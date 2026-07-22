@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Text, TextField, Badge, Separator, Tabs, Select } from "@radix-ui/themes";
 import {
   Cross1Icon,
@@ -8,11 +8,11 @@ import {
   MinusIcon,
   ArrowRightIcon,
   CalendarIcon,
+  CardStackIcon,
 } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
 import {
   useCashRegisterStore,
-  selectShiftSummary,
 } from "@/stores/cash-register.store";
 
 export function CashControlDialog() {
@@ -22,6 +22,13 @@ export function CashControlDialog() {
   const openShift = useCashRegisterStore((s) => s.openShift);
   const closeShift = useCashRegisterStore((s) => s.closeShift);
   const addMovement = useCashRegisterStore((s) => s.addMovement);
+  const error = useCashRegisterStore((s) => s.error);
+  const clearError = useCashRegisterStore((s) => s.clearError);
+  const fetchCurrentShift = useCashRegisterStore((s) => s.fetchCurrentShift);
+
+  useEffect(() => {
+    fetchCurrentShift();
+  }, [fetchCurrentShift]);
 
   const [initialAmount, setInitialAmount] = useState("");
   const [finalAmount, setFinalAmount] = useState("");
@@ -29,7 +36,17 @@ export function CashControlDialog() {
   const [movDesc, setMovDesc] = useState("");
   const [movType, setMovType] = useState<"INCOME" | "EXPENSE" | "WALLET_TRANSFER">("INCOME");
 
-  const summary = useCashRegisterStore(selectShiftSummary);
+  const summary = useMemo(() => {
+    if (!currentShift) return null;
+    const expectedCash =
+      currentShift.initialAmount + currentShift.totalSales + currentShift.totalIncome - currentShift.totalExpenses;
+    return {
+      ...currentShift,
+      expectedCash,
+      difference:
+        currentShift.finalAmount !== null ? currentShift.finalAmount - expectedCash : null,
+    };
+  }, [currentShift]);
 
   const handleOpenShift = () => {
     const amount = parseFloat(initialAmount);
@@ -97,7 +114,7 @@ export function CashControlDialog() {
           </div>
           <button
             onClick={closeCashControl}
-            style={{ background: "none", border: "none", color: "var(--text-secondary)", cursor: "pointer" }}
+            style={{ backgroundColor: "transparent", border: "none", color: "var(--text-secondary)", cursor: "pointer" }}
           >
             <Cross1Icon width={18} height={18} />
           </button>
@@ -136,6 +153,21 @@ export function CashControlDialog() {
                   <Text size="2" color="gray" style={{ display: "block", marginBottom: "8px" }}>
                     Monto inicial en caja
                   </Text>
+                  {error && (
+                    <div
+                      style={{
+                        padding: "8px 12px",
+                        backgroundColor: "#e54d2e15",
+                        border: "1px solid #e54d2e30",
+                        borderRadius: "6px",
+                        marginBottom: "8px",
+                        cursor: "pointer",
+                      }}
+                      onClick={clearError}
+                    >
+                      <Text size="2" color="red">{error}</Text>
+                    </div>
+                  )}
                   <div style={{ display: "flex", gap: "8px" }}>
                     <TextField.Root
                       type="number"
@@ -205,6 +237,39 @@ export function CashControlDialog() {
                       </Text>
                     </div>
                   </div>
+
+                  {/* Payment method breakdown */}
+                  {currentShift.paymentSummary.length > 0 && (
+                    <div style={{ padding: "12px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "8px", marginBottom: "16px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "10px" }}>
+                        <CardStackIcon width={14} height={14} style={{ color: "var(--text-secondary)" }} />
+                        <Text size="2" weight="bold">Ventas por método de pago</Text>
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "8px" }}>
+                        {currentShift.paymentSummary.map((entry) => (
+                          <div
+                            key={entry.payment_method}
+                            style={{
+                              padding: "10px",
+                              backgroundColor: "var(--bg-surface)",
+                              borderRadius: "6px",
+                              border: "1px solid var(--border)",
+                            }}
+                          >
+                            <Text size="1" color="gray" style={{ display: "block", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                              {entry.payment_method}
+                            </Text>
+                            <Text size="3" weight="bold" style={{ display: "block", marginTop: "4px" }}>
+                              ${(entry.total_cents / 100).toLocaleString("es-AR")}
+                            </Text>
+                            <Text size="1" color="gray" style={{ display: "block", marginTop: "2px" }}>
+                              {entry.count} venta{entry.count !== 1 ? "s" : ""}
+                            </Text>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Add movement */}
                   <div style={{ padding: "12px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "8px", marginBottom: "16px" }}>

@@ -43,7 +43,7 @@ export function PaymentDialog({ creditSurcharge }: PaymentDialogProps) {
   const customerId = useCartStore((s) => s.customerId);
   const note = useCartStore((s) => s.note);
   const currentShift = useCashRegisterStore((s) => s.currentShift);
-  const addSale = useCashRegisterStore((s) => s.addSale);
+  const fetchCurrentShift = useCashRegisterStore((s) => s.fetchCurrentShift);
   const allMethods = useSettingsStore((s) => s.paymentMethods);
   const surchargePercent = useSettingsStore((s) => s.creditSurcharge);
 
@@ -112,7 +112,7 @@ export function PaymentDialog({ creditSurcharge }: PaymentDialogProps) {
         cash_register_id: currentShift?.id,
       });
 
-      addSale(total);
+      await fetchCurrentShift();
       clearCart();
       closePayment();
     } catch {

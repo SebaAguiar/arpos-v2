@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { CashRegisterRepository } from "@/repositories/cash-register.repository";
+import { CashRegisterRepository, type PaymentMethodSummary } from "@/repositories/cash-register.repository";
+import { ApiError } from "@/services/api-client";
 
 export interface CashMovement {
   id: string;
@@ -20,18 +21,20 @@ export interface CashShift {
   totalSales: number;
   totalIncome: number;
   totalExpenses: number;
+  paymentSummary: PaymentMethodSummary[];
 }
 
 interface CashRegisterState {
   currentShift: CashShift | null;
   shifts: CashShift[];
   loading: boolean;
+  error: string | null;
 
   fetchCurrentShift: () => Promise<void>;
   openShift: (name: string, initialAmount: number) => Promise<void>;
   closeShift: (finalAmount: number) => Promise<void>;
   addMovement: (type: CashMovement["type"], amount: number, description: string) => void;
-  addSale: (amount: number) => void;
+  clearError: () => void;
 }
 
 let nextMovementId = 1;
@@ -40,6 +43,7 @@ export const useCashRegisterStore = create<CashRegisterState>((set) => ({
   currentShift: null,
   shifts: [],
   loading: false,
+  error: null,
 
   fetchCurrentShift: async () => {
     set({ loading: true });
@@ -55,9 +59,10 @@ export const useCashRegisterStore = create<CashRegisterState>((set) => ({
             startTime: register.openedAt ?? Math.floor(Date.now() / 1000),
             endTime: register.closedAt,
             movements: [],
-            totalSales: 0,
+            totalSales: register.totalSalesCents / 100,
             totalIncome: 0,
             totalExpenses: 0,
+            paymentSummary: register.paymentSummary,
           },
           loading: false,
         });
@@ -70,7 +75,7 @@ export const useCashRegisterStore = create<CashRegisterState>((set) => ({
   },
 
   openShift: async (name, initialAmount) => {
-    set({ loading: true });
+    set({ loading: true, error: null });
     try {
       const register = await CashRegisterRepository.open(name, initialAmount);
       set({
@@ -85,11 +90,22 @@ export const useCashRegisterStore = create<CashRegisterState>((set) => ({
           totalSales: 0,
           totalIncome: 0,
           totalExpenses: 0,
+          paymentSummary: [],
         },
         loading: false,
+        error: null,
       });
-    } catch {
-      set({ loading: false });
+    } catch (err) {
+      let message = "Error al abrir turno";
+      if (err instanceof ApiError) {
+        try {
+          const body = JSON.parse(err.message);
+          message = body.message ?? message;
+        } catch {
+          message = err.message || message;
+        }
+      }
+      set({ loading: false, error: message });
     }
   },
 
@@ -141,27 +157,5 @@ export const useCashRegisterStore = create<CashRegisterState>((set) => ({
       };
     }),
 
-  addSale: (amount) =>
-    set((state) => {
-      if (!state.currentShift) return state;
-      return {
-        currentShift: {
-          ...state.currentShift,
-          totalSales: state.currentShift.totalSales + amount,
-        },
-      };
-    }),
+  clearError: () => set({ error: null }),
 }));
-
-export const selectShiftSummary = (s: CashRegisterState) => {
-  if (!s.currentShift) return null;
-  const shift = s.currentShift;
-  const expectedCash =
-    shift.initialAmount + shift.totalSales + shift.totalIncome - shift.totalExpenses;
-  return {
-    ...shift,
-    expectedCash,
-    difference:
-      shift.finalAmount !== null ? shift.finalAmount - expectedCash : null,
-  };
-};

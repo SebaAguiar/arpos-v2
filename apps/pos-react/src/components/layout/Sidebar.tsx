@@ -25,7 +25,7 @@ const ITEM_BASE: React.CSSProperties = {
   padding: "8px 12px",
   borderRadius: "6px",
   border: "none",
-  background: "none",
+  backgroundColor: "transparent",
   fontSize: "13px",
   fontWeight: 400,
   color: "var(--text-secondary)",

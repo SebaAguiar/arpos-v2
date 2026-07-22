@@ -3,6 +3,12 @@ import {
   type ApiCashRegister,
 } from "../services/cash-register.service";
 
+export interface PaymentMethodSummary {
+  payment_method: string;
+  total_cents: number;
+  count: number;
+}
+
 export interface CashShiftData {
   id: string;
   name: string;
@@ -11,6 +17,8 @@ export interface CashShiftData {
   closingAmount: number | null;
   openedAt: number | null;
   closedAt: number | null;
+  totalSalesCents: number;
+  paymentSummary: PaymentMethodSummary[];
 }
 
 function mapCashRegister(api: ApiCashRegister): CashShiftData {
@@ -22,6 +30,12 @@ function mapCashRegister(api: ApiCashRegister): CashShiftData {
     closingAmount: api.closing_amount != null ? api.closing_amount / 100 : null,
     openedAt: api.opened_at,
     closedAt: api.closed_at,
+    totalSalesCents: api.total_sales_cents ?? 0,
+    paymentSummary: (api.payment_summary ?? []).map((p) => ({
+      payment_method: p.payment_method,
+      total_cents: p.total_cents,
+      count: p.count,
+    })),
   };
 }
 

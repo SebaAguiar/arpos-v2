@@ -14,6 +14,7 @@ import { useCartStore } from "@/stores/cart.store";
 import { useProductsStore } from "@/stores/products.store";
 import { useDialogStore } from "@/stores/dialog.store";
 import { useLayoutStore } from "@/stores/layout.store";
+import { useCashRegisterStore } from "@/stores/cash-register.store";
 import { ProductCard } from "@/components/product/ProductCard";
 import { CartItem } from "@/components/cart/CartItem";
 import { SummaryPanel } from "@/components/cart/SummaryPanel";
@@ -39,13 +40,15 @@ export function POSPage() {
   const setSearch = useProductsStore((s) => s.setSearch);
   const allProducts = useProductsStore((s) => s.products);
   const fetchProducts = useProductsStore((s) => s.fetchProducts);
+  const fetchCurrentShift = useCashRegisterStore((s) => s.fetchCurrentShift);
   const category = useProductsStore((s) => s.category);
   const sortField = useProductsStore((s) => s.sortField);
   const sortDirection = useProductsStore((s) => s.sortDirection);
 
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+    fetchCurrentShift();
+  }, [fetchProducts, fetchCurrentShift]);
 
   const filteredProducts = useMemo(() => {
     let result = allProducts.filter((p) => p.active);

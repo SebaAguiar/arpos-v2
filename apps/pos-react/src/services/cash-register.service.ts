@@ -1,5 +1,11 @@
 import { apiClient } from "./api-client";
 
+export interface ApiPaymentSummary {
+  payment_method: string;
+  total_cents: number;
+  count: number;
+}
+
 export interface ApiCashRegister {
   id: string;
   companyId: string;
@@ -12,6 +18,8 @@ export interface ApiCashRegister {
   closed_at: number | null;
   created_at: number;
   updated_at: number;
+  total_sales_cents?: number;
+  payment_summary?: ApiPaymentSummary[];
 }
 
 export const CashRegisterService = {
