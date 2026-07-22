@@ -39,6 +39,13 @@
         "cwd": "apps/api"
       }
     },
+    "prisma:seed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx ts-node prisma/seed.ts",
+        "cwd": "apps/api"
+      }
+    },
     "lint": {
       "executor": "nx:run-commands",
       "options": {
