@@ -121,7 +121,7 @@ export class SalesService {
     const storeId = this.tenantContext.getStoreId();
     const userId = this.tenantContext.getUserId() || 'system';
 
-    const now = Date.now();
+    const now = Math.floor(Date.now() / 1000);
 
     return this.prisma.$transaction(async (tx) => {
       const sale = await tx.sale.create({

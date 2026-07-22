@@ -14,7 +14,7 @@ export abstract class TenantBaseRepository<T extends BaseEntity> {
   }
 
   async create(data: Partial<T>): Promise<T> {
-    const now = Date.now();
+    const now = Math.floor(Date.now() / 1000);
     return (this.prisma as any)[this.modelName].create({
       data: {
         ...data,
@@ -48,7 +48,7 @@ export abstract class TenantBaseRepository<T extends BaseEntity> {
       where: { id },
       data: {
         ...data,
-        updated_at: Date.now(),
+        updated_at: Math.floor(Date.now() / 1000),
       },
     });
   }

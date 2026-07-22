@@ -46,6 +46,13 @@ export class LocalTenantMiddleware implements NestMiddleware {
     const augmented = req as AugmentedRequest;
     if (augmented.user?.id) {
       this.tenantContext.setUserId(augmented.user.id);
+    } else {
+      const admin = await this.prisma.user.findFirst({
+        where: { role: 'admin' },
+      });
+      if (admin) {
+        this.tenantContext.setUserId(admin.id);
+      }
     }
 
     augmented.companyId = localCompanyId;

@@ -36,7 +36,7 @@ export class ContactsService {
     },
     companyId: string,
   ) {
-    const now = Date.now();
+    const now = Math.floor(Date.now() / 1000);
     return this.prisma.contact.create({
       data: {
         ...data,
@@ -65,7 +65,7 @@ export class ContactsService {
       where: { id },
       data: {
         ...data,
-        updated_at: Date.now(),
+        updated_at: Math.floor(Date.now() / 1000),
       },
     });
   }
@@ -76,7 +76,7 @@ export class ContactsService {
       where: { id },
       data: {
         is_active: false,
-        updated_at: Date.now(),
+        updated_at: Math.floor(Date.now() / 1000),
       },
     });
   }

@@ -31,7 +31,7 @@ export class SetupController {
       throw new Error('Company already initialized');
     }
 
-    const now = Date.now();
+    const now = Math.floor(Date.now() / 1000);
 
     const company = await this.prisma.company.create({
       data: {
