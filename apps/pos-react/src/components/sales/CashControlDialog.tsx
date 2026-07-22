@@ -34,7 +34,7 @@ export function CashControlDialog() {
   const handleOpenShift = () => {
     const amount = parseFloat(initialAmount);
     if (isNaN(amount) || amount < 0) return;
-    openShift(amount);
+    openShift(`Caja ${new Date().toLocaleDateString("es-AR")}`, amount);
     setInitialAmount("");
   };
 

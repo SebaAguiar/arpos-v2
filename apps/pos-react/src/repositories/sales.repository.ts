@@ -1,0 +1,71 @@
+import { SalesService, type ApiSale, type ApiSaleStats } from "../services/sales.service";
+import type { Sale, SaleItem, PaymentMethod } from "@/lib/types";
+
+function mapSale(api: ApiSale): Sale {
+  const items: SaleItem[] = (api.items ?? []).map((item) => ({
+    id: item.id,
+    variantId: undefined,
+    description: item.product?.name ?? "",
+    productName: item.product?.name ?? "",
+    quantity: item.quantity,
+    unitPrice: item.unit_price_cents / 100,
+    subtotal: item.total_cents / 100,
+  }));
+
+  return {
+    id: api.id,
+    ticketNumber: 0,
+    total: api.total_cents / 100,
+    status: api.status === "completed" ? "COMPLETED" : "CANCELLED",
+    createdAt: api.created_at,
+    items,
+    paymentMethods: [
+      {
+        method: api.payment_method as PaymentMethod,
+        amount: api.total_cents / 100,
+      },
+    ],
+    customerId: api.contact_id ?? undefined,
+  };
+}
+
+export const SalesRepository = {
+  async getAll(filters?: {
+    from?: number;
+    to?: number;
+    status?: string;
+  }): Promise<Sale[]> {
+    const sales = await SalesService.list(filters);
+    return sales.map(mapSale);
+  },
+
+  async getStats(filters?: {
+    from?: number;
+    to?: number;
+  }): Promise<ApiSaleStats> {
+    return SalesService.getStats(filters);
+  },
+
+  async getById(id: string): Promise<Sale> {
+    const sale = await SalesService.get(id);
+    return mapSale(sale);
+  },
+
+  async create(input: {
+    items: Array<{
+      productId: string;
+      quantity: number;
+      unit_price_cents: number;
+    }>;
+    total_cents: number;
+    discount_cents?: number;
+    tax_cents?: number;
+    payment_method: string;
+    contact_id?: string;
+    notes?: string;
+    cash_register_id?: string;
+  }): Promise<Sale> {
+    const created = await SalesService.create(input);
+    return mapSale({ ...created, items: [] });
+  },
+};

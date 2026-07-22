@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { CashRegisterRepository } from "@/repositories/cash-register.repository";
 
 export interface CashMovement {
   id: string;
@@ -24,49 +25,95 @@ export interface CashShift {
 interface CashRegisterState {
   currentShift: CashShift | null;
   shifts: CashShift[];
-  openShift: (initialAmount: number) => void;
-  closeShift: (finalAmount: number) => void;
+  loading: boolean;
+
+  fetchCurrentShift: () => Promise<void>;
+  openShift: (name: string, initialAmount: number) => Promise<void>;
+  closeShift: (finalAmount: number) => Promise<void>;
   addMovement: (type: CashMovement["type"], amount: number, description: string) => void;
   addSale: (amount: number) => void;
 }
 
-let nextShiftId = 1;
 let nextMovementId = 1;
 
 export const useCashRegisterStore = create<CashRegisterState>((set) => ({
   currentShift: null,
   shifts: [],
+  loading: false,
 
-  openShift: (initialAmount) =>
-    set({
-      currentShift: {
-        id: `shift-${nextShiftId++}`,
-        initialAmount,
-        finalAmount: null,
-        status: "OPEN",
-        startTime: Math.floor(Date.now() / 1000),
-        endTime: null,
-        movements: [],
-        totalSales: 0,
-        totalIncome: 0,
-        totalExpenses: 0,
-      },
-    }),
+  fetchCurrentShift: async () => {
+    set({ loading: true });
+    try {
+      const register = await CashRegisterRepository.getCurrent();
+      if (register && register.status === "OPEN") {
+        set({
+          currentShift: {
+            id: register.id,
+            initialAmount: register.openingAmount,
+            finalAmount: register.closingAmount,
+            status: "OPEN",
+            startTime: register.openedAt ?? Math.floor(Date.now() / 1000),
+            endTime: register.closedAt,
+            movements: [],
+            totalSales: 0,
+            totalIncome: 0,
+            totalExpenses: 0,
+          },
+          loading: false,
+        });
+      } else {
+        set({ currentShift: null, loading: false });
+      }
+    } catch {
+      set({ loading: false });
+    }
+  },
 
-  closeShift: (finalAmount) =>
-    set((state) => {
-      if (!state.currentShift) return state;
+  openShift: async (name, initialAmount) => {
+    set({ loading: true });
+    try {
+      const register = await CashRegisterRepository.open(name, initialAmount);
+      set({
+        currentShift: {
+          id: register.id,
+          initialAmount: register.openingAmount,
+          finalAmount: null,
+          status: "OPEN",
+          startTime: register.openedAt ?? Math.floor(Date.now() / 1000),
+          endTime: null,
+          movements: [],
+          totalSales: 0,
+          totalIncome: 0,
+          totalExpenses: 0,
+        },
+        loading: false,
+      });
+    } catch {
+      set({ loading: false });
+    }
+  },
+
+  closeShift: async (finalAmount) => {
+    const state = useCashRegisterStore.getState();
+    if (!state.currentShift) return;
+    set({ loading: true });
+    try {
+      await CashRegisterRepository.close(state.currentShift.id, finalAmount);
       const closed = {
         ...state.currentShift,
         finalAmount,
         status: "CLOSED" as const,
         endTime: Math.floor(Date.now() / 1000),
       };
-      return {
+      set({
         currentShift: null,
         shifts: [closed, ...state.shifts],
-      };
-    }),
+        loading: false,
+      });
+    } catch {
+      set({ loading: false });
+    }
+  },
 
   addMovement: (type, amount, description) =>
     set((state) => {

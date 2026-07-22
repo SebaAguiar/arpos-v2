@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { ProductsRepository } from "@/repositories/products.repository";
 import type {
   Product,
   ProductSortField,
@@ -15,6 +16,7 @@ interface ProductsState {
   page: number;
   pageSize: number;
 
+  fetchProducts: () => Promise<void>;
   setProducts: (products: Product[]) => void;
   setLoading: (loading: boolean) => void;
   setSearch: (search: string) => void;
@@ -32,6 +34,16 @@ export const useProductsStore = create<ProductsState>((set) => ({
   sortDirection: "asc",
   page: 0,
   pageSize: 48,
+
+  fetchProducts: async () => {
+    set({ loading: true });
+    try {
+      const products = await ProductsRepository.getAll();
+      set({ products, loading: false, page: 0 });
+    } catch {
+      set({ loading: false });
+    }
+  },
 
   setProducts: (products) => set({ products, page: 0 }),
   setLoading: (loading) => set({ loading }),

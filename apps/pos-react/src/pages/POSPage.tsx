@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { Text, TextField, Badge, Tooltip } from "@radix-ui/themes";
 import {
   CameraIcon,
@@ -24,19 +24,8 @@ import { CashControlDialog } from "@/components/sales/CashControlDialog";
 import { DashboardDialog } from "@/components/dashboard/DashboardDialog";
 import { TasksDialog } from "@/components/tasks/TasksDialog";
 import { ProductManagementDialog } from "@/components/products/ProductManagementDialog";
+import { SettingsDialog } from "@/components/settings/SettingsDialog";
 import type { Product } from "@/lib/types";
-
-// Mock products for demo
-const mockProducts: Product[] = [
-  { id: "1", name: "Remera Básica", price: 2500, active: true, variants: [] },
-  { id: "2", name: "Jeans Clásico", price: 8900, active: true, variants: [] },
-  { id: "3", name: "Zapatillas Run", price: 15000, active: true, variants: [] },
-  { id: "4", name: "Gorro Lana", price: 1800, active: true, variants: [] },
-  { id: "5", name: "Campera Slim", price: 22000, active: true, variants: [] },
-  { id: "6", name: "Bermuda Cargo", price: 6500, active: true, variants: [] },
-  { id: "7", name: "Bufanda Algodón", price: 3200, active: true, variants: [] },
-  { id: "8", name: "Medias Pack x3", price: 1500, active: true, variants: [] },
-];
 
 export function POSPage() {
   const sidebarOpen = useLayoutStore((s) => s.sidebarOpen);
@@ -49,9 +38,14 @@ export function POSPage() {
   const search = useProductsStore((s) => s.search);
   const setSearch = useProductsStore((s) => s.setSearch);
   const allProducts = useProductsStore((s) => s.products);
+  const fetchProducts = useProductsStore((s) => s.fetchProducts);
   const category = useProductsStore((s) => s.category);
   const sortField = useProductsStore((s) => s.sortField);
   const sortDirection = useProductsStore((s) => s.sortDirection);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const filteredProducts = useMemo(() => {
     let result = allProducts.filter((p) => p.active);
@@ -91,8 +85,9 @@ export function POSPage() {
   const dashboard = useDialogStore((s) => s.dashboard);
   const tasks = useDialogStore((s) => s.tasks);
   const productManagement = useDialogStore((s) => s.productManagement);
+  const settings = useDialogStore((s) => s.settings);
 
-  const displayProducts = search ? filteredProducts : mockProducts;
+  const displayProducts = filteredProducts;
 
   const handleAddToCart = useCallback(
     (product: Product) => {
@@ -318,6 +313,7 @@ export function POSPage() {
       {dashboard && <DashboardDialog />}
       {tasks && <TasksDialog />}
       {productManagement && <ProductManagementDialog />}
+      {settings && <SettingsDialog />}
     </div>
   );
 }

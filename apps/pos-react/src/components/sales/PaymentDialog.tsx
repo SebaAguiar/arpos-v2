@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Text, TextField, Badge } from "@radix-ui/themes";
 import {
   Cross1Icon,
@@ -7,18 +7,25 @@ import {
   IdCardIcon,
   LaptopIcon,
   FileTextIcon,
+  ReaderIcon,
+  TokensIcon,
 } from "@radix-ui/react-icons";
 import { useCartStore } from "@/stores/cart.store";
 import { useDialogStore } from "@/stores/dialog.store";
+import { useCashRegisterStore } from "@/stores/cash-register.store";
+import { useSettingsStore } from "@/stores/settings.store";
+import { SalesRepository } from "@/repositories/sales.repository";
 import type { PaymentMethod, PaymentEntry } from "@/lib/types";
 
-const PAYMENT_METHODS: { method: PaymentMethod; label: string; icon: typeof Cross1Icon; color: string }[] = [
-  { method: "CASH", label: "Efectivo", icon: PersonIcon, color: "#30a46c" },
-  { method: "DEBIT", label: "Débito", icon: IdCardIcon, color: "#3b82f6" },
-  { method: "CREDIT", label: "Crédito", icon: LaptopIcon, color: "#8b5cf6" },
-  { method: "QR", label: "QR", icon: CameraIcon, color: "#f59e0b" },
-  { method: "WALLET", label: "Billetera", icon: FileTextIcon, color: "#ec4899" },
-];
+const METHOD_ICONS: Record<PaymentMethod, typeof Cross1Icon> = {
+  CASH: PersonIcon,
+  DEBIT: IdCardIcon,
+  CREDIT: LaptopIcon,
+  QR: CameraIcon,
+  WALLET: FileTextIcon,
+  TRANSFER: ReaderIcon,
+  POINTS: TokensIcon,
+};
 
 const QUICK_CASH = [1000, 2000, 5000, 10000];
 
@@ -26,18 +33,28 @@ interface PaymentDialogProps {
   creditSurcharge?: number;
 }
 
-export function PaymentDialog({ creditSurcharge = 0 }: PaymentDialogProps) {
+export function PaymentDialog({ creditSurcharge }: PaymentDialogProps) {
   const items = useCartStore((s) => s.items);
   const taxRate = useCartStore((s) => s.taxRate);
   const discount = useCartStore((s) => s.discount);
   const discountType = useCartStore((s) => s.discountType);
   const closePayment = useDialogStore((s) => s.closePayment);
   const clearCart = useCartStore((s) => s.clearCart);
+  const customerId = useCartStore((s) => s.customerId);
+  const note = useCartStore((s) => s.note);
+  const currentShift = useCashRegisterStore((s) => s.currentShift);
+  const addSale = useCashRegisterStore((s) => s.addSale);
+  const allMethods = useSettingsStore((s) => s.paymentMethods);
+  const surchargePercent = useSettingsStore((s) => s.creditSurcharge);
+
+  const effectiveSurcharge = creditSurcharge ?? surchargePercent;
+  const enabledMethods = useMemo(() => allMethods.filter((m) => m.enabled), [allMethods]);
 
   const [payments, setPayments] = useState<PaymentEntry[]>([]);
   const [activeMethod, setActiveMethod] = useState<PaymentMethod>("CASH");
   const [currentAmount, setCurrentAmount] = useState("");
   const [email, setEmail] = useState("");
+  const [processing, setProcessing] = useState(false);
 
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const taxAmount = subtotal * taxRate;
@@ -46,7 +63,7 @@ export function PaymentDialog({ creditSurcharge = 0 }: PaymentDialogProps) {
   const baseTotal = subtotal + taxAmount - discountAmount;
 
   const hasCredit = payments.some((p) => p.method === "CREDIT");
-  const surchargeAmount = hasCredit ? baseTotal * (creditSurcharge / 100) : 0;
+  const surchargeAmount = hasCredit ? baseTotal * (effectiveSurcharge / 100) : 0;
   const total = baseTotal + surchargeAmount;
   const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
   const remaining = Math.max(0, total - totalPaid);
@@ -72,11 +89,37 @@ export function PaymentDialog({ creditSurcharge = 0 }: PaymentDialogProps) {
     setPayments((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleConfirm = () => {
-    if (totalPaid < total) return;
-    // TODO: create sale via service
-    clearCart();
-    closePayment();
+  const handleConfirm = async () => {
+    if (totalPaid < total || processing) return;
+    setProcessing(true);
+    try {
+      const saleItems = items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        unit_price_cents: Math.round(item.price * 100),
+      }));
+
+      const primaryMethod = payments[0]?.method ?? "CASH";
+
+      await SalesRepository.create({
+        items: saleItems,
+        total_cents: Math.round(total * 100),
+        discount_cents: Math.round(discountAmount * 100),
+        tax_cents: Math.round(taxAmount * 100),
+        payment_method: primaryMethod,
+        contact_id: customerId ?? undefined,
+        notes: note || undefined,
+        cash_register_id: currentShift?.id,
+      });
+
+      addSale(total);
+      clearCart();
+      closePayment();
+    } catch {
+      // TODO: show error feedback
+    } finally {
+      setProcessing(false);
+    }
   };
 
   return (
@@ -147,28 +190,31 @@ export function PaymentDialog({ creditSurcharge = 0 }: PaymentDialogProps) {
 
           {/* Payment methods */}
           <div style={{ display: "flex", gap: "6px", marginBottom: "16px", flexWrap: "wrap" }}>
-            {PAYMENT_METHODS.map(({ method, label, icon: Icon, color }) => (
-              <button
-                key={method}
-                onClick={() => setActiveMethod(method)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "8px 12px",
-                  border: `1px solid ${activeMethod === method ? color : "var(--border)"}`,
-                  borderRadius: "6px",
-                  backgroundColor: activeMethod === method ? `${color}20` : "transparent",
-                  color: activeMethod === method ? color : "var(--text-secondary)",
-                  cursor: "pointer",
-                  fontSize: "13px",
-                  fontWeight: activeMethod === method ? 600 : 400,
-                }}
-              >
-                <Icon width={14} height={14} />
-                {label}
-              </button>
-            ))}
+            {enabledMethods.map((config) => {
+              const Icon = METHOD_ICONS[config.id];
+              return (
+                <button
+                  key={config.id}
+                  onClick={() => setActiveMethod(config.id)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "8px 12px",
+                    border: `1px solid ${activeMethod === config.id ? config.color : "var(--border)"}`,
+                    borderRadius: "6px",
+                    backgroundColor: activeMethod === config.id ? `${config.color}20` : "transparent",
+                    color: activeMethod === config.id ? config.color : "var(--text-secondary)",
+                    cursor: "pointer",
+                    fontSize: "13px",
+                    fontWeight: activeMethod === config.id ? 600 : 400,
+                  }}
+                >
+                  <Icon width={14} height={14} />
+                  {config.label}
+                </button>
+              );
+            })}
           </div>
 
           {/* Amount input */}
@@ -263,7 +309,7 @@ export function PaymentDialog({ creditSurcharge = 0 }: PaymentDialogProps) {
                   }}
                 >
                   <Badge color="blue" variant="soft" size="1">
-                    {PAYMENT_METHODS.find((m) => m.method === p.method)?.label}
+                    {enabledMethods.find((m) => m.id === p.method)?.label ?? p.method}
                   </Badge>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <Text size="2">${p.amount.toLocaleString("es-AR")}</Text>
@@ -318,7 +364,7 @@ export function PaymentDialog({ creditSurcharge = 0 }: PaymentDialogProps) {
           {surchargeAmount > 0 && (
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <Text size="2" color="gray">
-                Recargo crédito ({creditSurcharge}%)
+                Recargo crédito ({effectiveSurcharge}%)
               </Text>
               <Text size="2" color="gray">
                 +${surchargeAmount.toLocaleString("es-AR")}
@@ -348,20 +394,20 @@ export function PaymentDialog({ creditSurcharge = 0 }: PaymentDialogProps) {
 
           <button
             onClick={handleConfirm}
-            disabled={totalPaid < total}
+            disabled={totalPaid < total || processing}
             style={{
               width: "100%",
               padding: "12px",
-              backgroundColor: totalPaid >= total ? "#30a46c" : "var(--bg-surface)",
-              color: totalPaid >= total ? "#fff" : "var(--text-secondary)",
+              backgroundColor: totalPaid >= total && !processing ? "#30a46c" : "var(--bg-surface)",
+              color: totalPaid >= total && !processing ? "#fff" : "var(--text-secondary)",
               border: "none",
               borderRadius: "6px",
               fontSize: "15px",
               fontWeight: 600,
-              cursor: totalPaid >= total ? "pointer" : "not-allowed",
+              cursor: totalPaid >= total && !processing ? "pointer" : "not-allowed",
             }}
           >
-            Confirmar venta
+            {processing ? "Procesando..." : "Confirmar venta"}
           </button>
         </div>
       </div>

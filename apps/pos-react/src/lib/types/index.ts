@@ -54,7 +54,7 @@ export interface Customer {
   balance?: number;
 }
 
-export type PaymentMethod = "CASH" | "DEBIT" | "CREDIT" | "QR" | "WALLET";
+export type PaymentMethod = "CASH" | "DEBIT" | "CREDIT" | "QR" | "WALLET" | "TRANSFER" | "POINTS";
 
 export interface PaymentEntry {
   method: PaymentMethod;
