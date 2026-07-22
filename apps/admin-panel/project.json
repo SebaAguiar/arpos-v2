@@ -17,6 +17,13 @@
         "cwd": "apps/admin-panel"
       }
     },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx tsc --noEmit",
+        "cwd": "apps/admin-panel"
+      }
+    },
     "prisma:generate": {
       "executor": "nx:run-commands",
       "options": {
@@ -24,10 +31,31 @@
         "cwd": "apps/admin-panel"
       }
     },
+    "prisma:push": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx prisma db push",
+        "cwd": "apps/admin-panel"
+      }
+    },
     "prisma:migrate": {
       "executor": "nx:run-commands",
       "options": {
         "command": "npx prisma migrate dev",
+        "cwd": "apps/admin-panel"
+      }
+    },
+    "prisma:studio": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx prisma studio",
+        "cwd": "apps/admin-panel"
+      }
+    },
+    "prisma:seed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts",
         "cwd": "apps/admin-panel"
       }
     }

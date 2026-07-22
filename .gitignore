@@ -144,3 +144,5 @@ vite.config.ts.timestamp-*
 
 .commandcode
 .nx/
+*.db
+*.db-journal
