@@ -1,0 +1,108 @@
+import { MinusIcon, PlusIcon, Cross1Icon } from "@radix-ui/react-icons";
+import type { CartItem as CartItemType } from "@/lib/types";
+
+interface CartItemProps {
+  item: CartItemType;
+  onUpdateQuantity: (id: string, quantity: number) => void;
+  onRemove: (id: string) => void;
+}
+
+export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+        padding: "8px 12px",
+        borderBottom: "1px solid #2a2a2a",
+      }}
+    >
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div
+          style={{
+            fontSize: "13px",
+            fontWeight: 500,
+            color: "#ededed",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {item.name}
+          {item.variantLabel && (
+            <span style={{ color: "#888", fontWeight: 400 }}>
+              {" "}
+              ({item.variantLabel})
+            </span>
+          )}
+        </div>
+        <div style={{ fontSize: "12px", color: "#888" }}>
+          ${item.price.toLocaleString("es-AR")} x {item.quantity}
+        </div>
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+        <button
+          onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
+          style={{
+            width: "24px",
+            height: "24px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            border: "1px solid #2a2a2a",
+            borderRadius: "4px",
+            backgroundColor: "transparent",
+            color: "#888",
+            cursor: "pointer",
+          }}
+        >
+          <MinusIcon width={12} height={12} />
+        </button>
+        <span style={{ fontSize: "13px", color: "#ededed", minWidth: "20px", textAlign: "center" }}>
+          {item.quantity}
+        </span>
+        <button
+          onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+          style={{
+            width: "24px",
+            height: "24px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            border: "1px solid #2a2a2a",
+            borderRadius: "4px",
+            backgroundColor: "transparent",
+            color: "#888",
+            cursor: "pointer",
+          }}
+        >
+          <PlusIcon width={12} height={12} />
+        </button>
+      </div>
+
+      <span style={{ fontSize: "13px", fontWeight: 600, color: "#ededed", minWidth: "80px", textAlign: "right" }}>
+        ${(item.price * item.quantity).toLocaleString("es-AR")}
+      </span>
+
+      <button
+        onClick={() => onRemove(item.id)}
+        style={{
+          width: "24px",
+          height: "24px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          border: "none",
+          backgroundColor: "transparent",
+          color: "#e54d2e",
+          cursor: "pointer",
+          borderRadius: "4px",
+        }}
+      >
+        <Cross1Icon width={12} height={12} />
+      </button>
+    </div>
+  );
+}
