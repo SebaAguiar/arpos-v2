@@ -1,0 +1,22 @@
+{
+  "name": "arpos-launcher",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "targets": {
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tauri dev",
+        "cwd": "apps/arpos-launcher"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tauri build",
+        "cwd": "apps/arpos-launcher"
+      }
+    }
+  },
+  "tags": ["scope:launcher", "type:app"]
+}

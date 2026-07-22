@@ -54,7 +54,11 @@ Este documento define las entidades de dominio, términos técnicos y conceptos 
 - **Feature flag:** Interruptor que habilita/deshabilita funcionalidades en runtime. Ejemplo: `USE_REACT_POS`, `ENABLE_CLOUD_SYNC`.
 - **Process manager:** Componente Rust (Tauri) que spawn/kill el proceso NestJS como sidecar.
 - **Health check:** Endpoint `GET /api/health` que verifica que NestJS y SQLite están operativos.
-- **Auto-updater:** Mecanismo de Tauri que descarga e instala actualizaciones desde GitHub Releases.
+- **Auto-updater:** Mecanismo de Tauri que descarga e instala actualizaciones desde GitHub Releases. Usa differential updates (patch) para hotfixes y full binary para features.
+- **Differential Update:** Actualización que solo descarga los archivos modificados (patch), en lugar del binario completo. Tauri genera diffs automáticamente entre versiones consecutivas.
+- **Rollback:** Revertir a una versión anterior de la aplicación cuando la versión actual tiene bugs críticos. Se marca la versión rota como `broken` y se ofrece la anterior como `stable`.
+- **Ed25519 Signing:** Firma criptográfica de binarios para garantizar que las actualizaciones provienen de ArPOS y no fueron alteradas. La clave privada firma el binario, la pública (en tauri.conf.json) verifica la integridad.
+- **Rollout gradual:** Estrategia de distribución donde una nueva versión se libera progresivamente (5% → 25% → 100%) en lugar de todos los usuarios simultáneamente. Reduce el impacto de bugs en producción.
 - **Monorepo:** Estructura de repositorio con múltiples apps/packages en un solo repo. ArPOS usa pnpm workspaces + Nx.
 - **Nx:** Herramienta de monorepo que gestiona builds, tests y dependencias entre apps/packages.
 

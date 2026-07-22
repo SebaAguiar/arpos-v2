@@ -2,25 +2,24 @@
   "name": "arpos-v2",
   "private": true,
   "version": "0.1.0",
-  "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "tauri": "tauri"
-  },
-  "dependencies": {
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "@tauri-apps/api": "^2",
-    "@tauri-apps/plugin-opener": "^2"
+    "dev": "nx run-many -t dev",
+    "build": "nx run-many -t build",
+    "lint": "nx run-many -t lint",
+    "test": "nx run-many -t test",
+    "dev:api": "nx serve api",
+    "dev:pos": "nx serve pos-react",
+    "build:api": "nx build api",
+    "build:pos": "nx build pos-react",
+    "build:launcher": "nx build arpos-launcher",
+    "prisma:generate": "nx run api prisma:generate",
+    "prisma:migrate": "nx run api prisma:migrate",
+    "prisma:studio": "nx run api prisma:studio"
   },
   "devDependencies": {
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
-    "@vitejs/plugin-react": "^4.6.0",
-    "typescript": "~5.8.3",
-    "vite": "^7.0.4",
-    "@tauri-apps/cli": "^2"
+    "nx": "^22.3.0",
+    "@nx/js": "^22.3.0",
+    "@nx/node": "^22.3.0",
+    "typescript": "~5.8.3"
   }
 }

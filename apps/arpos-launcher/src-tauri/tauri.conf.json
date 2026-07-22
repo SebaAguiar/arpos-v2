@@ -4,10 +4,10 @@
   "version": "0.1.0",
   "identifier": "com.seba.arpos-v2",
   "build": {
-    "beforeDevCommand": "bun run dev",
+    "beforeDevCommand": "pnpm --filter pos-react dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "bun run build",
-    "frontendDist": "../dist"
+    "beforeBuildCommand": "pnpm --filter pos-react build",
+    "frontendDist": "../pos-react/dist"
   },
   "app": {
     "windows": [

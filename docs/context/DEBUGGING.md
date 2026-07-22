@@ -141,18 +141,21 @@ NESTJS_DEBUG_DI=true pnpm dev
 
 **Check:**
 1. ¿El schema Zod coincide con la forma real del request?
-2. ¿Estás leyendo los datos validados del context key correcto?
-3. ¿El decorador `@Contract()` está aplicado al handler?
+2. ¿Estás usando el Pipe correcto para validación?
+3. ¿El decorador `@UseGuards()` está aplicado al handler?
 
 ```typescript
+// ✅ Correcto — NestJS Pipes validan automáticamente
 @Post('/')
-@Contract(CreateSaleContract)
-create(c: Context) {
-  // ✅ Correcto
-  const body = c.get('kanji.validated.body');
+@UseGuards(AuthGuard)
+create(@Body(CreateSaleDto) dto: CreateSaleDto) {
+  // dto está tipado y validado
+}
 
-  // ❌ Wrong — los datos no han sido validados
-  const rawBody = await c.req.json();
+// ❌ Wrong — los datos no han sido validados
+@Post('/')
+async create(@Body() body: any) {
+  // body no está validado
 }
 ```
 

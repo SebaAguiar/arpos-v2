@@ -244,13 +244,80 @@ Este documento lista edge cases conocidos, vulnerabilidades de rendimiento y qui
 
 ## 16. React: Context Key Typos
 
-- **Síntoma:** `c.get('kanji.validated.body')` retorna `undefined`.
-- **Causa:** Typo en el nombre del context key o middleware no aplicado en orden correcto.
-- **Solución:** Definir constantes para context keys:
+- **Síntoma:** El DTO validado no está disponible en el handler.
+- **Causa:** Typo en el nombre del parámetro o Pipe no aplicado en orden correcto.
+- **Solución:** Usar Pipes de NestJS para validación automática:
   ```typescript
-  export const KANJI_CTX = {
-    VALIDATED_BODY: 'kanji.validated.body',
-    VALIDATED_QUERY: 'kanji.validated.query',
-    AUTH_USER: 'kanji.auth.user',
-  } as const;
+  // ✅ Correcto — NestJS Pipes validan y transforman automáticamente
+  @Post('/')
+  @UseGuards(AuthGuard)
+  create(@Body(CreateSaleDto) dto: CreateSaleDto) {
+    // dto está tipado y validado
+  }
+
+  // ❌ Wrong — no usar validación manual con context keys
   ```
+
+---
+
+## 17. Updater: Firma Ed25519 Inválida
+
+- **Síntoma:** "Signature verification failed" al intentar actualizar.
+- **Causa:** La clave pública en `tauri.conf.json` no coincide con la clave privada usada para firmar el binario. Común después de regenerar keys sin actualizar la config.
+- **Check:**
+  ```bash
+  # Verificar que la pubkey en tauri.conf.json coincida
+  cat src-tauri/tauri.conf.json | grep pubkey
+
+  # Comparar con la generada
+  cat tauri.key.pub
+  ```
+- **Solución:** Regenerar el binario con la clave correcta y actualizar `tauri.conf.json`.
+- **Prevención:** Guardar la clave privada en GitHub Secrets y 1Password. Nunca regenerar sin documentar.
+
+---
+
+## 18. Offline Durante Auto-Update
+
+- **Síntoma:** La app no actualiza porque el device está offline cuando sale la versión nueva.
+- **Causa:** El background thread solo puede checkear updates con conexión a internet.
+- **Check:**
+  ```typescript
+  // Verificar estado de conexión
+  const isOnline = navigator.onLine;
+  // O en Tauri:
+  const isOnline = await invoke('check_network_status');
+  ```
+- **Solución:** Retry automático cada 1 hora. Al reconectar, se detecta la versión nueva y se descarga.
+- **Prevención:** No fallar silenciosamente — loggear que el check no se pudo hacer por falta de conexión.
+
+---
+
+## 19. Rollback Fallido por Backup Corrupto
+
+- **Síntoma:** `manual_rollback_to_version` falla con "Backup for X not found" o "App corrupted".
+- **Causa:** El backup de la versión anterior fue eliminado, dañado, o nunca se creó.
+- **Check:**
+  ```bash
+  # Verificar backups disponibles
+  ls -la ~/.arpos/backup/
+
+  # Verificar integridad de un backup
+  file ~/.arpos/backup/arpos_1.0.0.tar.gz
+  ```
+- **Solución:** Si el backup local no existe, descargar la versión anterior desde GitHub Releases.
+- **Prevención:** Crear backup del binario anterior ANTES de aplicar cada update. Mantener al menos 2 versiones de backup.
+
+---
+
+## 20. Differential Update No Disponible (Versión Muy Vieja)
+
+- **Síntoma:** El updater descarga full binary en lugar de patch, o falla con "delta not available".
+- **Causa:** La versión instalada es demasiado vieja (ej: v0.8.0) y Tauri no puede generar un delta desde esa versión.
+- **Check:**
+  ```bash
+  # Verificar versión actual
+  cat ~/.arpos/config/version.json
+  ```
+- **Solución:** Tauri cae automáticamente a full binary download. No hay forma de forzar delta desde versiones muy viejas.
+- **Prevención:** Mantener el updater habilitado para que los usuarios se mantengan al día. Las actualizaciones incrementales (v1.0.0 → v1.0.1 → v1.0.2) siempre funcionan con delta.

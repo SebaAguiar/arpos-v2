@@ -1,0 +1,211 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id                String   @id @default(cuid())
+  name              String
+  taxId             String   @unique
+  address           String?
+  email             String?
+  phone             String?
+  created_at        Int      @default(0)
+  updated_at        Int
+  config            String?
+
+  stores            Store[]
+  users             User[]
+  products          Product[]
+  inventory         Inventory[]
+  sales             Sale[]
+  contacts          Contact[]
+  cash_registers    CashRegister[]
+
+  @@map("companies")
+}
+
+model Store {
+  id                String   @id @default(cuid())
+  companyId         String
+  name              String
+  address           String?
+  phone             String?
+  is_active         Boolean  @default(true)
+  created_at        Int      @default(0)
+  updated_at        Int
+
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  products          Product[]
+  inventory         Inventory[]
+  sales             Sale[]
+  cash_registers    CashRegister[]
+
+  @@map("stores")
+}
+
+model User {
+  id                String   @id @default(cuid())
+  companyId         String
+  email             String
+  password          String
+  name              String
+  role              String   @default("cashier")
+  is_active         Boolean  @default(true)
+  created_at        Int      @default(0)
+  updated_at        Int
+
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  sales             Sale[]
+
+  @@unique([companyId, email])
+  @@map("users")
+}
+
+model Product {
+  id                String   @id @default(cuid())
+  companyId         String
+  storeId           String
+  code              String
+  name              String
+  description       String?
+  price_cents       Int
+  cost_cents        Int?
+  stock_quantity    Int      @default(0)
+  sku               String?
+  category_id       String?
+  metadata          String?
+  is_active         Boolean  @default(true)
+  created_at        Int      @default(0)
+  updated_at        Int
+
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  store             Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  inventory         Inventory[]
+  sale_items        SaleItem[]
+
+  @@unique([companyId, storeId, code])
+  @@map("products")
+}
+
+model Inventory {
+  id                String   @id @default(cuid())
+  companyId         String
+  storeId           String
+  productId         String
+  quantity          Int      @default(0)
+  min_stock         Int      @default(0)
+  max_stock         Int?
+  created_at        Int      @default(0)
+  updated_at        Int
+
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  store             Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([storeId, productId])
+  @@map("inventory")
+}
+
+model Sale {
+  id                String   @id @default(cuid())
+  companyId         String
+  storeId           String
+  cash_register_id  String?
+  user_id           String
+  contact_id        String?
+
+  total_cents       Int
+  discount_cents    Int      @default(0)
+  tax_cents         Int      @default(0)
+
+  status            String   @default("completed")
+  payment_method    String
+  payment_details   String?
+
+  notes             String?
+  synced_at         Int?
+
+  created_at        Int      @default(0)
+  updated_at        Int
+
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  store             Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  user              User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  items             SaleItem[]
+
+  @@index([companyId, storeId])
+  @@index([created_at])
+  @@map("sales")
+}
+
+model SaleItem {
+  id                String   @id @default(cuid())
+  saleId            String
+  productId         String
+  quantity          Int
+  unit_price_cents  Int
+  total_cents       Int
+  discount_cents    Int      @default(0)
+
+  sale              Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("sale_items")
+}
+
+model Contact {
+  id                String   @id @default(cuid())
+  companyId         String
+  type              String   @default("customer")
+  name              String
+  email             String?
+  phone             String?
+  address           String?
+  tax_id            String?
+  notes             String?
+  is_active         Boolean  @default(true)
+  created_at        Int      @default(0)
+  updated_at        Int
+
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("contacts")
+}
+
+model CashRegister {
+  id                String   @id @default(cuid())
+  companyId         String
+  storeId           String
+  name              String
+  status            String   @default("closed")
+  opening_amount    Int      @default(0)
+  closing_amount    Int?
+  opened_at         Int?
+  closed_at         Int?
+  created_at        Int      @default(0)
+  updated_at        Int
+
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  store             Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@map("cash_registers")
+}
+
+model SyncQueue {
+  id                String   @id @default(cuid())
+  action            String
+  entity            String
+  entityId          String
+  payload           String
+  status            String   @default("pending")
+  synced_at         Int?
+  created_at        Int      @default(0)
+
+  @@index([status])
+  @@map("sync_queue")
+}

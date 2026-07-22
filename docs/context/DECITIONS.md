@@ -120,3 +120,28 @@ Este documento registra las decisiones arquitectónicas y técnicas tomadas dura
   - *REAL/DOUBLE:* Rechazado por problemas de punto flotante con dinero.
   - *Decimal.js en aplicación:* Rechazado porque agrega dependencia innecesaria.
 - **Trade-off:** Requiere conversión al mostrar (dividir por 100), pero elimina problemas de precisión monetaria.
+
+---
+
+## 11. Estrategia de Actualizaciones: Tauri Updater + GitHub Releases
+
+- **Decisión:** Usar Tauri built-in updater con GitHub Releases como distribuidor primario, con backend personalizado como fallback (Fase 2).
+- **Justificación:** El updater de Tauri maneja differential updates, firma Ed25519 y restart automático. GitHub Releases provee CDN gratis con versioning integrado. Para Fase 1 (lanzamiento), esto es suficiente. Para Fase 2 (>1000 usuarios), se agrega backend personalizado con rollout gradual y analytics.
+- **Alternativas consideradas:**
+  - *Backend personalizado desde Fase 1:* Rechazado porque agrega complejidad innecesaria antes de tener usuarios reales. Requiere S3, servidor de updates, y dashboard.
+  - *Electron Updater:* Rechazado porque ArPOS migra a Tauri (decisión #5).
+  - *Manual updates (sin auto-updater):* Rechazado porque usuarios no actualizarían, generando soporte técnico innecesario.
+  - *Docker-based updates:* Rechazado porque ArPOS no usa Docker (decisión #5).
+- **Trade-off:** GitHub Releases no tiene control fino de rollout (todos actualizan igual), pero para <1000 usuarios esto es aceptable. El backend personalizado en Fase 2 resuelve esta limitación.
+
+---
+
+## 12. Differential Updates (vs Full Binary Download)
+
+- **Decisión:** Usar differential updates de Tauri para hotfixes (patch), y full binary para features (minor) y breaking changes (major).
+- **Justificación:** Los hotfixes típicos cambian 1-2 archivos (~550 KB), vs 80-100 MB de full binary. Differential updates reducen tiempo de descarga de 2 minutos a 20 segundos para hotfixes.
+- **Alternativas consideradas:**
+  - *Siempre full binary:* Rechazado porque hotfixes serían lentos para usuarios con conexión lenta.
+  - *Custom delta system:* Rechazado porque Tauri ya maneja esto nativamente.
+  - *Block-level diff:* Rechazado porque Tauri usa diff a nivel de archivo, que es suficiente.
+- **Trade-off:** Requiere publicar versiones en orden (no se puede saltar de 1.0.0 a 1.0.2 sin publicar 1.0.1), pero esto es buena práctica de versionado semántico.

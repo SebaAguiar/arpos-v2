@@ -1,0 +1,16 @@
+{
+  "targetDefaults": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ]
+    },
+    "dev": {
+      "dependsOn": [
+        "^build"
+      ]
+    }
+  },
+  "defaultProject": "api",
+  "analytics": true
+}

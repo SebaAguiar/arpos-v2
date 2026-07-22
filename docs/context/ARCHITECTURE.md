@@ -1975,18 +1975,41 @@ jobs:
 
 ### 12.3 Auto-updater (Tauri Built-in)
 
-```rust
-// Tauri check for updates automáticamente
-// Backend: GitHub Releases con firmware signing
+El sistema de actualizaciones de ArPOS usa el updater built-in de Tauri, con fallback a GitHub Releases y soporte para differential updates.
 
-// En settings:
-"updater": {
-  "active": true,
-  "endpoints": ["https://api.github.com/repos/arpos/releases/latest"],
+**Tipos de actualización:**
+
+| Tipo | Versión | Ejemplo | Tamaño | Restart |
+|---|---|---|---|---|
+| **Hotfix** | Patch | v1.0.0 → v1.0.1 | 1-5 MB (differential) | Automático |
+| **Feature** | Minor | v1.0.0 → v1.1.0 | 80-100 MB (full) | Manual |
+| **Breaking** | Major | v1.0.0 → v2.0.0 | Full + migration | Forzado + wizard |
+
+**Configuración base (tauri.conf.json):**
+
+```json
+{
+  "updater": {
+    "active": true,
+    "dialog": true,
+    "endpoints": [
+      "https://releases.arpos.app/update/{{target}}/{{current_version}}"
+    ],
+    "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6..."
+  }
 }
-
-// User: Notificación "Actualizar a v1.1.0" → descarga + reinicia automáticamente
 ```
+
+**Flujo de actualización:**
+1. Background thread checkea cada 1 hora
+2. Si hay nueva versión: notificación discreta al usuario
+3. Descarga differential (patch) en lugar de full binary
+4. Verifica firma Ed25519
+5. Aplica patch + reinicia (2-5 minutos total)
+
+**Rollback:** Si una versión tiene bugs, se marca como `broken` y se revierte a la versión anterior automáticamente.
+
+> **Especificación completa:** Ver `docs/context/UPDATES.md` para estrategia detallada de distribución, differential updates, rollback, monitoreo, CI/CD pipeline y troubleshooting.
 
 ---
 
