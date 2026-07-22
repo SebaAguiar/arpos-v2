@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "identifier": "com.seba.arpos-v2",
   "build": {
-    "beforeDevCommand": "pnpm --filter pos-react dev",
+    "beforeDevCommand": "pnpm --filter api dev & pnpm --filter pos-react dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "pnpm --filter pos-react build",
+    "beforeBuildCommand": "pnpm --filter api build && pnpm --filter pos-react build",
     "frontendDist": "../pos-react/dist"
   },
   "app": {

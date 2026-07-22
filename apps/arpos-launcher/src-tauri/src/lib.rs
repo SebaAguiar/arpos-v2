@@ -21,8 +21,8 @@ impl ProcessManager {
         }
 
         let child = Command::new("node")
-            .arg("dist/main.js")
-            .current_dir("../api")
+            .arg("apps/api/dist/main.js")
+            .current_dir("../../")
             .spawn()
             .map_err(|e| format!("Failed to spawn NestJS: {}", e))?;
 
