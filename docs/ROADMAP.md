@@ -10,7 +10,7 @@ Este documento recopila las fases de migración, features propuestas y roadmap d
 
 **Milestone:** Schema SQLite validado, Prisma adapter funcional.
 
-- [ ] Adaptar `schema.prisma` a provider SQLite
+- [ ] ~~Adaptar `schema.prisma` a provider SQLite~~ **DEFERRED — no prioridad ahora**
 - [ ] Implementar type conversions (DECIMAL→INT, JSONB→TEXT, TIMESTAMP→INT)
 - [ ] Crear migraciones SQLite
 - [ ] Validar schema con datos reales
