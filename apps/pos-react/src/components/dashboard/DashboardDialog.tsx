@@ -52,7 +52,7 @@ function BarChart({ data, maxVal }: { data: { label: string; value: number }[]; 
             style={{
               width: "100%",
               height: `${maxVal > 0 ? (d.value / maxVal) * 100 : 0}%`,
-              backgroundColor: "#e54d2e",
+              backgroundColor: "var(--accent)",
               borderRadius: "3px 3px 0 0",
               minHeight: "4px",
             }}
@@ -71,7 +71,7 @@ function HorizontalBar({ label, percentage, color }: { label: string; percentage
         <Text size="2">{label}</Text>
         <Text size="2" color="gray">{percentage}%</Text>
       </div>
-      <div style={{ height: "8px", backgroundColor: "#252525", borderRadius: "4px", overflow: "hidden" }}>
+      <div style={{ height: "8px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "4px", overflow: "hidden" }}>
         <div
           style={{
             height: "100%",
@@ -109,9 +109,9 @@ export function DashboardDialog() {
     >
       <div
         style={{
-          backgroundColor: "#1a1a1a",
+          backgroundColor: "var(--bg-surface)",
           borderRadius: "12px",
-          border: "1px solid #2a2a2a",
+          border: "1px solid var(--border)",
           width: "700px",
           maxHeight: "85vh",
           display: "flex",
@@ -126,7 +126,7 @@ export function DashboardDialog() {
             alignItems: "center",
             justifyContent: "space-between",
             padding: "16px 20px",
-            borderBottom: "1px solid #2a2a2a",
+            borderBottom: "1px solid var(--border)",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -144,7 +144,7 @@ export function DashboardDialog() {
             </Select.Root>
             <button
               onClick={closeDashboard}
-              style={{ background: "none", border: "none", color: "#888", cursor: "pointer" }}
+              style={{ background: "none", border: "none", color: "var(--text-secondary)", cursor: "pointer" }}
             >
               <Cross1Icon width={18} height={18} />
             </button>
@@ -154,25 +154,25 @@ export function DashboardDialog() {
         <div style={{ flex: 1, overflow: "auto", padding: "20px" }}>
           {/* KPI Cards */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px", marginBottom: "20px" }}>
-            <div style={{ padding: "14px", backgroundColor: "#252525", borderRadius: "8px" }}>
+            <div style={{ padding: "14px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "8px" }}>
               <Text size="1" color="gray">Ventas</Text>
               <Text size="5" weight="bold" color="green" style={{ display: "block", marginTop: "4px" }}>
                 ${totalSales.toLocaleString("es-AR")}
               </Text>
             </div>
-            <div style={{ padding: "14px", backgroundColor: "#252525", borderRadius: "8px" }}>
+            <div style={{ padding: "14px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "8px" }}>
               <Text size="1" color="gray">Transacciones</Text>
               <Text size="5" weight="bold" style={{ display: "block", marginTop: "4px" }}>
                 {Math.round(totalProducts / 2.5)}
               </Text>
             </div>
-            <div style={{ padding: "14px", backgroundColor: "#252525", borderRadius: "8px" }}>
+            <div style={{ padding: "14px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "8px" }}>
               <Text size="1" color="gray">Ticket promedio</Text>
               <Text size="5" weight="bold" color="orange" style={{ display: "block", marginTop: "4px" }}>
                 ${avgTicket.toLocaleString("es-AR")}
               </Text>
             </div>
-            <div style={{ padding: "14px", backgroundColor: "#252525", borderRadius: "8px" }}>
+            <div style={{ padding: "14px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "8px" }}>
               <Text size="1" color="gray">Productos vendidos</Text>
               <Text size="5" weight="bold" style={{ display: "block", marginTop: "4px" }}>
                 {totalProducts}
@@ -209,7 +209,7 @@ export function DashboardDialog() {
                     alignItems: "center",
                     gap: "12px",
                     padding: "8px 10px",
-                    borderBottom: "1px solid #2a2a2a",
+                    borderBottom: "1px solid var(--border)",
                   }}
                 >
                   <Badge color="orange" variant="soft" size="1" style={{ minWidth: "24px", textAlign: "center" }}>

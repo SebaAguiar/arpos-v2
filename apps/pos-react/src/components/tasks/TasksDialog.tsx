@@ -76,9 +76,9 @@ export function TasksDialog() {
     >
       <div
         style={{
-          backgroundColor: "#1a1a1a",
+          backgroundColor: "var(--bg-surface)",
           borderRadius: "12px",
-          border: "1px solid #2a2a2a",
+          border: "1px solid var(--border)",
           width: "560px",
           maxHeight: "85vh",
           display: "flex",
@@ -93,7 +93,7 @@ export function TasksDialog() {
             alignItems: "center",
             justifyContent: "space-between",
             padding: "16px 20px",
-            borderBottom: "1px solid #2a2a2a",
+            borderBottom: "1px solid var(--border)",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -109,8 +109,8 @@ export function TasksDialog() {
               onClick={() => setShowForm(!showForm)}
               style={{
                 padding: "6px 12px",
-                backgroundColor: showForm ? "#2a2a2a" : "#e54d2e",
-                color: showForm ? "#888" : "#fff",
+                backgroundColor: showForm ? "var(--bg-surface)" : "var(--accent)",
+                color: showForm ? "var(--text-secondary)" : "#fff",
                 border: "none",
                 borderRadius: "6px",
                 cursor: "pointer",
@@ -126,7 +126,7 @@ export function TasksDialog() {
             </button>
             <button
               onClick={closeTasks}
-              style={{ background: "none", border: "none", color: "#888", cursor: "pointer" }}
+              style={{ background: "none", border: "none", color: "var(--text-secondary)", cursor: "pointer" }}
             >
               <Cross1Icon width={18} height={18} />
             </button>
@@ -139,9 +139,9 @@ export function TasksDialog() {
             <div
               style={{
                 padding: "14px",
-                backgroundColor: "#252525",
+                backgroundColor: "var(--bg-surface-hover)",
                 borderRadius: "8px",
-                border: "1px solid #2a2a2a",
+                border: "1px solid var(--border)",
                 marginBottom: "16px",
               }}
             >
@@ -182,8 +182,8 @@ export function TasksDialog() {
                     style={{
                       padding: "6px 14px",
                       backgroundColor: "transparent",
-                      color: "#888",
-                      border: "1px solid #2a2a2a",
+                      color: "var(--text-secondary)",
+                      border: "1px solid var(--border)",
                       borderRadius: "6px",
                       cursor: "pointer",
                       fontSize: "13px",
@@ -196,8 +196,8 @@ export function TasksDialog() {
                     disabled={!title.trim()}
                     style={{
                       padding: "6px 14px",
-                      backgroundColor: title.trim() ? "#e54d2e" : "#2a2a2a",
-                      color: title.trim() ? "#fff" : "#888",
+                      backgroundColor: title.trim() ? "var(--accent)" : "var(--bg-surface)",
+                      color: title.trim() ? "#fff" : "var(--text-secondary)",
                       border: "none",
                       borderRadius: "6px",
                       cursor: title.trim() ? "pointer" : "not-allowed",
@@ -220,10 +220,10 @@ export function TasksDialog() {
                 onClick={() => setFilterStatus(status)}
                 style={{
                   padding: "4px 10px",
-                  border: "1px solid #2a2a2a",
+                  border: "1px solid var(--border)",
                   borderRadius: "4px",
-                  backgroundColor: filterStatus === status ? "#252525" : "transparent",
-                  color: filterStatus === status ? "#ededed" : "#888",
+                  backgroundColor: filterStatus === status ? "var(--bg-surface-hover)" : "transparent",
+                  color: filterStatus === status ? "var(--text-primary)" : "var(--text-secondary)",
                   cursor: "pointer",
                   fontSize: "12px",
                   fontWeight: filterStatus === status ? 600 : 400,
@@ -237,7 +237,7 @@ export function TasksDialog() {
           {/* Tasks list */}
           {filteredTasks.length === 0 ? (
             <div style={{ textAlign: "center", padding: "40px 0" }}>
-              <LapTimerIcon width={32} height={32} style={{ color: "#555", marginBottom: "8px" }} />
+              <LapTimerIcon width={32} height={32} style={{ color: "var(--text-muted)", marginBottom: "8px" }} />
               <Text size="2" color="gray">
                 {filterStatus === "ALL" ? "No hay tareas" : `No hay tareas ${STATUS_CONFIG[filterStatus]?.label.toLowerCase()}`}
               </Text>
@@ -251,7 +251,7 @@ export function TasksDialog() {
                   alignItems: "flex-start",
                   gap: "10px",
                   padding: "10px 12px",
-                  border: "1px solid #2a2a2a",
+                  border: "1px solid var(--border)",
                   borderRadius: "8px",
                   marginBottom: "6px",
                   opacity: task.status === "DONE" ? 0.5 : 1,
@@ -268,7 +268,7 @@ export function TasksDialog() {
                     background: "none",
                     border: "none",
                     cursor: "pointer",
-                    color: task.status === "DONE" ? "#30a46c" : "#888",
+                    color: task.status === "DONE" ? "#30a46c" : "var(--text-secondary)",
                     marginTop: "2px",
                   }}
                 >
@@ -303,7 +303,7 @@ export function TasksDialog() {
                       {task.description}
                     </Text>
                   )}
-                  <div style={{ fontSize: "11px", color: "#555" }}>
+                  <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>
                     {task.assignee} • {new Date(task.createdAt * 1000).toLocaleDateString("es-AR")}
                   </div>
                 </div>
@@ -348,7 +348,7 @@ export function TasksDialog() {
                       padding: "2px 6px",
                       border: "none",
                       backgroundColor: "transparent",
-                      color: "#e54d2e",
+                      color: "var(--accent)",
                       cursor: "pointer",
                     }}
                   >

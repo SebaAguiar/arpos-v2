@@ -17,8 +17,8 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       style={{
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "#1a1a1a",
-        border: "1px solid #2a2a2a",
+        backgroundColor: "var(--bg-surface)",
+        border: "1px solid var(--border)",
         borderRadius: "8px",
         padding: "12px",
         cursor: "pointer",
@@ -27,22 +27,22 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         transition: "border-color 150ms ease",
       }}
       onMouseEnter={(e) =>
-        (e.currentTarget.style.borderColor = "#e54d2e")
+        (e.currentTarget.style.borderColor = "var(--accent)")
       }
       onMouseLeave={(e) =>
-        (e.currentTarget.style.borderColor = "#2a2a2a")
+        (e.currentTarget.style.borderColor = "var(--border)")
       }
     >
-      <span style={{ fontSize: "14px", fontWeight: 600, color: "#ededed" }}>
+      <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-primary)" }}>
         {product.name}
       </span>
-      <span style={{ fontSize: "13px", color: "#888" }}>
+      <span style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
         ${product.price.toLocaleString("es-AR")}
       </span>
       <span
         style={{
           fontSize: "11px",
-          color: totalStock > 5 ? "#30a46c" : totalStock > 0 ? "#f5a623" : "#e54d2e",
+          color: totalStock > 5 ? "#30a46c" : totalStock > 0 ? "#f5a623" : "var(--accent)",
         }}
       >
         Stock: {totalStock}

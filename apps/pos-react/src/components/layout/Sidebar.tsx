@@ -28,7 +28,7 @@ const ITEM_BASE: React.CSSProperties = {
   background: "none",
   fontSize: "13px",
   fontWeight: 400,
-  color: "#888",
+  color: "var(--text-secondary)",
   cursor: "pointer",
   textAlign: "left",
   width: "100%",
@@ -38,14 +38,14 @@ const ITEM_BASE: React.CSSProperties = {
 const ITEM_ACTIVE: React.CSSProperties = {
   ...ITEM_BASE,
   fontWeight: 600,
-  color: "#ededed",
-  backgroundColor: "#252525",
+  color: "var(--text-primary)",
+  backgroundColor: "var(--bg-surface-hover)",
 };
 
 const SECTION_HEADER: React.CSSProperties = {
   fontSize: "10px",
   fontWeight: 700,
-  color: "#666",
+  color: "var(--text-muted)",
   textTransform: "uppercase" as const,
   letterSpacing: "0.08em",
   padding: "0 12px",
@@ -86,18 +86,18 @@ export function Sidebar() {
         width: "220px",
         height: "100%",
         flexShrink: 0,
-        backgroundColor: "#1a1a1a",
-        borderRight: "1px solid #2a2a2a",
+        backgroundColor: "var(--bg-surface)",
+        borderRight: "1px solid var(--border)",
         display: "flex",
         flexDirection: "column",
       }}
     >
       {/* Logo */}
       <div style={{ padding: "16px 16px 12px" }}>
-        <h1 style={{ fontSize: "20px", fontWeight: 700, color: "#e54d2e", margin: 0 }}>
+        <h1 style={{ fontSize: "20px", fontWeight: 700, color: "var(--accent)", margin: 0 }}>
           ArPOS
         </h1>
-        <p style={{ fontSize: "11px", color: "#555", margin: 0 }}>v2.0</p>
+        <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: 0 }}>v2.0</p>
       </div>
 
       {/* Scrollable nav */}
@@ -171,7 +171,7 @@ export function Sidebar() {
       <div
         style={{
           marginTop: "auto",
-          borderTop: "1px solid #2a2a2a",
+          borderTop: "1px solid var(--border)",
           padding: "8px",
         }}
       >
@@ -197,13 +197,13 @@ function SidebarButton({ item }: { item: NavItem }) {
       style={active ? ITEM_ACTIVE : ITEM_BASE}
       onMouseEnter={(e) => {
         if (!active) {
-          e.currentTarget.style.color = "#ededed";
-          e.currentTarget.style.backgroundColor = "#252525";
+          e.currentTarget.style.color = "var(--text-primary)";
+          e.currentTarget.style.backgroundColor = "var(--bg-surface-hover)";
         }
       }}
       onMouseLeave={(e) => {
         if (!active) {
-          e.currentTarget.style.color = "#888";
+          e.currentTarget.style.color = "var(--text-secondary)";
           e.currentTarget.style.backgroundColor = "transparent";
         }
       }}
@@ -217,7 +217,7 @@ function SidebarButton({ item }: { item: NavItem }) {
             transform: "translateY(-50%)",
             width: "3px",
             height: "60%",
-            backgroundColor: "#e54d2e",
+            backgroundColor: "var(--accent)",
             borderRadius: "0 2px 2px 0",
           }}
         />
@@ -230,8 +230,8 @@ function SidebarButton({ item }: { item: NavItem }) {
             marginLeft: "auto",
             fontSize: "10px",
             fontWeight: 700,
-            color: "#ededed",
-            backgroundColor: "#e54d2e",
+            color: "var(--text-primary)",
+            backgroundColor: "var(--accent)",
             borderRadius: "10px",
             padding: "1px 6px",
             lineHeight: "16px",

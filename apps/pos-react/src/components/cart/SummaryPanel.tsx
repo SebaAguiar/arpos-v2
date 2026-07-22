@@ -30,7 +30,7 @@ export function SummaryPanel({ onCharge, onCustomerClick }: SummaryPanelProps) {
     <div
       style={{
         padding: "16px",
-        borderTop: "1px solid #2a2a2a",
+        borderTop: "1px solid var(--border)",
         display: "flex",
         flexDirection: "column",
         gap: "10px",
@@ -44,10 +44,10 @@ export function SummaryPanel({ onCharge, onCustomerClick }: SummaryPanelProps) {
           alignItems: "center",
           gap: "8px",
           padding: "8px 10px",
-          border: "1px solid #2a2a2a",
+          border: "1px solid var(--border)",
           borderRadius: "6px",
-          backgroundColor: customerName ? "#252525" : "transparent",
-          color: customerName ? "#ededed" : "#888",
+          backgroundColor: customerName ? "var(--bg-surface-hover)" : "transparent",
+          color: customerName ? "var(--text-primary)" : "var(--text-secondary)",
           cursor: "pointer",
           fontSize: "13px",
           width: "100%",
@@ -120,7 +120,7 @@ export function SummaryPanel({ onCharge, onCustomerClick }: SummaryPanelProps) {
           display: "flex",
           justifyContent: "space-between",
           padding: "12px 0",
-          borderTop: "1px solid #2a2a2a",
+          borderTop: "1px solid var(--border)",
         }}
       >
         <Text size="4" weight="bold">
@@ -138,8 +138,8 @@ export function SummaryPanel({ onCharge, onCustomerClick }: SummaryPanelProps) {
         style={{
           width: "100%",
           padding: "12px",
-          backgroundColor: items.length === 0 ? "#2a2a2a" : "#e54d2e",
-          color: items.length === 0 ? "#888" : "#fff",
+          backgroundColor: items.length === 0 ? "var(--bg-surface)" : "var(--accent)",
+          color: items.length === 0 ? "var(--text-secondary)" : "#fff",
           border: "none",
           borderRadius: "6px",
           fontSize: "15px",

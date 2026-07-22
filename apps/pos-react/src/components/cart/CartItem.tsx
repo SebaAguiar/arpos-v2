@@ -15,7 +15,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
         alignItems: "center",
         gap: "10px",
         padding: "8px 12px",
-        borderBottom: "1px solid #2a2a2a",
+        borderBottom: "1px solid var(--border)",
       }}
     >
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -23,7 +23,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
           style={{
             fontSize: "13px",
             fontWeight: 500,
-            color: "#ededed",
+            color: "var(--text-primary)",
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
@@ -31,13 +31,13 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
         >
           {item.name}
           {item.variantLabel && (
-            <span style={{ color: "#888", fontWeight: 400 }}>
+            <span style={{ color: "var(--text-secondary)", fontWeight: 400 }}>
               {" "}
               ({item.variantLabel})
             </span>
           )}
         </div>
-        <div style={{ fontSize: "12px", color: "#888" }}>
+        <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
           ${item.price.toLocaleString("es-AR")} x {item.quantity}
         </div>
       </div>
@@ -51,16 +51,16 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            border: "1px solid #2a2a2a",
+            border: "1px solid var(--border)",
             borderRadius: "4px",
             backgroundColor: "transparent",
-            color: "#888",
+            color: "var(--text-secondary)",
             cursor: "pointer",
           }}
         >
           <MinusIcon width={12} height={12} />
         </button>
-        <span style={{ fontSize: "13px", color: "#ededed", minWidth: "20px", textAlign: "center" }}>
+        <span style={{ fontSize: "13px", color: "var(--text-primary)", minWidth: "20px", textAlign: "center" }}>
           {item.quantity}
         </span>
         <button
@@ -71,10 +71,10 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            border: "1px solid #2a2a2a",
+            border: "1px solid var(--border)",
             borderRadius: "4px",
             backgroundColor: "transparent",
-            color: "#888",
+            color: "var(--text-secondary)",
             cursor: "pointer",
           }}
         >
@@ -82,7 +82,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
         </button>
       </div>
 
-      <span style={{ fontSize: "13px", fontWeight: 600, color: "#ededed", minWidth: "80px", textAlign: "right" }}>
+      <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)", minWidth: "80px", textAlign: "right" }}>
         ${(item.price * item.quantity).toLocaleString("es-AR")}
       </span>
 
@@ -96,7 +96,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
           justifyContent: "center",
           border: "none",
           backgroundColor: "transparent",
-          color: "#e54d2e",
+          color: "var(--accent)",
           cursor: "pointer",
           borderRadius: "4px",
         }}

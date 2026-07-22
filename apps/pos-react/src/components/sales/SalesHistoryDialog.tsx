@@ -52,9 +52,9 @@ export function SalesHistoryDialog() {
     >
       <div
         style={{
-          backgroundColor: "#1a1a1a",
+          backgroundColor: "var(--bg-surface)",
           borderRadius: "12px",
-          border: "1px solid #2a2a2a",
+          border: "1px solid var(--border)",
           width: "600px",
           maxHeight: "85vh",
           display: "flex",
@@ -69,7 +69,7 @@ export function SalesHistoryDialog() {
             alignItems: "center",
             justifyContent: "space-between",
             padding: "16px 20px",
-            borderBottom: "1px solid #2a2a2a",
+            borderBottom: "1px solid var(--border)",
           }}
         >
           <Text size="4" weight="bold">
@@ -77,7 +77,7 @@ export function SalesHistoryDialog() {
           </Text>
           <button
             onClick={closeSalesHistory}
-            style={{ background: "none", border: "none", color: "#888", cursor: "pointer" }}
+            style={{ background: "none", border: "none", color: "var(--text-secondary)", cursor: "pointer" }}
           >
             <Cross1Icon width={18} height={18} />
           </button>
@@ -91,10 +91,10 @@ export function SalesHistoryDialog() {
               onClick={() => setPeriod(p)}
               style={{
                 padding: "6px 14px",
-                border: "1px solid #2a2a2a",
+                border: "1px solid var(--border)",
                 borderRadius: "4px",
-                backgroundColor: period === p ? "#252525" : "transparent",
-                color: period === p ? "#ededed" : "#888",
+                backgroundColor: period === p ? "var(--bg-surface-hover)" : "transparent",
+                color: period === p ? "var(--text-primary)" : "var(--text-secondary)",
                 cursor: "pointer",
                 fontSize: "13px",
                 fontWeight: period === p ? 600 : 400,
@@ -109,7 +109,7 @@ export function SalesHistoryDialog() {
         <div style={{ flex: 1, overflow: "auto", padding: "0 20px" }}>
           {filteredSales.length === 0 ? (
             <div style={{ textAlign: "center", padding: "40px 0" }}>
-              <CalendarIcon width={32} height={32} style={{ color: "#555", marginBottom: "8px" }} />
+              <CalendarIcon width={32} height={32} style={{ color: "var(--text-muted)", marginBottom: "8px" }} />
               <Text size="2" color="gray">
                 No hay ventas en este período
               </Text>
@@ -120,7 +120,7 @@ export function SalesHistoryDialog() {
                 key={sale.id}
                 style={{
                   padding: "12px",
-                  border: "1px solid #2a2a2a",
+                  border: "1px solid var(--border)",
                   borderRadius: "6px",
                   marginBottom: "8px",
                 }}
@@ -143,7 +143,7 @@ export function SalesHistoryDialog() {
                   </Text>
                 </div>
 
-                <div style={{ fontSize: "12px", color: "#888", marginBottom: "4px" }}>
+                <div style={{ fontSize: "12px", color: "var(--text-secondary)", marginBottom: "4px" }}>
                   {new Date(sale.createdAt * 1000).toLocaleString("es-AR")}
                 </div>
 
@@ -159,10 +159,10 @@ export function SalesHistoryDialog() {
                   <button
                     style={{
                       padding: "4px 8px",
-                      border: "1px solid #2a2a2a",
+                      border: "1px solid var(--border)",
                       borderRadius: "4px",
                       backgroundColor: "transparent",
-                      color: "#888",
+                      color: "var(--text-secondary)",
                       cursor: "pointer",
                       fontSize: "11px",
                     }}
@@ -173,10 +173,10 @@ export function SalesHistoryDialog() {
                     <button
                       style={{
                         padding: "4px 8px",
-                        border: "1px solid #e54d2e",
+                        border: "1px solid var(--accent)",
                         borderRadius: "4px",
                         backgroundColor: "transparent",
-                        color: "#e54d2e",
+                        color: "var(--accent)",
                         cursor: "pointer",
                         fontSize: "11px",
                       }}
@@ -194,7 +194,7 @@ export function SalesHistoryDialog() {
         <div
           style={{
             padding: "12px 20px",
-            borderTop: "1px solid #2a2a2a",
+            borderTop: "1px solid var(--border)",
             display: "flex",
             justifyContent: "space-between",
           }}

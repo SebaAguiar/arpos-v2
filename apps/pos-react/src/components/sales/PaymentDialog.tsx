@@ -93,9 +93,9 @@ export function PaymentDialog({ creditSurcharge = 0 }: PaymentDialogProps) {
     >
       <div
         style={{
-          backgroundColor: "#1a1a1a",
+          backgroundColor: "var(--bg-surface)",
           borderRadius: "12px",
-          border: "1px solid #2a2a2a",
+          border: "1px solid var(--border)",
           width: "520px",
           maxHeight: "90vh",
           display: "flex",
@@ -110,7 +110,7 @@ export function PaymentDialog({ creditSurcharge = 0 }: PaymentDialogProps) {
             alignItems: "center",
             justifyContent: "space-between",
             padding: "16px 20px",
-            borderBottom: "1px solid #2a2a2a",
+            borderBottom: "1px solid var(--border)",
           }}
         >
           <Text size="4" weight="bold">
@@ -121,7 +121,7 @@ export function PaymentDialog({ creditSurcharge = 0 }: PaymentDialogProps) {
             style={{
               background: "none",
               border: "none",
-              color: "#888",
+              color: "var(--text-secondary)",
               cursor: "pointer",
             }}
           >
@@ -156,10 +156,10 @@ export function PaymentDialog({ creditSurcharge = 0 }: PaymentDialogProps) {
                   alignItems: "center",
                   gap: "6px",
                   padding: "8px 12px",
-                  border: `1px solid ${activeMethod === method ? color : "#2a2a2a"}`,
+                  border: `1px solid ${activeMethod === method ? color : "var(--border)"}`,
                   borderRadius: "6px",
                   backgroundColor: activeMethod === method ? `${color}20` : "transparent",
-                  color: activeMethod === method ? color : "#888",
+                  color: activeMethod === method ? color : "var(--text-secondary)",
                   cursor: "pointer",
                   fontSize: "13px",
                   fontWeight: activeMethod === method ? 600 : 400,
@@ -185,7 +185,7 @@ export function PaymentDialog({ creditSurcharge = 0 }: PaymentDialogProps) {
               onClick={addPayment}
               style={{
                 padding: "8px 16px",
-                backgroundColor: "#e54d2e",
+                backgroundColor: "var(--accent)",
                 color: "#fff",
                 border: "none",
                 borderRadius: "6px",
@@ -207,10 +207,10 @@ export function PaymentDialog({ creditSurcharge = 0 }: PaymentDialogProps) {
                   disabled={remaining <= 0}
                   style={{
                     padding: "6px 12px",
-                    border: "1px solid #2a2a2a",
+                    border: "1px solid var(--border)",
                     borderRadius: "4px",
                     backgroundColor: "transparent",
-                    color: remaining > 0 ? "#ededed" : "#555",
+                    color: remaining > 0 ? "var(--text-primary)" : "var(--text-muted)",
                     cursor: remaining > 0 ? "pointer" : "not-allowed",
                     fontSize: "12px",
                   }}
@@ -257,7 +257,7 @@ export function PaymentDialog({ creditSurcharge = 0 }: PaymentDialogProps) {
                     alignItems: "center",
                     justifyContent: "space-between",
                     padding: "6px 10px",
-                    backgroundColor: "#252525",
+                    backgroundColor: "var(--bg-surface-hover)",
                     borderRadius: "4px",
                     marginBottom: "4px",
                   }}
@@ -272,7 +272,7 @@ export function PaymentDialog({ creditSurcharge = 0 }: PaymentDialogProps) {
                       style={{
                         background: "none",
                         border: "none",
-                        color: "#e54d2e",
+                        color: "var(--accent)",
                         cursor: "pointer",
                       }}
                     >
@@ -302,7 +302,7 @@ export function PaymentDialog({ creditSurcharge = 0 }: PaymentDialogProps) {
         <div
           style={{
             padding: "16px 20px",
-            borderTop: "1px solid #2a2a2a",
+            borderTop: "1px solid var(--border)",
             display: "flex",
             flexDirection: "column",
             gap: "10px",
@@ -352,8 +352,8 @@ export function PaymentDialog({ creditSurcharge = 0 }: PaymentDialogProps) {
             style={{
               width: "100%",
               padding: "12px",
-              backgroundColor: totalPaid >= total ? "#30a46c" : "#2a2a2a",
-              color: totalPaid >= total ? "#fff" : "#888",
+              backgroundColor: totalPaid >= total ? "#30a46c" : "var(--bg-surface)",
+              color: totalPaid >= total ? "#fff" : "var(--text-secondary)",
               border: "none",
               borderRadius: "6px",
               fontSize: "15px",

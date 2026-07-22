@@ -67,9 +67,9 @@ export function CashControlDialog() {
     >
       <div
         style={{
-          backgroundColor: "#1a1a1a",
+          backgroundColor: "var(--bg-surface)",
           borderRadius: "12px",
-          border: "1px solid #2a2a2a",
+          border: "1px solid var(--border)",
           width: "640px",
           maxHeight: "85vh",
           display: "flex",
@@ -84,7 +84,7 @@ export function CashControlDialog() {
             alignItems: "center",
             justifyContent: "space-between",
             padding: "16px 20px",
-            borderBottom: "1px solid #2a2a2a",
+            borderBottom: "1px solid var(--border)",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -97,7 +97,7 @@ export function CashControlDialog() {
           </div>
           <button
             onClick={closeCashControl}
-            style={{ background: "none", border: "none", color: "#888", cursor: "pointer" }}
+            style={{ background: "none", border: "none", color: "var(--text-secondary)", cursor: "pointer" }}
           >
             <Cross1Icon width={18} height={18} />
           </button>
@@ -125,7 +125,7 @@ export function CashControlDialog() {
                     }}
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-                      <LockClosedIcon width={20} height={20} color="#e54d2e" />
+                      <LockClosedIcon width={20} height={20} color="var(--accent)" />
                       <Text size="3" weight="bold" color="red">Caja cerrada</Text>
                     </div>
                     <Text size="2" color="gray">
@@ -170,19 +170,19 @@ export function CashControlDialog() {
                 <div>
                   {/* Summary cards */}
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px", marginBottom: "16px" }}>
-                    <div style={{ padding: "12px", backgroundColor: "#252525", borderRadius: "8px" }}>
+                    <div style={{ padding: "12px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "8px" }}>
                       <Text size="1" color="gray">Monto inicial</Text>
                       <Text size="4" weight="bold" style={{ display: "block", marginTop: "4px" }}>
                         ${summary?.initialAmount.toLocaleString("es-AR")}
                       </Text>
                     </div>
-                    <div style={{ padding: "12px", backgroundColor: "#252525", borderRadius: "8px" }}>
+                    <div style={{ padding: "12px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "8px" }}>
                       <Text size="1" color="gray">Ventas</Text>
                       <Text size="4" weight="bold" color="green" style={{ display: "block", marginTop: "4px" }}>
                         ${summary?.totalSales.toLocaleString("es-AR")}
                       </Text>
                     </div>
-                    <div style={{ padding: "12px", backgroundColor: "#252525", borderRadius: "8px" }}>
+                    <div style={{ padding: "12px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "8px" }}>
                       <Text size="1" color="gray">Efectivo esperado</Text>
                       <Text size="4" weight="bold" color="orange" style={{ display: "block", marginTop: "4px" }}>
                         ${summary?.expectedCash.toLocaleString("es-AR")}
@@ -207,7 +207,7 @@ export function CashControlDialog() {
                   </div>
 
                   {/* Add movement */}
-                  <div style={{ padding: "12px", backgroundColor: "#252525", borderRadius: "8px", marginBottom: "16px" }}>
+                  <div style={{ padding: "12px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "8px", marginBottom: "16px" }}>
                     <Text size="2" weight="bold" style={{ display: "block", marginBottom: "8px" }}>
                       Registrar movimiento
                     </Text>
@@ -245,8 +245,8 @@ export function CashControlDialog() {
                         disabled={!movDesc.trim() || !movAmount}
                         style={{
                           padding: "6px 14px",
-                          backgroundColor: movDesc.trim() && movAmount ? "#e54d2e" : "#2a2a2a",
-                          color: movDesc.trim() && movAmount ? "#fff" : "#888",
+                          backgroundColor: movDesc.trim() && movAmount ? "var(--accent)" : "var(--bg-surface)",
+                          color: movDesc.trim() && movAmount ? "#fff" : "var(--text-secondary)",
                           border: "none",
                           borderRadius: "6px",
                           cursor: movDesc.trim() && movAmount ? "pointer" : "not-allowed",
@@ -272,7 +272,7 @@ export function CashControlDialog() {
                             alignItems: "center",
                             justifyContent: "space-between",
                             padding: "8px 10px",
-                            backgroundColor: "#252525",
+                            backgroundColor: "var(--bg-surface-hover)",
                             borderRadius: "4px",
                             marginBottom: "4px",
                           }}
@@ -300,7 +300,7 @@ export function CashControlDialog() {
                   )}
 
                   {/* Close shift */}
-                  <Separator style={{ backgroundColor: "#2a2a2a", marginBottom: "16px" }} />
+                  <Separator style={{ backgroundColor: "var(--border)", marginBottom: "16px" }} />
                   <div>
                     <Text size="2" weight="bold" style={{ display: "block", marginBottom: "8px" }}>
                       Cerrar turno
@@ -318,7 +318,7 @@ export function CashControlDialog() {
                         onClick={handleCloseShift}
                         style={{
                           padding: "8px 24px",
-                          backgroundColor: "#e54d2e",
+                          backgroundColor: "var(--accent)",
                           color: "#fff",
                           border: "none",
                           borderRadius: "6px",
@@ -350,7 +350,7 @@ export function CashControlDialog() {
             <Tabs.Content value="history" style={{ padding: "16px 20px" }}>
               {shifts.length === 0 ? (
                 <div style={{ textAlign: "center", padding: "40px 0" }}>
-                  <CalendarIcon width={32} height={32} style={{ color: "#555", marginBottom: "8px" }} />
+                  <CalendarIcon width={32} height={32} style={{ color: "var(--text-muted)", marginBottom: "8px" }} />
                   <Text size="2" color="gray">No hay turnos cerrados</Text>
                 </div>
               ) : (
@@ -363,7 +363,7 @@ export function CashControlDialog() {
                       key={shift.id}
                       style={{
                         padding: "12px",
-                        border: "1px solid #2a2a2a",
+                        border: "1px solid var(--border)",
                         borderRadius: "8px",
                         marginBottom: "8px",
                       }}
@@ -382,7 +382,7 @@ export function CashControlDialog() {
                             : "Sin arqueo"}
                         </Badge>
                       </div>
-                      <div style={{ fontSize: "12px", color: "#888" }}>
+                      <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
                         {new Date(shift.startTime * 1000).toLocaleString("es-AR")} —{" "}
                         {shift.endTime
                           ? new Date(shift.endTime * 1000).toLocaleString("es-AR")

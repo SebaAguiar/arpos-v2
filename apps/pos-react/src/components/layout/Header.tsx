@@ -1,10 +1,13 @@
-import { TextField, DropdownMenu, Avatar, IconButton, Badge } from "@radix-ui/themes";
+import { TextField, DropdownMenu, Avatar, IconButton, Badge, Tooltip } from "@radix-ui/themes";
 import {
   MagnifyingGlassIcon,
   BellIcon,
   HamburgerMenuIcon,
   Cross1Icon,
+  SunIcon,
+  MoonIcon,
 } from "@radix-ui/react-icons";
+import { useThemeStore } from "@/stores/theme.store";
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -12,26 +15,31 @@ interface HeaderProps {
 }
 
 export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
+  const theme = useThemeStore((s) => s.theme);
+  const toggleTheme = useThemeStore((s) => s.toggleTheme);
+
   return (
     <header
       style={{
         height: "52px",
-        borderBottom: "1px solid #2a2a2a",
+        borderBottom: "1px solid var(--border)",
         display: "flex",
         alignItems: "center",
         padding: "0 16px",
         gap: "12px",
-        backgroundColor: "#1a1a1a",
+        backgroundColor: "var(--bg-surface)",
       }}
     >
-      <IconButton
-        variant="ghost"
-        size="1"
-        onClick={onToggleSidebar}
-        style={{ cursor: "pointer", color: "#888" }}
-      >
-        {sidebarOpen ? <Cross1Icon width={16} height={16} /> : <HamburgerMenuIcon width={16} height={16} />}
-      </IconButton>
+      <Tooltip content={sidebarOpen ? "Ocultar menú" : "Mostrar menú"}>
+        <IconButton
+          variant="ghost"
+          size="1"
+          onClick={onToggleSidebar}
+          style={{ cursor: "pointer", color: "var(--text-secondary)" }}
+        >
+          {sidebarOpen ? <Cross1Icon width={16} height={16} /> : <HamburgerMenuIcon width={16} height={16} />}
+        </IconButton>
+      </Tooltip>
 
       <TextField.Root
         placeholder="Buscar producto..."
@@ -47,6 +55,17 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
       <Badge color="green" variant="soft" size="1">
         Online
       </Badge>
+
+      <Tooltip content={theme === "dark" ? "Modo claro" : "Modo oscuro"}>
+        <IconButton
+          variant="ghost"
+          size="1"
+          onClick={toggleTheme}
+          style={{ cursor: "pointer", color: "var(--text-secondary)" }}
+        >
+          {theme === "dark" ? <SunIcon width={16} height={16} /> : <MoonIcon width={16} height={16} />}
+        </IconButton>
+      </Tooltip>
 
       <IconButton variant="ghost" size="1">
         <BellIcon width={16} height={16} />

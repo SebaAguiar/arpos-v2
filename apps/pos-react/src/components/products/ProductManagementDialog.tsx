@@ -228,9 +228,9 @@ export function ProductManagementDialog() {
     >
       <div
         style={{
-          backgroundColor: "#1a1a1a",
+          backgroundColor: "var(--bg-surface)",
           borderRadius: "12px",
-          border: "1px solid #2a2a2a",
+          border: "1px solid var(--border)",
           width: "720px",
           maxHeight: "90vh",
           display: "flex",
@@ -245,7 +245,7 @@ export function ProductManagementDialog() {
             alignItems: "center",
             justifyContent: "space-between",
             padding: "16px 20px",
-            borderBottom: "1px solid #2a2a2a",
+            borderBottom: "1px solid var(--border)",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -257,7 +257,7 @@ export function ProductManagementDialog() {
               onClick={() => { setForm(emptyForm()); setEditingId(null); setActiveTab("form"); }}
               style={{
                 padding: "6px 12px",
-                backgroundColor: "#e54d2e",
+                backgroundColor: "var(--accent)",
                 color: "#fff",
                 border: "none",
                 borderRadius: "6px",
@@ -274,7 +274,7 @@ export function ProductManagementDialog() {
             </button>
             <button
               onClick={closeProductManagement}
-              style={{ background: "none", border: "none", color: "#888", cursor: "pointer" }}
+              style={{ background: "none", border: "none", color: "var(--text-secondary)", cursor: "pointer" }}
             >
               <Cross1Icon width={18} height={18} />
             </button>
@@ -309,7 +309,7 @@ export function ProductManagementDialog() {
                       alignItems: "center",
                       gap: "12px",
                       padding: "10px 12px",
-                      border: "1px solid #2a2a2a",
+                      border: "1px solid var(--border)",
                       borderRadius: "8px",
                       marginBottom: "6px",
                     }}
@@ -320,7 +320,7 @@ export function ProductManagementDialog() {
                         {!product.active && <Badge color="red" variant="soft" size="1">Inactivo</Badge>}
                         {product.category && <Badge color="blue" variant="soft" size="1">{product.category}</Badge>}
                       </div>
-                      <div style={{ fontSize: "12px", color: "#888", marginTop: "2px" }}>
+                      <div style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "2px" }}>
                         ${product.price.toLocaleString("es-AR")} • Stock:{" "}
                         {product.variants.reduce(
                           (s, v) => s + v.stockItems.reduce((si, item) => si + item.quantity, 0),
@@ -332,19 +332,19 @@ export function ProductManagementDialog() {
                     <div style={{ display: "flex", gap: "4px" }}>
                       <button
                         onClick={() => handleEdit(product)}
-                        style={{ padding: "4px 8px", border: "none", backgroundColor: "transparent", color: "#888", cursor: "pointer" }}
+                        style={{ padding: "4px 8px", border: "none", backgroundColor: "transparent", color: "var(--text-secondary)", cursor: "pointer" }}
                       >
                         <Pencil2Icon width={14} height={14} />
                       </button>
                       <button
                         onClick={() => handleDuplicate(product)}
-                        style={{ padding: "4px 8px", border: "none", backgroundColor: "transparent", color: "#888", cursor: "pointer" }}
+                        style={{ padding: "4px 8px", border: "none", backgroundColor: "transparent", color: "var(--text-secondary)", cursor: "pointer" }}
                       >
                         <CopyIcon width={14} height={14} />
                       </button>
                       <button
                         onClick={() => handleDelete(product.id)}
-                        style={{ padding: "4px 8px", border: "none", backgroundColor: "transparent", color: "#e54d2e", cursor: "pointer" }}
+                        style={{ padding: "4px 8px", border: "none", backgroundColor: "transparent", color: "var(--accent)", cursor: "pointer" }}
                       >
                         <TrashIcon width={14} height={14} />
                       </button>
@@ -387,7 +387,7 @@ export function ProductManagementDialog() {
                   </div>
                 </div>
 
-                <Separator style={{ backgroundColor: "#2a2a2a" }} />
+                <Separator style={{ backgroundColor: "var(--border)" }} />
 
                 {/* Pricing */}
                 <Text size="2" weight="bold" color="gray">Precio y costo</Text>
@@ -433,7 +433,7 @@ export function ProductManagementDialog() {
                   </div>
                 </div>
 
-                <Separator style={{ backgroundColor: "#2a2a2a" }} />
+                <Separator style={{ backgroundColor: "var(--border)" }} />
 
                 {/* Variants */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -442,10 +442,10 @@ export function ProductManagementDialog() {
                     onClick={() => setForm({ ...form, variants: [...form.variants, emptyVariant()] })}
                     style={{
                       padding: "4px 10px",
-                      border: "1px dashed #2a2a2a",
+                      border: "1px dashed var(--border)",
                       borderRadius: "4px",
                       backgroundColor: "transparent",
-                      color: "#888",
+                      color: "var(--text-secondary)",
                       cursor: "pointer",
                       fontSize: "12px",
                       display: "flex",
@@ -463,7 +463,7 @@ export function ProductManagementDialog() {
                     key={i}
                     style={{
                       padding: "10px",
-                      backgroundColor: "#252525",
+                      backgroundColor: "var(--bg-surface-hover)",
                       borderRadius: "6px",
                       display: "flex",
                       flexDirection: "column",
@@ -479,7 +479,7 @@ export function ProductManagementDialog() {
                             variants: form.variants.filter((_, vi) => vi !== i),
                           })
                         }
-                        style={{ background: "none", border: "none", color: "#e54d2e", cursor: "pointer" }}
+                        style={{ background: "none", border: "none", color: "var(--accent)", cursor: "pointer" }}
                       >
                         <TrashIcon width={12} height={12} />
                       </button>
@@ -541,8 +541,8 @@ export function ProductManagementDialog() {
                     style={{
                       padding: "8px 16px",
                       backgroundColor: "transparent",
-                      color: "#888",
-                      border: "1px solid #2a2a2a",
+                      color: "var(--text-secondary)",
+                      border: "1px solid var(--border)",
                       borderRadius: "6px",
                       cursor: "pointer",
                       fontSize: "13px",
@@ -555,8 +555,8 @@ export function ProductManagementDialog() {
                     disabled={!form.name.trim()}
                     style={{
                       padding: "8px 20px",
-                      backgroundColor: form.name.trim() ? "#e54d2e" : "#2a2a2a",
-                      color: form.name.trim() ? "#fff" : "#888",
+                      backgroundColor: form.name.trim() ? "var(--accent)" : "var(--bg-surface)",
+                      color: form.name.trim() ? "#fff" : "var(--text-secondary)",
                       border: "none",
                       borderRadius: "6px",
                       cursor: form.name.trim() ? "pointer" : "not-allowed",

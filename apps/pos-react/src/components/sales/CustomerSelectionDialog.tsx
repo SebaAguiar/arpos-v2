@@ -48,9 +48,9 @@ export function CustomerSelectionDialog() {
     >
       <div
         style={{
-          backgroundColor: "#1a1a1a",
+          backgroundColor: "var(--bg-surface)",
           borderRadius: "12px",
-          border: "1px solid #2a2a2a",
+          border: "1px solid var(--border)",
           width: "440px",
           maxHeight: "80vh",
           display: "flex",
@@ -65,7 +65,7 @@ export function CustomerSelectionDialog() {
             alignItems: "center",
             justifyContent: "space-between",
             padding: "16px 20px",
-            borderBottom: "1px solid #2a2a2a",
+            borderBottom: "1px solid var(--border)",
           }}
         >
           <Text size="4" weight="bold">
@@ -76,7 +76,7 @@ export function CustomerSelectionDialog() {
             style={{
               background: "none",
               border: "none",
-              color: "#888",
+              color: "var(--text-secondary)",
               cursor: "pointer",
             }}
           >
@@ -107,10 +107,10 @@ export function CustomerSelectionDialog() {
               display: "flex",
               alignItems: "center",
               gap: "10px",
-              border: "1px solid #2a2a2a",
+              border: "1px solid var(--border)",
               borderRadius: "6px",
               backgroundColor: "transparent",
-              color: "#888",
+              color: "var(--text-secondary)",
               cursor: "pointer",
               marginBottom: "6px",
               textAlign: "left",
@@ -130,10 +130,10 @@ export function CustomerSelectionDialog() {
                 display: "flex",
                 alignItems: "center",
                 gap: "10px",
-                border: "1px solid #2a2a2a",
+                border: "1px solid var(--border)",
                 borderRadius: "6px",
                 backgroundColor: "transparent",
-                color: "#ededed",
+                color: "var(--text-primary)",
                 cursor: "pointer",
                 marginBottom: "6px",
                 textAlign: "left",
@@ -144,13 +144,13 @@ export function CustomerSelectionDialog() {
                   {customer.name}
                 </div>
                 {customer.email && (
-                  <div style={{ fontSize: "11px", color: "#888" }}>
+                  <div style={{ fontSize: "11px", color: "var(--text-secondary)" }}>
                     {customer.email}
                   </div>
                 )}
               </div>
               {customer.phone && (
-                <span style={{ fontSize: "11px", color: "#888" }}>
+                <span style={{ fontSize: "11px", color: "var(--text-secondary)" }}>
                   {customer.phone}
                 </span>
               )}
@@ -167,7 +167,7 @@ export function CustomerSelectionDialog() {
         </div>
 
         {/* Create new */}
-        <div style={{ padding: "12px 20px", borderTop: "1px solid #2a2a2a" }}>
+        <div style={{ padding: "12px 20px", borderTop: "1px solid var(--border)" }}>
           <button
             style={{
               width: "100%",
@@ -176,10 +176,10 @@ export function CustomerSelectionDialog() {
               alignItems: "center",
               justifyContent: "center",
               gap: "6px",
-              border: "1px dashed #2a2a2a",
+              border: "1px dashed var(--border)",
               borderRadius: "6px",
               backgroundColor: "transparent",
-              color: "#888",
+              color: "var(--text-secondary)",
               cursor: "pointer",
               fontSize: "13px",
             }}

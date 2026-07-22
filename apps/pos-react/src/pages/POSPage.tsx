@@ -113,8 +113,8 @@ export function POSPage() {
           <div
             style={{
               width: "48px",
-              backgroundColor: "#1a1a1a",
-              borderRight: "1px solid #2a2a2a",
+              backgroundColor: "var(--bg-surface)",
+              borderRight: "1px solid var(--border)",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
@@ -144,7 +144,7 @@ export function POSPage() {
                       border: "none",
                       borderRadius: "6px",
                       backgroundColor: "transparent",
-                      color: "#888",
+                      color: "var(--text-secondary)",
                       cursor: "pointer",
                     }}
                   >
@@ -161,8 +161,8 @@ export function POSPage() {
                       alignItems: "center",
                       justifyContent: "center",
                       borderRadius: "6px",
-                      backgroundColor: "#252525",
-                      color: "#ededed",
+                      backgroundColor: "var(--bg-surface-hover)",
+                      color: "var(--text-primary)",
                     }}
                   >
                     <Icon width={18} height={18} />
@@ -179,7 +179,7 @@ export function POSPage() {
         <div
           style={{
             padding: "12px 16px",
-            borderBottom: "1px solid #2a2a2a",
+            borderBottom: "1px solid var(--border)",
             display: "flex",
             alignItems: "center",
             gap: "10px",
@@ -230,8 +230,8 @@ export function POSPage() {
       <div
         style={{
           width: "340px",
-          backgroundColor: "#1a1a1a",
-          borderLeft: "1px solid #2a2a2a",
+          backgroundColor: "var(--bg-surface)",
+          borderLeft: "1px solid var(--border)",
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
@@ -241,7 +241,7 @@ export function POSPage() {
         <div
           style={{
             padding: "12px 16px",
-            borderBottom: "1px solid #2a2a2a",
+            borderBottom: "1px solid var(--border)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -264,10 +264,10 @@ export function POSPage() {
               alignItems: "center",
               gap: "4px",
               padding: "4px 8px",
-              border: "1px solid #2a2a2a",
+              border: "1px solid var(--border)",
               borderRadius: "4px",
-              backgroundColor: customerName ? "#252525" : "transparent",
-              color: customerName ? "#ededed" : "#888",
+              backgroundColor: customerName ? "var(--bg-surface-hover)" : "transparent",
+              color: customerName ? "var(--text-primary)" : "var(--text-secondary)",
               cursor: "pointer",
               fontSize: "11px",
             }}
