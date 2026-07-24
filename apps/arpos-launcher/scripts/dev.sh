@@ -9,6 +9,16 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 cd "$PROJECT_ROOT" && pnpm --filter api dev &
 API_PID=$!
 
+# Wait for API to be ready before starting frontend
+echo "Waiting for API on port 3000..."
+for i in $(seq 1 60); do
+  if curl -s http://localhost:3000/api/health > /dev/null 2>&1; then
+    echo "API is ready!"
+    break
+  fi
+  sleep 1
+done
+
 # Start POS React dev server
 cd "$PROJECT_ROOT" && pnpm --filter pos-react dev &
 POS_PID=$!
