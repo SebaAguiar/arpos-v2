@@ -1,5 +1,6 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { PrismaModule } from './data-access/prisma/prisma.module';
 import { TenantModule } from './core/tenant/tenant.module';
 import { AuthModule } from './features/auth/auth.module';
@@ -9,6 +10,7 @@ import { ProductsModule } from './features/products/products.module';
 import { SalesModule } from './features/sales/sales.module';
 import { CashRegisterModule } from './features/cash-register/cash-register.module';
 import { LocalTenantMiddleware } from './core/tenant/local-tenant.middleware';
+import { JwtAuthGuard } from './features/auth/guards/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -21,6 +23,9 @@ import { LocalTenantMiddleware } from './core/tenant/local-tenant.middleware';
     ContactsModule,
     ProductsModule,
     SalesModule,
+  ],
+  providers: [
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
   ],
 })
 export class AppModule implements NestModule {

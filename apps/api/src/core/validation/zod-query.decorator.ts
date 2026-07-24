@@ -5,14 +5,14 @@ import {
 } from '@nestjs/common';
 import { ZodType } from 'zod';
 
-export function ZodBody(schema: ZodType) {
+export function ZodQuery(schema: ZodType) {
   return createParamDecorator((_data: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest();
-    const result = schema.safeParse(request.body);
+    const result = schema.safeParse(request.query);
 
     if (!result.success) {
       throw new BadRequestException({
-        message: 'Validation failed',
+        message: 'Query validation failed',
         errors: result.error.flatten().fieldErrors,
       });
     }
