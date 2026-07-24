@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { PrismaService } from '../../data-access/prisma/prisma.service';
+import { AuthRepository } from './auth.repository';
 
 export interface UserPayload {
   id: string;
@@ -14,14 +14,12 @@ export interface UserPayload {
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly authRepo: AuthRepository,
     private readonly jwtService: JwtService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<UserPayload | null> {
-    const user = await this.prisma.user.findFirst({
-      where: { email, is_active: true },
-    });
+    const user = await this.authRepo.findActiveByEmail(email);
 
     if (!user) {
       return null;
@@ -55,10 +53,7 @@ export class AuthService {
   }
 
   async getProfile(userId: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { id: true, email: true, name: true, role: true, companyId: true },
-    });
+    const user = await this.authRepo.findById(userId);
 
     if (!user) {
       throw new UnauthorizedException('User not found');
