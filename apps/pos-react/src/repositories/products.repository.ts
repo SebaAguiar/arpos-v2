@@ -59,7 +59,6 @@ export const ProductsRepository = {
     stock_quantity?: number;
     sku?: string;
     category_id?: string;
-    storeId: string;
   }): Promise<Product> {
     const created = await ProductsService.create(input);
     return mapProduct({ ...created, inventory: [] });

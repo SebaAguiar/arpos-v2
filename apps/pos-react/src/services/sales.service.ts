@@ -41,6 +41,12 @@ export interface ApiSaleStats {
   averageTicket: number;
 }
 
+export interface ApiPaymentMethodBreakdown {
+  payment_method: string;
+  total_cents: number;
+  count: number;
+}
+
 export const SalesService = {
   async list(filters?: {
     from?: number;
@@ -64,6 +70,17 @@ export const SalesService = {
     if (filters?.to) params.set("to", String(filters.to));
     const query = params.toString();
     return apiClient.get<ApiSaleStats>(`/sales/stats${query ? `?${query}` : ""}`);
+  },
+
+  async getByPaymentMethod(filters?: {
+    from?: number;
+    to?: number;
+  }): Promise<ApiPaymentMethodBreakdown[]> {
+    const params = new URLSearchParams();
+    if (filters?.from) params.set("from", String(filters.from));
+    if (filters?.to) params.set("to", String(filters.to));
+    const query = params.toString();
+    return apiClient.get<ApiPaymentMethodBreakdown[]>(`/sales/by-payment-method${query ? `?${query}` : ""}`);
   },
 
   async get(id: string): Promise<ApiSale> {

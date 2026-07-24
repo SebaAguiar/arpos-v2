@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Text, Badge, Tabs, Select } from "@radix-ui/themes";
 import { Cross1Icon, BarChartIcon } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
+import { SalesRepository } from "@/repositories/sales.repository";
+import type { ApiSaleStats, ApiPaymentMethodBreakdown } from "@/services/sales.service";
 
 type Period = "today" | "7d" | "30d" | "90d";
 
@@ -12,35 +14,32 @@ const PERIOD_LABELS: Record<Period, string> = {
   "90d": "Últimos 90 días",
 };
 
-const mockHourlySales = [
-  { hour: "09", amount: 2500 },
-  { hour: "10", amount: 5800 },
-  { hour: "11", amount: 8200 },
-  { hour: "12", amount: 12000 },
-  { hour: "13", amount: 7500 },
-  { hour: "14", amount: 4200 },
-  { hour: "15", amount: 6800 },
-  { hour: "16", amount: 9100 },
-  { hour: "17", amount: 11300 },
-  { hour: "18", amount: 8700 },
-  { hour: "19", amount: 5400 },
-  { hour: "20", amount: 3200 },
-];
+function getPeriodTimestamps(period: Period): { from?: number; to?: number } {
+  const now = Math.floor(Date.now() / 1000);
+  switch (period) {
+    case "today": {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      return { from: Math.floor(todayStart.getTime() / 1000), to: now };
+    }
+    case "7d":
+      return { from: now - 7 * 86400, to: now };
+    case "30d":
+      return { from: now - 30 * 86400, to: now };
+    case "90d":
+      return { from: now - 90 * 86400, to: now };
+  }
+}
 
-const mockTopProducts = [
-  { name: "Remera Básica", quantity: 45, revenue: 112500 },
-  { name: "Jeans Clásico", quantity: 22, revenue: 195800 },
-  { name: "Zapatillas Run", quantity: 12, revenue: 180000 },
-  { name: "Gorro Lana", quantity: 38, revenue: 68400 },
-  { name: "Campera Slim", quantity: 8, revenue: 176000 },
-];
-
-const mockPayments = [
-  { method: "Efectivo", percentage: 45, color: "#30a46c" },
-  { method: "Débito", percentage: 28, color: "#3b82f6" },
-  { method: "Crédito", percentage: 18, color: "#8b5cf6" },
-  { method: "QR", percentage: 9, color: "#f59e0b" },
-];
+const METHOD_COLORS: Record<string, string> = {
+  CASH: "#30a46c",
+  DEBIT: "#3b82f6",
+  CREDIT: "#8b5cf6",
+  QR: "#f59e0b",
+  WALLET: "#ec4899",
+  TRANSFER: "#06b6d4",
+  POINTS: "#64748b",
+};
 
 function BarChart({ data, maxVal }: { data: { label: string; value: number }[]; maxVal: number }) {
   return (
@@ -89,11 +88,66 @@ function HorizontalBar({ label, percentage, color }: { label: string; percentage
 export function DashboardDialog() {
   const closeDashboard = useDialogStore((s) => s.closeDashboard);
   const [period, setPeriod] = useState<Period>("today");
+  const [stats, setStats] = useState<ApiSaleStats | null>(null);
+  const [paymentBreakdown, setPaymentBreakdown] = useState<ApiPaymentMethodBreakdown[]>([]);
+  const [hourlySales, setHourlySales] = useState<{ hour: string; amount: number }[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const totalSales = mockHourlySales.reduce((s, h) => s + h.amount, 0);
-  const maxHourly = Math.max(...mockHourlySales.map((h) => h.amount));
-  const totalProducts = mockTopProducts.reduce((s, p) => s + p.quantity, 0);
-  const avgTicket = totalProducts > 0 ? Math.round(totalSales / Math.max(totalProducts / 2.5, 1)) : 0;
+  const fetchData = useCallback(async (p: Period) => {
+    setLoading(true);
+    try {
+      const { from, to } = getPeriodTimestamps(p);
+      const [statsData, paymentsData, salesData] = await Promise.all([
+        SalesRepository.getStats({ from, to }),
+        SalesRepository.getByPaymentMethod({ from, to }),
+        SalesRepository.getAll({ from, to }),
+      ]);
+
+      setStats(statsData);
+      setPaymentBreakdown(paymentsData);
+
+      const hourlyMap = new Map<string, number>();
+      for (let h = 8; h <= 22; h++) {
+        hourlyMap.set(String(h).padStart(2, "0"), 0);
+      }
+      for (const sale of salesData) {
+        const date = new Date(sale.createdAt * 1000);
+        const hour = String(date.getHours()).padStart(2, "0");
+        if (hourlyMap.has(hour)) {
+          hourlyMap.set(hour, (hourlyMap.get(hour) ?? 0) + sale.total);
+        }
+      }
+      setHourlySales(
+        Array.from(hourlyMap.entries()).map(([hour, amount]) => ({ hour, amount }))
+      );
+    } catch {
+      setStats(null);
+      setPaymentBreakdown([]);
+      setHourlySales([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData(period);
+  }, [period, fetchData]);
+
+  const handlePeriodChange = (value: string) => {
+    setPeriod(value as Period);
+  };
+
+  const totalRevenue = stats?.totalRevenue ?? 0;
+  const totalTransactions = stats?.totalSales ?? 0;
+  const averageTicket = stats?.averageTicket ?? 0;
+  const maxHourly = Math.max(...hourlySales.map((h) => h.amount), 1);
+
+  const totalPaymentCents = paymentBreakdown.reduce((s, p) => s + p.total_cents, 0);
+  const paymentDistribution = paymentBreakdown.map((p) => ({
+    method: p.payment_method,
+    percentage: totalPaymentCents > 0 ? Math.round((p.total_cents / totalPaymentCents) * 100) : 0,
+    color: METHOD_COLORS[p.payment_method] ?? "#64748b",
+  }));
 
   return (
     <div
@@ -119,7 +173,6 @@ export function DashboardDialog() {
           overflow: "hidden",
         }}
       >
-        {/* Header */}
         <div
           style={{
             display: "flex",
@@ -134,7 +187,7 @@ export function DashboardDialog() {
             <Text size="4" weight="bold">Dashboard</Text>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <Select.Root value={period} onValueChange={(v) => setPeriod(v as Period)}>
+            <Select.Root value={period} onValueChange={handlePeriodChange}>
               <Select.Trigger style={{ width: "160px" }} />
               <Select.Content>
                 {Object.entries(PERIOD_LABELS).map(([key, label]) => (
@@ -152,91 +205,70 @@ export function DashboardDialog() {
         </div>
 
         <div style={{ flex: 1, overflow: "auto", padding: "20px" }}>
-          {/* KPI Cards */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px", marginBottom: "20px" }}>
-            <div style={{ padding: "14px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "8px" }}>
-              <Text size="1" color="gray">Ventas</Text>
-              <Text size="5" weight="bold" color="green" style={{ display: "block", marginTop: "4px" }}>
-                ${totalSales.toLocaleString("es-AR")}
-              </Text>
+          {loading ? (
+            <div style={{ textAlign: "center", padding: "40px 0" }}>
+              <Text size="2" color="gray">Cargando datos...</Text>
             </div>
-            <div style={{ padding: "14px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "8px" }}>
-              <Text size="1" color="gray">Transacciones</Text>
-              <Text size="5" weight="bold" style={{ display: "block", marginTop: "4px" }}>
-                {Math.round(totalProducts / 2.5)}
-              </Text>
-            </div>
-            <div style={{ padding: "14px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "8px" }}>
-              <Text size="1" color="gray">Ticket promedio</Text>
-              <Text size="5" weight="bold" color="orange" style={{ display: "block", marginTop: "4px" }}>
-                ${avgTicket.toLocaleString("es-AR")}
-              </Text>
-            </div>
-            <div style={{ padding: "14px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "8px" }}>
-              <Text size="1" color="gray">Productos vendidos</Text>
-              <Text size="5" weight="bold" style={{ display: "block", marginTop: "4px" }}>
-                {totalProducts}
-              </Text>
-            </div>
-          </div>
-
-          <Tabs.Root defaultValue="hourly">
-            <Tabs.List>
-              <Tabs.Trigger value="hourly">Ventas por hora</Tabs.Trigger>
-              <Tabs.Trigger value="products">Top productos</Tabs.Trigger>
-              <Tabs.Trigger value="payments">Medios de pago</Tabs.Trigger>
-            </Tabs.List>
-
-            <Tabs.Content value="hourly" style={{ paddingTop: "16px" }}>
-              <Text size="3" weight="bold" style={{ display: "block", marginBottom: "12px" }}>
-                Ventas por hora — {PERIOD_LABELS[period]}
-              </Text>
-              <BarChart
-                data={mockHourlySales.map((h) => ({ label: h.hour, value: h.amount }))}
-                maxVal={maxHourly}
-              />
-            </Tabs.Content>
-
-            <Tabs.Content value="products" style={{ paddingTop: "16px" }}>
-              <Text size="3" weight="bold" style={{ display: "block", marginBottom: "12px" }}>
-                Productos más vendidos
-              </Text>
-              {mockTopProducts.map((p, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    padding: "8px 10px",
-                    borderBottom: "1px solid var(--border)",
-                  }}
-                >
-                  <Badge color="orange" variant="soft" size="1" style={{ minWidth: "24px", textAlign: "center" }}>
-                    {i + 1}
-                  </Badge>
-                  <div style={{ flex: 1 }}>
-                    <Text size="2" weight="bold">{p.name}</Text>
-                    <Text size="1" color="gray" style={{ display: "block" }}>
-                      {p.quantity} unidades
-                    </Text>
-                  </div>
-                  <Text size="2" weight="bold" color="green">
-                    ${p.revenue.toLocaleString("es-AR")}
+          ) : (
+            <>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px", marginBottom: "20px" }}>
+                <div style={{ padding: "14px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "8px" }}>
+                  <Text size="1" color="gray">Ventas</Text>
+                  <Text size="5" weight="bold" color="green" style={{ display: "block", marginTop: "4px" }}>
+                    ${totalRevenue.toLocaleString("es-AR")}
                   </Text>
                 </div>
-              ))}
-            </Tabs.Content>
+                <div style={{ padding: "14px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "8px" }}>
+                  <Text size="1" color="gray">Transacciones</Text>
+                  <Text size="5" weight="bold" style={{ display: "block", marginTop: "4px" }}>
+                    {totalTransactions}
+                  </Text>
+                </div>
+                <div style={{ padding: "14px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "8px" }}>
+                  <Text size="1" color="gray">Ticket promedio</Text>
+                  <Text size="5" weight="bold" color="orange" style={{ display: "block", marginTop: "4px" }}>
+                    ${averageTicket.toLocaleString("es-AR")}
+                  </Text>
+                </div>
+                <div style={{ padding: "14px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "8px" }}>
+                  <Text size="1" color="gray">Métodos de pago</Text>
+                  <Text size="5" weight="bold" style={{ display: "block", marginTop: "4px" }}>
+                    {paymentBreakdown.length}
+                  </Text>
+                </div>
+              </div>
 
-            <Tabs.Content value="payments" style={{ paddingTop: "16px" }}>
-              <Text size="3" weight="bold" style={{ display: "block", marginBottom: "12px" }}>
-                Distribución por medio de pago
-              </Text>
-              {mockPayments.map((p, i) => (
-                <HorizontalBar key={i} label={p.method} percentage={p.percentage} color={p.color} />
-              ))}
-            </Tabs.Content>
-          </Tabs.Root>
+              <Tabs.Root defaultValue="hourly">
+                <Tabs.List>
+                  <Tabs.Trigger value="hourly">Ventas por hora</Tabs.Trigger>
+                  <Tabs.Trigger value="payments">Medios de pago</Tabs.Trigger>
+                </Tabs.List>
+
+                <Tabs.Content value="hourly" style={{ paddingTop: "16px" }}>
+                  <Text size="3" weight="bold" style={{ display: "block", marginBottom: "12px" }}>
+                    Ventas por hora — {PERIOD_LABELS[period]}
+                  </Text>
+                  <BarChart
+                    data={hourlySales.map((h) => ({ label: h.hour, value: h.amount }))}
+                    maxVal={maxHourly}
+                  />
+                </Tabs.Content>
+
+                <Tabs.Content value="payments" style={{ paddingTop: "16px" }}>
+                  <Text size="3" weight="bold" style={{ display: "block", marginBottom: "12px" }}>
+                    Distribución por medio de pago
+                  </Text>
+                  {paymentDistribution.length === 0 ? (
+                    <Text size="2" color="gray">No hay datos de pagos</Text>
+                  ) : (
+                    paymentDistribution.map((p, i) => (
+                      <HorizontalBar key={i} label={p.method} percentage={p.percentage} color={p.color} />
+                    ))
+                  )}
+                </Tabs.Content>
+              </Tabs.Root>
+            </>
+          )}
         </div>
       </div>
     </div>

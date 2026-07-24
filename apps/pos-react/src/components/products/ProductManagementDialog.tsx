@@ -16,6 +16,7 @@ import {
 } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
 import { useProductsStore } from "@/stores/products.store";
+import { ProductsRepository } from "@/repositories/products.repository";
 import type { Product } from "@/lib/types";
 
 interface VariantForm {
@@ -70,12 +71,13 @@ const emptyForm = (): ProductForm => ({
 export function ProductManagementDialog() {
   const closeProductManagement = useDialogStore((s) => s.closeProductManagement);
   const products = useProductsStore((s) => s.products);
-  const setProducts = useProductsStore((s) => s.setProducts);
+  const fetchProducts = useProductsStore((s) => s.fetchProducts);
 
   const [form, setForm] = useState<ProductForm>(emptyForm());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("list");
+  const [saving, setSaving] = useState(false);
 
   const filtered = products.filter(
     (p) =>
@@ -97,77 +99,41 @@ export function ProductManagementDialog() {
     return (((p - c) / p) * 100).toFixed(1);
   };
 
-  const handleSave = () => {
-    if (!form.name.trim()) return;
+  const handleSave = async () => {
+    if (!form.name.trim() || saving) return;
+    setSaving(true);
+    try {
+      const priceCents = Math.round((parseFloat(form.price) || 0) * 100);
+      const costCents = form.cost ? Math.round(parseFloat(form.cost) * 100) : undefined;
 
-    if (editingId) {
-      setProducts(
-        products.map((p) =>
-          p.id === editingId
-            ? {
-                ...p,
-                name: form.name,
-                description: form.description,
-                category: form.category,
-                internalCode: form.internalCode,
-                price: parseFloat(form.price) || 0,
-                cost: parseFloat(form.cost) || 0,
-                margin: parseFloat(form.margin) || 0,
-                active: form.active,
-                variants: form.variants.map((v) => ({
-                  id: v.id || `var-${Date.now()}-${Math.random()}`,
-                  size: v.size || undefined,
-                  color: v.color || undefined,
-                  barcode: v.barcode || undefined,
-                  sku: v.sku || undefined,
-                  price: v.price ? parseFloat(v.price) : undefined,
-                  costPrice: v.cost ? parseFloat(v.cost) : undefined,
-                  active: v.active,
-                  stockItems: [
-                    {
-                      quantity: parseInt(v.initialStock) || 0,
-                      storeId: "default",
-                    },
-                  ],
-                })),
-              }
-            : p
-        )
-      );
-    } else {
-      const newProduct: Product = {
-        id: `prod-${Date.now()}`,
-        name: form.name,
-        description: form.description,
-        category: form.category,
-        internalCode: form.internalCode,
-        price: parseFloat(form.price) || 0,
-        cost: parseFloat(form.cost) || 0,
-        margin: parseFloat(form.margin) || 0,
-        active: form.active,
-        variants: form.variants.map((v) => ({
-          id: `var-${Date.now()}-${Math.random()}`,
-          size: v.size || undefined,
-          color: v.color || undefined,
-          barcode: v.barcode || undefined,
-          sku: v.sku || undefined,
-          price: v.price ? parseFloat(v.price) : undefined,
-          costPrice: v.cost ? parseFloat(v.cost) : undefined,
-          active: v.active,
-          stockItems: [
-            {
-              quantity: parseInt(v.initialStock) || 0,
-              storeId: "default",
-            },
-          ],
-        })),
-      };
-      setProducts([...products, newProduct]);
+      if (editingId) {
+        await ProductsRepository.update(editingId, {
+          name: form.name.trim(),
+          description: form.description || undefined,
+          price_cents: priceCents,
+          cost_cents: costCents,
+          category_id: form.category || undefined,
+          is_active: form.active,
+        });
+      } else {
+        const code = form.internalCode.trim() || form.name.trim().slice(0, 10).toLowerCase().replace(/\s+/g, "-");
+        await ProductsRepository.create({
+          code,
+          name: form.name.trim(),
+          description: form.description || undefined,
+          price_cents: priceCents,
+          cost_cents: costCents,
+          category_id: form.category || undefined,
+        });
+      }
+
+      await fetchProducts();
+      setForm(emptyForm());
+      setEditingId(null);
+      setActiveTab("list");
+    } finally {
+      setSaving(false);
     }
-
-    setForm(emptyForm());
-    setEditingId(null);
-    setActiveTab("list");
   };
 
   const handleEdit = (product: Product) => {
@@ -197,21 +163,22 @@ export function ProductManagementDialog() {
     setActiveTab("form");
   };
 
-  const handleDelete = (id: string) => {
-    setProducts(products.filter((p) => p.id !== id));
+  const handleDelete = async (id: string) => {
+    await ProductsRepository.remove(id);
+    await fetchProducts();
   };
 
-  const handleDuplicate = (product: Product) => {
-    const dup: Product = {
-      ...product,
-      id: `prod-${Date.now()}`,
+  const handleDuplicate = async (product: Product) => {
+    const code = `${product.internalCode || product.name.slice(0, 10).toLowerCase().replace(/\s+/g, "-")}-copy`;
+    await ProductsRepository.create({
+      code,
       name: `${product.name} (copia)`,
-      variants: product.variants.map((v) => ({
-        ...v,
-        id: `var-${Date.now()}-${Math.random()}`,
-      })),
-    };
-    setProducts([...products, dup]);
+      description: product.description,
+      price_cents: Math.round(product.price * 100),
+      cost_cents: product.cost ? Math.round(product.cost * 100) : undefined,
+      category_id: product.category,
+    });
+    await fetchProducts();
   };
 
   return (
@@ -238,7 +205,6 @@ export function ProductManagementDialog() {
           overflow: "hidden",
         }}
       >
-        {/* Header */}
         <div
           style={{
             display: "flex",
@@ -356,7 +322,6 @@ export function ProductManagementDialog() {
 
             <Tabs.Content value="form" style={{ padding: "16px 20px" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                {/* Basic info */}
                 <Text size="2" weight="bold" color="gray">Información básica</Text>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
                   <TextField.Root
@@ -389,7 +354,6 @@ export function ProductManagementDialog() {
 
                 <Separator style={{ backgroundColor: "var(--border)" }} />
 
-                {/* Pricing */}
                 <Text size="2" weight="bold" color="gray">Precio y costo</Text>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
                   <div>
@@ -435,7 +399,6 @@ export function ProductManagementDialog() {
 
                 <Separator style={{ backgroundColor: "var(--border)" }} />
 
-                {/* Variants */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <Text size="2" weight="bold" color="gray">Variantes</Text>
                   <button
@@ -534,7 +497,6 @@ export function ProductManagementDialog() {
                   </div>
                 ))}
 
-                {/* Save */}
                 <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", marginTop: "8px" }}>
                   <button
                     onClick={() => { setForm(emptyForm()); setEditingId(null); setActiveTab("list"); }}
@@ -552,19 +514,19 @@ export function ProductManagementDialog() {
                   </button>
                   <button
                     onClick={handleSave}
-                    disabled={!form.name.trim()}
+                    disabled={!form.name.trim() || saving}
                     style={{
                       padding: "8px 20px",
-                      backgroundColor: form.name.trim() ? "var(--accent)" : "var(--bg-surface)",
-                      color: form.name.trim() ? "#fff" : "var(--text-secondary)",
+                      backgroundColor: form.name.trim() && !saving ? "var(--accent)" : "var(--bg-surface)",
+                      color: form.name.trim() && !saving ? "#fff" : "var(--text-secondary)",
                       border: "none",
                       borderRadius: "6px",
-                      cursor: form.name.trim() ? "pointer" : "not-allowed",
+                      cursor: form.name.trim() && !saving ? "pointer" : "not-allowed",
                       fontSize: "13px",
                       fontWeight: 600,
                     }}
                   >
-                    {editingId ? "Guardar cambios" : "Crear producto"}
+                    {saving ? "Guardando..." : editingId ? "Guardar cambios" : "Crear producto"}
                   </button>
                 </div>
               </div>

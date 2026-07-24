@@ -52,7 +52,6 @@ export const ProductsService = {
     stock_quantity?: number;
     sku?: string;
     category_id?: string;
-    storeId: string;
   }): Promise<ApiProduct> {
     return apiClient.post<ApiProduct>("/products", input);
   },
