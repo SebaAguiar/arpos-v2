@@ -5,10 +5,12 @@ import {
   Patch,
   Delete,
   Param,
-  Body,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
+import { ZodBody } from '../../core/validation/zod-body.decorator';
+import { CreateProductSchema, CreateProductInput } from './dto/create-product.schema';
+import { UpdateProductSchema, UpdateProductInput } from './dto/update-product.schema';
 
 @Controller('products')
 export class ProductsController {
@@ -19,9 +21,8 @@ export class ProductsController {
 
   @Get()
   findAll() {
-    const companyId = this.tenantContext.getCompanyId();
     const storeId = this.tenantContext.getStoreId();
-    return this.productsService.findAll(companyId, storeId || undefined);
+    return this.productsService.findAll(storeId || undefined);
   }
 
   @Get(':id')
@@ -30,39 +31,15 @@ export class ProductsController {
   }
 
   @Post()
-  create(
-    @Body()
-    body: {
-      code: string;
-      name: string;
-      description?: string;
-      price_cents: number;
-      cost_cents?: number;
-      stock_quantity?: number;
-      sku?: string;
-      category_id?: string;
-      storeId: string;
-    },
-  ) {
+  create(@ZodBody(CreateProductSchema) input: CreateProductInput) {
     const companyId = this.tenantContext.getCompanyId();
-    return this.productsService.create(body, companyId);
+    const storeId = this.tenantContext.getStoreId();
+    return this.productsService.create(input, companyId, storeId);
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body()
-    body: Partial<{
-      name: string;
-      description: string;
-      price_cents: number;
-      cost_cents: number;
-      sku: string;
-      category_id: string;
-      is_active: boolean;
-    }>,
-  ) {
-    return this.productsService.update(id, body);
+  update(@Param('id') id: string, @ZodBody(UpdateProductSchema) input: UpdateProductInput) {
+    return this.productsService.update(id, input);
   }
 
   @Delete(':id')

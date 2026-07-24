@@ -1,15 +1,9 @@
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Param } from '@nestjs/common';
 import { CashRegisterService } from './cash-register.service';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
-
-class OpenCashRegisterDto {
-  name!: string;
-  opening_amount!: number;
-}
-
-class CloseCashRegisterDto {
-  closing_amount!: number;
-}
+import { ZodBody } from '../../core/validation/zod-body.decorator';
+import { OpenCashRegisterSchema, OpenCashRegisterInput } from './dto/open-cash-register.schema';
+import { CloseCashRegisterSchema, CloseCashRegisterInput } from './dto/close-cash-register.schema';
 
 @Controller('cash-registers')
 export class CashRegisterController {
@@ -38,14 +32,14 @@ export class CashRegisterController {
   }
 
   @Post()
-  open(@Body() dto: OpenCashRegisterDto) {
+  open(@ZodBody(OpenCashRegisterSchema) input: OpenCashRegisterInput) {
     const companyId = this.tenantContext.getCompanyId();
     const storeId = this.tenantContext.getStoreId();
-    return this.cashRegisterService.open(dto, companyId, storeId);
+    return this.cashRegisterService.open(input, companyId, storeId);
   }
 
   @Post(':id/close')
-  close(@Param('id') id: string, @Body() dto: CloseCashRegisterDto) {
-    return this.cashRegisterService.close(id, dto.closing_amount);
+  close(@Param('id') id: string, @ZodBody(CloseCashRegisterSchema) input: CloseCashRegisterInput) {
+    return this.cashRegisterService.close(id, input.closing_amount);
   }
 }

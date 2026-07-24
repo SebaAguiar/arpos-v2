@@ -4,12 +4,14 @@ import {
   Post,
   Patch,
   Delete,
-  Body,
   Param,
   Query,
 } from '@nestjs/common';
 import { ContactsService } from './contacts.service';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
+import { ZodBody } from '../../core/validation/zod-body.decorator';
+import { CreateContactSchema, CreateContactInput } from './dto/create-contact.schema';
+import { UpdateContactSchema, UpdateContactInput } from './dto/update-contact.schema';
 
 @Controller('contacts')
 export class ContactsController {
@@ -20,8 +22,7 @@ export class ContactsController {
 
   @Get()
   findAll(@Query('type') type?: string) {
-    const companyId = this.tenantContext.getCompanyId();
-    return this.contactsService.findAll(companyId, type);
+    return this.contactsService.findAll(type);
   }
 
   @Get(':id')
@@ -30,38 +31,14 @@ export class ContactsController {
   }
 
   @Post()
-  create(
-    @Body()
-    body: {
-      type?: string;
-      name: string;
-      email?: string;
-      phone?: string;
-      address?: string;
-      tax_id?: string;
-      notes?: string;
-    },
-  ) {
+  create(@ZodBody(CreateContactSchema) input: CreateContactInput) {
     const companyId = this.tenantContext.getCompanyId();
-    return this.contactsService.create(body, companyId);
+    return this.contactsService.create(input, companyId);
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body()
-    body: Partial<{
-      type: string;
-      name: string;
-      email: string;
-      phone: string;
-      address: string;
-      tax_id: string;
-      notes: string;
-      is_active: boolean;
-    }>,
-  ) {
-    return this.contactsService.update(id, body);
+  update(@Param('id') id: string, @ZodBody(UpdateContactSchema) input: UpdateContactInput) {
+    return this.contactsService.update(id, input);
   }
 
   @Delete(':id')

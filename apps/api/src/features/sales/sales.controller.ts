@@ -2,13 +2,14 @@ import {
   Controller,
   Get,
   Post,
-  Body,
   Param,
   Query,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { SalesService, CreateSaleInput, SaleFilters } from './sales.service';
+import { SalesService } from './sales.service';
+import { ZodBody } from '../../core/validation/zod-body.decorator';
+import { CreateSaleSchema, CreateSaleInput } from './dto/create-sale.schema';
 
 @Controller('sales')
 export class SalesController {
@@ -20,21 +21,11 @@ export class SalesController {
     @Query('to') to?: string,
     @Query('status') status?: string,
   ) {
-    const filters: SaleFilters = {};
-
-    if (from) {
-      filters.from = parseInt(from, 10);
-    }
-    if (to) {
-      filters.to = parseInt(to, 10);
-    }
-    if (status) {
-      filters.status = status;
-    }
-
-    return this.salesService.findAll(
-      Object.keys(filters).length > 0 ? filters : undefined,
-    );
+    return this.salesService.findAll({
+      from: from ? parseInt(from, 10) : undefined,
+      to: to ? parseInt(to, 10) : undefined,
+      status,
+    });
   }
 
   @Get('stats')
@@ -42,10 +33,21 @@ export class SalesController {
     @Query('from') from?: string,
     @Query('to') to?: string,
   ) {
-    const fromNum = from ? parseInt(from, 10) : undefined;
-    const toNum = to ? parseInt(to, 10) : undefined;
+    return this.salesService.getStats(
+      from ? parseInt(from, 10) : undefined,
+      to ? parseInt(to, 10) : undefined,
+    );
+  }
 
-    return this.salesService.getStats(fromNum, toNum);
+  @Get('by-payment-method')
+  async getByPaymentMethod(
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ) {
+    return this.salesService.getSalesByPaymentMethod(
+      from ? parseInt(from, 10) : undefined,
+      to ? parseInt(to, 10) : undefined,
+    );
   }
 
   @Get(':id')
@@ -55,7 +57,7 @@ export class SalesController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() input: CreateSaleInput) {
+  async create(@ZodBody(CreateSaleSchema) input: CreateSaleInput) {
     return this.salesService.create(input);
   }
 }

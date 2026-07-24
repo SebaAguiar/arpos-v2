@@ -1,13 +1,10 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post } from '@nestjs/common';
 import { PrismaService } from '../../data-access/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
-
-export class InitCompanyDto {
-  companyName!: string;
-  taxId!: string;
-  adminEmail!: string;
-  adminPassword!: string;
-}
+import { Public } from '../auth/guards/public.decorator';
+import { ZodBody } from '../../core/validation/zod-body.decorator';
+import { InitCompanySchema, InitCompanyInput } from './dto/init-company.schema';
+import * as bcrypt from 'bcryptjs';
 
 @Controller('setup')
 export class SetupController {
@@ -16,22 +13,23 @@ export class SetupController {
     private readonly configService: ConfigService,
   ) {}
 
+  @Public()
   @Get('status')
   async getSetupStatus() {
     const companyCount = await this.prisma.company.count();
-    return {
-      isInitialized: companyCount > 0,
-    };
+    return { isInitialized: companyCount > 0 };
   }
 
+  @Public()
   @Post('init-company')
-  async initCompany(@Body() dto: InitCompanyDto) {
+  async initCompany(@ZodBody(InitCompanySchema) dto: InitCompanyInput) {
     const existingCompany = await this.prisma.company.count();
     if (existingCompany > 0) {
-      throw new Error('Company already initialized');
+      return { message: 'Company already initialized', statusCode: 409 };
     }
 
     const now = Math.floor(Date.now() / 1000);
+    const hashedPassword = await bcrypt.hash(dto.adminPassword, 10);
 
     const company = await this.prisma.company.create({
       data: {
@@ -55,7 +53,7 @@ export class SetupController {
       data: {
         companyId: company.id,
         email: dto.adminEmail,
-        password: dto.adminPassword,
+        password: hashedPassword,
         name: 'Administrador',
         role: 'admin',
         created_at: now,
