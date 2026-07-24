@@ -39,17 +39,19 @@ export function SummaryPanel({ onCharge, onCustomerClick }: SummaryPanelProps) {
       {/* Customer */}
       <button
         onClick={onCustomerClick}
+        aria-label="Seleccionar o cambiar cliente"
         style={{
           display: "flex",
           alignItems: "center",
           gap: "8px",
           padding: "8px 10px",
-          border: "1px solid var(--border)",
+          border: customerName ? "1px solid var(--color-info)" : "1px solid var(--border)",
           borderRadius: "6px",
-          backgroundColor: customerName ? "var(--bg-surface-hover)" : "transparent",
-          color: customerName ? "var(--text-primary)" : "var(--text-secondary)",
+          backgroundColor: customerName ? "var(--color-info-subtle)" : "transparent",
+          color: customerName ? "var(--color-info)" : "var(--text-secondary)",
           cursor: "pointer",
           fontSize: "13px",
+          fontWeight: customerName ? 500 : 400,
           width: "100%",
           textAlign: "left",
         }}
@@ -105,10 +107,10 @@ export function SummaryPanel({ onCharge, onCustomerClick }: SummaryPanelProps) {
 
       {discountAmount > 0 && (
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <Text size="2" color="red">
+          <Text size="2" style={{ color: "var(--color-danger)" }}>
             Descuento
           </Text>
-          <Text size="2" color="red">
+          <Text size="2" style={{ color: "var(--color-danger)" }}>
             -${discountAmount.toLocaleString("es-AR")}
           </Text>
         </div>

@@ -14,6 +14,8 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   return (
     <button
       onClick={() => onAddToCart(product)}
+      className="product-card"
+      aria-label={`Agregar ${product.name} al carrito`}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -26,12 +28,6 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         gap: "6px",
         transition: "border-color 150ms ease",
       }}
-      onMouseEnter={(e) =>
-        (e.currentTarget.style.borderColor = "var(--accent)")
-      }
-      onMouseLeave={(e) =>
-        (e.currentTarget.style.borderColor = "var(--border)")
-      }
     >
       <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-primary)" }}>
         {product.name}
@@ -42,7 +38,12 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       <span
         style={{
           fontSize: "11px",
-          color: totalStock > 5 ? "#30a46c" : totalStock > 0 ? "#f5a623" : "var(--accent)",
+          fontWeight: 500,
+          padding: "2px 6px",
+          borderRadius: "4px",
+          width: "fit-content",
+          color: totalStock > 5 ? "var(--color-success)" : totalStock > 0 ? "var(--color-warning)" : "var(--color-danger)",
+          backgroundColor: totalStock > 5 ? "var(--color-success-subtle)" : totalStock > 0 ? "var(--color-warning-subtle)" : "var(--color-danger-subtle)",
         }}
       >
         Stock: {totalStock}

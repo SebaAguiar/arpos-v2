@@ -133,6 +133,7 @@ export function POSPage() {
                 <Tooltip key={label} content={label}>
                   <button
                     onClick={action}
+                    aria-label={`Abrir ${label}`}
                     style={{
                       width: "36px",
                       height: "36px",
@@ -152,6 +153,7 @@ export function POSPage() {
               ) : (
                 <Tooltip key={label} content={label}>
                   <span
+                    aria-label={label}
                     style={{
                       width: "36px",
                       height: "36px",
@@ -159,8 +161,9 @@ export function POSPage() {
                       alignItems: "center",
                       justifyContent: "center",
                       borderRadius: "6px",
-                      backgroundColor: "var(--bg-surface-hover)",
-                      color: "var(--text-primary)",
+                      backgroundColor: "var(--accent-subtle)",
+                      color: "var(--accent)",
+                      border: "1px solid var(--accent)",
                     }}
                   >
                     <Icon width={18} height={18} />
@@ -185,6 +188,7 @@ export function POSPage() {
         >
           <TextField.Root
             placeholder="Escanear código o buscar producto..."
+            aria-label="Buscar productos o escanear código de barras"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ flex: 1 }}
@@ -209,8 +213,8 @@ export function POSPage() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
-              gap: "8px",
+              gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+              gap: "10px",
             }}
           >
             {displayProducts.map((product) => (
@@ -227,7 +231,7 @@ export function POSPage() {
       {/* Cart + Summary */}
       <div
         style={{
-          width: "340px",
+          width: "360px",
           backgroundColor: "var(--bg-surface)",
           borderLeft: "1px solid var(--border)",
           display: "flex",
@@ -257,6 +261,7 @@ export function POSPage() {
           </div>
           <button
             onClick={openCustomerSelection}
+            aria-label="Seleccionar cliente para la venta"
             style={{
               display: "flex",
               alignItems: "center",
@@ -284,6 +289,8 @@ export function POSPage() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                padding: "24px",
+                textAlign: "center",
               }}
             >
               <Text size="2" color="gray">
@@ -302,10 +309,8 @@ export function POSPage() {
           )}
         </div>
 
-        {/* Summary */}
-        {items.length > 0 && (
-          <SummaryPanel onCharge={openPayment} onCustomerClick={openCustomerSelection} />
-        )}
+        {/* Summary (Stably anchored) */}
+        <SummaryPanel onCharge={openPayment} onCustomerClick={openCustomerSelection} />
       </div>
 
       {/* Dialogs */}

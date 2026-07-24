@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Text, Badge, Tabs, Select } from "@radix-ui/themes";
+import { Text, Tabs, Select } from "@radix-ui/themes";
 import { Cross1Icon, BarChartIcon } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
 import { SalesRepository } from "@/repositories/sales.repository";

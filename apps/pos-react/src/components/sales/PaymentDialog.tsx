@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Text, TextField, Badge } from "@radix-ui/themes";
 import {
   Cross1Icon,
@@ -9,12 +9,14 @@ import {
   FileTextIcon,
   ReaderIcon,
   TokensIcon,
+  ExclamationTriangleIcon,
 } from "@radix-ui/react-icons";
 import { useCartStore } from "@/stores/cart.store";
 import { useDialogStore } from "@/stores/dialog.store";
 import { useCashRegisterStore } from "@/stores/cash-register.store";
 import { useSettingsStore } from "@/stores/settings.store";
 import { SalesRepository } from "@/repositories/sales.repository";
+import { ApiError } from "@/services/api-client";
 import type { PaymentMethod, PaymentEntry } from "@/lib/types";
 
 const METHOD_ICONS: Record<PaymentMethod, typeof Cross1Icon> = {
@@ -55,6 +57,7 @@ export function PaymentDialog({ creditSurcharge }: PaymentDialogProps) {
   const [currentAmount, setCurrentAmount] = useState("");
   const [email, setEmail] = useState("");
   const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const taxAmount = subtotal * taxRate;
@@ -89,9 +92,10 @@ export function PaymentDialog({ creditSurcharge }: PaymentDialogProps) {
     setPayments((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleConfirm = async () => {
+  const handleConfirm = useCallback(async () => {
     if (totalPaid < total || processing) return;
     setProcessing(true);
+    setError(null);
     try {
       const saleItems = items.map((item) => ({
         productId: item.productId,
@@ -115,12 +119,16 @@ export function PaymentDialog({ creditSurcharge }: PaymentDialogProps) {
       await fetchCurrentShift();
       clearCart();
       closePayment();
-    } catch {
-      // TODO: show error feedback
+    } catch (e) {
+      const message =
+        e instanceof ApiError
+          ? e.message
+          : "Error al procesar la venta. Intentá de nuevo.";
+      setError(message);
     } finally {
       setProcessing(false);
     }
-  };
+  }, [totalPaid, total, processing, items, payments, discountAmount, taxAmount, customerId, note, currentShift, fetchCurrentShift, clearCart, closePayment]);
 
   return (
     <div
@@ -392,8 +400,42 @@ export function PaymentDialog({ creditSurcharge }: PaymentDialogProps) {
             </div>
           )}
 
+          {error && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "10px 12px",
+                backgroundColor: "#e5484d15",
+                border: "1px solid #e5484d50",
+                borderRadius: "6px",
+              }}
+            >
+              <ExclamationTriangleIcon width={16} height={16} color="#e5484d" />
+              <Text size="2" color="red" style={{ flex: 1 }}>
+                {error}
+              </Text>
+              <button
+                onClick={() => setError(null)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#e5484d",
+                  cursor: "pointer",
+                  padding: "2px",
+                }}
+              >
+                <Cross1Icon width={12} height={12} />
+              </button>
+            </div>
+          )}
+
           <button
-            onClick={handleConfirm}
+            onClick={() => {
+              setError(null);
+              handleConfirm();
+            }}
             disabled={totalPaid < total || processing}
             style={{
               width: "100%",

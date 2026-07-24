@@ -42,43 +42,45 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
         </div>
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
         <button
           onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
+          aria-label={`Disminuir cantidad de ${item.name}`}
           style={{
-            width: "24px",
-            height: "24px",
+            width: "32px",
+            height: "32px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             border: "1px solid var(--border)",
-            borderRadius: "4px",
+            borderRadius: "6px",
             backgroundColor: "transparent",
             color: "var(--text-secondary)",
             cursor: "pointer",
           }}
         >
-          <MinusIcon width={12} height={12} />
+          <MinusIcon width={14} height={14} />
         </button>
-        <span style={{ fontSize: "13px", color: "var(--text-primary)", minWidth: "20px", textAlign: "center" }}>
+        <span style={{ fontSize: "13px", color: "var(--text-primary)", minWidth: "24px", textAlign: "center", fontWeight: 500 }}>
           {item.quantity}
         </span>
         <button
           onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+          aria-label={`Aumentar cantidad de ${item.name}`}
           style={{
-            width: "24px",
-            height: "24px",
+            width: "32px",
+            height: "32px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             border: "1px solid var(--border)",
-            borderRadius: "4px",
+            borderRadius: "6px",
             backgroundColor: "transparent",
             color: "var(--text-secondary)",
             cursor: "pointer",
           }}
         >
-          <PlusIcon width={12} height={12} />
+          <PlusIcon width={14} height={14} />
         </button>
       </div>
 
@@ -88,9 +90,10 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
 
       <button
         onClick={() => onRemove(item.id)}
+        aria-label={`Eliminar ${item.name} del carrito`}
         style={{
-          width: "24px",
-          height: "24px",
+          width: "32px",
+          height: "32px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -98,10 +101,10 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
           backgroundColor: "transparent",
           color: "var(--accent)",
           cursor: "pointer",
-          borderRadius: "4px",
+          borderRadius: "6px",
         }}
       >
-        <Cross1Icon width={12} height={12} />
+        <Cross1Icon width={14} height={14} />
       </button>
     </div>
   );

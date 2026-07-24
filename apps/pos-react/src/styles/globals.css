@@ -14,6 +14,15 @@
   --text-muted: #666;
   --accent: #e54d2e;
   --accent-hover: #d4431f;
+  --accent-subtle: rgba(229, 77, 46, 0.15);
+  --color-success: #30a46c;
+  --color-success-subtle: rgba(48, 164, 108, 0.15);
+  --color-warning: #f5a623;
+  --color-warning-subtle: rgba(245, 166, 35, 0.15);
+  --color-danger: #e5484d;
+  --color-danger-subtle: rgba(229, 72, 77, 0.15);
+  --color-info: #3e63dd;
+  --color-info-subtle: rgba(62, 99, 221, 0.15);
   --scrollbar-track: #1a1a1a;
   --scrollbar-thumb: #2a2a2a;
   --scrollbar-thumb-hover: #888;
@@ -31,6 +40,15 @@
   --text-muted: #999;
   --accent: #e54d2e;
   --accent-hover: #d4431f;
+  --accent-subtle: rgba(229, 77, 46, 0.1);
+  --color-success: #297c51;
+  --color-success-subtle: rgba(41, 124, 81, 0.1);
+  --color-warning: #d97706;
+  --color-warning-subtle: rgba(217, 119, 6, 0.1);
+  --color-danger: #ce2c31;
+  --color-danger-subtle: rgba(206, 44, 49, 0.1);
+  --color-info: #2043b5;
+  --color-info-subtle: rgba(32, 67, 181, 0.1);
   --scrollbar-track: #f0f0f0;
   --scrollbar-thumb: #ccc;
   --scrollbar-thumb-hover: #999;
@@ -80,3 +98,21 @@ html, body, #root {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* ─── Product Card Hover & Focus ─── */
+.product-card:hover,
+.product-card:focus-visible {
+  border-color: var(--accent) !important;
+  outline: none;
+}
+
+/* ─── Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
