@@ -1,10 +1,12 @@
 import { Controller, Get, Post, Param } from '@nestjs/common';
+import { Public } from '../auth/guards/public.decorator';
 import { CashRegisterService } from './cash-register.service';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
 import { ZodBody } from '../../core/validation/zod-body.decorator';
 import { OpenCashRegisterSchema, OpenCashRegisterInput } from './dto/open-cash-register.schema';
 import { CloseCashRegisterSchema, CloseCashRegisterInput } from './dto/close-cash-register.schema';
 
+@Public()
 @Controller('cash-registers')
 export class CashRegisterController {
   constructor(

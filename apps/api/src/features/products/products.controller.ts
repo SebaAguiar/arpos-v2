@@ -6,12 +6,14 @@ import {
   Delete,
   Param,
 } from '@nestjs/common';
+import { Public } from '../auth/guards/public.decorator';
 import { ProductsService } from './products.service';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
 import { ZodBody } from '../../core/validation/zod-body.decorator';
 import { CreateProductSchema, CreateProductInput } from './dto/create-product.schema';
 import { UpdateProductSchema, UpdateProductInput } from './dto/update-product.schema';
 
+@Public()
 @Controller('products')
 export class ProductsController {
   constructor(

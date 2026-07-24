@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../data-access/prisma/prisma.service';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
 import { Sale, Prisma } from '@prisma/client';
@@ -90,6 +90,21 @@ export class SalesRepository {
       });
 
       for (const item of input.items) {
+        const product = await tx.product.findUnique({
+          where: { id: item.productId },
+          select: { stock_quantity: true, name: true },
+        });
+
+        if (!product) {
+          throw new BadRequestException(`Product ${item.productId} not found`);
+        }
+
+        if (product.stock_quantity < item.quantity) {
+          throw new BadRequestException(
+            `Insufficient stock for "${product.name}": has ${product.stock_quantity}, needs ${item.quantity}`,
+          );
+        }
+
         const itemTotalCents = item.unit_price_cents * item.quantity;
 
         await tx.saleItem.create({

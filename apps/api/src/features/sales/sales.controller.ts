@@ -3,61 +3,48 @@ import {
   Get,
   Post,
   Param,
-  Query,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import { SalesService } from './sales.service';
 import { ZodBody } from '../../core/validation/zod-body.decorator';
+import { ZodQuery } from '../../core/validation/zod-query.decorator';
 import { CreateSaleSchema, CreateSaleInput } from './dto/create-sale.schema';
+import { SaleFiltersSchema, SaleFiltersInput } from './dto/sale-filters.schema';
+import { Public } from '../auth/guards/public.decorator';
 
 @Controller('sales')
 export class SalesController {
   constructor(private readonly salesService: SalesService) {}
 
+  @Public()
   @Get()
-  async findAll(
-    @Query('from') from?: string,
-    @Query('to') to?: string,
-    @Query('status') status?: string,
-  ) {
-    return this.salesService.findAll({
-      from: from ? parseInt(from, 10) : undefined,
-      to: to ? parseInt(to, 10) : undefined,
-      status,
-    });
+  findAll(@ZodQuery(SaleFiltersSchema) filters: SaleFiltersInput) {
+    return this.salesService.findAll(filters);
   }
 
+  @Public()
   @Get('stats')
-  async getStats(
-    @Query('from') from?: string,
-    @Query('to') to?: string,
-  ) {
-    return this.salesService.getStats(
-      from ? parseInt(from, 10) : undefined,
-      to ? parseInt(to, 10) : undefined,
-    );
+  getStats(@ZodQuery(SaleFiltersSchema) filters: SaleFiltersInput) {
+    return this.salesService.getStats(filters.from, filters.to);
   }
 
+  @Public()
   @Get('by-payment-method')
-  async getByPaymentMethod(
-    @Query('from') from?: string,
-    @Query('to') to?: string,
-  ) {
-    return this.salesService.getSalesByPaymentMethod(
-      from ? parseInt(from, 10) : undefined,
-      to ? parseInt(to, 10) : undefined,
-    );
+  getByPaymentMethod(@ZodQuery(SaleFiltersSchema) filters: SaleFiltersInput) {
+    return this.salesService.getSalesByPaymentMethod(filters.from, filters.to);
   }
 
+  @Public()
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string) {
     return this.salesService.findOne(id);
   }
 
+  @Public()
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@ZodBody(CreateSaleSchema) input: CreateSaleInput) {
+  create(@ZodBody(CreateSaleSchema) input: CreateSaleInput) {
     return this.salesService.create(input);
   }
 }

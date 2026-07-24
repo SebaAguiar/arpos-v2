@@ -7,12 +7,14 @@ import {
   Param,
   Query,
 } from '@nestjs/common';
+import { Public } from '../auth/guards/public.decorator';
 import { ContactsService } from './contacts.service';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
 import { ZodBody } from '../../core/validation/zod-body.decorator';
 import { CreateContactSchema, CreateContactInput } from './dto/create-contact.schema';
 import { UpdateContactSchema, UpdateContactInput } from './dto/update-contact.schema';
 
+@Public()
 @Controller('contacts')
 export class ContactsController {
   constructor(
