@@ -6,35 +6,35 @@ import {
   LockClosedIcon,
   PlusIcon,
   MinusIcon,
-  ArrowRightIcon,
   CalendarIcon,
   CardStackIcon,
 } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
-import {
-  useCashRegisterStore,
-} from "@/stores/cash-register.store";
+import { useCashRegisterStore } from "@/stores/cash-register.store";
 
 export function CashControlDialog() {
   const closeCashControl = useDialogStore((s) => s.closeCashControl);
   const currentShift = useCashRegisterStore((s) => s.currentShift);
   const shifts = useCashRegisterStore((s) => s.shifts);
+  const loading = useCashRegisterStore((s) => s.loading);
   const openShift = useCashRegisterStore((s) => s.openShift);
   const closeShift = useCashRegisterStore((s) => s.closeShift);
   const addMovement = useCashRegisterStore((s) => s.addMovement);
   const error = useCashRegisterStore((s) => s.error);
   const clearError = useCashRegisterStore((s) => s.clearError);
   const fetchCurrentShift = useCashRegisterStore((s) => s.fetchCurrentShift);
+  const fetchHistory = useCashRegisterStore((s) => s.fetchHistory);
 
   useEffect(() => {
     fetchCurrentShift();
-  }, [fetchCurrentShift]);
+    fetchHistory();
+  }, [fetchCurrentShift, fetchHistory]);
 
   const [initialAmount, setInitialAmount] = useState("");
   const [finalAmount, setFinalAmount] = useState("");
   const [movAmount, setMovAmount] = useState("");
   const [movDesc, setMovDesc] = useState("");
-  const [movType, setMovType] = useState<"INCOME" | "EXPENSE" | "WALLET_TRANSFER">("INCOME");
+  const [movType, setMovType] = useState<"INCOME" | "EXPENSE">("INCOME");
 
   const summary = useMemo(() => {
     if (!currentShift) return null;
@@ -48,24 +48,25 @@ export function CashControlDialog() {
     };
   }, [currentShift]);
 
-  const handleOpenShift = () => {
+  const handleOpenShift = async () => {
     const amount = parseFloat(initialAmount);
     if (isNaN(amount) || amount < 0) return;
-    openShift(`Caja ${new Date().toLocaleDateString("es-AR")}`, amount);
+    await openShift(`Caja ${new Date().toLocaleDateString("es-AR")}`, amount);
     setInitialAmount("");
   };
 
-  const handleCloseShift = () => {
+  const handleCloseShift = async () => {
     const amount = parseFloat(finalAmount);
     if (isNaN(amount) || amount < 0) return;
-    closeShift(amount);
+    await closeShift(amount);
     setFinalAmount("");
+    fetchHistory();
   };
 
-  const handleAddMovement = () => {
+  const handleAddMovement = async () => {
     const amount = parseFloat(movAmount);
     if (isNaN(amount) || amount <= 0 || !movDesc.trim()) return;
-    addMovement(movType, amount, movDesc.trim());
+    await addMovement(movType, amount, movDesc.trim());
     setMovAmount("");
     setMovDesc("");
   };
@@ -179,13 +180,15 @@ export function CashControlDialog() {
                     />
                     <button
                       onClick={handleOpenShift}
+                      disabled={loading || !initialAmount}
                       style={{
                         padding: "8px 24px",
                         backgroundColor: "#30a46c",
                         color: "#fff",
                         border: "none",
                         borderRadius: "6px",
-                        cursor: "pointer",
+                        cursor: loading || !initialAmount ? "not-allowed" : "pointer",
+                        opacity: loading || !initialAmount ? 0.6 : 1,
                         fontWeight: 600,
                         display: "flex",
                         alignItems: "center",
@@ -193,13 +196,28 @@ export function CashControlDialog() {
                       }}
                     >
                       <LockOpen1Icon width={14} height={14} />
-                      Abrir turno
+                      {loading ? "Abriendo..." : "Abrir turno"}
                     </button>
                   </div>
                 </div>
               ) : (
                 /* Active shift */
                 <div>
+                  {error && (
+                    <div
+                      style={{
+                        padding: "8px 12px",
+                        backgroundColor: "#e54d2e15",
+                        border: "1px solid #e54d2e30",
+                        borderRadius: "6px",
+                        marginBottom: "12px",
+                        cursor: "pointer",
+                      }}
+                      onClick={clearError}
+                    >
+                      <Text size="2" color="red">{error}</Text>
+                    </div>
+                  )}
                   {/* Summary cards */}
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px", marginBottom: "16px" }}>
                     <div style={{ padding: "12px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "8px" }}>
@@ -279,15 +297,12 @@ export function CashControlDialog() {
                     <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
                       <Select.Root value={movType} onValueChange={(v) => setMovType(v as typeof movType)}>
                         <Select.Trigger style={{ width: "160px" }} />
-                        <Select.Content>
+                        <Select.Content style={{ height: "auto" }}>
                           <Select.Item value="INCOME">
                             <PlusIcon width={12} /> Ingreso
                           </Select.Item>
                           <Select.Item value="EXPENSE">
                             <MinusIcon width={12} /> Egreso
-                          </Select.Item>
-                          <Select.Item value="WALLET_TRANSFER">
-                            <ArrowRightIcon width={12} /> Transferencia
                           </Select.Item>
                         </Select.Content>
                       </Select.Root>
@@ -307,18 +322,18 @@ export function CashControlDialog() {
                       />
                       <button
                         onClick={handleAddMovement}
-                        disabled={!movDesc.trim() || !movAmount}
+                        disabled={loading || !movDesc.trim() || !movAmount}
                         style={{
                           padding: "6px 14px",
-                          backgroundColor: movDesc.trim() && movAmount ? "var(--accent)" : "var(--bg-surface)",
-                          color: movDesc.trim() && movAmount ? "#fff" : "var(--text-secondary)",
+                          backgroundColor: !loading && movDesc.trim() && movAmount ? "var(--accent)" : "var(--bg-surface)",
+                          color: !loading && movDesc.trim() && movAmount ? "#fff" : "var(--text-secondary)",
                           border: "none",
                           borderRadius: "6px",
-                          cursor: movDesc.trim() && movAmount ? "pointer" : "not-allowed",
+                          cursor: loading || !movDesc.trim() || !movAmount ? "not-allowed" : "pointer",
                           fontWeight: 600,
                         }}
                       >
-                        Agregar
+                        {loading ? "..." : "Agregar"}
                       </button>
                     </div>
                   </div>
@@ -344,18 +359,18 @@ export function CashControlDialog() {
                         >
                           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                             <Badge
-                              color={mov.type === "INCOME" ? "green" : mov.type === "EXPENSE" ? "red" : "blue"}
+                              color={mov.type === "INCOME" ? "green" : "red"}
                               variant="soft"
                               size="1"
                             >
-                              {mov.type === "INCOME" ? "Ingreso" : mov.type === "EXPENSE" ? "Egreso" : "Transferencia"}
+                              {mov.type === "INCOME" ? "Ingreso" : "Egreso"}
                             </Badge>
                             <Text size="2">{mov.description}</Text>
                           </div>
                           <Text
                             size="2"
                             weight="bold"
-                            color={mov.type === "INCOME" ? "green" : mov.type === "EXPENSE" ? "red" : "blue"}
+                            color={mov.type === "INCOME" ? "green" : "red"}
                           >
                             {mov.type === "INCOME" ? "+" : "-"}${mov.amount.toLocaleString("es-AR")}
                           </Text>
@@ -381,13 +396,15 @@ export function CashControlDialog() {
                       />
                       <button
                         onClick={handleCloseShift}
+                        disabled={loading || !finalAmount}
                         style={{
                           padding: "8px 24px",
                           backgroundColor: "var(--accent)",
                           color: "#fff",
                           border: "none",
                           borderRadius: "6px",
-                          cursor: "pointer",
+                          cursor: loading || !finalAmount ? "not-allowed" : "pointer",
+                          opacity: loading || !finalAmount ? 0.6 : 1,
                           fontWeight: 600,
                           display: "flex",
                           alignItems: "center",
@@ -395,7 +412,7 @@ export function CashControlDialog() {
                         }}
                       >
                         <LockClosedIcon width={14} height={14} />
-                        Cerrar turno
+                        {loading ? "Cerrando..." : "Cerrar turno"}
                       </button>
                     </div>
                     {summary?.difference !== null && summary?.difference !== undefined && (
@@ -403,8 +420,8 @@ export function CashControlDialog() {
                         {summary.difference === 0
                           ? "Caja cuadrada"
                           : summary.difference > 0
-                          ? `Sobrante: $${summary.difference.toLocaleString("es-AR")}`
-                          : `Faltante: $${Math.abs(summary.difference).toLocaleString("es-AR")}`}
+                            ? `Sobrante: $${summary.difference.toLocaleString("es-AR")}`
+                            : `Faltante: $${Math.abs(summary.difference).toLocaleString("es-AR")}`}
                       </Text>
                     )}
                   </div>
@@ -435,16 +452,16 @@ export function CashControlDialog() {
                     >
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
                         <Text size="2" weight="bold">
-                          Turno #{shift.id.replace("shift-", "")}
+                          Turno #{shift.id.slice(0, 8)}
                         </Text>
                         <Badge color={diff === 0 ? "green" : diff !== null && diff > 0 ? "blue" : "red"} variant="soft" size="1">
                           {diff === 0
                             ? "Cuadrada"
                             : diff !== null
-                            ? diff > 0
-                              ? `+$${diff.toLocaleString("es-AR")}`
-                              : `-$${Math.abs(diff).toLocaleString("es-AR")}`
-                            : "Sin arqueo"}
+                              ? diff > 0
+                                ? `+$${diff.toLocaleString("es-AR")}`
+                                : `-$${Math.abs(diff).toLocaleString("es-AR")}`
+                              : "Sin arqueo"}
                         </Badge>
                       </div>
                       <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
@@ -456,7 +473,7 @@ export function CashControlDialog() {
                       <div style={{ display: "flex", gap: "12px", marginTop: "6px", fontSize: "12px" }}>
                         <span>Inicio: ${shift.initialAmount.toLocaleString("es-AR")}</span>
                         <span style={{ color: "#30a46c" }}>Ventas: ${shift.totalSales.toLocaleString("es-AR")}</span>
-                        <span>Movimientos: {shift.movements.length}</span>
+                        <span>Movimientos: {shift.movementCount}</span>
                       </div>
                     </div>
                   );

@@ -6,6 +6,7 @@ import {
   GearIcon,
   LightningBoltIcon,
   TimerIcon,
+  LayersIcon,
 } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
 
@@ -153,6 +154,26 @@ export function Sidebar() {
             {gestion.map((item) => (
               <SidebarButton key={item.label} item={item} />
             ))}
+            <NavLink
+              to="/inventory"
+              style={({ isActive }) => ({
+                ...(isActive ? ITEM_ACTIVE : ITEM_BASE),
+              })}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  width: "3px",
+                  height: "60%",
+                  borderRadius: "0 2px 2px 0",
+                }}
+              />
+              <LayersIcon width={16} height={16} />
+              Inventario
+            </NavLink>
           </div>
         </div>
 

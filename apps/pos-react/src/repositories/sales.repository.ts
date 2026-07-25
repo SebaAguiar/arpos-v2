@@ -1,4 +1,4 @@
-import { SalesService, type ApiSale, type ApiSaleStats, type ApiPaymentMethodBreakdown } from "../services/sales.service";
+import { SalesService, type ApiSale, type ApiSaleStats, type ApiPaymentMethodBreakdown, type ApiTopProduct } from "../services/sales.service";
 import type { Sale, SaleItem, PaymentMethod } from "@/lib/types";
 
 function mapSale(api: ApiSale): Sale {
@@ -56,6 +56,14 @@ export const SalesRepository = {
   async getById(id: string): Promise<Sale> {
     const sale = await SalesService.get(id);
     return mapSale(sale);
+  },
+
+  async getTopProducts(filters?: {
+    from?: number;
+    to?: number;
+    limit?: number;
+  }): Promise<ApiTopProduct[]> {
+    return SalesService.getTopProducts(filters);
   },
 
   async create(input: {

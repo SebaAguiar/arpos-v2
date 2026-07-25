@@ -10,9 +10,12 @@ import {
   ReaderIcon,
   TokensIcon,
   GearIcon,
+  HomeIcon,
 } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
 import { useSettingsStore } from "@/stores/settings.store";
+import { UsersManager } from "./UsersManager";
+import { StoreManager } from "./StoreManager";
 import type { PaymentMethod } from "@/lib/types";
 
 const METHOD_ICONS: Record<PaymentMethod, typeof Cross1Icon> = {
@@ -37,6 +40,10 @@ const METHOD_COLORS: Record<PaymentMethod, string> = {
 
 export function SettingsDialog() {
   const closeSettings = useDialogStore((s) => s.closeSettings);
+  const usersOpen = useDialogStore((s) => s.users);
+  const openUsers = useDialogStore((s) => s.openUsers);
+  const storesOpen = useDialogStore((s) => s.stores);
+  const openStores = useDialogStore((s) => s.openStores);
   const paymentMethods = useSettingsStore((s) => s.paymentMethods);
   const togglePaymentMethod = useSettingsStore((s) => s.togglePaymentMethod);
   const updatePaymentMethodLabel = useSettingsStore((s) => s.updatePaymentMethodLabel);
@@ -222,8 +229,58 @@ export function SettingsDialog() {
               />
             </div>
           </div>
+
+          {/* Users & Stores */}
+          <Text size="3" weight="bold" style={{ display: "block", marginBottom: "12px", marginTop: "24px" }}>
+            Gestión
+          </Text>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "16px" }}>
+            <button
+              onClick={openStores}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                width: "100%",
+                padding: "10px 12px",
+                backgroundColor: "var(--bg-surface-hover)",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer",
+                color: "var(--text-primary)",
+                textAlign: "left",
+              }}
+            >
+              <HomeIcon width={16} height={16} color="var(--text-secondary)" />
+              <Text size="2">Sucursales</Text>
+            </button>
+
+            <button
+              onClick={openUsers}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                width: "100%",
+                padding: "10px 12px",
+                backgroundColor: "var(--bg-surface-hover)",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer",
+                color: "var(--text-primary)",
+                textAlign: "left",
+              }}
+            >
+              <PersonIcon width={16} height={16} color="var(--text-secondary)" />
+              <Text size="2">Usuarios</Text>
+            </button>
+          </div>
         </div>
       </div>
+
+      {usersOpen && <UsersManager />}
+      {storesOpen && <StoreManager />}
     </div>
   );
 }

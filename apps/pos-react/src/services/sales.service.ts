@@ -47,6 +47,14 @@ export interface ApiPaymentMethodBreakdown {
   count: number;
 }
 
+export interface ApiTopProduct {
+  productId: string;
+  productName: string;
+  productCode: string;
+  total_cents: number;
+  quantity: number;
+}
+
 export const SalesService = {
   async list(filters?: {
     from?: number;
@@ -85,6 +93,19 @@ export const SalesService = {
 
   async get(id: string): Promise<ApiSale> {
     return apiClient.get<ApiSale>(`/sales/${id}`);
+  },
+
+  async getTopProducts(filters?: {
+    from?: number;
+    to?: number;
+    limit?: number;
+  }): Promise<ApiTopProduct[]> {
+    const params = new URLSearchParams();
+    if (filters?.from) params.set("from", String(filters.from));
+    if (filters?.to) params.set("to", String(filters.to));
+    if (filters?.limit) params.set("limit", String(filters.limit));
+    const query = params.toString();
+    return apiClient.get<ApiTopProduct[]>(`/sales/top-products${query ? `?${query}` : ""}`);
   },
 
   async create(input: {

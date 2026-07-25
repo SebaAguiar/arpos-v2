@@ -13,6 +13,8 @@ interface DialogState {
   reports: boolean;
   suspendedOrders: boolean;
   variantSelection: boolean;
+  users: boolean;
+  stores: boolean;
   selectedProductId: string | null;
 
   openPayment: () => void;
@@ -39,6 +41,10 @@ interface DialogState {
   closeSuspendedOrders: () => void;
   openVariantSelection: (productId: string) => void;
   closeVariantSelection: () => void;
+  openUsers: () => void;
+  closeUsers: () => void;
+  openStores: () => void;
+  closeStores: () => void;
   closeAll: () => void;
 }
 
@@ -55,6 +61,8 @@ export const useDialogStore = create<DialogState>((set) => ({
   reports: false,
   suspendedOrders: false,
   variantSelection: false,
+  users: false,
+  stores: false,
   selectedProductId: null,
 
   openPayment: () => set({ payment: true }),
@@ -83,6 +91,10 @@ export const useDialogStore = create<DialogState>((set) => ({
     set({ variantSelection: true, selectedProductId: productId }),
   closeVariantSelection: () =>
     set({ variantSelection: false, selectedProductId: null }),
+  openUsers: () => set({ users: true }),
+  closeUsers: () => set({ users: false }),
+  openStores: () => set({ stores: true }),
+  closeStores: () => set({ stores: false }),
   closeAll: () =>
     set({
       payment: false,
@@ -97,6 +109,8 @@ export const useDialogStore = create<DialogState>((set) => ({
       reports: false,
       suspendedOrders: false,
       variantSelection: false,
+      users: false,
+      stores: false,
       selectedProductId: null,
     }),
 }));

@@ -1,6 +1,7 @@
 import {
   CashRegisterService,
   type ApiCashRegister,
+  type ApiCashMovement,
 } from "../services/cash-register.service";
 
 export interface PaymentMethodSummary {
@@ -19,6 +20,18 @@ export interface CashShiftData {
   closedAt: number | null;
   totalSalesCents: number;
   paymentSummary: PaymentMethodSummary[];
+  incomeCents: number;
+  expenseCents: number;
+  movementCount: number;
+}
+
+export interface CashMovementData {
+  id: string;
+  cashRegisterId: string;
+  type: "income" | "expense";
+  amountCents: number;
+  description: string;
+  createdAt: number;
 }
 
 function mapCashRegister(api: ApiCashRegister): CashShiftData {
@@ -36,6 +49,20 @@ function mapCashRegister(api: ApiCashRegister): CashShiftData {
       total_cents: p.total_cents,
       count: p.count,
     })),
+    incomeCents: api.income_cents ?? 0,
+    expenseCents: api.expense_cents ?? 0,
+    movementCount: api.movement_count ?? 0,
+  };
+}
+
+function mapMovement(api: ApiCashMovement): CashMovementData {
+  return {
+    id: api.id,
+    cashRegisterId: api.cashRegisterId,
+    type: api.type as "income" | "expense",
+    amountCents: api.amount_cents,
+    description: api.description,
+    createdAt: api.created_at,
   };
 }
 
@@ -61,5 +88,24 @@ export const CashRegisterRepository = {
   async close(id: string, closingAmount: number): Promise<CashShiftData> {
     const closed = await CashRegisterService.close(id, Math.round(closingAmount * 100));
     return mapCashRegister(closed);
+  },
+
+  async getMovements(id: string): Promise<CashMovementData[]> {
+    const movements = await CashRegisterService.getMovements(id);
+    return movements.map(mapMovement);
+  },
+
+  async createMovement(
+    id: string,
+    type: string,
+    amount: number,
+    description: string,
+  ): Promise<CashMovementData> {
+    const created = await CashRegisterService.createMovement(id, {
+      type,
+      amount_cents: Math.round(amount * 100),
+      description,
+    });
+    return mapMovement(created);
   },
 };

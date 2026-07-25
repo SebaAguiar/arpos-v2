@@ -41,24 +41,30 @@ const METHOD_COLORS: Record<string, string> = {
   POINTS: "#64748b",
 };
 
+const BAR_CHART_HEIGHT = 140;
+const BAR_LABEL_HEIGHT = 28;
+
 function BarChart({ data, maxVal }: { data: { label: string; value: number }[]; maxVal: number }) {
+  const barMaxHeight = BAR_CHART_HEIGHT - BAR_LABEL_HEIGHT;
   return (
-    <div style={{ display: "flex", alignItems: "flex-end", gap: "4px", height: "120px" }}>
-      {data.map((d, i) => (
-        <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
-          <Text size="1" color="gray">${(d.value / 1000).toFixed(1)}k</Text>
-          <div
-            style={{
-              width: "100%",
-              height: `${maxVal > 0 ? (d.value / maxVal) * 100 : 0}%`,
-              backgroundColor: "var(--accent)",
-              borderRadius: "3px 3px 0 0",
-              minHeight: "4px",
-            }}
-          />
-          <Text size="1" color="gray">{d.label}</Text>
-        </div>
-      ))}
+    <div style={{ display: "flex", alignItems: "flex-end", gap: "3px", height: `${BAR_CHART_HEIGHT}px` }}>
+      {data.map((d, i) => {
+        const barPx = maxVal > 0 ? Math.round((d.value / maxVal) * barMaxHeight) : 0;
+        return (
+          <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0 }}>
+            <Text size="1" color="gray">{d.value >= 1000 ? `$${(d.value / 1000).toFixed(1)}k` : `$${d.value.toLocaleString("es-AR")}`}</Text>
+            <div
+              style={{
+                width: "100%",
+                height: `${Math.max(barPx, 3)}px`,
+                backgroundColor: "var(--accent)",
+                borderRadius: "3px 3px 0 0",
+              }}
+            />
+            <Text size="1" color="gray">{d.label}</Text>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -93,8 +99,8 @@ export function DashboardDialog() {
   const [hourlySales, setHourlySales] = useState<{ hour: string; amount: number }[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchData = useCallback(async (p: Period) => {
-    setLoading(true);
+  const fetchData = useCallback(async (p: Period, initial = false) => {
+    if (initial) setLoading(true);
     try {
       const { from, to } = getPeriodTimestamps(p);
       const [statsData, paymentsData, salesData] = await Promise.all([
@@ -107,20 +113,18 @@ export function DashboardDialog() {
       setPaymentBreakdown(paymentsData);
 
       const hourlyMap = new Map<string, number>();
-      for (let h = 8; h <= 22; h++) {
+      for (let h = 0; h <= 23; h++) {
         hourlyMap.set(String(h).padStart(2, "0"), 0);
       }
       for (const sale of salesData) {
         const date = new Date(sale.createdAt * 1000);
         const hour = String(date.getHours()).padStart(2, "0");
-        if (hourlyMap.has(hour)) {
-          hourlyMap.set(hour, (hourlyMap.get(hour) ?? 0) + sale.total);
-        }
+        hourlyMap.set(hour, (hourlyMap.get(hour) ?? 0) + sale.total);
       }
-      setHourlySales(
-        Array.from(hourlyMap.entries()).map(([hour, amount]) => ({ hour, amount }))
-      );
-    } catch {
+      const allHours = Array.from(hourlyMap.entries()).map(([hour, amount]) => ({ hour, amount }));
+      setHourlySales(allHours);
+    } catch (err) {
+      console.error("[Dashboard] Error fetching data:", err);
       setStats(null);
       setPaymentBreakdown([]);
       setHourlySales([]);
@@ -130,16 +134,18 @@ export function DashboardDialog() {
   }, []);
 
   useEffect(() => {
-    fetchData(period);
+    fetchData(period, true);
+    const interval = setInterval(() => fetchData(period), 5000);
+    return () => clearInterval(interval);
   }, [period, fetchData]);
 
   const handlePeriodChange = (value: string) => {
     setPeriod(value as Period);
   };
 
-  const totalRevenue = stats?.totalRevenue ?? 0;
+  const totalRevenue = (stats?.totalRevenue ?? 0) / 100;
   const totalTransactions = stats?.totalSales ?? 0;
-  const averageTicket = stats?.averageTicket ?? 0;
+  const averageTicket = (stats?.averageTicket ?? 0) / 100;
   const maxHourly = Math.max(...hourlySales.map((h) => h.amount), 1);
 
   const totalPaymentCents = paymentBreakdown.reduce((s, p) => s + p.total_cents, 0);
@@ -188,7 +194,7 @@ export function DashboardDialog() {
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <Select.Root value={period} onValueChange={handlePeriodChange}>
-              <Select.Trigger style={{ width: "160px" }} />
+              <Select.Trigger className="select-compact" style={{ width: "160px" }} />
               <Select.Content>
                 {Object.entries(PERIOD_LABELS).map(([key, label]) => (
                   <Select.Item key={key} value={key}>{label}</Select.Item>

@@ -114,3 +114,23 @@ export interface StoreConfig {
 
 export type ProductSortField = "name" | "price" | "createdAt";
 export type ProductSortDirection = "asc" | "desc";
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: "admin" | "manager" | "cashier";
+  is_active: boolean;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface Store {
+  id: string;
+  name: string;
+  address?: string;
+  phone?: string;
+  is_active: boolean;
+  created_at: number;
+  updated_at: number;
+}

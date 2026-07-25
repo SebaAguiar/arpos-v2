@@ -20,6 +20,20 @@ export interface ApiCashRegister {
   updated_at: number;
   total_sales_cents?: number;
   payment_summary?: ApiPaymentSummary[];
+  income_cents?: number;
+  expense_cents?: number;
+  movement_count?: number;
+}
+
+export interface ApiCashMovement {
+  id: string;
+  cashRegisterId: string;
+  companyId: string;
+  storeId: string;
+  type: string;
+  amount_cents: number;
+  description: string;
+  created_at: number;
 }
 
 export const CashRegisterService = {
@@ -47,5 +61,16 @@ export const CashRegisterService = {
     return apiClient.post<ApiCashRegister>(`/cash-registers/${id}/close`, {
       closing_amount,
     });
+  },
+
+  async getMovements(id: string): Promise<ApiCashMovement[]> {
+    return apiClient.get<ApiCashMovement[]>(`/cash-registers/${id}/movements`);
+  },
+
+  async createMovement(
+    id: string,
+    input: { type: string; amount_cents: number; description: string },
+  ): Promise<ApiCashMovement> {
+    return apiClient.post<ApiCashMovement>(`/cash-registers/${id}/movements`, input);
   },
 };

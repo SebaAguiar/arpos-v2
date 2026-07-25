@@ -1,7 +1,15 @@
 import { Text, Card, Switch, Select } from "@radix-ui/themes";
-import { GearIcon } from "@radix-ui/react-icons";
+import { GearIcon, PersonIcon, HomeIcon } from "@radix-ui/react-icons";
+import { useDialogStore } from "@/stores/dialog.store";
+import { UsersManager } from "@/components/settings/UsersManager";
+import { StoreManager } from "@/components/settings/StoreManager";
 
 export function SettingsPage() {
+  const usersOpen = useDialogStore((s) => s.users);
+  const openUsers = useDialogStore((s) => s.openUsers);
+  const storesOpen = useDialogStore((s) => s.stores);
+  const openStores = useDialogStore((s) => s.openStores);
+
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
@@ -23,6 +31,58 @@ export function SettingsPage() {
               <Text size="2">CUIT</Text>
               <Text size="2" color="gray">20-12345678-9</Text>
             </div>
+          </div>
+        </Card>
+
+        <Card>
+          <Text size="3" weight="bold" style={{ display: "block", marginBottom: "12px" }}>
+            Sucursales
+          </Text>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <Text size="2">Gestionar sucursales del negocio</Text>
+            <button
+              onClick={openStores}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "6px 12px",
+                backgroundColor: "var(--bg-surface-hover)",
+                border: "1px solid var(--border)",
+                borderRadius: "6px",
+                cursor: "pointer",
+                color: "var(--text-primary)",
+                fontSize: "13px",
+              }}
+            >
+              <HomeIcon width={14} height={14} /> Administrar
+            </button>
+          </div>
+        </Card>
+
+        <Card>
+          <Text size="3" weight="bold" style={{ display: "block", marginBottom: "12px" }}>
+            Usuarios
+          </Text>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <Text size="2">Gestionar usuarios del sistema</Text>
+            <button
+              onClick={openUsers}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "6px 12px",
+                backgroundColor: "var(--bg-surface-hover)",
+                border: "1px solid var(--border)",
+                borderRadius: "6px",
+                cursor: "pointer",
+                color: "var(--text-primary)",
+                fontSize: "13px",
+              }}
+            >
+              <PersonIcon width={14} height={14} /> Administrar
+            </button>
           </div>
         </Card>
 
@@ -81,6 +141,9 @@ export function SettingsPage() {
           </div>
         </Card>
       </div>
+
+      {usersOpen && <UsersManager />}
+      {storesOpen && <StoreManager />}
     </div>
   );
 }
