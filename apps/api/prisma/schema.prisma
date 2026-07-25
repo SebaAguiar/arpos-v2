@@ -22,9 +22,11 @@ model Company {
   users             User[]
   products          Product[]
   inventory         Inventory[]
+  inventory_movements InventoryMovement[]
   sales             Sale[]
   contacts          Contact[]
   cash_registers    CashRegister[]
+  cash_movements    CashMovement[]
 
   @@map("companies")
 }
@@ -42,8 +44,10 @@ model Store {
   company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   products          Product[]
   inventory         Inventory[]
+  inventory_movements InventoryMovement[]
   sales             Sale[]
   cash_registers    CashRegister[]
+  cash_movements    CashMovement[]
 
   @@map("stores")
 }
@@ -61,6 +65,7 @@ model User {
 
   company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   sales             Sale[]
+  inventory_movements InventoryMovement[]
 
   @@unique([companyId, email])
   @@map("users")
@@ -86,6 +91,7 @@ model Product {
   company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   store             Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
   inventory         Inventory[]
+  inventory_movements InventoryMovement[]
   sale_items        SaleItem[]
 
   @@unique([companyId, storeId, code])
@@ -109,6 +115,30 @@ model Inventory {
 
   @@unique([storeId, productId])
   @@map("inventory")
+}
+
+model InventoryMovement {
+  id              String   @id @default(cuid())
+  companyId       String
+  storeId         String
+  productId       String
+  userId          String?
+  type            String
+  quantity        Int
+  reason          String
+  reference_type  String?
+  reference_id    String?
+  created_at      Int      @default(0)
+
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  store           Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, storeId])
+  @@index([productId])
+  @@index([created_at])
+  @@map("inventory_movements")
 }
 
 model Sale {
@@ -192,8 +222,26 @@ model CashRegister {
 
   company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   store             Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  movements         CashMovement[]
 
   @@map("cash_registers")
+}
+
+model CashMovement {
+  id                String   @id @default(cuid())
+  cashRegisterId    String
+  companyId         String
+  storeId           String
+  type              String
+  amount_cents      Int
+  description       String
+  created_at        Int      @default(0)
+
+  cashRegister      CashRegister @relation(fields: [cashRegisterId], references: [id], onDelete: Cascade)
+  company           Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  store             Store        @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@map("cash_movements")
 }
 
 model SyncQueue {

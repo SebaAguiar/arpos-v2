@@ -12,6 +12,7 @@ describe('SalesController', () => {
     create: jest.fn(),
     getStats: jest.fn(),
     getSalesByPaymentMethod: jest.fn(),
+    getTopProducts: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -84,6 +85,26 @@ describe('SalesController', () => {
 
       const result = await controller.getByPaymentMethod({} as never);
       expect(result).toEqual(grouped);
+    });
+  });
+
+  describe('getTopProducts', () => {
+    it('should call service.getTopProducts with filters', async () => {
+      const topProducts = [
+        { productId: 'p1', productName: 'Product A', total_cents: 5000, quantity: 10 },
+      ];
+      mockService.getTopProducts.mockResolvedValue(topProducts);
+
+      const result = await controller.getTopProducts({ from: 100, to: 200, limit: 5 } as never);
+      expect(result).toEqual(topProducts);
+      expect(service.getTopProducts).toHaveBeenCalledWith(100, 200, 5);
+    });
+
+    it('should call service.getTopProducts without filters', async () => {
+      mockService.getTopProducts.mockResolvedValue([]);
+
+      await controller.getTopProducts({} as never);
+      expect(service.getTopProducts).toHaveBeenCalledWith(undefined, undefined, undefined);
     });
   });
 });

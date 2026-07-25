@@ -125,6 +125,21 @@ export class SalesRepository {
             updated_at: now,
           },
         });
+
+        await tx.inventoryMovement.create({
+          data: {
+            companyId,
+            storeId,
+            productId: item.productId,
+            userId,
+            type: 'sale',
+            quantity: -item.quantity,
+            reason: `Venta #${sale.id}`,
+            reference_type: 'sale',
+            reference_id: sale.id,
+            created_at: now,
+          },
+        });
       }
 
       return tx.sale.findUnique({
@@ -200,5 +215,60 @@ export class SalesRepository {
       payment_method: method,
       ...data,
     }));
+  }
+
+  async getTopProducts(from?: number, to?: number, limit = 10) {
+    const where: Prisma.SaleWhereInput = {
+      companyId: this.getCompanyId(),
+      storeId: this.getStoreId(),
+      status: 'completed',
+    };
+
+    if (from || to) {
+      where.created_at = {};
+      if (from) where.created_at.gte = from;
+      if (to) where.created_at.lte = to;
+    }
+
+    const sales = await this.prisma.sale.findMany({
+      where,
+      select: {
+        items: {
+          select: {
+            productId: true,
+            quantity: true,
+            total_cents: true,
+            product: { select: { id: true, name: true, code: true } },
+          },
+        },
+      },
+    });
+
+    const productMap = new Map<string, { name: string; code: string; total_cents: number; quantity: number }>();
+
+    for (const sale of sales) {
+      for (const item of sale.items) {
+        const existing = productMap.get(item.productId) ?? {
+          name: item.product.name,
+          code: item.product.code,
+          total_cents: 0,
+          quantity: 0,
+        };
+        existing.total_cents += item.total_cents;
+        existing.quantity += item.quantity;
+        productMap.set(item.productId, existing);
+      }
+    }
+
+    return Array.from(productMap.entries())
+      .map(([productId, data]) => ({
+        productId,
+        productName: data.name,
+        productCode: data.code,
+        total_cents: data.total_cents,
+        quantity: data.quantity,
+      }))
+      .sort((a, b) => b.total_cents - a.total_cents)
+      .slice(0, limit);
   }
 }

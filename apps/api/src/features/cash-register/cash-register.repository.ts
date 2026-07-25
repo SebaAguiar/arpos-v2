@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../data-access/prisma/prisma.service';
-import { CashRegister } from '@prisma/client';
+import { CashRegister, CashMovement } from '@prisma/client';
 
 export interface PaymentMethodSummary {
   payment_method: string;
@@ -11,6 +11,15 @@ export interface PaymentMethodSummary {
 export interface CashRegisterWithSummary extends CashRegister {
   total_sales_cents: number;
   payment_summary: PaymentMethodSummary[];
+  income_cents: number;
+  expense_cents: number;
+  movement_count: number;
+}
+
+export interface CashMovementSummary {
+  income_cents: number;
+  expense_cents: number;
+  count: number;
 }
 
 @Injectable()
@@ -108,5 +117,50 @@ export class CashRegisterRepository {
     );
 
     return { total_sales_cents, payment_summary };
+  }
+
+  async createMovement(data: {
+    cashRegisterId: string;
+    companyId: string;
+    storeId: string;
+    type: string;
+    amount_cents: number;
+    description: string;
+  }): Promise<CashMovement> {
+    const now = Math.floor(Date.now() / 1000);
+    return this.prisma.cashMovement.create({
+      data: {
+        cashRegisterId: data.cashRegisterId,
+        companyId: data.companyId,
+        storeId: data.storeId,
+        type: data.type,
+        amount_cents: data.amount_cents,
+        description: data.description,
+        created_at: now,
+      },
+    });
+  }
+
+  async getMovements(cashRegisterId: string): Promise<CashMovement[]> {
+    return this.prisma.cashMovement.findMany({
+      where: { cashRegisterId },
+      orderBy: { created_at: 'desc' },
+    });
+  }
+
+  async getMovementSummary(cashRegisterId: string): Promise<CashMovementSummary> {
+    const movements = await this.prisma.cashMovement.findMany({
+      where: { cashRegisterId },
+      select: { type: true, amount_cents: true },
+    });
+
+    let income_cents = 0;
+    let expense_cents = 0;
+    for (const m of movements) {
+      if (m.type === 'income') income_cents += m.amount_cents;
+      else expense_cents += m.amount_cents;
+    }
+
+    return { income_cents, expense_cents, count: movements.length };
   }
 }

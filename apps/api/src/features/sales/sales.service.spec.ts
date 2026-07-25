@@ -9,6 +9,7 @@ describe('SalesService', () => {
     create: jest.Mock;
     getStats: jest.Mock;
     getSalesByPaymentMethod: jest.Mock;
+    getTopProducts: jest.Mock;
   };
 
   beforeEach(() => {
@@ -18,6 +19,7 @@ describe('SalesService', () => {
       create: jest.fn(),
       getStats: jest.fn(),
       getSalesByPaymentMethod: jest.fn(),
+      getTopProducts: jest.fn(),
     };
     service = new SalesService(mockRepo as never);
   });
@@ -88,6 +90,26 @@ describe('SalesService', () => {
 
       const result = await service.getSalesByPaymentMethod();
       expect(result).toEqual(grouped);
+    });
+  });
+
+  describe('getTopProducts', () => {
+    it('should return top products from repository', async () => {
+      const topProducts = [
+        { productId: 'p1', productName: 'Product A', total_cents: 5000, quantity: 10 },
+      ];
+      mockRepo.getTopProducts.mockResolvedValue(topProducts);
+
+      const result = await service.getTopProducts(100, 200, 5);
+      expect(result).toEqual(topProducts);
+      expect(mockRepo.getTopProducts).toHaveBeenCalledWith(100, 200, 5);
+    });
+
+    it('should use default limit of 10', async () => {
+      mockRepo.getTopProducts.mockResolvedValue([]);
+
+      await service.getTopProducts();
+      expect(mockRepo.getTopProducts).toHaveBeenCalledWith(undefined, undefined, 10);
     });
   });
 });

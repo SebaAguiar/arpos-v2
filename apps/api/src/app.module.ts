@@ -9,6 +9,9 @@ import { ContactsModule } from './features/contacts/contacts.module';
 import { ProductsModule } from './features/products/products.module';
 import { SalesModule } from './features/sales/sales.module';
 import { CashRegisterModule } from './features/cash-register/cash-register.module';
+import { InventoryModule } from './features/inventory/inventory.module';
+import { UsersModule } from './features/users/users.module';
+import { StoresModule } from './features/stores/stores.module';
 import { LocalTenantMiddleware } from './core/tenant/local-tenant.middleware';
 import { JwtAuthGuard } from './features/auth/guards/jwt-auth.guard';
 
@@ -23,6 +26,9 @@ import { JwtAuthGuard } from './features/auth/guards/jwt-auth.guard';
     ContactsModule,
     ProductsModule,
     SalesModule,
+    InventoryModule,
+    UsersModule,
+    StoresModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

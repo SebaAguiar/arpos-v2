@@ -43,4 +43,8 @@ export class SalesService {
   async getSalesByPaymentMethod(from?: number, to?: number) {
     return this.salesRepo.getSalesByPaymentMethod(from, to);
   }
+
+  async getTopProducts(from?: number, to?: number, limit = 10) {
+    return this.salesRepo.getTopProducts(from, to, limit);
+  }
 }

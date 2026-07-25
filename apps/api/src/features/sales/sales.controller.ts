@@ -11,6 +11,7 @@ import { ZodBody } from '../../core/validation/zod-body.decorator';
 import { ZodQuery } from '../../core/validation/zod-query.decorator';
 import { CreateSaleSchema, CreateSaleInput } from './dto/create-sale.schema';
 import { SaleFiltersSchema, SaleFiltersInput } from './dto/sale-filters.schema';
+import { TopProductsSchema, TopProductsInput } from './dto/top-products.schema';
 import { Public } from '../auth/guards/public.decorator';
 
 @Controller('sales')
@@ -33,6 +34,12 @@ export class SalesController {
   @Get('by-payment-method')
   getByPaymentMethod(@ZodQuery(SaleFiltersSchema) filters: SaleFiltersInput) {
     return this.salesService.getSalesByPaymentMethod(filters.from, filters.to);
+  }
+
+  @Public()
+  @Get('top-products')
+  getTopProducts(@ZodQuery(TopProductsSchema) query: TopProductsInput) {
+    return this.salesService.getTopProducts(query.from, query.to, query.limit);
   }
 
   @Public()

@@ -10,6 +10,9 @@ describe('CashRegisterService', () => {
     create: jest.Mock;
     close: jest.Mock;
     buildSummary: jest.Mock;
+    getMovementSummary: jest.Mock;
+    createMovement: jest.Mock;
+    getMovements: jest.Mock;
   };
 
   beforeEach(() => {
@@ -20,19 +23,24 @@ describe('CashRegisterService', () => {
       create: jest.fn(),
       close: jest.fn(),
       buildSummary: jest.fn(),
+      getMovementSummary: jest.fn(),
+      createMovement: jest.fn(),
+      getMovements: jest.fn(),
     };
     service = new CashRegisterService(mockRepo as never);
   });
 
   describe('findCurrent', () => {
-    it('should return open register with summary', async () => {
+    it('should return open register with summary and movements', async () => {
       const register = { id: 'cr1', status: 'open', opened_at: 1000 };
       const summary = { total_sales_cents: 5000, payment_summary: [] };
+      const movementSummary = { income_cents: 2000, expense_cents: 500, count: 3 };
       mockRepo.findOpen.mockResolvedValue(register);
       mockRepo.buildSummary.mockResolvedValue(summary);
+      mockRepo.getMovementSummary.mockResolvedValue(movementSummary);
 
       const result = await service.findCurrent('c1', 's1');
-      expect(result).toEqual({ ...register, ...summary });
+      expect(result).toEqual({ ...register, ...summary, income_cents: 2000, expense_cents: 500, movement_count: 3 });
     });
 
     it('should throw NotFoundException when no open register', async () => {
@@ -82,12 +90,70 @@ describe('CashRegisterService', () => {
   });
 
   describe('findAll', () => {
-    it('should return all registers for company/store', async () => {
-      const registers = [{ id: 'cr1' }, { id: 'cr2' }];
+    it('should return all registers with summary data', async () => {
+      const registers = [{ id: 'cr1', opened_at: 1000 }, { id: 'cr2', opened_at: 2000 }];
       mockRepo.findAll.mockResolvedValue(registers);
+      mockRepo.buildSummary.mockResolvedValue({ total_sales_cents: 5000, payment_summary: [] });
+      mockRepo.getMovementSummary.mockResolvedValue({ income_cents: 2000, expense_cents: 500, count: 3 });
 
       const result = await service.findAll('c1', 's1');
-      expect(result).toEqual(registers);
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({
+        ...registers[0],
+        total_sales_cents: 5000,
+        payment_summary: [],
+        income_cents: 2000,
+        expense_cents: 500,
+        movement_count: 3,
+      });
+      expect(mockRepo.buildSummary).toHaveBeenCalledTimes(2);
+      expect(mockRepo.getMovementSummary).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('createMovement', () => {
+    it('should create a movement on an open register', async () => {
+      mockRepo.findById.mockResolvedValue({ id: 'cr1', status: 'open' });
+      const movement = { id: 'm1', type: 'income', amount_cents: 1000, description: 'Cambio' };
+      mockRepo.createMovement.mockResolvedValue(movement);
+
+      const result = await service.createMovement(
+        'cr1',
+        { type: 'income', amount_cents: 1000, description: 'Cambio' },
+        'c1',
+        's1',
+      );
+      expect(result).toEqual(movement);
+    });
+
+    it('should throw NotFoundException when register not found', async () => {
+      mockRepo.findById.mockResolvedValue(null);
+      await expect(
+        service.createMovement('nonexistent', { type: 'income', amount_cents: 1000, description: 'Test' }, 'c1', 's1'),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw ConflictException when register is closed', async () => {
+      mockRepo.findById.mockResolvedValue({ id: 'cr1', status: 'closed' });
+      await expect(
+        service.createMovement('cr1', { type: 'income', amount_cents: 1000, description: 'Test' }, 'c1', 's1'),
+      ).rejects.toThrow(ConflictException);
+    });
+  });
+
+  describe('getMovements', () => {
+    it('should return movements for a register', async () => {
+      mockRepo.findById.mockResolvedValue({ id: 'cr1' });
+      const movements = [{ id: 'm1', type: 'income', amount_cents: 1000 }];
+      mockRepo.getMovements.mockResolvedValue(movements);
+
+      const result = await service.getMovements('cr1');
+      expect(result).toEqual(movements);
+    });
+
+    it('should throw NotFoundException when register not found', async () => {
+      mockRepo.findById.mockResolvedValue(null);
+      await expect(service.getMovements('nonexistent')).rejects.toThrow(NotFoundException);
     });
   });
 });

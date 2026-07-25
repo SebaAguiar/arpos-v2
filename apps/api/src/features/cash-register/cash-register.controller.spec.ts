@@ -13,6 +13,8 @@ describe('CashRegisterController', () => {
     findOne: jest.fn(),
     open: jest.fn(),
     close: jest.fn(),
+    createMovement: jest.fn(),
+    getMovements: jest.fn(),
   };
 
   const mockTenant = {
@@ -89,6 +91,28 @@ describe('CashRegisterController', () => {
       const result = await controller.close('cr1', { closing_amount: 15000 } as never);
       expect(result).toEqual(closed);
       expect(service.close).toHaveBeenCalledWith('cr1', 15000);
+    });
+  });
+
+  describe('getMovements', () => {
+    it('should call service.getMovements with id', async () => {
+      const movements = [{ id: 'm1', type: 'income', amount_cents: 1000 }];
+      mockService.getMovements.mockResolvedValue(movements);
+
+      const result = await controller.getMovements('cr1');
+      expect(result).toEqual(movements);
+      expect(service.getMovements).toHaveBeenCalledWith('cr1');
+    });
+  });
+
+  describe('createMovement', () => {
+    it('should call service.createMovement with input and tenant context', async () => {
+      const movement = { id: 'm1', type: 'income', amount_cents: 1000, description: 'Cambio' };
+      mockService.createMovement.mockResolvedValue(movement);
+
+      const result = await controller.createMovement('cr1', { type: 'income', amount_cents: 1000, description: 'Cambio' } as never);
+      expect(result).toEqual(movement);
+      expect(service.createMovement).toHaveBeenCalledWith('cr1', { type: 'income', amount_cents: 1000, description: 'Cambio' }, 'company-1', 'store-1');
     });
   });
 });
