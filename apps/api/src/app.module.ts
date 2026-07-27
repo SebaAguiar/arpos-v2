@@ -7,6 +7,7 @@ import { AuthModule } from './features/auth/auth.module';
 import { SystemModule } from './features/system/system.module';
 import { ContactsModule } from './features/contacts/contacts.module';
 import { ProductsModule } from './features/products/products.module';
+import { VariantsModule } from './features/variants/variants.module';
 import { SalesModule } from './features/sales/sales.module';
 import { CashRegisterModule } from './features/cash-register/cash-register.module';
 import { InventoryModule } from './features/inventory/inventory.module';
@@ -26,6 +27,7 @@ import { JwtAuthGuard } from './features/auth/guards/jwt-auth.guard';
     CashRegisterModule,
     ContactsModule,
     ProductsModule,
+    VariantsModule,
     SalesModule,
     InventoryModule,
     UsersModule,

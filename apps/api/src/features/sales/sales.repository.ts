@@ -69,7 +69,23 @@ export class SalesRepository {
     const userId = this.tenantContext.getUserId() || 'system';
     const now = Math.floor(Date.now() / 1000);
 
+    // Start of today (midnight local time) as unix timestamp
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayStart = Math.floor(today.getTime() / 1000);
+
     return this.prisma.$transaction(async (tx) => {
+      // Generate sequential ticket_number per store per day
+      const countToday = await tx.sale.count({
+        where: {
+          companyId,
+          storeId,
+          status: 'completed',
+          created_at: { gte: todayStart },
+        },
+      });
+      const ticketNumber = countToday + 1;
+
       const sale = await tx.sale.create({
         data: {
           companyId,
@@ -84,6 +100,7 @@ export class SalesRepository {
           payment_method: input.payment_method,
           payment_details: input.payment_details,
           notes: input.notes,
+          ticket_number: ticketNumber,
           created_at: now,
           updated_at: now,
         },

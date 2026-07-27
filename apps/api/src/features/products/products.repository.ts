@@ -23,7 +23,14 @@ export class ProductsRepository {
         is_active: true,
         ...(storeId ? { storeId } : {}),
       },
-      include: { inventory: true },
+      include: {
+        inventory: true,
+        variants: {
+          where: { is_active: true },
+          include: { inventory: true },
+          orderBy: { created_at: 'asc' },
+        },
+      },
       orderBy: { created_at: 'desc' },
     });
   }
@@ -31,7 +38,14 @@ export class ProductsRepository {
   async findById(id: string): Promise<Product | null> {
     return this.prisma.product.findFirst({
       where: { id, companyId: this.getCompanyId() },
-      include: { inventory: true },
+      include: {
+        inventory: true,
+        variants: {
+          where: { is_active: true },
+          include: { inventory: true },
+          orderBy: { created_at: 'asc' },
+        },
+      },
     });
   }
 
@@ -66,7 +80,10 @@ export class ProductsRepository {
         created_at: now,
         updated_at: now,
       },
-      include: { inventory: true },
+      include: {
+        inventory: true,
+        variants: { include: { inventory: true } },
+      },
     });
   }
 
@@ -77,7 +94,10 @@ export class ProductsRepository {
         ...data,
         updated_at: Math.floor(Date.now() / 1000),
       },
-      include: { inventory: true },
+      include: {
+        inventory: true,
+        variants: { include: { inventory: true } },
+      },
     });
   }
 
@@ -88,7 +108,10 @@ export class ProductsRepository {
         is_active: false,
         updated_at: Math.floor(Date.now() / 1000),
       },
-      include: { inventory: true },
+      include: {
+        inventory: true,
+        variants: { include: { inventory: true } },
+      },
     });
   }
 }
