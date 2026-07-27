@@ -246,14 +246,18 @@ model CashMovement {
 
 model SyncQueue {
   id                String   @id @default(cuid())
+  companyId         String
+  storeId           String
   action            String
   entity            String
   entityId          String
   payload           String
   status            String   @default("pending")
+  error_message     String?
   synced_at         Int?
   created_at        Int      @default(0)
 
   @@index([status])
+  @@index([companyId, storeId, status])
   @@map("sync_queue")
 }
