@@ -1,4 +1,4 @@
-import { TextField, DropdownMenu, Avatar, IconButton, Badge, Tooltip } from "@radix-ui/themes";
+import { TextField, DropdownMenu, Avatar, IconButton, Tooltip } from "@radix-ui/themes";
 import {
   MagnifyingGlassIcon,
   BellIcon,
@@ -9,6 +9,9 @@ import {
 } from "@radix-ui/react-icons";
 import { useThemeStore } from "@/stores/theme.store";
 import { useAuth } from "@/hooks/useAuth";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { useSyncStore } from "@/stores/sync.store";
+import { NetworkIndicator } from "./NetworkIndicator";
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -19,6 +22,10 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
   const theme = useThemeStore((s) => s.theme);
   const toggleTheme = useThemeStore((s) => s.toggleTheme);
   const { user, logout } = useAuth();
+  const isOnline = useNetworkStatus();
+  const pendingCount = useSyncStore((s) => s.pendingCount);
+  const isProcessing = useSyncStore((s) => s.isProcessing);
+  const isBackendAvailable = useSyncStore((s) => s.isBackendAvailable);
 
   const initials = user?.name
     ?.split(" ")
@@ -61,9 +68,12 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
 
       <div style={{ flex: 1 }} />
 
-      <Badge color="green" variant="soft" size="1">
-        Online
-      </Badge>
+      <NetworkIndicator
+        isOnline={isOnline}
+        isBackendAvailable={isBackendAvailable}
+        pendingCount={pendingCount}
+        isProcessing={isProcessing}
+      />
 
       <Tooltip content={theme === "dark" ? "Modo claro" : "Modo oscuro"}>
         <IconButton

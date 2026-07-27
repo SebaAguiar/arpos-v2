@@ -3,10 +3,11 @@ import { Text, TextField, Badge } from "@radix-ui/themes";
 import { HomeIcon, PlusIcon, Pencil2Icon, TrashIcon, Cross1Icon } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
 import { useStoresStore } from "@/stores/stores.store";
+import { StaleIndicator } from "@/components/ui/StaleIndicator";
 import type { Store } from "@/lib/types";
 
 export function StoreManager() {
-  const { stores, storeCount, loading, error, canAddStore, fetchStores, createStore, updateStore, deleteStore } =
+  const { stores, storeCount, loading, error, isStale, canAddStore, fetchStores, createStore, updateStore, deleteStore } =
     useStoresStore();
   const closeStores = useDialogStore((s) => s.closeStores);
   const [showForm, setShowForm] = useState(false);
@@ -89,6 +90,7 @@ export function StoreManager() {
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <HomeIcon width={20} height={20} />
             <Text size="4" weight="bold">Sucursales</Text>
+            <StaleIndicator isStale={isStale} />
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             {!showForm && canAddStore && (

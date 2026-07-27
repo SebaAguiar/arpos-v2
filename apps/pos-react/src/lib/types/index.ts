@@ -134,3 +134,9 @@ export interface Store {
   created_at: number;
   updated_at: number;
 }
+
+export interface SyncStatus {
+  pending: number;
+  synced: number;
+  failed: number;
+}

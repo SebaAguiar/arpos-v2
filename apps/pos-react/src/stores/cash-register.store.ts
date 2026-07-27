@@ -4,6 +4,7 @@ import {
   type PaymentMethodSummary,
   type CashMovementData,
 } from "@/repositories/cash-register.repository";
+import { getCached, setCache } from "@/lib/cache";
 import { ApiError } from "@/services/api-client";
 
 export interface CashMovement {
@@ -29,10 +30,14 @@ export interface CashShift {
   paymentSummary: PaymentMethodSummary[];
 }
 
+const CACHE_KEY_SHIFT = "cashShift";
+const CACHE_KEY_HISTORY = "cashHistory";
+
 interface CashRegisterState {
   currentShift: CashShift | null;
   shifts: CashShift[];
   loading: boolean;
+  isStale: boolean;
   error: string | null;
 
   fetchCurrentShift: () => Promise<void>;
@@ -57,6 +62,7 @@ export const useCashRegisterStore = create<CashRegisterState>((set, get) => ({
   currentShift: null,
   shifts: [],
   loading: false,
+  isStale: false,
   error: null,
 
   fetchCurrentShift: async () => {
@@ -67,28 +73,32 @@ export const useCashRegisterStore = create<CashRegisterState>((set, get) => ({
         const movementsData = await CashRegisterRepository.getMovements(register.id);
         const movements = movementsData.map(mapMovement);
 
-        set({
-          currentShift: {
-            id: register.id,
-            initialAmount: register.openingAmount,
-            finalAmount: register.closingAmount,
-            status: "OPEN",
-            startTime: register.openedAt ?? Math.floor(Date.now() / 1000),
-            endTime: register.closedAt,
-            movements,
-            totalSales: register.totalSalesCents / 100,
-            totalIncome: register.incomeCents / 100,
-            totalExpenses: register.expenseCents / 100,
-            movementCount: register.movementCount,
-            paymentSummary: register.paymentSummary,
-          },
-          loading: false,
-        });
+        const shift: CashShift = {
+          id: register.id,
+          initialAmount: register.openingAmount,
+          finalAmount: register.closingAmount,
+          status: "OPEN",
+          startTime: register.openedAt ?? Math.floor(Date.now() / 1000),
+          endTime: register.closedAt,
+          movements,
+          totalSales: register.totalSalesCents / 100,
+          totalIncome: register.incomeCents / 100,
+          totalExpenses: register.expenseCents / 100,
+          movementCount: register.movementCount,
+          paymentSummary: register.paymentSummary,
+        };
+        setCache(CACHE_KEY_SHIFT, shift);
+        set({ currentShift: shift, loading: false, isStale: false });
       } else {
-        set({ currentShift: null, loading: false });
+        set({ currentShift: null, loading: false, isStale: false });
       }
     } catch {
-      set({ loading: false });
+      const cached = getCached<CashShift>(CACHE_KEY_SHIFT);
+      set({
+        currentShift: cached ?? null,
+        loading: false,
+        isStale: cached !== null,
+      });
     }
   },
 
@@ -111,9 +121,14 @@ export const useCashRegisterStore = create<CashRegisterState>((set, get) => ({
           movementCount: r.movementCount,
           paymentSummary: r.paymentSummary,
         }));
-      set({ shifts: closedShifts });
+      setCache(CACHE_KEY_HISTORY, closedShifts);
+      set({ shifts: closedShifts, isStale: false });
     } catch {
-      // silently fail for history
+      const cached = getCached<CashShift[]>(CACHE_KEY_HISTORY);
+      set({
+        shifts: cached ?? [],
+        isStale: cached !== null,
+      });
     }
   },
 

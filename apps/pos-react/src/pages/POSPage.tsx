@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Text, TextField, Badge, Tooltip } from "@radix-ui/themes";
 import {
   CameraIcon,
@@ -15,20 +16,17 @@ import { useProductsStore } from "@/stores/products.store";
 import { useDialogStore } from "@/stores/dialog.store";
 import { useLayoutStore } from "@/stores/layout.store";
 import { useCashRegisterStore } from "@/stores/cash-register.store";
+import { StaleIndicator } from "@/components/ui/StaleIndicator";
 import { ProductCard } from "@/components/product/ProductCard";
 import { CartItem } from "@/components/cart/CartItem";
 import { SummaryPanel } from "@/components/cart/SummaryPanel";
 import { PaymentDialog } from "@/components/sales/PaymentDialog";
 import { CustomerSelectionDialog } from "@/components/sales/CustomerSelectionDialog";
 import { SalesHistoryDialog } from "@/components/sales/SalesHistoryDialog";
-import { CashControlDialog } from "@/components/sales/CashControlDialog";
-import { DashboardDialog } from "@/components/dashboard/DashboardDialog";
-import { TasksDialog } from "@/components/tasks/TasksDialog";
-import { ProductManagementDialog } from "@/components/products/ProductManagementDialog";
-import { SettingsDialog } from "@/components/settings/SettingsDialog";
 import type { Product } from "@/lib/types";
 
 export function POSPage() {
+  const navigate = useNavigate();
   const sidebarOpen = useLayoutStore((s) => s.sidebarOpen);
   const addItem = useCartStore((s) => s.addItem);
   const items = useCartStore((s) => s.items);
@@ -41,6 +39,7 @@ export function POSPage() {
   const allProducts = useProductsStore((s) => s.products);
   const fetchProducts = useProductsStore((s) => s.fetchProducts);
   const fetchCurrentShift = useCashRegisterStore((s) => s.fetchCurrentShift);
+  const isProductsStale = useProductsStore((s) => s.isStale);
   const category = useProductsStore((s) => s.category);
   const sortField = useProductsStore((s) => s.sortField);
   const sortDirection = useProductsStore((s) => s.sortDirection);
@@ -75,20 +74,9 @@ export function POSPage() {
 
   const openPayment = useDialogStore((s) => s.openPayment);
   const openCustomerSelection = useDialogStore((s) => s.openCustomerSelection);
-  const openCashControl = useDialogStore((s) => s.openCashControl);
-  const openSettings = useDialogStore((s) => s.openSettings);
-  const openDashboard = useDialogStore((s) => s.openDashboard);
-  const openReports = useDialogStore((s) => s.openReports);
-  const openTasks = useDialogStore((s) => s.openTasks);
-  const openProductManagement = useDialogStore((s) => s.openProductManagement);
   const payment = useDialogStore((s) => s.payment);
   const customerSelection = useDialogStore((s) => s.customerSelection);
   const salesHistory = useDialogStore((s) => s.salesHistory);
-  const cashControl = useDialogStore((s) => s.cashControl);
-  const dashboard = useDialogStore((s) => s.dashboard);
-  const tasks = useDialogStore((s) => s.tasks);
-  const productManagement = useDialogStore((s) => s.productManagement);
-  const settings = useDialogStore((s) => s.settings);
 
   const displayProducts = filteredProducts;
 
@@ -122,12 +110,12 @@ export function POSPage() {
           >
             {[
               { icon: BackpackIcon, label: "POS", action: undefined },
-              { icon: LightningBoltIcon, label: "Caja", action: openCashControl },
-              { icon: TimerIcon, label: "Tareas", action: openTasks },
-              { icon: CubeIcon, label: "Productos", action: openProductManagement },
-              { icon: BarChartIcon, label: "Dashboard", action: openDashboard },
-              { icon: BarChartIcon, label: "Reportes", action: openReports },
-              { icon: GearIcon, label: "Configuración", action: openSettings },
+              { icon: LightningBoltIcon, label: "Caja", action: () => navigate("/cash-register") },
+              { icon: TimerIcon, label: "Tareas", action: () => navigate("/tasks") },
+              { icon: CubeIcon, label: "Productos", action: () => navigate("/products-management") },
+              { icon: BarChartIcon, label: "Dashboard", action: () => navigate("/dashboard") },
+              { icon: BarChartIcon, label: "Reportes", action: () => navigate("/reports") },
+              { icon: GearIcon, label: "Configuración", action: () => navigate("/settings") },
             ].map(({ icon: Icon, label, action }) =>
               action ? (
                 <Tooltip key={label} content={label}>
@@ -200,6 +188,7 @@ export function POSPage() {
           <Badge color="gray" variant="soft" size="1">
             {displayProducts.length} productos
           </Badge>
+          <StaleIndicator isStale={isProductsStale} />
         </div>
 
         {/* Product grid */}
@@ -317,11 +306,6 @@ export function POSPage() {
       {payment && <PaymentDialog />}
       {customerSelection && <CustomerSelectionDialog />}
       {salesHistory && <SalesHistoryDialog />}
-      {cashControl && <CashControlDialog />}
-      {dashboard && <DashboardDialog />}
-      {tasks && <TasksDialog />}
-      {productManagement && <ProductManagementDialog />}
-      {settings && <SettingsDialog />}
     </div>
   );
 }

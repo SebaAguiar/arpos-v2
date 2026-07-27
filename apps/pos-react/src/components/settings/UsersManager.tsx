@@ -3,6 +3,7 @@ import { Text, TextField, Select, Badge } from "@radix-ui/themes";
 import { PersonIcon, PlusIcon, Pencil2Icon, TrashIcon, Cross1Icon, LockClosedIcon, EyeOpenIcon, EyeNoneIcon } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
 import { useUsersStore } from "@/stores/users.store";
+import { StaleIndicator } from "@/components/ui/StaleIndicator";
 import type { User } from "@/lib/types";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -18,7 +19,7 @@ const ROLE_COLORS: Record<string, string> = {
 };
 
 export function UsersManager() {
-  const { users, loading, error, fetchUsers, createUser, updateUser, deleteUser } = useUsersStore();
+  const { users, loading, error, isStale, fetchUsers, createUser, updateUser, deleteUser } = useUsersStore();
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<User | null>(null);
   const [form, setForm] = useState({ email: "", password: "", name: "", role: "cashier" });
@@ -130,6 +131,7 @@ export function UsersManager() {
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <PersonIcon width={20} height={20} />
             <Text size="4" weight="bold">Usuarios</Text>
+            <StaleIndicator isStale={isStale} />
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             {!showForm && (

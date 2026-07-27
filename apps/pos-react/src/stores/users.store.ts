@@ -1,10 +1,14 @@
 import { create } from "zustand";
 import { UsersRepository } from "@/repositories/users.repository";
+import { getCached, setCache } from "@/lib/cache";
 import type { User } from "@/lib/types";
+
+const CACHE_KEY = "users";
 
 interface UsersState {
   users: User[];
   loading: boolean;
+  isStale: boolean;
   error: string | null;
   fetchUsers: (filters?: { role?: string; is_active?: boolean }) => Promise<void>;
   createUser: (input: {
@@ -29,16 +33,22 @@ interface UsersState {
 export const useUsersStore = create<UsersState>((set, get) => ({
   users: [],
   loading: false,
+  isStale: false,
   error: null,
 
   fetchUsers: async (filters) => {
     set({ loading: true, error: null });
     try {
       const users = await UsersRepository.getAll(filters);
-      set({ users, loading: false });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Error loading users";
-      set({ error: message, loading: false });
+      setCache(CACHE_KEY, users);
+      set({ users, loading: false, isStale: false });
+    } catch {
+      const cached = getCached<User[]>(CACHE_KEY);
+      set({
+        users: cached ?? [],
+        loading: false,
+        isStale: cached !== null,
+      });
     }
   },
 

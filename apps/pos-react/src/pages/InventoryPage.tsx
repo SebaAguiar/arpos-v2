@@ -12,6 +12,7 @@ import {
 import { useInventoryStore } from "@/stores/inventory.store";
 import { StockAdjustmentDialog } from "@/components/inventory/StockAdjustmentDialog";
 import { StockMovementsDialog } from "@/components/inventory/StockMovementsDialog";
+import { StaleIndicator } from "@/components/ui/StaleIndicator";
 
 type StatusFilter = "all" | "out_of_stock" | "low_stock" | "normal";
 
@@ -19,6 +20,7 @@ export function InventoryPage() {
   const stock = useInventoryStore((s) => s.stock);
   const loading = useInventoryStore((s) => s.loading);
   const error = useInventoryStore((s) => s.error);
+  const isStale = useInventoryStore((s) => s.isStale);
   const fetchStock = useInventoryStore((s) => s.fetchStock);
   const clearError = useInventoryStore((s) => s.clearError);
 
@@ -84,17 +86,19 @@ export function InventoryPage() {
             Control de existencias, historial de movimientos y alertas de reabastecimiento.
           </Text>
         </Flex>
-
-        <Button
-          size="2"
-          onClick={() => {
-            setSelectedProductId(null);
-            setAdjustmentOpen(true);
-          }}
-        >
-          <PlusIcon width={16} height={16} />
-          Nuevo movimiento
-        </Button>
+        <Flex align="center" gap="2">
+          <StaleIndicator isStale={isStale} />
+          <Button
+            size="2"
+            onClick={() => {
+              setSelectedProductId(null);
+              setAdjustmentOpen(true);
+            }}
+          >
+            <PlusIcon width={16} height={16} />
+            Nuevo movimiento
+          </Button>
+        </Flex>
       </Flex>
 
       {/* Alerta de Error si existiera */}

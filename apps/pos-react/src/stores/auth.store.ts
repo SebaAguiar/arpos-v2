@@ -54,9 +54,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const user = await AuthRepository.getProfile();
       set({ user, loading: false, initialized: true });
-    } catch {
-      clearAuthToken();
-      set({ user: null, loading: false, initialized: true });
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 401) {
+        clearAuthToken();
+        set({ user: null, loading: false, initialized: true });
+      } else {
+        set({ loading: false, initialized: true });
+      }
     }
   },
 

@@ -30,6 +30,7 @@ import { ProductsRepository } from "@/repositories/products.repository";
 import { StockBadge } from "@/components/product/StockBadge";
 import { ProductFormDialog } from "@/components/product/ProductFormDialog";
 import { StockAdjustmentDialog } from "@/components/product/StockAdjustmentDialog";
+import { StaleIndicator } from "@/components/ui/StaleIndicator";
 import type { Product, ProductSortField, ProductSortDirection } from "@/lib/types";
 
 export function ProductsPage() {
@@ -40,6 +41,7 @@ export function ProductsPage() {
     category,
     sortField,
     sortDirection,
+    isStale,
     fetchProducts,
     setSearch,
     setCategory,
@@ -169,6 +171,7 @@ export function ProductsPage() {
                 {outOfStockCount} agotados
               </Badge>
             )}
+            <StaleIndicator isStale={isStale} />
           </Flex>
           <Text size="2" color="gray" style={{ marginTop: "4px" }}>
             Administrá el catálogo de productos, precios y movimientos de stock en tiempo real.

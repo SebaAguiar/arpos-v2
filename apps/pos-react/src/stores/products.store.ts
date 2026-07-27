@@ -1,14 +1,18 @@
 import { create } from "zustand";
 import { ProductsRepository } from "@/repositories/products.repository";
+import { getCached, setCache } from "@/lib/cache";
 import type {
   Product,
   ProductSortField,
   ProductSortDirection,
 } from "@/lib/types";
 
+const CACHE_KEY = "products";
+
 interface ProductsState {
   products: Product[];
   loading: boolean;
+  isStale: boolean;
   search: string;
   category: string | null;
   sortField: ProductSortField;
@@ -28,6 +32,7 @@ interface ProductsState {
 export const useProductsStore = create<ProductsState>((set) => ({
   products: [],
   loading: false,
+  isStale: false,
   search: "",
   category: null,
   sortField: "name",
@@ -39,9 +44,15 @@ export const useProductsStore = create<ProductsState>((set) => ({
     set({ loading: true });
     try {
       const products = await ProductsRepository.getAll();
-      set({ products, loading: false, page: 0 });
+      setCache(CACHE_KEY, products);
+      set({ products, loading: false, isStale: false, page: 0 });
     } catch {
-      set({ loading: false });
+      const cached = getCached<Product[]>(CACHE_KEY);
+      set({
+        products: cached ?? [],
+        loading: false,
+        isStale: cached !== null,
+      });
     }
   },
 

@@ -6,6 +6,10 @@ import { ProductsPage } from "@/pages/ProductsPage";
 import { InventoryPage } from "@/pages/InventoryPage";
 import { ReportsPage } from "@/pages/ReportsPage";
 import { SettingsPage } from "@/pages/SettingsPage";
+import { CashRegisterPage } from "@/pages/CashRegisterPage";
+import { DashboardPage } from "@/pages/DashboardPage";
+import { TasksPage } from "@/pages/TasksPage";
+import { ProductManagementPage } from "@/pages/ProductManagementPage";
 
 export function App() {
   return (
@@ -17,6 +21,10 @@ export function App() {
           <Route path="/inventory" element={<InventoryPage />} />
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/cash-register" element={<CashRegisterPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/tasks" element={<TasksPage />} />
+          <Route path="/products-management" element={<ProductManagementPage />} />
         </Route>
       </Routes>
     </ProtectedRoute>

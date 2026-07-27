@@ -1,10 +1,14 @@
 import { create } from "zustand";
 import { StoresRepository, type Store } from "@/repositories/stores.repository";
+import { getCached, setCache } from "@/lib/cache";
+
+const CACHE_KEY = "stores";
 
 interface StoresState {
   stores: Store[];
   storeCount: number;
   loading: boolean;
+  isStale: boolean;
   error: string | null;
   canAddStore: boolean;
   fetchStores: () => Promise<void>;
@@ -16,10 +20,16 @@ interface StoresState {
   deleteStore: (id: string) => Promise<void>;
 }
 
+interface StoresCache {
+  stores: Store[];
+  storeCount: number;
+}
+
 export const useStoresStore = create<StoresState>((set, get) => ({
   stores: [],
   storeCount: 0,
   loading: false,
+  isStale: false,
   error: null,
   canAddStore: true,
 
@@ -30,10 +40,21 @@ export const useStoresStore = create<StoresState>((set, get) => ({
         StoresRepository.getAll(),
         StoresRepository.getCount(),
       ]);
-      set({ stores, storeCount, canAddStore: storeCount < 1, loading: false });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Error loading stores";
-      set({ error: message, loading: false });
+      setCache(CACHE_KEY, { stores, storeCount } satisfies StoresCache);
+      set({ stores, storeCount, canAddStore: storeCount < 1, loading: false, isStale: false });
+    } catch {
+      const cached = getCached<StoresCache>(CACHE_KEY);
+      if (cached) {
+        set({
+          stores: cached.stores,
+          storeCount: cached.storeCount,
+          canAddStore: cached.storeCount < 1,
+          loading: false,
+          isStale: true,
+        });
+      } else {
+        set({ loading: false, isStale: false });
+      }
     }
   },
 
