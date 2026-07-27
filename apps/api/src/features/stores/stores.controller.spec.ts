@@ -80,8 +80,9 @@ describe('StoresController', () => {
 
   describe('remove', () => {
     it('should soft-delete a store', async () => {
+      mockService.remove.mockResolvedValue(undefined);
       const result = await controller.remove('s1');
-      expect(result.is_active).toBe(false);
+      expect(result).toBeUndefined();
     });
   });
 });

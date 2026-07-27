@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { StoresService } from './stores.service';
 import { StoresRepository } from './stores.repository';
+import { SyncService } from '../sync/sync.service';
 import { NotFoundException, ConflictException } from '@nestjs/common';
 
 describe('StoresService', () => {
@@ -25,7 +26,11 @@ describe('StoresService', () => {
     ),
     create: jest.fn().mockResolvedValue(mockStore),
     update: jest.fn().mockResolvedValue({ ...mockStore, name: 'Updated' }),
-    softDelete: jest.fn().mockResolvedValue({ ...mockStore, is_active: false }),
+    softDelete: jest.fn().mockResolvedValue(undefined),
+  };
+
+  const mockSync = {
+    enqueueChange: jest.fn().mockResolvedValue(undefined),
   };
 
   beforeAll(async () => {
@@ -33,6 +38,7 @@ describe('StoresService', () => {
       providers: [
         StoresService,
         { provide: StoresRepository, useValue: mockRepo },
+        { provide: SyncService, useValue: mockSync },
       ],
     }).compile();
 
@@ -98,7 +104,7 @@ describe('StoresService', () => {
     it('should soft-delete when multiple stores exist', async () => {
       mockRepo.count.mockResolvedValueOnce(2);
       const result = await service.remove('s1');
-      expect(result.is_active).toBe(false);
+      expect(result).toBeUndefined();
     });
 
     it('should throw ConflictException when removing last store', async () => {

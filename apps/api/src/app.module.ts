@@ -12,6 +12,7 @@ import { CashRegisterModule } from './features/cash-register/cash-register.modul
 import { InventoryModule } from './features/inventory/inventory.module';
 import { UsersModule } from './features/users/users.module';
 import { StoresModule } from './features/stores/stores.module';
+import { SyncModule } from './features/sync/sync.module';
 import { LocalTenantMiddleware } from './core/tenant/local-tenant.middleware';
 import { JwtAuthGuard } from './features/auth/guards/jwt-auth.guard';
 
@@ -29,6 +30,7 @@ import { JwtAuthGuard } from './features/auth/guards/jwt-auth.guard';
     InventoryModule,
     UsersModule,
     StoresModule,
+    SyncModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

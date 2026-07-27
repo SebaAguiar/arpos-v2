@@ -11,6 +11,9 @@ describe('SalesService', () => {
     getSalesByPaymentMethod: jest.Mock;
     getTopProducts: jest.Mock;
   };
+  let mockSync: {
+    enqueueChange: jest.Mock;
+  };
 
   beforeEach(() => {
     mockRepo = {
@@ -21,7 +24,10 @@ describe('SalesService', () => {
       getSalesByPaymentMethod: jest.fn(),
       getTopProducts: jest.fn(),
     };
-    service = new SalesService(mockRepo as never);
+    mockSync = {
+      enqueueChange: jest.fn().mockResolvedValue(undefined),
+    };
+    service = new SalesService(mockRepo as never, mockSync as never);
   });
 
   describe('findAll', () => {

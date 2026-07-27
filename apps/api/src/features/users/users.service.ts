@@ -2,10 +2,14 @@ import { Injectable, NotFoundException, ConflictException } from '@nestjs/common
 import { UsersRepository, SafeUser } from './users.repository';
 import { CreateUserInput } from './dto/create-user.schema';
 import { UpdateUserInput } from './dto/update-user.schema';
+import { SyncService } from '../sync/sync.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly usersRepo: UsersRepository) {}
+  constructor(
+    private readonly usersRepo: UsersRepository,
+    private readonly syncService: SyncService,
+  ) {}
 
   async findAll(filters?: { role?: string; is_active?: boolean }): Promise<SafeUser[]> {
     return this.usersRepo.findAll(filters);
@@ -24,7 +28,15 @@ export class UsersService {
     if (existing) {
       throw new ConflictException(`User with email ${data.email} already exists`);
     }
-    return this.usersRepo.create(data);
+    const user = await this.usersRepo.create(data);
+
+    await this.syncService.enqueueChange('create', 'user', user.id, {
+      email: user.email,
+      name: user.name,
+      role: user.role,
+    });
+
+    return user;
   }
 
   async update(id: string, data: UpdateUserInput): Promise<SafeUser> {
@@ -37,14 +49,27 @@ export class UsersService {
       }
     }
 
-    return this.usersRepo.update(id, data);
+    const user = await this.usersRepo.update(id, data);
+
+    await this.syncService.enqueueChange('update', 'user', user.id, {
+      email: user.email,
+      name: user.name,
+      role: user.role,
+    });
+
+    return user;
   }
 
-  async remove(id: string): Promise<SafeUser> {
+  async remove(id: string): Promise<void> {
     const user = await this.findOne(id);
     if (user.role === 'admin') {
       throw new ConflictException('Cannot deactivate admin users');
     }
-    return this.usersRepo.softDelete(id);
+    await this.usersRepo.softDelete(id);
+
+    await this.syncService.enqueueChange('delete', 'user', user.id, {
+      email: user.email,
+      name: user.name,
+    });
   }
 }

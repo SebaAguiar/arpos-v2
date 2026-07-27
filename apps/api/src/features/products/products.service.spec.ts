@@ -10,6 +10,9 @@ describe('ProductsService', () => {
     update: jest.Mock;
     softDelete: jest.Mock;
   };
+  let mockSync: {
+    enqueueChange: jest.Mock;
+  };
 
   beforeEach(() => {
     mockRepo = {
@@ -19,7 +22,10 @@ describe('ProductsService', () => {
       update: jest.fn(),
       softDelete: jest.fn(),
     };
-    service = new ProductsService(mockRepo as never);
+    mockSync = {
+      enqueueChange: jest.fn().mockResolvedValue(undefined),
+    };
+    service = new ProductsService(mockRepo as never, mockSync as never);
   });
 
   describe('findAll', () => {
@@ -84,13 +90,16 @@ describe('ProductsService', () => {
 
   describe('remove', () => {
     it('should soft delete an existing product', async () => {
-      const existing = { id: 'p1', name: 'Widget' };
-      const deleted = { id: 'p1', is_active: false };
+      const existing = { id: 'p1', name: 'Widget', code: 'W001' };
       mockRepo.findById.mockResolvedValue(existing);
-      mockRepo.softDelete.mockResolvedValue(deleted);
+      mockRepo.softDelete.mockResolvedValue(undefined);
 
       const result = await service.remove('p1');
-      expect(result).toEqual(deleted);
+      expect(result).toBeUndefined();
+      expect(mockSync.enqueueChange).toHaveBeenCalledWith('delete', 'product', 'p1', {
+        code: 'W001',
+        name: 'Widget',
+      });
     });
 
     it('should throw NotFoundException when deleting nonexistent product', async () => {

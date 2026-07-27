@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { CashRegisterRepository, CashRegisterWithSummary } from './cash-register.repository';
 import { CreateCashMovementInput } from './dto/create-cash-movement.schema';
+import { SyncService } from '../sync/sync.service';
 
 @Injectable()
 export class CashRegisterService {
-  constructor(private readonly cashRegisterRepo: CashRegisterRepository) {}
+  constructor(
+    private readonly cashRegisterRepo: CashRegisterRepository,
+    private readonly syncService: SyncService,
+  ) {}
 
   async findCurrent(companyId: string, storeId: string): Promise<CashRegisterWithSummary> {
     const register = await this.cashRegisterRepo.findOpen(companyId, storeId);
@@ -59,7 +63,17 @@ export class CashRegisterService {
         'A cash register is already open. Close it before opening a new one.',
       );
     }
-    return this.cashRegisterRepo.create({ companyId, storeId, ...data });
+    const register = await this.cashRegisterRepo.create({ companyId, storeId, ...data });
+
+    await this.syncService.enqueueChange('create', 'cash_register', register.id, {
+      name: register.name,
+      opening_amount: register.opening_amount,
+      status: register.status,
+      companyId,
+      storeId,
+    });
+
+    return register;
   }
 
   async close(id: string, closing_amount: number) {
@@ -70,7 +84,15 @@ export class CashRegisterService {
     if (register.status === 'closed') {
       throw new ConflictException('Cash register is already closed');
     }
-    return this.cashRegisterRepo.close(id, closing_amount);
+    const closed = await this.cashRegisterRepo.close(id, closing_amount);
+
+    await this.syncService.enqueueChange('update', 'cash_register', closed.id, {
+      name: closed.name,
+      closing_amount: closed.closing_amount,
+      status: closed.status,
+    });
+
+    return closed;
   }
 
   async createMovement(
@@ -86,12 +108,22 @@ export class CashRegisterService {
     if (register.status === 'closed') {
       throw new ConflictException('Cannot add movements to a closed cash register');
     }
-    return this.cashRegisterRepo.createMovement({
+    const movement = await this.cashRegisterRepo.createMovement({
       cashRegisterId,
       companyId,
       storeId,
       ...input,
     });
+
+    await this.syncService.enqueueChange('create', 'cash_register', cashRegisterId, {
+      movementId: movement.id,
+      type: movement.type,
+      amount_cents: movement.amount_cents,
+      description: movement.description,
+      cashRegisterId,
+    });
+
+    return movement;
   }
 
   async getMovements(cashRegisterId: string) {

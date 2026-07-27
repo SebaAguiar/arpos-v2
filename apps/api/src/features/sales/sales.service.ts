@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { SalesRepository } from './sales.repository';
 import { CreateSaleInput } from './dto/create-sale.schema';
+import { SyncService } from '../sync/sync.service';
 
 export type { CreateSaleInput };
 
@@ -18,7 +19,10 @@ export interface SaleStats {
 
 @Injectable()
 export class SalesService {
-  constructor(private readonly salesRepo: SalesRepository) {}
+  constructor(
+    private readonly salesRepo: SalesRepository,
+    private readonly syncService: SyncService,
+  ) {}
 
   async findAll(filters?: SaleFilters) {
     return this.salesRepo.findAll(filters);
@@ -33,7 +37,16 @@ export class SalesService {
   }
 
   async create(input: CreateSaleInput) {
-    return this.salesRepo.create(input);
+    const sale = await this.salesRepo.create(input);
+
+    await this.syncService.enqueueChange('create', 'sale', sale.id, {
+      total_cents: sale.total_cents,
+      payment_method: sale.payment_method,
+      status: sale.status,
+      user_id: sale.user_id,
+    });
+
+    return sale;
   }
 
   async getStats(from?: number, to?: number): Promise<SaleStats> {

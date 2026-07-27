@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { UsersRepository, SafeUser } from './users.repository';
+import { SyncService } from '../sync/sync.service';
 import { NotFoundException, ConflictException } from '@nestjs/common';
 
 describe('UsersService', () => {
@@ -38,7 +39,11 @@ describe('UsersService', () => {
     ),
     create: jest.fn().mockResolvedValue(mockCashier),
     update: jest.fn().mockResolvedValue({ ...mockUser, name: 'Updated' }),
-    softDelete: jest.fn().mockResolvedValue({ ...mockCashier, is_active: false }),
+    softDelete: jest.fn().mockResolvedValue(undefined),
+  };
+
+  const mockSync = {
+    enqueueChange: jest.fn().mockResolvedValue(undefined),
   };
 
   beforeAll(async () => {
@@ -46,6 +51,7 @@ describe('UsersService', () => {
       providers: [
         UsersService,
         { provide: UsersRepository, useValue: mockRepo },
+        { provide: SyncService, useValue: mockSync },
       ],
     }).compile();
 
@@ -114,7 +120,8 @@ describe('UsersService', () => {
   describe('remove', () => {
     it('should soft-delete a non-admin user', async () => {
       const result = await service.remove('u2');
-      expect(result.is_active).toBe(false);
+      expect(result).toBeUndefined();
+      expect(mockRepo.softDelete).toHaveBeenCalledWith('u2');
     });
 
     it('should throw ConflictException when deleting admin', async () => {

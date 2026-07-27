@@ -2,10 +2,14 @@ import { Injectable, BadRequestException, NotFoundException } from '@nestjs/comm
 import { InventoryRepository, StockItem, InventoryMovementData } from './inventory.repository';
 import { CreateMovementInput } from './dto/create-movement.schema';
 import { ListMovementsInput } from './dto/list-movements.schema';
+import { SyncService } from '../sync/sync.service';
 
 @Injectable()
 export class InventoryService {
-  constructor(private readonly inventoryRepo: InventoryRepository) {}
+  constructor(
+    private readonly inventoryRepo: InventoryRepository,
+    private readonly syncService: SyncService,
+  ) {}
 
   async listStock(companyId: string, storeId: string): Promise<StockItem[]> {
     return this.inventoryRepo.getStock(companyId, storeId);
@@ -53,6 +57,16 @@ export class InventoryService {
     });
 
     await this.inventoryRepo.adjustStock(input.productId, quantityDelta);
+
+    await this.syncService.enqueueChange('create', 'inventory', input.productId, {
+      productId: input.productId,
+      type: input.type,
+      quantity: quantityDelta,
+      reason: input.reason,
+      companyId,
+      storeId,
+      userId: userId ?? null,
+    });
   }
 
   private calculateDelta(type: string, quantity: number): number {

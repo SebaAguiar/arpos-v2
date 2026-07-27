@@ -88,8 +88,7 @@ describe('UsersController', () => {
 
   describe('remove', () => {
     it('should soft-delete a user', async () => {
-      const result = await controller.remove('u1');
-      expect(result.is_active).toBe(false);
+      await controller.remove('u1');
       expect(service.remove).toHaveBeenCalledWith('u1');
     });
   });

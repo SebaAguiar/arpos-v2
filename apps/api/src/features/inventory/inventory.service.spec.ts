@@ -9,6 +9,9 @@ describe('InventoryService', () => {
     createMovement: jest.Mock;
     adjustStock: jest.Mock;
   };
+  let mockSync: {
+    enqueueChange: jest.Mock;
+  };
 
   beforeEach(() => {
     mockRepo = {
@@ -17,7 +20,10 @@ describe('InventoryService', () => {
       createMovement: jest.fn(),
       adjustStock: jest.fn(),
     };
-    service = new InventoryService(mockRepo as never);
+    mockSync = {
+      enqueueChange: jest.fn().mockResolvedValue(undefined),
+    };
+    service = new InventoryService(mockRepo as never, mockSync as never);
   });
 
   describe('listStock', () => {

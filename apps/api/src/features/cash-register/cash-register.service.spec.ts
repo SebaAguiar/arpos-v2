@@ -14,6 +14,9 @@ describe('CashRegisterService', () => {
     createMovement: jest.Mock;
     getMovements: jest.Mock;
   };
+  let mockSync: {
+    enqueueChange: jest.Mock;
+  };
 
   beforeEach(() => {
     mockRepo = {
@@ -27,7 +30,10 @@ describe('CashRegisterService', () => {
       createMovement: jest.fn(),
       getMovements: jest.fn(),
     };
-    service = new CashRegisterService(mockRepo as never);
+    mockSync = {
+      enqueueChange: jest.fn().mockResolvedValue(undefined),
+    };
+    service = new CashRegisterService(mockRepo as never, mockSync as never);
   });
 
   describe('findCurrent', () => {

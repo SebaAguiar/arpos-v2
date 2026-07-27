@@ -2,10 +2,14 @@ import { Injectable, NotFoundException, ConflictException } from '@nestjs/common
 import { StoresRepository } from './stores.repository';
 import { CreateStoreInput } from './dto/create-store.schema';
 import { UpdateStoreInput } from './dto/update-store.schema';
+import { SyncService } from '../sync/sync.service';
 
 @Injectable()
 export class StoresService {
-  constructor(private readonly storesRepo: StoresRepository) {}
+  constructor(
+    private readonly storesRepo: StoresRepository,
+    private readonly syncService: SyncService,
+  ) {}
 
   async findAll() {
     return this.storesRepo.findAll();
@@ -30,20 +34,43 @@ export class StoresService {
         'Local mode allows only 1 store. Upgrade to multi-store plan for more.',
       );
     }
-    return this.storesRepo.create(data);
+    const store = await this.storesRepo.create(data);
+
+    await this.syncService.enqueueChange('create', 'store', store.id, {
+      name: store.name,
+      address: store.address,
+      phone: store.phone,
+    });
+
+    return store;
   }
 
   async update(id: string, data: UpdateStoreInput) {
     await this.findOne(id);
-    return this.storesRepo.update(id, data);
+    const store = await this.storesRepo.update(id, data);
+
+    await this.syncService.enqueueChange('update', 'store', store.id, {
+      name: store.name,
+      address: store.address,
+      phone: store.phone,
+    });
+
+    return store;
   }
 
   async remove(id: string) {
-    await this.findOne(id);
+    const store = await this.findOne(id);
     const count = await this.storesRepo.count();
     if (count <= 1) {
       throw new ConflictException('Cannot deactivate the only store');
     }
-    return this.storesRepo.softDelete(id);
+
+    await this.storesRepo.softDelete(id);
+
+    await this.syncService.enqueueChange('delete', 'store', store.id, {
+      name: store.name,
+    });
+
+    return undefined;
   }
 }

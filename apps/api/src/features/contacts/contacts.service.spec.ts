@@ -10,6 +10,9 @@ describe('ContactsService', () => {
     update: jest.Mock;
     softDelete: jest.Mock;
   };
+  let mockSync: {
+    enqueueChange: jest.Mock;
+  };
 
   beforeEach(() => {
     mockRepo = {
@@ -19,7 +22,10 @@ describe('ContactsService', () => {
       update: jest.fn(),
       softDelete: jest.fn(),
     };
-    service = new ContactsService(mockRepo as never);
+    mockSync = {
+      enqueueChange: jest.fn().mockResolvedValue(undefined),
+    };
+    service = new ContactsService(mockRepo as never, mockSync as never);
   });
 
   describe('findAll', () => {
@@ -79,11 +85,15 @@ describe('ContactsService', () => {
 
   describe('remove', () => {
     it('should soft delete an existing contact', async () => {
-      mockRepo.findById.mockResolvedValue({ id: 'c1' });
-      mockRepo.softDelete.mockResolvedValue({ id: 'c1', is_active: false });
+      mockRepo.findById.mockResolvedValue({ id: 'c1', name: 'John', type: 'customer' });
+      mockRepo.softDelete.mockResolvedValue(undefined);
 
       const result = await service.remove('c1');
-      expect(result).toEqual({ id: 'c1', is_active: false });
+      expect(result).toBeUndefined();
+      expect(mockSync.enqueueChange).toHaveBeenCalledWith('delete', 'contact', 'c1', {
+        name: 'John',
+        type: 'customer',
+      });
     });
 
     it('should throw NotFoundException when not found', async () => {
