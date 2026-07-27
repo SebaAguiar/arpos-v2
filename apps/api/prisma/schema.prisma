@@ -21,6 +21,7 @@ model Company {
   stores            Store[]
   users             User[]
   products          Product[]
+  product_variants  ProductVariant[]
   inventory         Inventory[]
   inventory_movements InventoryMovement[]
   sales             Sale[]
@@ -90,6 +91,7 @@ model Product {
 
   company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   store             Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  variants          ProductVariant[]
   inventory         Inventory[]
   inventory_movements InventoryMovement[]
   sale_items        SaleItem[]
@@ -98,11 +100,36 @@ model Product {
   @@map("products")
 }
 
+model ProductVariant {
+  id                String   @id @default(cuid())
+  companyId         String
+  productId         String
+  size              String?
+  color             String?
+  barcode           String?
+  sku               String?
+  price_cents       Int      @default(0)
+  cost_cents        Int?
+  is_active         Boolean  @default(true)
+  created_at        Int      @default(0)
+  updated_at        Int
+
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  inventory         Inventory[]
+  sale_items        SaleItem[]
+  inventory_movements InventoryMovement[]
+
+  @@unique([companyId, barcode])
+  @@map("product_variants")
+}
+
 model Inventory {
   id                String   @id @default(cuid())
   companyId         String
   storeId           String
   productId         String
+  variantId         String?
   quantity          Int      @default(0)
   min_stock         Int      @default(0)
   max_stock         Int?
@@ -112,8 +139,9 @@ model Inventory {
   company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   store             Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
   product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant           ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
 
-  @@unique([storeId, productId])
+  @@unique([storeId, variantId])
   @@map("inventory")
 }
 
@@ -122,6 +150,7 @@ model InventoryMovement {
   companyId       String
   storeId         String
   productId       String
+  variantId       String?
   userId          String?
   type            String
   quantity        Int
@@ -133,6 +162,7 @@ model InventoryMovement {
   company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   store           Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
   product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant         ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
   user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([companyId, storeId])
@@ -148,6 +178,7 @@ model Sale {
   cash_register_id  String?
   user_id           String
   contact_id        String?
+  ticket_number     Int      @default(0)
 
   total_cents       Int
   discount_cents    Int      @default(0)
@@ -169,6 +200,7 @@ model Sale {
   items             SaleItem[]
 
   @@index([companyId, storeId])
+  @@index([companyId, storeId, ticket_number])
   @@index([created_at])
   @@map("sales")
 }
@@ -177,6 +209,7 @@ model SaleItem {
   id                String   @id @default(cuid())
   saleId            String
   productId         String
+  variantId         String?
   quantity          Int
   unit_price_cents  Int
   total_cents       Int
@@ -184,6 +217,7 @@ model SaleItem {
 
   sale              Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
   product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant           ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
 
   @@map("sale_items")
 }
