@@ -22,6 +22,7 @@ export interface ApiSale {
   cash_register_id: string | null;
   user_id: string;
   contact_id: string | null;
+  ticket_number: number;
   total_cents: number;
   discount_cents: number;
   tax_cents: number;
@@ -33,6 +34,7 @@ export interface ApiSale {
   created_at: number;
   updated_at: number;
   items?: ApiSaleItem[];
+  user?: { id: string; name: string; email: string };
 }
 
 export interface ApiSaleStats {

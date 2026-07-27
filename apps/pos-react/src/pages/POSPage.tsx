@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Text, TextField, Badge, Tooltip } from "@radix-ui/themes";
 import {
@@ -18,12 +18,19 @@ import { useLayoutStore } from "@/stores/layout.store";
 import { useCashRegisterStore } from "@/stores/cash-register.store";
 import { StaleIndicator } from "@/components/ui/StaleIndicator";
 import { ProductCard } from "@/components/product/ProductCard";
+import { VariantSelectionDialog } from "@/components/product/VariantSelectionDialog";
 import { CartItem } from "@/components/cart/CartItem";
 import { SummaryPanel } from "@/components/cart/SummaryPanel";
 import { PaymentDialog } from "@/components/sales/PaymentDialog";
 import { CustomerSelectionDialog } from "@/components/sales/CustomerSelectionDialog";
 import { SalesHistoryDialog } from "@/components/sales/SalesHistoryDialog";
-import type { Product } from "@/lib/types";
+import { SaleSuccessDialog } from "@/components/sales/SaleSuccessDialog";
+import {
+  printReceipt,
+  downloadReceiptPdf,
+  shareViaWhatsApp,
+} from "@/services/receipt.service";
+import type { Product, ProductVariant, Sale, StoreConfig } from "@/lib/types";
 
 export function POSPage() {
   const navigate = useNavigate();
@@ -48,6 +55,43 @@ export function POSPage() {
     fetchProducts();
     fetchCurrentShift();
   }, [fetchProducts, fetchCurrentShift]);
+
+  // Sale success dialog state
+  const [successDialog, setSuccessDialog] = useState<{
+    open: boolean;
+    sale: Sale | null;
+    change: number;
+    email: string;
+  }>({ open: false, sale: null, change: 0, email: "" });
+
+  const handleSaleComplete = useCallback(
+    (sale: Sale, change: number, email: string) => {
+      setSuccessDialog({ open: true, sale, change, email });
+    },
+    []
+  );
+
+  const handleSuccessClose = useCallback(
+    (action: "close" | "print" | "download" | "whatsapp") => {
+      const { sale } = successDialog;
+      if (sale) {
+        const storeConfig: StoreConfig | null = null; // TODO: wire from settings store
+        switch (action) {
+          case "print":
+            printReceipt(sale, storeConfig);
+            break;
+          case "download":
+            downloadReceiptPdf(sale, storeConfig);
+            break;
+          case "whatsapp":
+            shareViaWhatsApp(sale, storeConfig);
+            break;
+        }
+      }
+      setSuccessDialog({ open: false, sale: null, change: 0, email: "" });
+    },
+    [successDialog]
+  );
 
   const filteredProducts = useMemo(() => {
     let result = allProducts.filter((p) => p.active);
@@ -80,14 +124,42 @@ export function POSPage() {
 
   const displayProducts = filteredProducts;
 
+  const [variantDialog, setVariantDialog] = useState<Product | null>(null);
+
   const handleAddToCart = useCallback(
     (product: Product) => {
+      if (product.variants.length > 1) {
+        setVariantDialog(product);
+        return;
+      }
+      const variant = product.variants[0];
       addItem({
         productId: product.id,
+        variantId: variant?.id,
         name: product.name,
-        price: product.price,
+        variantLabel: variant?.size || variant?.color
+          ? [variant?.size, variant?.color].filter(Boolean).join(" / ")
+          : undefined,
+        price: variant?.price ?? product.price,
         quantity: 1,
+        sku: variant?.sku,
       });
+    },
+    [addItem]
+  );
+
+  const handleVariantSelect = useCallback(
+    (product: Product, variant: ProductVariant) => {
+      addItem({
+        productId: product.id,
+        variantId: variant.id,
+        name: product.name,
+        variantLabel: [variant.size, variant.color].filter(Boolean).join(" / ") || undefined,
+        price: variant.price ?? product.price,
+        quantity: 1,
+        sku: variant.sku,
+      });
+      setVariantDialog(null);
     },
     [addItem]
   );
@@ -113,7 +185,6 @@ export function POSPage() {
               { icon: LightningBoltIcon, label: "Caja", action: () => navigate("/cash-register") },
               { icon: TimerIcon, label: "Tareas", action: () => navigate("/tasks") },
               { icon: CubeIcon, label: "Productos", action: () => navigate("/products-management") },
-              { icon: BarChartIcon, label: "Dashboard", action: () => navigate("/dashboard") },
               { icon: BarChartIcon, label: "Reportes", action: () => navigate("/reports") },
               { icon: GearIcon, label: "Configuración", action: () => navigate("/settings") },
             ].map(({ icon: Icon, label, action }) =>
@@ -303,9 +374,23 @@ export function POSPage() {
       </div>
 
       {/* Dialogs */}
-      {payment && <PaymentDialog />}
+      {payment && <PaymentDialog onSaleComplete={handleSaleComplete} />}
       {customerSelection && <CustomerSelectionDialog />}
       {salesHistory && <SalesHistoryDialog />}
+      <SaleSuccessDialog
+        open={successDialog.open}
+        sale={successDialog.sale}
+        change={successDialog.change}
+        email={successDialog.email}
+        onClose={handleSuccessClose}
+      />
+      {variantDialog && (
+        <VariantSelectionDialog
+          product={variantDialog}
+          onSelect={handleVariantSelect}
+          onClose={() => setVariantDialog(null)}
+        />
+      )}
     </div>
   );
 }

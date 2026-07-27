@@ -23,6 +23,7 @@ export interface ApiInventory {
   companyId: string;
   storeId: string;
   productId: string;
+  variantId: string | null;
   quantity: number;
   min_stock: number;
   max_stock: number | null;
@@ -30,8 +31,25 @@ export interface ApiInventory {
   updated_at: number;
 }
 
+export interface ApiProductVariant {
+  id: string;
+  companyId: string;
+  productId: string;
+  size: string | null;
+  color: string | null;
+  barcode: string | null;
+  sku: string | null;
+  price_cents: number;
+  cost_cents: number | null;
+  is_active: boolean;
+  created_at: number;
+  updated_at: number;
+  inventory: ApiInventory[];
+}
+
 export interface ApiProductWithInventory extends ApiProduct {
   inventory: ApiInventory[];
+  variants: ApiProductVariant[];
 }
 
 export const ProductsService = {
@@ -73,5 +91,42 @@ export const ProductsService = {
 
   async remove(id: string): Promise<void> {
     return apiClient.delete(`/products/${id}`);
+  },
+};
+
+export const VariantsService = {
+  async listByProduct(productId: string): Promise<ApiProductVariant[]> {
+    return apiClient.get<ApiProductVariant[]>(`/variants?productId=${productId}`);
+  },
+
+  async create(input: {
+    productId: string;
+    size?: string;
+    color?: string;
+    barcode?: string;
+    sku?: string;
+    price_cents?: number;
+    cost_cents?: number;
+  }): Promise<ApiProductVariant> {
+    return apiClient.post<ApiProductVariant>("/variants", input);
+  },
+
+  async update(
+    id: string,
+    data: Partial<{
+      size: string;
+      color: string;
+      barcode: string;
+      sku: string;
+      price_cents: number;
+      cost_cents: number;
+      is_active: boolean;
+    }>,
+  ): Promise<ApiProductVariant> {
+    return apiClient.patch<ApiProductVariant>(`/variants/${id}`, data);
+  },
+
+  async remove(id: string): Promise<void> {
+    return apiClient.delete(`/variants/${id}`);
   },
 };

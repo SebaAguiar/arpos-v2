@@ -179,7 +179,7 @@ export function ProductManagementPage() {
   };
 
   return (
-    <div style={{ padding: "24px", maxWidth: "800px" }}>
+    <div className="page" style={{ maxWidth: "800px" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <Text size="5" weight="bold">Gestión de Productos</Text>

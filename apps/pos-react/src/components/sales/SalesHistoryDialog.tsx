@@ -3,6 +3,7 @@ import { Text, Badge } from "@radix-ui/themes";
 import { Cross1Icon, CalendarIcon } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
 import { SalesRepository } from "@/repositories/sales.repository";
+import { printReceipt } from "@/services/receipt.service";
 import type { Sale } from "@/lib/types";
 
 type Period = "today" | "week" | "month";
@@ -169,6 +170,7 @@ export function SalesHistoryDialog() {
 
                 <div style={{ marginTop: "8px", display: "flex", gap: "6px" }}>
                   <button
+                    onClick={() => printReceipt(sale, null)}
                     style={{
                       padding: "4px 8px",
                       border: "1px solid var(--border)",

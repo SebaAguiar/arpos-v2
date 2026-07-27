@@ -29,5 +29,8 @@
     "@nx/js": "^22.3.0",
     "@nx/node": "^22.3.0",
     "typescript": "~5.8.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["core-js"]
   }
 }

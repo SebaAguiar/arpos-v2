@@ -1,13 +1,14 @@
 import type { ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { LoginPage } from "@/pages/LoginPage";
+import { FirstRunWizard } from "@/components/auth/FirstRunWizard";
 
 interface ProtectedRouteProps {
   children: ReactNode;
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated, initialized, loading } = useAuth();
+  const { isAuthenticated, initialized, isInitialized, loading } = useAuth();
 
   if (!initialized || loading) {
     return (
@@ -36,6 +37,10 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         </div>
       </div>
     );
+  }
+
+  if (!isInitialized) {
+    return <FirstRunWizard />;
   }
 
   if (!isAuthenticated) {

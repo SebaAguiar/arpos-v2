@@ -6,11 +6,15 @@ import {
   Cross1Icon,
   SunIcon,
   MoonIcon,
+  LockOpen1Icon,
+  LockClosedIcon,
 } from "@radix-ui/react-icons";
 import { useThemeStore } from "@/stores/theme.store";
 import { useAuth } from "@/hooks/useAuth";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { useSyncStore } from "@/stores/sync.store";
+import { useDialogStore } from "@/stores/dialog.store";
+import { useCashRegisterStore } from "@/stores/cash-register.store";
 import { NetworkIndicator } from "./NetworkIndicator";
 
 interface HeaderProps {
@@ -26,6 +30,8 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
   const pendingCount = useSyncStore((s) => s.pendingCount);
   const isProcessing = useSyncStore((s) => s.isProcessing);
   const isBackendAvailable = useSyncStore((s) => s.isBackendAvailable);
+  const openCashControl = useDialogStore((s) => s.openCashControl);
+  const currentShift = useCashRegisterStore((s) => s.currentShift);
 
   const initials = user?.name
     ?.split(" ")
@@ -67,6 +73,39 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
       </TextField.Root>
 
       <div style={{ flex: 1 }} />
+
+      <Tooltip content={currentShift ? "Cerrar caja" : "Abrir caja"}>
+        <button
+          onClick={openCashControl}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            padding: "4px 10px",
+            border: "none",
+            borderRadius: "6px",
+            backgroundColor: currentShift ? "#e54d2e15" : "#30a46c15",
+            color: currentShift ? "#e54d2e" : "#30a46c",
+            cursor: "pointer",
+            fontSize: "12px",
+            fontWeight: 600,
+            transition: "all 120ms ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.opacity = "0.8";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.opacity = "1";
+          }}
+        >
+          {currentShift ? (
+            <LockClosedIcon width={14} height={14} />
+          ) : (
+            <LockOpen1Icon width={14} height={14} />
+          )}
+          {currentShift ? "Cerrar caja" : "Abrir caja"}
+        </button>
+      </Tooltip>
 
       <NetworkIndicator
         isOnline={isOnline}

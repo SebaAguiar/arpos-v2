@@ -14,7 +14,7 @@ function mapSale(api: ApiSale): Sale {
 
   return {
     id: api.id,
-    ticketNumber: 0,
+    ticketNumber: api.ticket_number,
     total: api.total_cents / 100,
     status: api.status === "completed" ? "COMPLETED" : "CANCELLED",
     createdAt: api.created_at,
@@ -26,6 +26,7 @@ function mapSale(api: ApiSale): Sale {
       },
     ],
     customerId: api.contact_id ?? undefined,
+    user: api.user,
   };
 }
 
@@ -81,6 +82,6 @@ export const SalesRepository = {
     cash_register_id?: string;
   }): Promise<Sale> {
     const created = await SalesService.create(input);
-    return mapSale({ ...created, items: [] });
+    return mapSale(created);
   },
 };

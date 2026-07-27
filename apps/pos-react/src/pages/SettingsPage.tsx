@@ -53,7 +53,7 @@ export function SettingsPage() {
   const [editingLabel, setEditingLabel] = useState<PaymentMethod | null>(null);
 
   return (
-    <div style={{ padding: "24px", maxWidth: "800px" }}>
+    <div className="page" style={{ maxWidth: "700px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "20px" }}>
         <GearIcon width={20} height={20} />
         <Text size="5" weight="bold">Configuración</Text>

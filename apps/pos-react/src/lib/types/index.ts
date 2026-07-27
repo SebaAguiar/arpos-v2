@@ -76,6 +76,7 @@ export interface Sale {
   paymentMethods: SalePaymentMethod[];
   customerId?: string;
   customer?: Customer;
+  user?: { id: string; name: string; email: string };
 }
 
 export interface SaleItem {

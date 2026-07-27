@@ -139,6 +139,8 @@ export function ReportsPage() {
 
   useEffect(() => {
     fetchData(period, true);
+    const interval = setInterval(() => fetchData(period), 5000);
+    return () => clearInterval(interval);
   }, [period, fetchData]);
 
   const totalRevenue = (stats?.totalRevenue ?? 0) / 100;
@@ -156,7 +158,7 @@ export function ReportsPage() {
   const maxProductRevenue = Math.max(...topProducts.map((p) => p.total_cents / 100), 1);
 
   return (
-    <div>
+    <div className="page" style={{ maxWidth: "900px" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <BarChartIcon width={20} height={20} />

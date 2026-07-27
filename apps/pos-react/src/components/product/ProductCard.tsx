@@ -11,6 +11,17 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
     0
   );
 
+  const variantCount = product.variants.length;
+  const hasMultipleVariants = variantCount > 1;
+
+  const price = product.price;
+
+  const colorLabels = product.variants
+    .filter((v) => v.color)
+    .map((v) => v.color!)
+    .filter((c, i, arr) => arr.indexOf(c) === i)
+    .slice(0, 3);
+
   return (
     <button
       onClick={() => onAddToCart(product)}
@@ -32,8 +43,44 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-primary)" }}>
         {product.name}
       </span>
+
+      {hasMultipleVariants && (
+        <span
+          style={{
+            fontSize: "11px",
+            fontWeight: 500,
+            padding: "2px 6px",
+            borderRadius: "4px",
+            width: "fit-content",
+            color: "var(--accent)",
+            backgroundColor: "var(--accent-subtle)",
+          }}
+        >
+          {variantCount} variantes
+        </span>
+      )}
+
+      {colorLabels.length > 0 && (
+        <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+          {colorLabels.map((color) => (
+            <span
+              key={color}
+              style={{
+                width: "12px",
+                height: "12px",
+                borderRadius: "50%",
+                border: "1px solid var(--border)",
+                backgroundColor: color,
+                display: "inline-block",
+              }}
+              title={color}
+            />
+          ))}
+        </div>
+      )}
+
       <span style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
-        ${product.price.toLocaleString("es-AR")}
+        ${price.toLocaleString("es-AR")}
       </span>
       <span
         style={{

@@ -130,7 +130,7 @@ export function Sidebar() {
         }}
         className="no-scrollbar"
       >
-        {/* POS — route-based, always visible */}
+        {/* POS */}
         <div>
           <SidebarNavLink to="/" icon={BackpackIcon} label="POS — Ventas" />
         </div>
@@ -157,7 +157,6 @@ export function Sidebar() {
         <div>
           <div style={SECTION_HEADER}>Analítica</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-            <SidebarNavLink to="/dashboard" icon={BarChartIcon} label="Dashboard" />
             <SidebarNavLink to="/reports" icon={BarChartIcon} label="Reportes" />
           </div>
         </div>

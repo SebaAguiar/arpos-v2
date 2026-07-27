@@ -17,7 +17,7 @@ import { useCashRegisterStore } from "@/stores/cash-register.store";
 import { useSettingsStore } from "@/stores/settings.store";
 import { SalesRepository } from "@/repositories/sales.repository";
 import { ApiError } from "@/services/api-client";
-import type { PaymentMethod, PaymentEntry } from "@/lib/types";
+import type { PaymentMethod, PaymentEntry, Sale } from "@/lib/types";
 
 const METHOD_ICONS: Record<PaymentMethod, typeof Cross1Icon> = {
   CASH: PersonIcon,
@@ -33,9 +33,10 @@ const QUICK_CASH = [1000, 2000, 5000, 10000];
 
 interface PaymentDialogProps {
   creditSurcharge?: number;
+  onSaleComplete?: (sale: Sale, change: number, email: string) => void;
 }
 
-export function PaymentDialog({ creditSurcharge }: PaymentDialogProps) {
+export function PaymentDialog({ creditSurcharge, onSaleComplete }: PaymentDialogProps) {
   const items = useCartStore((s) => s.items);
   const taxRate = useCartStore((s) => s.taxRate);
   const discount = useCartStore((s) => s.discount);
@@ -105,7 +106,7 @@ export function PaymentDialog({ creditSurcharge }: PaymentDialogProps) {
 
       const primaryMethod = payments[0]?.method ?? "CASH";
 
-      await SalesRepository.create({
+      const createdSale = await SalesRepository.create({
         items: saleItems,
         total_cents: Math.round(total * 100),
         discount_cents: Math.round(discountAmount * 100),
@@ -117,8 +118,10 @@ export function PaymentDialog({ creditSurcharge }: PaymentDialogProps) {
       });
 
       await fetchCurrentShift();
+      const change = Math.max(0, totalPaid - total);
       clearCart();
       closePayment();
+      onSaleComplete?.(createdSale, change, email);
     } catch (e) {
       const message =
         e instanceof ApiError
@@ -128,7 +131,7 @@ export function PaymentDialog({ creditSurcharge }: PaymentDialogProps) {
     } finally {
       setProcessing(false);
     }
-  }, [totalPaid, total, processing, items, payments, discountAmount, taxAmount, customerId, note, currentShift, fetchCurrentShift, clearCart, closePayment]);
+  }, [totalPaid, total, processing, items, payments, discountAmount, taxAmount, customerId, note, email, currentShift, fetchCurrentShift, clearCart, closePayment, onSaleComplete]);
 
   return (
     <div

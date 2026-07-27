@@ -60,7 +60,7 @@ export function TasksPage() {
   };
 
   return (
-    <div style={{ padding: "24px", maxWidth: "800px" }}>
+    <div className="page" style={{ maxWidth: "800px" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <Text size="5" weight="bold">Tareas</Text>
@@ -190,7 +190,7 @@ export function TasksPage() {
       </div>
 
       {filteredTasks.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "40px 0" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "40px 0" }}>
           <LapTimerIcon width={32} height={32} style={{ color: "var(--text-muted)", marginBottom: "8px" }} />
           <Text size="2" color="gray">
             {filterStatus === "ALL" ? "No hay tareas" : `No hay tareas ${STATUS_CONFIG[filterStatus]?.label.toLowerCase()}`}

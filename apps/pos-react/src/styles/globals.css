@@ -123,3 +123,9 @@ html, body, #root {
   padding: 0 10px !important;
 }
 
+/* ─── Page container ─── */
+.page {
+  margin: 0 auto;
+  padding: 24px;
+}
+

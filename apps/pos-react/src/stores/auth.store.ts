@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { AuthRepository, type AuthUser } from "@/repositories/auth.repository";
+import { SetupRepository } from "@/repositories/setup.repository";
 import { setAuthToken, clearAuthToken } from "@/services/api-client";
 import { ApiError } from "@/services/api-client";
 
@@ -7,11 +8,13 @@ interface AuthState {
   user: AuthUser | null;
   loading: boolean;
   initialized: boolean;
+  isInitialized: boolean;
   error: string | null;
 
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   initialize: () => Promise<void>;
+  checkSetup: () => Promise<void>;
   clearError: () => void;
 }
 
@@ -19,6 +22,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   loading: false,
   initialized: false,
+  isInitialized: true,
   error: null,
 
   login: async (email, password) => {
@@ -61,6 +65,15 @@ export const useAuthStore = create<AuthState>((set) => ({
       } else {
         set({ loading: false, initialized: true });
       }
+    }
+  },
+
+  checkSetup: async () => {
+    try {
+      const status = await SetupRepository.getStatus();
+      set({ isInitialized: status.isInitialized });
+    } catch {
+      set({ isInitialized: true });
     }
   },
 
