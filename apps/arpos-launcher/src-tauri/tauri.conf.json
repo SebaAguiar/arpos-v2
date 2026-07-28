@@ -1,35 +1,44 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "arpos-v2",
+  "productName": "ArPOS",
   "version": "0.1.0",
-  "identifier": "com.seba.arpos-v2",
+  "identifier": "com.arpos.desktop",
   "build": {
     "beforeDevCommand": "bash scripts/dev.sh",
     "devUrl": "http://localhost:1420",
     "beforeBuildCommand": "pnpm --filter api build && pnpm --filter pos-react build",
-    "frontendDist": "../pos-react/dist"
+    "frontendDist": "../../pos-react/dist"
   },
   "app": {
     "windows": [
       {
-        "title": "arpos-v2",
-        "width": 800,
-        "height": 600
+        "title": "ArPOS",
+        "width": 1400,
+        "height": 900,
+        "minWidth": 800,
+        "minHeight": 600,
+        "center": true,
+        "resizable": true,
+        "decorations": true,
+        "fullscreen": false
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self' http://localhost:3000 http://127.0.0.1:3000; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'"
     }
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": ["deb", "rpm"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "category": "Finance",
+    "shortDescription": "Point of Sale System",
+    "longDescription": "ArPOS - A modern, offline-first point of sale system for retail businesses"
   }
 }

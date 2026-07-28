@@ -1,72 +1,54 @@
-use std::process::{Child, Command};
-use std::sync::Mutex;
-use tauri::Manager;
+mod commands;
+mod managers;
+mod utils;
 
-struct ProcessManager {
-    nestjs_process: Mutex<Option<Child>>,
-}
-
-impl ProcessManager {
-    fn new() -> Self {
-        Self {
-            nestjs_process: Mutex::new(None),
-        }
-    }
-
-    fn spawn_nestjs(&self) -> Result<String, String> {
-        let mut process = self.nestjs_process.lock().map_err(|e| e.to_string())?;
-        
-        if process.is_some() {
-            return Ok("NestJS already running".to_string());
-        }
-
-        let child = Command::new("node")
-            .arg("apps/api/dist/main.js")
-            .current_dir("../../")
-            .spawn()
-            .map_err(|e| format!("Failed to spawn NestJS: {}", e))?;
-
-        *process = Some(child);
-        Ok("NestJS started".to_string())
-    }
-
-    fn kill_nestjs(&self) -> Result<String, String> {
-        let mut process = self.nestjs_process.lock().map_err(|e| e.to_string())?;
-        
-        if let Some(ref mut child) = *process {
-            child.kill().map_err(|e| format!("Failed to kill NestJS: {}", e))?;
-            *process = None;
-            Ok("NestJS stopped".to_string())
-        } else {
-            Ok("NestJS not running".to_string())
-        }
-    }
-}
-
-#[tauri::command]
-fn start_backend(state: tauri::State<'_, ProcessManager>) -> Result<String, String> {
-    state.spawn_nestjs()
-}
-
-#[tauri::command]
-fn stop_backend(state: tauri::State<'_, ProcessManager>) -> Result<String, String> {
-    state.kill_nestjs()
-}
-
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
+use managers::backup::BackupManager;
+use managers::database::DatabaseManager;
+use managers::export::ExportManager;
+use managers::process::ProcessManager;
+use managers::system::SystemManager;
+use managers::updater::UpdaterManager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .manage(ProcessManager::new())
+        .manage(DatabaseManager::new())
+        .manage(SystemManager::new())
+        .manage(BackupManager::new())
+        .manage(ExportManager::new())
+        .manage(UpdaterManager::new())
         .invoke_handler(tauri::generate_handler![
-            greet,
-            start_backend,
-            stop_backend
+            // Process commands
+            commands::process::start_backend,
+            commands::process::stop_backend,
+            commands::process::restart_backend,
+            commands::process::get_backend_status,
+            commands::process::wait_for_backend,
+            // Database commands
+            commands::database::init_database,
+            commands::database::run_migrations,
+            commands::database::push_schema,
+            commands::database::check_db_integrity,
+            commands::database::get_database_info,
+            commands::database::ensure_database,
+            // System commands
+            commands::system::get_system_info,
+            commands::system::get_cpu_usage,
+            commands::system::get_memory_usage,
+            // Backup commands
+            commands::backup::create_backup,
+            commands::backup::list_backups,
+            commands::backup::restore_backup,
+            commands::backup::delete_backup,
+            commands::backup::auto_backup,
+            // Export commands
+            commands::export::export_to_sql,
+            commands::export::export_to_json,
+            // Updater commands
+            commands::updater::check_for_updates,
+            commands::updater::download_update,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
