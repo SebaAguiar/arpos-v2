@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function SupportPage() {
   const tickets = await prisma.supportTicket.findMany({
     orderBy: { createdAt: "desc" },
@@ -74,7 +76,7 @@ export default async function SupportPage() {
                     </span>
                   </td>
                   <td className="py-3 text-sm text-gray-500">
-                    {ticket.createdAt.toLocaleDateString("es-AR")}
+                    {new Date(ticket.createdAt * 1000).toLocaleDateString("es-AR")}
                   </td>
                 </tr>
               ))}

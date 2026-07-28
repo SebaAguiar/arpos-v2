@@ -1,5 +1,7 @@
 import { getLicenses } from "@/lib/actions/licenses";
 
+export const dynamic = "force-dynamic";
+
 export default async function LicensesPage() {
   const licenses = await getLicenses();
 

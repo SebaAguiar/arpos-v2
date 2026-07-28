@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 export default async function PaymentsPage() {
   const payments = await prisma.payment.findMany({
     orderBy: { createdAt: "desc" },
@@ -52,7 +54,7 @@ export default async function PaymentsPage() {
                     {payment.client.name}
                   </td>
                   <td className="py-3 text-sm text-gray-900">
-                    ${payment.amount.toLocaleString("es-AR")}
+                    ${(payment.amountCents / 100).toLocaleString("es-AR")}
                   </td>
                   <td className="py-3 text-sm text-gray-500">
                     {payment.method}
@@ -69,10 +71,12 @@ export default async function PaymentsPage() {
                     </span>
                   </td>
                   <td className="py-3 text-sm text-gray-500">
-                    {payment.license?.plan || "-"}
+                    {payment.license?.key || "-"}
                   </td>
                   <td className="py-3 text-sm text-gray-500">
-                    {payment.paidAt?.toLocaleDateString("es-AR")}
+                    {payment.paidAt
+                      ? new Date(payment.paidAt * 1000).toLocaleDateString("es-AR")
+                      : "-"}
                   </td>
                 </tr>
               ))}
