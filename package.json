@@ -8,7 +8,7 @@
     "dev:pos": "nx dev pos-react",
     "dev:admin": "nx dev admin-panel",
     "dev:launcher": "nx dev arpos-launcher",
-    "build": "nx run-many -t build",
+    "build": "nx build api && nx build admin-panel && nx build pos-react && nx build arpos-launcher",
     "build:api": "nx build api",
     "build:pos": "nx build pos-react",
     "build:admin": "nx build admin-panel",
