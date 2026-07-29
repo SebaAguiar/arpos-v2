@@ -25,12 +25,15 @@
     "install:all": "pnpm install"
   },
   "devDependencies": {
-    "nx": "^22.3.0",
     "@nx/js": "^22.3.0",
     "@nx/node": "^22.3.0",
+    "nx": "^22.3.0",
+    "playwright": "^1.62.0",
     "typescript": "~5.8.3"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["core-js"]
+    "onlyBuiltDependencies": [
+      "core-js"
+    ]
   }
 }
