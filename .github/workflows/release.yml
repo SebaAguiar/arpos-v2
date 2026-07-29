@@ -121,20 +121,9 @@ jobs:
           echo "signature=$SIGNATURE" >> "$GITHUB_OUTPUT"
 
           # Write updater JSON for Tauri v2
-          UPDATER_JSON=$(cat << EOF
-{
-  "version": "$VERSION",
-  "pub_date": "$TIMESTAMP",
-  "platforms": {
-    "linux-x86_64": {
-      "signature": "$SIGNATURE",
-      "url": "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ArPOS_${VERSION}_amd64.AppImage"
-    }
-  }
-}
-EOF
-)
-          echo "$UPDATER_JSON" > "updater-$VERSION.json"
+          UPDATER_URL="https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ArPOS_${VERSION}_amd64.AppImage"
+          printf '{"version":"%s","pub_date":"%s","platforms":{"linux-x86_64":{"signature":"%s","url":"%s"}}}\n' \
+            "$VERSION" "$TIMESTAMP" "$SIGNATURE" "$UPDATER_URL" > "updater-$VERSION.json"
           echo "updater-json=updater-$VERSION.json" >> "$GITHUB_OUTPUT"
 
       # ── Upload artifacts ────────────────────────────
