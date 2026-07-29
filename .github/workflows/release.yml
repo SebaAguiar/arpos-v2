@@ -58,13 +58,12 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            libwebkit2gtk-4.1-dev \
-            libappindicator3-dev \
-            librsvg2-dev \
-            patchelf \
-            libssl-dev \
-            libayatana-appindicator3-dev
+            sudo apt-get install -y \
+              libwebkit2gtk-4.1-dev \
+              librsvg2-dev \
+              patchelf \
+              libssl-dev \
+              libayatana-appindicator3-dev
 
       # ── Install JS deps ─────────────────────────────
       - name: Install dependencies
@@ -73,6 +72,13 @@ jobs:
       # ── Generate Prisma client ──────────────────────
       - name: Generate Prisma client
         run: pnpm --filter api exec prisma generate
+
+      # ── Create env file for API build ───────────────
+      - name: Create env file
+        run: |
+          echo 'DATABASE_URL="file:./dev.db"' > apps/api/.env
+          echo 'PORT=3000' >> apps/api/.env
+          echo 'JWT_SECRET="ci-secret"' >> apps/api/.env
 
       # ── Build JS (API + Admin + POS) ────────────────
       - name: Build JS frontends
