@@ -4,6 +4,7 @@ const publicPaths = [
   "/login",
   "/api/auth/login",
   "/api/auth/register",
+  "/api/auth/admin/login",
   "/api/license/validate",
   "/api/license/status",
   "/api/license/activate",
@@ -16,7 +17,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (pathname.startsWith("/api/license/")) {
+  if (pathname.startsWith("/api/license/") || pathname.startsWith("/api/sync/")) {
     return NextResponse.next();
   }
 
@@ -26,7 +27,7 @@ export function middleware(request: NextRequest) {
     if (pathname.startsWith("/api/")) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
     return NextResponse.redirect(new URL("/login", request.url));

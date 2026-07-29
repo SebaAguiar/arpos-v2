@@ -70,6 +70,7 @@ model Client {
   licenses      License[]
   payments      Payment[]
   supportTickets SupportTicket[]
+  syncedChanges  SyncedChange[]
 
   @@map("clients")
 }
@@ -125,6 +126,26 @@ model Payment {
   @@index([clientId])
   @@index([licenseId])
   @@map("payments")
+}
+
+// ─── SYNC CLOUD ───
+
+model SyncedChange {
+  id        String   @id @default(cuid())
+  clientId  String
+  licenseId String?
+  action    String
+  entity    String
+  entityId  String
+  payload   String   @default("{}")
+  source    String   @default("pos")
+  createdAt Int      @default(0)
+
+  client    Client   @relation(fields: [clientId], references: [id])
+
+  @@index([clientId, createdAt])
+  @@index([entity, entityId])
+  @@map("synced_changes")
 }
 
 // ─── SOPORTE ───
