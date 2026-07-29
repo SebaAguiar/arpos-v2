@@ -71,7 +71,7 @@ export function LoginPage() {
             </Text>
             <TextField.Root
               type="email"
-              placeholder="admin@arpos.local"
+              placeholder="admin@arpos.com"
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);

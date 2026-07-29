@@ -25,14 +25,14 @@ jobs:
         shell: bash
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # ── Node.js + pnpm ──────────────────────────────
       - uses: pnpm/action-setup@v2
         with:
           version: latest
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: 'pnpm'
@@ -40,7 +40,7 @@ jobs:
       # ── Rust ─────────────────────────────────────────
       - uses: dtolnay/rust-toolchain@stable
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v5
         with:
           path: |
             ~/.cargo/registry
@@ -128,7 +128,7 @@ jobs:
 
       # ── Upload artifacts ────────────────────────────
       - name: Upload bundles as artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: bundles-${{ matrix.bundle-name }}
           path: |
@@ -147,10 +147,10 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Download all bundles
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           pattern: bundles-*
           merge-multiple: true
