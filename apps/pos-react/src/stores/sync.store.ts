@@ -1,74 +1,120 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import { SyncService } from "@/services/sync.service";
+import type { SubscriptionInfo, PullResult } from "@/lib/types";
 
 interface SyncState {
   pendingCount: number;
   syncedCount: number;
   failedCount: number;
   isProcessing: boolean;
+  isPulling: boolean;
   isBackendAvailable: boolean;
   lastSyncAt: number | null;
+  subscription: SubscriptionInfo | null;
+  lastPullResult: PullResult | null;
   pollingTimer: ReturnType<typeof setInterval> | null;
 
   fetchStatus: () => Promise<void>;
   processPending: () => Promise<void>;
+  pullFromCloud: () => Promise<void>;
   startPolling: (ms?: number) => void;
   stopPolling: () => void;
+  setSubscription: (info: SubscriptionInfo) => void;
+  clearSubscription: () => void;
 }
 
-export const useSyncStore = create<SyncState>((set, get) => ({
-  pendingCount: 0,
-  syncedCount: 0,
-  failedCount: 0,
-  isProcessing: false,
-  isBackendAvailable: true,
-  lastSyncAt: null,
-  pollingTimer: null,
+export const useSyncStore = create<SyncState>()(
+  persist(
+    (set, get) => ({
+      pendingCount: 0,
+      syncedCount: 0,
+      failedCount: 0,
+      isProcessing: false,
+      isPulling: false,
+      isBackendAvailable: true,
+      lastSyncAt: null,
+      subscription: null,
+      lastPullResult: null,
+      pollingTimer: null,
 
-  fetchStatus: async () => {
-    try {
-      const status = await SyncService.getStatus();
-      set({
-        pendingCount: status.pending,
-        syncedCount: status.synced,
-        failedCount: status.failed,
-        isBackendAvailable: true,
-      });
-    } catch {
-      set({ pendingCount: 0, isBackendAvailable: false });
-    }
-  },
+      fetchStatus: async () => {
+        try {
+          const status = await SyncService.getStatus();
+          set({
+            pendingCount: status.pending,
+            syncedCount: status.synced,
+            failedCount: status.error,
+            lastSyncAt: status.lastSyncedAt ? status.lastSyncedAt * 1000 : null,
+            isBackendAvailable: true,
+          });
+        } catch {
+          set({ pendingCount: 0, isBackendAvailable: false });
+        }
+      },
 
-  processPending: async () => {
-    const { isProcessing } = get();
-    if (isProcessing) return;
+      processPending: async () => {
+        const { isProcessing } = get();
+        if (isProcessing) return;
 
-    set({ isProcessing: true });
-    try {
-      await SyncService.processPending();
-      set({ lastSyncAt: Date.now() });
-      await get().fetchStatus();
-    } finally {
-      set({ isProcessing: false });
-    }
-  },
+        set({ isProcessing: true });
+        try {
+          const result = await SyncService.processPending();
+          set({ lastSyncAt: Date.now() });
+          if (result.failed > 0) {
+            console.warn(`[Sync] ${result.failed} items failed to sync`);
+          }
+          await get().fetchStatus();
+        } finally {
+          set({ isProcessing: false });
+        }
+      },
 
-  startPolling: (ms = 30_000) => {
-    const { pollingTimer } = get();
-    if (pollingTimer) return;
+      pullFromCloud: async () => {
+        const { isPulling } = get();
+        if (isPulling) return;
 
-    get().fetchStatus();
-    const timer = setInterval(() => {
-      get().fetchStatus();
-    }, ms);
-    set({ pollingTimer: timer });
-  },
+        set({ isPulling: true, lastPullResult: null });
+        try {
+          const result = await SyncService.pullFromCloud();
+          set({ lastPullResult: result, lastSyncAt: Date.now() });
+          await get().fetchStatus();
+        } catch (error) {
+          console.error("[Sync] Pull failed:", error);
+          throw error;
+        } finally {
+          set({ isPulling: false });
+        }
+      },
 
-  stopPolling: () => {
-    const { pollingTimer } = get();
-    if (pollingTimer) {
-      clearInterval(pollingTimer);
-      set({ pollingTimer: null });
-    }
-  },
-}));
+      startPolling: (ms = 30_000) => {
+        const { pollingTimer } = get();
+        if (pollingTimer) return;
+
+        get().fetchStatus();
+        const timer = setInterval(() => {
+          get().fetchStatus();
+        }, ms);
+        set({ pollingTimer: timer });
+      },
+
+      stopPolling: () => {
+        const { pollingTimer } = get();
+        if (pollingTimer) {
+          clearInterval(pollingTimer);
+          set({ pollingTimer: null });
+        }
+      },
+
+      setSubscription: (info) => set({ subscription: info }),
+
+      clearSubscription: () => set({ subscription: null }),
+    }),
+    {
+      name: "arpos-sync",
+      partialize: (state) => ({
+        subscription: state.subscription,
+      }),
+    },
+  ),
+);

@@ -139,5 +139,32 @@ export interface Store {
 export interface SyncStatus {
   pending: number;
   synced: number;
+  error: number;
+  lastSyncedAt: number | null;
+}
+
+export interface ProcessResult {
+  processed: number;
+  succeeded: number;
   failed: number;
+}
+
+export interface PullResult {
+  pulled: number;
+  applied: number;
+  skipped: number;
+  errors: string[];
+}
+
+export interface SubscriptionInfo {
+  status: "active" | "inactive" | "none";
+  tier?: string;
+  cloudUrl?: string;
+  cloudJwt?: string;
+  expiresAt?: number;
+}
+
+export interface CloudConfig {
+  url: string;
+  jwt: string;
 }
