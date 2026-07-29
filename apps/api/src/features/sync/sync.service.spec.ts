@@ -12,18 +12,21 @@ describe('SyncService', () => {
     deletePending: jest.Mock;
     getStats: jest.Mock;
   };
-  let mockConfig: {
-    get: jest.Mock;
-  };
   let mockPrisma: {
     company: { findFirst: jest.Mock };
     store: { findFirst: jest.Mock };
+    syncQueue: { findFirst: jest.Mock };
   };
   let mockTenantContext: {
     getCompanyId: jest.Mock;
     getStoreId: jest.Mock;
     setCompanyId: jest.Mock;
     setStoreId: jest.Mock;
+  };
+  let mockCloudRelay: {
+    pushToCloud: jest.Mock;
+    pullFromCloud: jest.Mock;
+    isCloudConfigured: jest.Mock;
   };
 
   beforeEach(() => {
@@ -38,17 +41,10 @@ describe('SyncService', () => {
       getStats: jest.fn(),
     };
 
-    mockConfig = {
-      get: jest.fn((key: string) => {
-        if (key === 'CLOUD_URL') return '';
-        if (key === 'CLOUD_JWT') return '';
-        return null;
-      }),
-    };
-
     mockPrisma = {
       company: { findFirst: jest.fn() },
       store: { findFirst: jest.fn() },
+      syncQueue: { findFirst: jest.fn() },
     };
 
     mockTenantContext = {
@@ -58,11 +54,17 @@ describe('SyncService', () => {
       setStoreId: jest.fn(),
     };
 
+    mockCloudRelay = {
+      pushToCloud: jest.fn(),
+      pullFromCloud: jest.fn(),
+      isCloudConfigured: jest.fn().mockReturnValue(false),
+    };
+
     service = new SyncService(
       mockRepo as never,
-      mockConfig as never,
       mockPrisma as never,
       mockTenantContext as never,
+      mockCloudRelay as never,
     );
   });
 
@@ -123,13 +125,8 @@ describe('SyncService', () => {
     });
 
     it('should mark items as error when push to cloud fails', async () => {
-      mockConfig.get.mockImplementation((key: string) => {
-        if (key === 'CLOUD_URL') return 'https://cloud.example.com';
-        if (key === 'CLOUD_JWT') return 'jwt-token';
-        return null;
-      });
-
-      global.fetch = jest.fn().mockRejectedValue(new Error('Network timeout'));
+      mockCloudRelay.isCloudConfigured.mockReturnValue(true);
+      mockCloudRelay.pushToCloud.mockRejectedValue(new Error('Network timeout'));
 
       const pendingItems = [
         { id: 'sq-1', action: 'create', entity: 'sale', entityId: 's1', payload: '{"total":10}' },
@@ -141,8 +138,6 @@ describe('SyncService', () => {
 
       expect(result).toEqual({ processed: 1, succeeded: 0, failed: 1 });
       expect(mockRepo.markError).toHaveBeenCalledWith('sq-1', 'Network timeout');
-
-      (global as { fetch?: typeof fetch }).fetch = undefined;
     });
   });
 

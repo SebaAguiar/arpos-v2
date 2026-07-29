@@ -7,13 +7,11 @@ import {
   Param,
   Query,
 } from '@nestjs/common';
-import { Public } from '../auth/guards/public.decorator';
 import { VariantsService } from './variants.service';
 import { ZodBody } from '../../core/validation/zod-body.decorator';
 import { CreateVariantSchema, CreateVariantInput } from './dto/create-variant.schema';
 import { UpdateVariantSchema, UpdateVariantInput } from './dto/update-variant.schema';
 
-@Public()
 @Controller('variants')
 export class VariantsController {
   constructor(private readonly variantsService: VariantsService) {}

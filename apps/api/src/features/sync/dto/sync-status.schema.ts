@@ -11,3 +11,9 @@ export const CleanupSchema = z.object({
 });
 
 export type CleanupInput = z.infer<typeof CleanupSchema>;
+
+export const PullQuerySchema = z.object({
+  since: z.coerce.number().int().optional(),
+});
+
+export type PullQueryInput = z.infer<typeof PullQuerySchema>;

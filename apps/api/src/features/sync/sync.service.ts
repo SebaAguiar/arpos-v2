@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../data-access/prisma/prisma.service';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
 import {
@@ -8,6 +7,7 @@ import {
   SyncEntity,
   SyncAction,
 } from './sync.repository';
+import { CloudRelayService, PullResult } from './cloud-relay.service';
 
 export interface ProcessResult {
   processed: number;
@@ -36,9 +36,9 @@ export class SyncService {
 
   constructor(
     private readonly syncRepo: SyncRepository,
-    private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
     private readonly tenantContext: TenantContextService,
+    private readonly cloudRelay: CloudRelayService,
   ) {}
 
   async enqueueChange(
@@ -96,14 +96,14 @@ export class SyncService {
       return { processed: 0, succeeded: 0, failed: 0 };
     }
 
-    const cloudEnabled = this.isCloudEnabled();
+    const cloudEnabled = this.cloudRelay.isCloudConfigured();
     let succeeded = 0;
     let failed = 0;
 
     for (const item of pending) {
       try {
         if (cloudEnabled) {
-          await this.pushToCloud(item);
+          await this.cloudRelay.pushToCloud(item);
         }
         await this.syncRepo.markSynced(item.id);
         succeeded++;
@@ -129,6 +129,26 @@ export class SyncService {
     };
   }
 
+  async pullFromCloud(): Promise<PullResult> {
+    await this.ensureTenantContext();
+    const lastSync = await this.getLastSyncTimestamp();
+    return this.cloudRelay.pullFromCloud(lastSync);
+  }
+
+  async getLastSyncTimestamp(): Promise<number | null> {
+    const last = await this.prisma.syncQueue.findFirst({
+      where: {
+        companyId: this.tenantContext.getCompanyId(),
+        storeId: this.tenantContext.getStoreId(),
+        status: 'synced',
+        synced_at: { not: null },
+      },
+      orderBy: { synced_at: 'desc' },
+      select: { synced_at: true },
+    });
+    return last?.synced_at ?? null;
+  }
+
   async cleanupSynced(olderThanDays: number = 30): Promise<number> {
     return this.syncRepo.deleteSynced(olderThanDays);
   }
@@ -137,52 +157,13 @@ export class SyncService {
     return this.syncRepo.deletePending(olderThanDays);
   }
 
-  private isCloudEnabled(): boolean {
-    const cloudUrl = this.configService.get<string>('CLOUD_URL');
-    const cloudJwt = this.configService.get<string>('CLOUD_JWT');
-    return !!(cloudUrl && cloudJwt);
-  }
-
-  private async pushToCloud(item: {
-    action: string;
-    entity: string;
-    entityId: string;
-    payload: string;
-  }): Promise<void> {
-    const cloudUrl = this.configService.get<string>('CLOUD_URL');
-    const cloudJwt = this.configService.get<string>('CLOUD_JWT');
-
-    if (!cloudUrl || !cloudJwt) {
-      throw new Error('Cloud not configured');
-    }
-
-    const response = await fetch(`${cloudUrl}/api/sync/apply`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${cloudJwt}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        action: item.action,
-        entity: item.entity,
-        entityId: item.entityId,
-        payload: JSON.parse(item.payload),
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Cloud sync failed: ${response.status} ${response.statusText}`);
-    }
-  }
-
   private async processOldestBatch(): Promise<void> {
     const oldest = await this.syncRepo.findPending(10);
-    const cloudEnabled = this.isCloudEnabled();
 
     for (const item of oldest) {
       try {
-        if (cloudEnabled) {
-          await this.pushToCloud(item);
+        if (this.cloudRelay.isCloudConfigured()) {
+          await this.cloudRelay.pushToCloud(item);
         }
         await this.syncRepo.markSynced(item.id);
       } catch (error) {

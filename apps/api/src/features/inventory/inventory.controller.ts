@@ -1,12 +1,10 @@
 import { Controller, Get, Post, Query } from '@nestjs/common';
-import { Public } from '../auth/guards/public.decorator';
 import { InventoryService } from './inventory.service';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
 import { ZodBody } from '../../core/validation/zod-body.decorator';
 import { CreateMovementSchema, CreateMovementInput } from './dto/create-movement.schema';
 import { ListMovementsSchema, ListMovementsInput } from './dto/list-movements.schema';
 
-@Public()
 @Controller('inventory')
 export class InventoryController {
   constructor(

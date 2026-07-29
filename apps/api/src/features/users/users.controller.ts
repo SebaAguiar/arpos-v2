@@ -6,7 +6,6 @@ import {
   Delete,
   Param,
 } from '@nestjs/common';
-import { Public } from '../auth/guards/public.decorator';
 import { UsersService } from './users.service';
 import { ZodBody } from '../../core/validation/zod-body.decorator';
 import { ZodQuery } from '../../core/validation/zod-query.decorator';
@@ -14,7 +13,6 @@ import { CreateUserSchema, CreateUserInput } from './dto/create-user.schema';
 import { UpdateUserSchema, UpdateUserInput } from './dto/update-user.schema';
 import { UserFiltersSchema, UserFiltersInput } from './dto/user-filters.schema';
 
-@Public()
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

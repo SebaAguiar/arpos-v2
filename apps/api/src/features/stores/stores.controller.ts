@@ -6,13 +6,11 @@ import {
   Delete,
   Param,
 } from '@nestjs/common';
-import { Public } from '../auth/guards/public.decorator';
 import { StoresService } from './stores.service';
 import { ZodBody } from '../../core/validation/zod-body.decorator';
 import { createStoreSchema, CreateStoreInput } from './dto/create-store.schema';
 import { updateStoreSchema, UpdateStoreInput } from './dto/update-store.schema';
 
-@Public()
 @Controller('stores')
 export class StoresController {
   constructor(private readonly storesService: StoresService) {}
