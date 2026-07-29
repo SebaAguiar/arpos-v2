@@ -13,7 +13,6 @@ import {
   GlobeIcon,
   CheckCircledIcon,
   CrossCircledIcon,
-  ReloadIcon,
   UploadIcon,
   DownloadIcon,
 } from "@radix-ui/react-icons";
@@ -22,7 +21,7 @@ import { useSettingsStore } from "@/stores/settings.store";
 import { useSyncStore } from "@/stores/sync.store";
 import { UsersManager } from "@/components/settings/UsersManager";
 import { StoreManager } from "@/components/settings/StoreManager";
-import type { PaymentMethod, CloudConfig } from "@/lib/types";
+import type { PaymentMethod } from "@/lib/types";
 
 const METHOD_ICONS: Record<PaymentMethod, typeof GearIcon> = {
   CASH: PersonIcon,

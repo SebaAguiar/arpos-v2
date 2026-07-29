@@ -75,8 +75,9 @@ export function InventoryPage() {
   };
 
   return (
-    <Flex direction="column" gap="4">
-      {/* Header con Título y Acción Principal */}
+    <div className="page">
+      <Flex direction="column" gap="5">
+        {/* Header con Título y Acción Principal */}
       <Flex align="center" justify="between" wrap="wrap" gap="3">
         <Flex direction="column" gap="1">
           <Text size="5" weight="bold">
@@ -449,27 +450,28 @@ export function InventoryPage() {
           </Button>
         )}
       </Flex>
-
-      {/* Dialogs */}
-      {adjustmentOpen && (
-        <StockAdjustmentDialog
-          preselectedProductId={selectedProductId}
-          onClose={() => {
-            setAdjustmentOpen(false);
-            setSelectedProductId(null);
-          }}
-        />
-      )}
-      {movementsOpen && (
-        <StockMovementsDialog
-          preselectedProductId={selectedProductId}
-          onClose={() => {
-            setMovementsOpen(false);
-            setSelectedProductId(null);
-          }}
-        />
-      )}
     </Flex>
-  );
+
+    {/* Dialogs */}
+    {adjustmentOpen && (
+      <StockAdjustmentDialog
+        preselectedProductId={selectedProductId}
+        onClose={() => {
+          setAdjustmentOpen(false);
+          setSelectedProductId(null);
+        }}
+      />
+    )}
+    {movementsOpen && (
+      <StockMovementsDialog
+        preselectedProductId={selectedProductId}
+        onClose={() => {
+          setMovementsOpen(false);
+          setSelectedProductId(null);
+        }}
+      />
+    )}
+  </div>
+);
 }
 

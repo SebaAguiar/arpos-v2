@@ -9,6 +9,7 @@ function mapContact(api: ApiContact): Customer {
     phone: api.phone ?? undefined,
     address: api.address ?? undefined,
     taxId: api.tax_id ?? undefined,
+    balance: api.balance_cents / 100,
   };
 }
 

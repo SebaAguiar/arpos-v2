@@ -26,6 +26,7 @@ const SYNC_ENTITIES: SyncEntity[] = [
   'cash_register',
   'user',
   'store',
+  'wallet_transaction',
 ];
 
 const SYNC_ACTIONS: SyncAction[] = ['create', 'update', 'delete'];

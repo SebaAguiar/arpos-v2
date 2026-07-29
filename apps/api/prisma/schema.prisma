@@ -28,6 +28,9 @@ model Company {
   contacts          Contact[]
   cash_registers    CashRegister[]
   cash_movements    CashMovement[]
+  purchase_orders   PurchaseOrder[]
+  purchase_receipts PurchaseReceipt[]
+  wallet_transactions WalletTransaction[]
 
   @@map("companies")
 }
@@ -49,6 +52,8 @@ model Store {
   sales             Sale[]
   cash_registers    CashRegister[]
   cash_movements    CashMovement[]
+  purchase_orders   PurchaseOrder[]
+  purchase_receipts PurchaseReceipt[]
 
   @@map("stores")
 }
@@ -67,6 +72,8 @@ model User {
   company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   sales             Sale[]
   inventory_movements InventoryMovement[]
+  created_orders    PurchaseOrder[] @relation("created_orders")
+  created_receipts  PurchaseReceipt[] @relation("created_receipts")
 
   @@unique([companyId, email])
   @@map("users")
@@ -95,6 +102,7 @@ model Product {
   inventory         Inventory[]
   inventory_movements InventoryMovement[]
   sale_items        SaleItem[]
+  purchase_order_items PurchaseOrderItem[]
 
   @@unique([companyId, storeId, code])
   @@map("products")
@@ -119,6 +127,7 @@ model ProductVariant {
   inventory         Inventory[]
   sale_items        SaleItem[]
   inventory_movements InventoryMovement[]
+  purchase_order_items PurchaseOrderItem[]
 
   @@unique([companyId, barcode])
   @@map("product_variants")
@@ -233,12 +242,101 @@ model Contact {
   tax_id            String?
   notes             String?
   is_active         Boolean  @default(true)
+  balance_cents     Int      @default(0)
   created_at        Int      @default(0)
   updated_at        Int
 
   company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  purchase_orders   PurchaseOrder[] @relation("order_supplier")
+  purchase_receipts PurchaseReceipt[] @relation("receipt_supplier")
+  wallet_transactions WalletTransaction[]
 
   @@map("contacts")
+}
+
+model WalletTransaction {
+  id                String   @id @default(cuid())
+  companyId         String
+  contactId         String
+  type              String
+  amount_cents      Int
+  balance_before    Int
+  balance_after     Int
+  reference         String?
+  reference_id      String?
+  notes             String?
+  created_by        String?
+  created_at        Int      @default(0)
+
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  contact           Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, contactId])
+  @@index([created_at])
+  @@map("wallet_transactions")
+}
+
+model PurchaseOrder {
+  id                String   @id @default(cuid())
+  companyId         String
+  storeId           String
+  supplierId        String
+  status            String   @default("draft")
+  expected_date     Int?
+  notes             String?
+  total_cents       Int      @default(0)
+  created_by        String
+  created_at        Int      @default(0)
+  updated_at        Int
+
+  company           Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  store             Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  supplier          Contact        @relation("order_supplier", fields: [supplierId], references: [id])
+  creator           User           @relation("created_orders", fields: [created_by], references: [id])
+  items             PurchaseOrderItem[]
+  receipts          PurchaseReceipt[]
+
+  @@index([companyId, storeId])
+  @@index([status])
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderItem {
+  id                String   @id @default(cuid())
+  orderId           String
+  productId         String
+  variantId         String?
+  quantity_ordered  Int
+  quantity_received Int      @default(0)
+  unit_cost_cents   Int      @default(0)
+  total_cents       Int      @default(0)
+
+  order             PurchaseOrder     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product           Product           @relation(fields: [productId], references: [id])
+  variant           ProductVariant?   @relation(fields: [variantId], references: [id], onDelete: SetNull)
+
+  @@map("purchase_order_items")
+}
+
+model PurchaseReceipt {
+  id                String   @id @default(cuid())
+  companyId         String
+  storeId           String
+  orderId           String?
+  supplierId        String
+  receipt_number    String?
+  notes             String?
+  created_by        String
+  created_at        Int      @default(0)
+
+  company           Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  store             Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  order             PurchaseOrder? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  supplier          Contact        @relation("receipt_supplier", fields: [supplierId], references: [id])
+  creator           User           @relation("created_receipts", fields: [created_by], references: [id])
+
+  @@index([companyId, storeId])
+  @@map("purchase_receipts")
 }
 
 model CashRegister {

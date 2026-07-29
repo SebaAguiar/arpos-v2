@@ -24,12 +24,12 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self' http://localhost:3000 http://127.0.0.1:3000; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'"
+      "csp": "default-src 'self' http://localhost:3000 http://127.0.0.1:3000; connect-src 'self' http://localhost:3000 http://127.0.0.1:3000 https://api.github.com; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'"
     }
   },
   "bundle": {
     "active": true,
-    "targets": ["deb", "rpm"],
+    "targets": ["deb", "rpm", "appimage", "msi", "nsis", "dmg"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -39,6 +39,29 @@
     ],
     "category": "Finance",
     "shortDescription": "Point of Sale System",
-    "longDescription": "ArPOS - A modern, offline-first point of sale system for retail businesses"
+    "longDescription": "ArPOS - A modern, offline-first point of sale system for retail businesses",
+    "windows": {
+      "wix": {
+        "language": "es-AR"
+      },
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    },
+    "linux": {
+      "deb": {
+        "depends": []
+      }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "active": true,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDNCQzFDMDhBNEVEQTkzQUMKUldTc2s5cE9pc0RCTy8vdGNzUGtjR2wvVXdzL2RDS0lKNzBiWWVFM2grejh3eElsamZPRjV6amMK",
+      "endpoints": [
+        "https://api.github.com/repos/SebaAguiar/arpos-v2/releases/latest"
+      ],
+      "dialog": true
+    }
   }
 }

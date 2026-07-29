@@ -4,7 +4,7 @@ import { TenantContextService } from '../../core/tenant/tenant-context.service';
 import { SyncQueue } from '@prisma/client';
 
 export type SyncAction = 'create' | 'update' | 'delete';
-export type SyncEntity = 'sale' | 'product' | 'inventory' | 'contact' | 'cash_register' | 'user' | 'store';
+export type SyncEntity = 'sale' | 'product' | 'inventory' | 'contact' | 'cash_register' | 'user' | 'store' | 'wallet_transaction';
 export type SyncStatus = 'pending' | 'synced' | 'error';
 
 export interface SyncQueueItem {

@@ -14,6 +14,9 @@ describe('SalesService', () => {
   let mockSync: {
     enqueueChange: jest.Mock;
   };
+  let mockWallet: {
+    internalDebit: jest.Mock;
+  };
 
   beforeEach(() => {
     mockRepo = {
@@ -27,7 +30,10 @@ describe('SalesService', () => {
     mockSync = {
       enqueueChange: jest.fn().mockResolvedValue(undefined),
     };
-    service = new SalesService(mockRepo as never, mockSync as never);
+    mockWallet = {
+      internalDebit: jest.fn().mockResolvedValue({ transaction: {}, balance: 0 }),
+    };
+    service = new SalesService(mockRepo as never, mockSync as never, mockWallet as never);
   });
 
   describe('findAll', () => {
@@ -75,6 +81,36 @@ describe('SalesService', () => {
       const result = await service.create(input);
       expect(result).toEqual(sale);
       expect(mockRepo.create).toHaveBeenCalledWith(input);
+    });
+
+    it('should debit wallet when payment method is wallet', async () => {
+      const input = {
+        items: [{ productId: 'p1', quantity: 1, unit_price_cents: 1000 }],
+        total_cents: 1000,
+        payment_method: 'wallet',
+        contact_id: 'contact-1',
+      };
+      const sale = { id: 'sale-1', ...input, ticket_number: 1 };
+      mockRepo.create.mockResolvedValue(sale);
+
+      const result = await service.create(input);
+      expect(result).toEqual(sale);
+      expect(mockWallet.internalDebit).toHaveBeenCalledWith(
+        'contact-1',
+        1000,
+        'sale',
+        'sale-1',
+        expect.any(String),
+      );
+    });
+
+    it('should throw when wallet payment without contact_id', async () => {
+      const input = {
+        items: [{ productId: 'p1', quantity: 1, unit_price_cents: 1000 }],
+        total_cents: 1000,
+        payment_method: 'wallet',
+      };
+      await expect(service.create(input)).rejects.toThrow('contact_id is required');
     });
   });
 

@@ -14,6 +14,8 @@ import { InventoryModule } from './features/inventory/inventory.module';
 import { UsersModule } from './features/users/users.module';
 import { StoresModule } from './features/stores/stores.module';
 import { SyncModule } from './features/sync/sync.module';
+import { PurchasesModule } from './features/purchases/purchases.module';
+import { WalletModule } from './features/wallet/wallet.module';
 import { LocalTenantMiddleware } from './core/tenant/local-tenant.middleware';
 import { JwtAuthGuard } from './features/auth/guards/jwt-auth.guard';
 
@@ -33,6 +35,8 @@ import { JwtAuthGuard } from './features/auth/guards/jwt-auth.guard';
     UsersModule,
     StoresModule,
     SyncModule,
+    PurchasesModule,
+    WalletModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

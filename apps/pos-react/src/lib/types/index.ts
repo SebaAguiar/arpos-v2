@@ -136,6 +136,50 @@ export interface Store {
   updated_at: number;
 }
 
+export interface PurchaseOrderItem {
+  id: string;
+  productId: string;
+  variantId?: string;
+  quantity_ordered: number;
+  quantity_received: number;
+  unit_cost_cents: number;
+  total_cents: number;
+  product: { id: string; name: string; code: string };
+  variant?: { id: string; size?: string; color?: string; sku?: string };
+}
+
+export interface PurchaseOrder {
+  id: string;
+  companyId: string;
+  storeId: string;
+  supplierId: string;
+  status: "draft" | "ordered" | "partial" | "received" | "cancelled";
+  expected_date?: number;
+  notes?: string;
+  total_cents: number;
+  created_by: string;
+  created_at: number;
+  updated_at: number;
+  supplier: { id: string; name: string };
+  items: PurchaseOrderItem[];
+  receipts?: Array<{
+    id: string;
+    receipt_number?: string;
+    notes?: string;
+    created_at: number;
+    creator: { id: string; name: string };
+  }>;
+}
+
+export interface PurchaseReceipt {
+  id: string;
+  orderId: string;
+  supplierId: string;
+  receipt_number?: string;
+  notes?: string;
+  created_at: number;
+}
+
 export interface SyncStatus {
   pending: number;
   synced: number;
@@ -167,4 +211,28 @@ export interface SubscriptionInfo {
 export interface CloudConfig {
   url: string;
   jwt: string;
+}
+
+export interface WalletTransaction {
+  id: string;
+  contactId: string;
+  type: "credit" | "debit";
+  amount_cents: number;
+  balance_before: number;
+  balance_after: number;
+  reference: string | null;
+  reference_id: string | null;
+  notes: string | null;
+  created_by: string | null;
+  created_at: number;
+}
+
+export interface WalletBalance {
+  contactId: string;
+  balance_cents: number;
+}
+
+export interface CreditDebitInput {
+  amount_cents: number;
+  notes?: string;
 }

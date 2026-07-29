@@ -27,4 +27,15 @@ export default defineConfig(async () => ({
       ignored: ["**/src-tauri/**"],
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom", "react-router-dom"],
+          radix: ["@radix-ui/themes", "@radix-ui/react-icons"],
+          pdf: ["html2pdf.js"],
+        },
+      },
+    },
+  },
 }));

@@ -87,6 +87,7 @@ export function LoginPage() {
             </Text>
             <TextField.Root
               type="password"
+              autoComplete="current-password"
               placeholder="••••••••"
               value={password}
               onChange={(e) => {

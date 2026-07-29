@@ -10,6 +10,7 @@ export interface ApiContact {
   address: string | null;
   tax_id: string | null;
   notes: string | null;
+  balance_cents: number;
   is_active: boolean;
   created_at: number;
   updated_at: number;

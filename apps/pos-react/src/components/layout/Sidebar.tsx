@@ -7,6 +7,9 @@ import {
   LightningBoltIcon,
   TimerIcon,
   LayersIcon,
+  PersonIcon,
+  ClipboardIcon,
+  CardStackIcon,
 } from "@radix-ui/react-icons";
 
 const ITEM_BASE: React.CSSProperties = {
@@ -150,6 +153,9 @@ export function Sidebar() {
           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
             <SidebarNavLink to="/products-management" icon={CubeIcon} label="Productos" />
             <SidebarNavLink to="/inventory" icon={LayersIcon} label="Inventario" />
+            <SidebarNavLink to="/purchases" icon={ClipboardIcon} label="Compras" />
+            <SidebarNavLink to="/customers" icon={PersonIcon} label="Clientes" />
+            <SidebarNavLink to="/wallet" icon={CardStackIcon} label="Billetera" />
           </div>
         </div>
 

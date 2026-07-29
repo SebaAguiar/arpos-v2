@@ -53,13 +53,13 @@ export class ContactsService {
   async remove(id: string) {
     const contact = await this.findOne(id);
 
-    await this.contactsRepo.softDelete(id);
+    const updated = await this.contactsRepo.softDelete(id);
 
     await this.syncService.enqueueChange('delete', 'contact', contact.id, {
       name: contact.name,
       type: contact.type,
     });
 
-    return undefined;
+    return updated;
   }
 }
