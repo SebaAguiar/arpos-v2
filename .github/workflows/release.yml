@@ -119,12 +119,34 @@ jobs:
           echo "pub_date=$TIMESTAMP" >> "$GITHUB_OUTPUT"
           echo "signature=$SIGNATURE" >> "$GITHUB_OUTPUT"
 
+          # Write updater JSON for Tauri v2
+          UPDATER_JSON=$(cat << EOF
+{
+  "version": "$VERSION",
+  "pub_date": "$TIMESTAMP",
+  "platforms": {
+    "linux-x86_64": {
+      "signature": "$SIGNATURE",
+      "url": "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ArPOS_${VERSION}_amd64.AppImage"
+    }
+  }
+}
+EOF
+)
+          echo "$UPDATER_JSON" > "updater-$VERSION.json"
+          echo "updater-json=updater-$VERSION.json" >> "$GITHUB_OUTPUT"
+
       # ── Upload artifacts ────────────────────────────
       - name: Upload bundles as artifacts
         uses: actions/upload-artifact@v4
         with:
           name: bundles-${{ matrix.bundle-name }}
-          path: ${{ steps.bundles.outputs.bundle-dir }}
+          path: |
+            ${{ steps.bundles.outputs.bundle-dir }}/deb/*.deb
+            ${{ steps.bundles.outputs.bundle-dir }}/rpm/*.rpm
+            ${{ steps.bundles.outputs.bundle-dir }}/appimage/*.AppImage
+            ${{ steps.bundles.outputs.bundle-dir }}/**/*.sig
+            ${{ steps.manifest.outputs.updater-json }}
           retention-days: 5
 
   # ── Create GitHub Release ───────────────────────────
