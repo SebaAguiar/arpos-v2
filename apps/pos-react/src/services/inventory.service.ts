@@ -24,9 +24,40 @@ export interface ApiInventoryMovement {
   productCode?: string;
 }
 
+export interface ApiInventoryReport {
+  totalProducts: number;
+  totalStockValueCents: number;
+  lowStockCount: number;
+  outOfStockCount: number;
+  byCategory: Array<{
+    category: string | null;
+    count: number;
+    valueCents: number;
+  }>;
+  lowStockProducts: Array<{
+    productId: string;
+    productName: string;
+    productCode: string;
+    stockQuantity: number;
+    costCents: number | null;
+    priceCents: number;
+  }>;
+  outOfStockProducts: Array<{
+    productId: string;
+    productName: string;
+    productCode: string;
+    costCents: number | null;
+    priceCents: number;
+  }>;
+}
+
 export const InventoryService = {
   async getStock(): Promise<ApiStockItem[]> {
     return apiClient.get<ApiStockItem[]>("/inventory");
+  },
+
+  async getReport(): Promise<ApiInventoryReport> {
+    return apiClient.get<ApiInventoryReport>("/inventory/report");
   },
 
   async getMovements(filters?: {

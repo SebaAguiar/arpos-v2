@@ -29,7 +29,10 @@ import {
   printReceipt,
   downloadReceiptPdf,
   shareViaWhatsApp,
+  type PaperSize,
 } from "@/services/receipt.service";
+import { useCompanyStore } from "@/stores/company.store";
+import { useSettingsStore } from "@/stores/settings.store";
 import type { Product, ProductVariant, Sale, StoreConfig } from "@/lib/types";
 
 export function POSPage() {
@@ -51,10 +54,18 @@ export function POSPage() {
   const sortField = useProductsStore((s) => s.sortField);
   const sortDirection = useProductsStore((s) => s.sortDirection);
 
+  const company = useCompanyStore((s) => s.company);
+  const fetchCompany = useCompanyStore((s) => s.fetchCompany);
+  const settingsAutoPrint = useSettingsStore((s) => s.autoPrint);
+  const paperSize = useSettingsStore((s) => s.paperSize);
+  const receiptHeader = useSettingsStore((s) => s.receiptHeader);
+  const receiptFooter = useSettingsStore((s) => s.receiptFooter);
+
   useEffect(() => {
     fetchProducts();
     fetchCurrentShift();
-  }, [fetchProducts, fetchCurrentShift]);
+    fetchCompany();
+  }, [fetchProducts, fetchCurrentShift, fetchCompany]);
 
   // Sale success dialog state
   const [successDialog, setSuccessDialog] = useState<{
@@ -64,24 +75,40 @@ export function POSPage() {
     email: string;
   }>({ open: false, sale: null, change: 0, email: "" });
 
+  const storeConfig: StoreConfig | null = useMemo(() => {
+    if (!company) return null;
+    return {
+      name: company.name,
+      address: company.address,
+      phone: company.phone,
+      email: company.email,
+      taxRate: 0,
+      creditSurcharge: 0,
+      receiptHeader,
+      receiptFooter,
+    };
+  }, [company, receiptHeader, receiptFooter]);
+
   const handleSaleComplete = useCallback(
     (sale: Sale, change: number, email: string) => {
       setSuccessDialog({ open: true, sale, change, email });
+      if (settingsAutoPrint && storeConfig) {
+        setTimeout(() => printReceipt(sale, storeConfig, paperSize as PaperSize), 300);
+      }
     },
-    []
+    [settingsAutoPrint, storeConfig, paperSize]
   );
 
   const handleSuccessClose = useCallback(
     (action: "close" | "print" | "download" | "whatsapp") => {
       const { sale } = successDialog;
       if (sale) {
-        const storeConfig: StoreConfig | null = null; // TODO: wire from settings store
         switch (action) {
           case "print":
-            printReceipt(sale, storeConfig);
+            printReceipt(sale, storeConfig, paperSize as PaperSize);
             break;
           case "download":
-            downloadReceiptPdf(sale, storeConfig);
+            downloadReceiptPdf(sale, storeConfig, paperSize as PaperSize);
             break;
           case "whatsapp":
             shareViaWhatsApp(sale, storeConfig);
@@ -90,7 +117,7 @@ export function POSPage() {
       }
       setSuccessDialog({ open: false, sale: null, change: 0, email: "" });
     },
-    [successDialog]
+    [successDialog, storeConfig, paperSize]
   );
 
   const filteredProducts = useMemo(() => {

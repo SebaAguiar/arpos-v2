@@ -236,3 +236,29 @@ export interface CreditDebitInput {
   amount_cents: number;
   notes?: string;
 }
+
+export interface BackupInfo {
+  filename: string;
+  path: string;
+  size_bytes: number;
+  created_at: string;
+}
+
+export interface Company {
+  id: string;
+  name: string;
+  taxId: string;
+  address?: string;
+  email?: string;
+  phone?: string;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface UpdateCompanyInput {
+  name?: string;
+  taxId?: string;
+  address?: string;
+  email?: string;
+  phone?: string;
+}

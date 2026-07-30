@@ -5,7 +5,9 @@ import { Header } from "./Header";
 import { useLayoutStore } from "@/stores/layout.store";
 import { useSyncStore } from "@/stores/sync.store";
 import { useDialogStore } from "@/stores/dialog.store";
-import { CashShiftDialog } from "@/components/sales/CashShiftDialog";
+import { OpenRegisterModal } from "@/components/sales/OpenRegisterModal";
+import { CloseRegisterModal } from "@/components/sales/CloseRegisterModal";
+import { useCashRegisterStore } from "@/stores/cash-register.store";
 
 export function AppLayout() {
   const sidebarOpen = useLayoutStore((s) => s.sidebarOpen);
@@ -13,6 +15,7 @@ export function AppLayout() {
   const startPolling = useSyncStore((s) => s.startPolling);
   const stopPolling = useSyncStore((s) => s.stopPolling);
   const cashControl = useDialogStore((s) => s.cashControl);
+  const currentShift = useCashRegisterStore((s) => s.currentShift);
 
   useEffect(() => {
     startPolling(30_000);
@@ -29,7 +32,7 @@ export function AppLayout() {
         </main>
       </div>
 
-      {cashControl && <CashShiftDialog />}
+      {cashControl && (currentShift ? <CloseRegisterModal /> : <OpenRegisterModal />)}
     </div>
   );
 }

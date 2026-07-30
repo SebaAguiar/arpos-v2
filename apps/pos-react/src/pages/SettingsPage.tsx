@@ -21,6 +21,7 @@ import { useSettingsStore } from "@/stores/settings.store";
 import { useSyncStore } from "@/stores/sync.store";
 import { UsersManager } from "@/components/settings/UsersManager";
 import { StoreManager } from "@/components/settings/StoreManager";
+import { CompanyForm } from "@/components/settings/CompanyForm";
 import type { PaymentMethod } from "@/lib/types";
 
 const METHOD_ICONS: Record<PaymentMethod, typeof GearIcon> = {
@@ -55,6 +56,14 @@ export function SettingsPage() {
   const setCreditSurcharge = useSettingsStore((s) => s.setCreditSurcharge);
   const taxRate = useSettingsStore((s) => s.taxRate);
   const setTaxRate = useSettingsStore((s) => s.setTaxRate);
+  const autoPrint = useSettingsStore((s) => s.autoPrint);
+  const setAutoPrint = useSettingsStore((s) => s.setAutoPrint);
+  const paperSize = useSettingsStore((s) => s.paperSize);
+  const setPaperSize = useSettingsStore((s) => s.setPaperSize);
+  const receiptHeader = useSettingsStore((s) => s.receiptHeader);
+  const setReceiptHeader = useSettingsStore((s) => s.setReceiptHeader);
+  const receiptFooter = useSettingsStore((s) => s.receiptFooter);
+  const setReceiptFooter = useSettingsStore((s) => s.setReceiptFooter);
 
   const subscription = useSyncStore((s) => s.subscription);
   const setSubscription = useSyncStore((s) => s.setSubscription);
@@ -93,6 +102,9 @@ export function SettingsPage() {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "16px", maxWidth: "700px" }}>
+        {/* Company Data */}
+        <CompanyForm />
+
         {/* Payment Methods */}
         <Card>
           <Text size="3" weight="bold" style={{ display: "block", marginBottom: "12px" }}>
@@ -267,18 +279,40 @@ export function SettingsPage() {
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <Text size="2">Auto-imprimir tickets</Text>
-              <Switch defaultChecked />
+              <Switch checked={autoPrint} onCheckedChange={setAutoPrint} />
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <Text size="2">Puerto impresora</Text>
-              <Select.Root defaultValue="usb">
+              <Text size="2">Tamaño de papel</Text>
+              <Select.Root value={paperSize} onValueChange={(v) => setPaperSize(v as typeof paperSize)}>
                 <Select.Trigger />
                 <Select.Content>
-                  <Select.Item value="usb">USB</Select.Item>
-                  <Select.Item value="serial">Serial</Select.Item>
-                  <Select.Item value="network">Red</Select.Item>
+                  <Select.Item value="80mm">80mm (térmico)</Select.Item>
+                  <Select.Item value="58mm">58mm (térmico chico)</Select.Item>
+                  <Select.Item value="a4">A4</Select.Item>
+                  <Select.Item value="a5">A5</Select.Item>
+                  <Select.Item value="default">Automático</Select.Item>
                 </Select.Content>
               </Select.Root>
+            </div>
+            <div>
+              <Text size="2" weight="bold" style={{ display: "block", marginBottom: "4px" }}>
+                Encabezado del ticket
+              </Text>
+              <TextField.Root
+                placeholder="Ej: Gracias por elegirnos..."
+                value={receiptHeader}
+                onChange={(e) => setReceiptHeader(e.target.value)}
+              />
+            </div>
+            <div>
+              <Text size="2" weight="bold" style={{ display: "block", marginBottom: "4px" }}>
+                Pie del ticket
+              </Text>
+              <TextField.Root
+                placeholder="Ej: ¡Vuelva pronto!"
+                value={receiptFooter}
+                onChange={(e) => setReceiptFooter(e.target.value)}
+              />
             </div>
           </div>
         </Card>

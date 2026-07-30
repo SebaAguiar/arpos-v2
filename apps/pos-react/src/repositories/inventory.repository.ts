@@ -2,6 +2,7 @@ import {
   InventoryService,
   type ApiStockItem,
   type ApiInventoryMovement,
+  type ApiInventoryReport,
 } from "../services/inventory.service";
 
 export interface StockItemData {
@@ -50,10 +51,71 @@ function mapMovement(api: ApiInventoryMovement): InventoryMovementData {
   };
 }
 
+export interface InventoryReportData {
+  totalProducts: number;
+  totalStockValue: number;
+  lowStockCount: number;
+  outOfStockCount: number;
+  byCategory: Array<{
+    category: string | null;
+    count: number;
+    value: number;
+  }>;
+  lowStockProducts: Array<{
+    productId: string;
+    productName: string;
+    productCode: string;
+    stockQuantity: number;
+    cost: number | null;
+    price: number;
+  }>;
+  outOfStockProducts: Array<{
+    productId: string;
+    productName: string;
+    productCode: string;
+    cost: number | null;
+    price: number;
+  }>;
+}
+
+function mapReport(api: ApiInventoryReport): InventoryReportData {
+  return {
+    totalProducts: api.totalProducts,
+    totalStockValue: api.totalStockValueCents / 100,
+    lowStockCount: api.lowStockCount,
+    outOfStockCount: api.outOfStockCount,
+    byCategory: api.byCategory.map((c) => ({
+      category: c.category,
+      count: c.count,
+      value: c.valueCents / 100,
+    })),
+    lowStockProducts: api.lowStockProducts.map((p) => ({
+      productId: p.productId,
+      productName: p.productName,
+      productCode: p.productCode,
+      stockQuantity: p.stockQuantity,
+      cost: p.costCents != null ? p.costCents / 100 : null,
+      price: p.priceCents / 100,
+    })),
+    outOfStockProducts: api.outOfStockProducts.map((p) => ({
+      productId: p.productId,
+      productName: p.productName,
+      productCode: p.productCode,
+      cost: p.costCents != null ? p.costCents / 100 : null,
+      price: p.priceCents / 100,
+    })),
+  };
+}
+
 export const InventoryRepository = {
   async getStock(): Promise<StockItemData[]> {
     const items = await InventoryService.getStock();
     return items.map(mapStock);
+  },
+
+  async getReport(): Promise<InventoryReportData> {
+    const data = await InventoryService.getReport();
+    return mapReport(data);
   },
 
   async getMovements(filters?: {

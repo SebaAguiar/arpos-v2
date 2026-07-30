@@ -10,6 +10,7 @@ import {
   PersonIcon,
   ClipboardIcon,
   CardStackIcon,
+  ArchiveIcon,
 } from "@radix-ui/react-icons";
 
 const ITEM_BASE: React.CSSProperties = {
@@ -168,7 +169,7 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* Bottom — Configuración */}
+      {/* Bottom — Sistema */}
       <div
         style={{
           marginTop: "auto",
@@ -176,7 +177,10 @@ export function Sidebar() {
           padding: "8px",
         }}
       >
-        <SidebarNavLink to="/settings" icon={GearIcon} label="Configuración" />
+        <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+          <SidebarNavLink to="/settings/backup" icon={ArchiveIcon} label="Backups" />
+          <SidebarNavLink to="/settings" icon={GearIcon} label="Configuración" />
+        </div>
       </div>
     </aside>
   );

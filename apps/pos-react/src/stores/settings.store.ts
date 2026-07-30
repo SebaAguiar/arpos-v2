@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { PaymentMethod } from "@/lib/types";
 
+export type PaperSize = "default" | "80mm" | "58mm" | "a4" | "a5";
+
 export interface PaymentMethodConfig {
   id: PaymentMethod;
   label: string;
@@ -14,12 +16,20 @@ interface SettingsState {
   paymentMethods: PaymentMethodConfig[];
   creditSurcharge: number;
   taxRate: number;
+  autoPrint: boolean;
+  paperSize: PaperSize;
+  receiptHeader: string;
+  receiptFooter: string;
 
   togglePaymentMethod: (id: PaymentMethod) => void;
   updatePaymentMethodLabel: (id: PaymentMethod, label: string) => void;
   setCreditSurcharge: (percent: number) => void;
   setTaxRate: (rate: number) => void;
   reorderPaymentMethods: (fromIndex: number, toIndex: number) => void;
+  setAutoPrint: (enabled: boolean) => void;
+  setPaperSize: (size: PaperSize) => void;
+  setReceiptHeader: (text: string) => void;
+  setReceiptFooter: (text: string) => void;
 }
 
 const DEFAULT_METHODS: PaymentMethodConfig[] = [
@@ -38,6 +48,10 @@ export const useSettingsStore = create<SettingsState>()(
       paymentMethods: DEFAULT_METHODS,
       creditSurcharge: 0,
       taxRate: 0.21,
+      autoPrint: false,
+      paperSize: "80mm" as PaperSize,
+      receiptHeader: "",
+      receiptFooter: "¡Gracias por su compra!",
 
       togglePaymentMethod: (id) =>
         set((state) => ({
@@ -63,6 +77,10 @@ export const useSettingsStore = create<SettingsState>()(
           methods.splice(toIndex, 0, moved);
           return { paymentMethods: methods };
         }),
+      setAutoPrint: (enabled) => set({ autoPrint: enabled }),
+      setPaperSize: (size) => set({ paperSize: size }),
+      setReceiptHeader: (text) => set({ receiptHeader: text }),
+      setReceiptFooter: (text) => set({ receiptFooter: text }),
     }),
     {
       name: "arpos-settings",
@@ -70,6 +88,10 @@ export const useSettingsStore = create<SettingsState>()(
         paymentMethods: state.paymentMethods,
         creditSurcharge: state.creditSurcharge,
         taxRate: state.taxRate,
+        autoPrint: state.autoPrint,
+        paperSize: state.paperSize,
+        receiptHeader: state.receiptHeader,
+        receiptFooter: state.receiptFooter,
       }),
     }
   )

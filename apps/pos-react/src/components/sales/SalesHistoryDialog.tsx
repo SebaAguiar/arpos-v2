@@ -1,10 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Text, Badge } from "@radix-ui/themes";
 import { Cross1Icon, CalendarIcon } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
 import { SalesRepository } from "@/repositories/sales.repository";
 import { printReceipt } from "@/services/receipt.service";
-import type { Sale } from "@/lib/types";
+import { useCompanyStore } from "@/stores/company.store";
+import { useSettingsStore } from "@/stores/settings.store";
+import type { Sale, StoreConfig } from "@/lib/types";
 
 type Period = "today" | "week" | "month";
 
@@ -28,6 +30,24 @@ export function SalesHistoryDialog() {
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const closeSalesHistory = useDialogStore((s) => s.closeSalesHistory);
+  const company = useCompanyStore((s) => s.company);
+  const fetchCompany = useCompanyStore((s) => s.fetchCompany);
+  const receiptHeader = useSettingsStore((s) => s.receiptHeader);
+  const receiptFooter = useSettingsStore((s) => s.receiptFooter);
+
+  const storeConfig: StoreConfig | null = useMemo(() => {
+    if (!company) return null;
+    return {
+      name: company.name,
+      address: company.address,
+      phone: company.phone,
+      email: company.email,
+      taxRate: 0,
+      creditSurcharge: 0,
+      receiptHeader,
+      receiptFooter,
+    };
+  }, [company, receiptHeader, receiptFooter]);
 
   const fetchSales = useCallback(async (p: Period) => {
     setLoading(true);
@@ -44,7 +64,8 @@ export function SalesHistoryDialog() {
 
   useEffect(() => {
     fetchSales(period);
-  }, [period, fetchSales]);
+    if (!company) fetchCompany();
+  }, [period, fetchSales, company, fetchCompany]);
 
   const handlePeriodChange = (p: Period) => {
     setPeriod(p);
@@ -170,7 +191,7 @@ export function SalesHistoryDialog() {
 
                 <div style={{ marginTop: "8px", display: "flex", gap: "6px" }}>
                   <button
-                    onClick={() => printReceipt(sale, null)}
+                    onClick={() => printReceipt(sale, storeConfig)}
                     style={{
                       padding: "4px 8px",
                       border: "1px solid var(--border)",
