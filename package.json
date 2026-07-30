@@ -22,11 +22,15 @@
     "admin:prisma:studio": "nx run admin-panel:prisma:studio",
     "admin:seed": "nx run admin-panel:prisma:seed",
     "seed": "nx run api:prisma:seed",
+    "e2e": "cd apps/pos-e2e && npx playwright test",
+    "e2e:ui": "cd apps/pos-e2e && npx playwright test --ui",
+    "e2e:debug": "cd apps/pos-e2e && npx playwright test --debug",
     "install:all": "pnpm install"
   },
   "devDependencies": {
     "@nx/js": "^22.3.0",
     "@nx/node": "^22.3.0",
+    "@tauri-apps/cli": "^2.11.4",
     "nx": "^22.3.0",
     "playwright": "^1.62.0",
     "typescript": "~5.8.3"
