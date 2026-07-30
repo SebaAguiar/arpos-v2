@@ -20,3 +20,39 @@ export function parseNumericInput(value: string): number {
   const parsed = parseFloat(normalized);
   return isNaN(parsed) ? 0 : parsed;
 }
+
+export function unixTimestampToDate(timestamp: number): Date {
+  return new Date(timestamp * 1000);
+}
+
+export function dateToUnixTimestamp(date: Date): number {
+  return Math.floor(date.getTime() / 1000);
+}
+
+export function formatUnixTimestamp(timestamp: number, locale = "es-AR"): string {
+  return new Date(timestamp * 1000).toLocaleDateString(locale);
+}
+
+export function formatUnixDateTime(timestamp: number, locale = "es-AR"): string {
+  return new Date(timestamp * 1000).toLocaleString(locale);
+}
+
+export function parseJsonField<T = Record<string, unknown>>(
+  value: string | null | undefined,
+): T | null {
+  if (!value) return null;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return null;
+  }
+}
+
+export function stringifyJsonField(value: unknown): string | null {
+  if (value == null) return null;
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return null;
+  }
+}
