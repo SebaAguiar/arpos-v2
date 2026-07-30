@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
-import { InventoryRepository, StockItem, InventoryMovementData } from './inventory.repository';
+import { InventoryRepository, StockItem, InventoryMovementData, InventoryReportData } from './inventory.repository';
 import { CreateMovementInput } from './dto/create-movement.schema';
 import { ListMovementsInput } from './dto/list-movements.schema';
 import { SyncService } from '../sync/sync.service';
@@ -13,6 +13,10 @@ export class InventoryService {
 
   async listStock(companyId: string, storeId: string): Promise<StockItem[]> {
     return this.inventoryRepo.getStock(companyId, storeId);
+  }
+
+  async getReport(companyId: string, storeId: string): Promise<InventoryReportData> {
+    return this.inventoryRepo.getReport(companyId, storeId);
   }
 
   async listMovements(

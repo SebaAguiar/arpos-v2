@@ -19,6 +19,13 @@ export class InventoryController {
     return this.inventoryService.listStock(companyId, storeId);
   }
 
+  @Get('report')
+  getReport() {
+    const companyId = this.tenantContext.getCompanyId();
+    const storeId = this.tenantContext.getStoreId();
+    return this.inventoryService.getReport(companyId, storeId);
+  }
+
   @Get('movements')
   listMovements(@Query(ListMovementsSchema) query: ListMovementsInput) {
     const companyId = this.tenantContext.getCompanyId();
