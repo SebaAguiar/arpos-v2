@@ -25,15 +25,17 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: "pnpm dev:api",
+      command: "pnpm --filter api dev",
+      cwd: "../../",
       port: 3000,
-      timeout: 30000,
+      timeout: 60000,
       reuseExistingServer: true,
     },
     {
-      command: "pnpm dev:pos",
+      command: "pnpm --filter pos-react dev",
+      cwd: "../../",
       port: 1420,
-      timeout: 30000,
+      timeout: 60000,
       reuseExistingServer: true,
     },
   ],
