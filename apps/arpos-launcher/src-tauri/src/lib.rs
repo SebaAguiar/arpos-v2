@@ -38,6 +38,7 @@ pub fn run() {
             commands::system::get_system_info,
             commands::system::get_cpu_usage,
             commands::system::get_memory_usage,
+            commands::system::is_online,
             // Backup commands
             commands::backup::create_backup,
             commands::backup::list_backups,

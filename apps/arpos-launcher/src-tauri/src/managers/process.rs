@@ -55,11 +55,11 @@ impl ProcessManager {
         }
 
         let project_root = paths::get_project_root();
-        let dist_path = project_root.join("apps").join("api").join("dist").join("main.js");
+        let dist_path = project_root.join("apps").join("pos-api").join("dist").join("main.js");
 
         if !dist_path.exists() {
             return Err(format!(
-                "Backend not built. Expected {:?}. Run 'pnpm --filter api build' first.",
+                "Backend not built. Expected {:?}. Run 'pnpm --filter pos-api build' first.",
                 dist_path
             ));
         }
@@ -170,6 +170,19 @@ impl ProcessManager {
         self.stop()?;
         std::thread::sleep(Duration::from_millis(500));
         self.start()
+    }
+}
+
+impl Drop for ProcessManager {
+    fn drop(&mut self) {
+        let mut child = match self.child.lock() {
+            Ok(guard) => guard,
+            Err(_) => return,
+        };
+        if let Some(ref mut proc) = *child {
+            let _ = proc.kill();
+            let _ = proc.wait();
+        }
     }
 }
 

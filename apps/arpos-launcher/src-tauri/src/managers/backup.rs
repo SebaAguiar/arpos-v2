@@ -1,7 +1,11 @@
 use std::fs;
 use std::path::PathBuf;
+use std::process::{Command, Stdio};
 
+use crate::managers::database::which_sqlite3;
 use crate::utils::paths;
+
+const MAX_BACKUPS: usize = 30;
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct BackupInfo {
@@ -34,6 +38,15 @@ impl BackupManager {
 
         let metadata = fs::metadata(&backup_path)
             .map_err(|e| format!("Failed to read backup metadata: {}", e))?;
+
+        // Prune old backups
+        if let Ok(backups) = self.list_backups() {
+            if backups.len() > MAX_BACKUPS {
+                for old in backups.iter().skip(MAX_BACKUPS) {
+                    let _ = fs::remove_file(&old.path);
+                }
+            }
+        }
 
         Ok(BackupInfo {
             filename,
@@ -90,10 +103,33 @@ impl BackupManager {
             return Err(format!("Backup file not found: {}", backup_path));
         }
 
+        // Validate backup integrity before restore
+        let sqlite3_bin = which_sqlite3().ok_or("sqlite3 not found in PATH")?;
+        let integrity = Command::new(&sqlite3_bin)
+            .arg(source.to_str().unwrap())
+            .arg("PRAGMA integrity_check;")
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .output()
+            .map_err(|e| format!("Failed to validate backup: {}", e))?;
+
+        let integrity_out = String::from_utf8_lossy(&integrity.stdout);
+        if integrity_out.trim() != "ok" {
+            return Err(format!(
+                "Backup integrity check failed: {}",
+                integrity_out.trim()
+            ));
+        }
+
         let db_path = paths::get_db_path();
 
-        fs::copy(&source, &db_path)
-            .map_err(|e| format!("Failed to restore backup: {}", e))?;
+        // Atomic restore: copy to temp file first, then rename
+        let temp_path = db_path.with_extension("db.restore.tmp");
+        fs::copy(&source, &temp_path)
+            .map_err(|e| format!("Failed to copy backup to temp: {}", e))?;
+
+        fs::rename(&temp_path, &db_path)
+            .map_err(|e| format!("Failed to replace database: {}", e))?;
 
         Ok(format!("Database restored from {}", backup_path))
     }

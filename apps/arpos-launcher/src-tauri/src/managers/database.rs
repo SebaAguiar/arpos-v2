@@ -17,6 +17,30 @@ impl DatabaseManager {
         Self
     }
 
+pub fn configure(&self) -> Result<String, String> {
+        let db_path = paths::get_db_path();
+        if !db_path.exists() {
+            return Err("Database not found".to_string());
+        }
+
+        let sqlite3_bin = which_sqlite3().ok_or("sqlite3 not found in PATH")?;
+
+        let output = Command::new(&sqlite3_bin)
+            .arg(db_path.to_str().unwrap())
+            .arg("PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;")
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .output()
+            .map_err(|e| format!("Failed to configure SQLite: {}", e))?;
+
+        if output.status.success() {
+            Ok("SQLite configured: WAL mode + foreign keys".to_string())
+        } else {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            Err(format!("SQLite configuration failed: {}", stderr.trim()))
+        }
+    }
+
     pub fn init(&self) -> Result<String, String> {
         paths::ensure_data_dir()?;
 
@@ -24,15 +48,17 @@ impl DatabaseManager {
         if !db_path.exists() {
             std::fs::write(&db_path, "")
                 .map_err(|e| format!("Failed to create database file: {}", e))?;
+            self.configure()?;
             return Ok(format!("Database created at {:?}", db_path));
         }
 
+        self.configure().ok();
         Ok(format!("Database already exists at {:?}", db_path))
     }
 
     pub fn migrate(&self) -> Result<String, String> {
         let project_root = paths::get_project_root();
-        let api_dir = project_root.join("apps").join("api");
+        let api_dir = project_root.join("apps").join("pos-api");
         let prisma_dir = api_dir.join("prisma");
         let db_path = paths::get_db_path();
 
@@ -76,7 +102,7 @@ impl DatabaseManager {
 
     pub fn push(&self) -> Result<String, String> {
         let project_root = paths::get_project_root();
-        let api_dir = project_root.join("apps").join("api");
+        let api_dir = project_root.join("apps").join("pos-api");
         let db_path = paths::get_db_path();
 
         let prisma_bin = api_dir
@@ -114,7 +140,7 @@ impl DatabaseManager {
         }
 
         let project_root = paths::get_project_root();
-        let api_dir = project_root.join("apps").join("api");
+        let api_dir = project_root.join("apps").join("pos-api");
 
         let sqlite3_bin = which_sqlite3().ok_or("sqlite3 not found in PATH")?;
 
@@ -158,12 +184,13 @@ impl DatabaseManager {
 
     pub fn ensure_database(&self) -> Result<String, String> {
         self.init()?;
+        self.configure()?;
         self.migrate()?;
         Ok("Database initialized and migrations applied".to_string())
     }
 }
 
-fn which_sqlite3() -> Option<String> {
+pub(crate) fn which_sqlite3() -> Option<String> {
     let possible_paths = if cfg!(windows) {
         vec!["sqlite3.exe"]
     } else {

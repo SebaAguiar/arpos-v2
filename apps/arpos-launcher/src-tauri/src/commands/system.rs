@@ -16,3 +16,8 @@ pub fn get_cpu_usage(state: State<'_, SystemManager>) -> f32 {
 pub fn get_memory_usage(state: State<'_, SystemManager>) -> (u64, u64, f32) {
     state.get_memory_usage()
 }
+
+#[tauri::command]
+pub fn is_online() -> bool {
+    SystemManager::is_online()
+}

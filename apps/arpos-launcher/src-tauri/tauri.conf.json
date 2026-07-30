@@ -6,7 +6,7 @@
   "build": {
     "beforeDevCommand": "bash scripts/dev.sh",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "pnpm --filter api build && pnpm --filter pos-react build",
+    "beforeBuildCommand": "pnpm --filter pos-api build && pnpm --filter pos-react build",
     "frontendDist": "../../pos-react/dist"
   },
   "app": {

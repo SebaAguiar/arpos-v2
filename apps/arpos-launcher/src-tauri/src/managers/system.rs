@@ -1,6 +1,8 @@
-use sysinfo::System;
-
+use std::net::TcpStream;
 use std::sync::Mutex;
+use std::time::Duration;
+
+use sysinfo::System;
 
 pub struct SystemManager {
     system: Mutex<System>,
@@ -79,6 +81,25 @@ impl SystemManager {
         }
         let total: f32 = system.cpus().iter().map(|c| c.cpu_usage()).sum();
         total / system.cpus().len() as f32
+    }
+
+    pub fn is_online() -> bool {
+        const HOSTS: &[&str] = &[
+            "1.1.1.1:80",
+            "8.8.8.8:80",
+            "google.com:80",
+        ];
+        for host in HOSTS {
+            if TcpStream::connect_timeout(
+                &host.parse().unwrap(),
+                Duration::from_secs(2),
+            )
+            .is_ok()
+            {
+                return true;
+            }
+        }
+        false
     }
 
     pub fn get_memory_usage(&self) -> (u64, u64, f32) {
