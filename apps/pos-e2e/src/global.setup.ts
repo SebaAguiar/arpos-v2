@@ -8,7 +8,7 @@ setup("authenticate via UI login and save storage state", async ({ page }) => {
   await page.getByPlaceholder("••••••••").fill("admin123");
   await page.getByText("Iniciar sesión").click();
 
-  const sidebarPos = page.locator('[aria-label="POS"]');
+  const sidebarPos = page.getByRole("link", { name: "POS — Ventas" });
   await expect(sidebarPos).toBeVisible({ timeout: 15000 });
   await page.context().storageState({ path: "e2e-auth.json" });
 });

@@ -44,7 +44,7 @@ test.describe("Sync — Cloud Sync", () => {
     await page.waitForFunction(() => navigator.onLine, {}, { timeout: 3000 });
     await page.waitForTimeout(500);
 
-    await expect(page.getByText("Online")).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("Online", { exact: true })).toBeVisible({ timeout: 5000 });
   });
 
   test("sync status reflects pending count after creating a sale", async ({ page }) => {
