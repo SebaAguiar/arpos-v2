@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
 # Start API in background
-cd "$PROJECT_ROOT" && pnpm --filter pos-api dev &
+cd "$PROJECT_ROOT" && pnpm --filter api dev &
 API_PID=$!
 
 # Wait for API to be ready before starting frontend

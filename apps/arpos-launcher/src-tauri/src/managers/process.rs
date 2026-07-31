@@ -55,7 +55,7 @@ impl ProcessManager {
         }
 
         let project_root = paths::get_project_root();
-        let dist_path = project_root.join("apps").join("pos-api").join("dist").join("main.js");
+        let dist_path = project_root.join("apps").join("api").join("dist").join("main.js");
 
         if !dist_path.exists() {
             return Err(format!(

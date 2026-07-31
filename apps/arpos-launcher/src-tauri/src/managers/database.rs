@@ -58,7 +58,7 @@ pub fn configure(&self) -> Result<String, String> {
 
     pub fn migrate(&self) -> Result<String, String> {
         let project_root = paths::get_project_root();
-        let api_dir = project_root.join("apps").join("pos-api");
+        let api_dir = project_root.join("apps").join("api");
         let prisma_dir = api_dir.join("prisma");
         let db_path = paths::get_db_path();
 
@@ -102,7 +102,7 @@ pub fn configure(&self) -> Result<String, String> {
 
     pub fn push(&self) -> Result<String, String> {
         let project_root = paths::get_project_root();
-        let api_dir = project_root.join("apps").join("pos-api");
+        let api_dir = project_root.join("apps").join("api");
         let db_path = paths::get_db_path();
 
         let prisma_bin = api_dir
@@ -140,7 +140,7 @@ pub fn configure(&self) -> Result<String, String> {
         }
 
         let project_root = paths::get_project_root();
-        let api_dir = project_root.join("apps").join("pos-api");
+        let api_dir = project_root.join("apps").join("api");
 
         let sqlite3_bin = which_sqlite3().ok_or("sqlite3 not found in PATH")?;
 
