@@ -13,7 +13,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:push": "prisma db push",
     "prisma:studio": "prisma studio",
-    "prisma:seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+    "prisma:seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts",
+    "seed:tenant": "ts-node --compiler-options {\"module\":\"CommonJS\"} scripts/seed-tenant.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
