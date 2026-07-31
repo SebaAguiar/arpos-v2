@@ -31,34 +31,38 @@ export class SetupService {
     const now = Math.floor(Date.now() / 1000);
     const hashedPassword = await bcrypt.hash(dto.adminPassword, 10);
 
-    const company = await this.prisma.company.create({
-      data: {
-        name: dto.companyName,
-        taxId: dto.taxId,
-        created_at: now,
-        updated_at: now,
-      },
-    });
+    const { company, store, adminUser } = await this.prisma.$transaction(async (tx) => {
+      const company = await tx.company.create({
+        data: {
+          name: dto.companyName,
+          taxId: dto.taxId,
+          created_at: now,
+          updated_at: now,
+        },
+      });
 
-    const store = await this.prisma.store.create({
-      data: {
-        companyId: company.id,
-        name: 'Sucursal Principal',
-        created_at: now,
-        updated_at: now,
-      },
-    });
+      const store = await tx.store.create({
+        data: {
+          companyId: company.id,
+          name: 'Sucursal Principal',
+          created_at: now,
+          updated_at: now,
+        },
+      });
 
-    const adminUser = await this.prisma.user.create({
-      data: {
-        companyId: company.id,
-        email: dto.adminEmail,
-        password: hashedPassword,
-        name: 'Administrador',
-        role: 'admin',
-        created_at: now,
-        updated_at: now,
-      },
+      const adminUser = await tx.user.create({
+        data: {
+          companyId: company.id,
+          email: dto.adminEmail,
+          password: hashedPassword,
+          name: 'Administrador',
+          role: 'admin',
+          created_at: now,
+          updated_at: now,
+        },
+      });
+
+      return { company, store, adminUser };
     });
 
     this.configService.set('LOCAL_COMPANY_ID', company.id);
