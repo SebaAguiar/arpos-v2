@@ -1,4 +1,5 @@
 import { TextField, DropdownMenu, Avatar, IconButton, Tooltip } from "@radix-ui/themes";
+import { useEffect } from "react";
 import {
   MagnifyingGlassIcon,
   BellIcon,
@@ -30,8 +31,15 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
   const pendingCount = useSyncStore((s) => s.pendingCount);
   const isProcessing = useSyncStore((s) => s.isProcessing);
   const isBackendAvailable = useSyncStore((s) => s.isBackendAvailable);
+  const fetchStatus = useSyncStore((s) => s.fetchStatus);
   const openCashControl = useDialogStore((s) => s.openCashControl);
   const currentShift = useCashRegisterStore((s) => s.currentShift);
+
+  useEffect(() => {
+    if (isOnline) {
+      void fetchStatus();
+    }
+  }, [isOnline, fetchStatus]);
 
   const initials = user?.name
     ?.split(" ")
