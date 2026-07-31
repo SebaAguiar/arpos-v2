@@ -42,7 +42,7 @@
     "longDescription": "ArPOS - A modern, offline-first point of sale system for retail businesses",
     "windows": {
       "wix": {
-        "language": "es-AR"
+        "language": "es-ES"
       },
       "nsis": {
         "installMode": "currentUser"
