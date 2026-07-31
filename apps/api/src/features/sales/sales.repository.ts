@@ -1,8 +1,10 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../data-access/prisma/prisma.service';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
-import { Sale, Prisma } from '@prisma/client';
+import { Sale, Prisma, SaleItem } from '@prisma/client';
 import { CreateSaleInput } from './dto/create-sale.schema';
+
+export type SaleWithItems = Sale & { items: SaleItem[] };
 
 @Injectable()
 export class SalesRepository {
@@ -63,7 +65,7 @@ export class SalesRepository {
     });
   }
 
-  async create(input: CreateSaleInput): Promise<Sale> {
+  async create(input: CreateSaleInput): Promise<SaleWithItems> {
     const companyId = this.getCompanyId();
     const storeId = this.getStoreId();
     const userId = this.tenantContext.getUserId() || 'system';
@@ -162,7 +164,7 @@ export class SalesRepository {
       return tx.sale.findUnique({
         where: { id: sale.id },
         include: { items: true },
-      }) as Promise<Sale>;
+      }) as Promise<SaleWithItems>;
     });
   }
 

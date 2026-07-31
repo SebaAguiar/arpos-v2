@@ -63,9 +63,25 @@ export class SalesService {
 
     await this.syncService.enqueueChange('create', 'sale', sale.id, {
       total_cents: sale.total_cents,
+      discount_cents: sale.discount_cents,
+      tax_cents: sale.tax_cents,
       payment_method: sale.payment_method,
+      payment_details: sale.payment_details,
       status: sale.status,
       user_id: sale.user_id,
+      contact_id: sale.contact_id,
+      cash_register_id: sale.cash_register_id,
+      ticket_number: sale.ticket_number,
+      notes: sale.notes,
+      created_at: sale.created_at,
+      items: sale.items.map((item) => ({
+        productId: item.productId,
+        variantId: item.variantId,
+        quantity: item.quantity,
+        unit_price_cents: item.unit_price_cents,
+        total_cents: item.total_cents,
+        discount_cents: item.discount_cents,
+      })),
     });
 
     return sale;

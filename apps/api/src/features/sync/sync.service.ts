@@ -1,4 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+} from '@nestjs/common';
 import { PrismaService } from '../../data-access/prisma/prisma.service';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
 import {
@@ -32,7 +36,7 @@ const SYNC_ENTITIES: SyncEntity[] = [
 const SYNC_ACTIONS: SyncAction[] = ['create', 'update', 'delete'];
 
 @Injectable()
-export class SyncService {
+export class SyncService implements OnModuleInit {
   private readonly logger = new Logger('SyncService');
 
   constructor(
@@ -42,11 +46,19 @@ export class SyncService {
     private readonly cloudRelay: CloudRelayService,
   ) {}
 
+  async onModuleInit(): Promise<void> {
+    // Real-time notifications: when the cloud relay reports remote
+    // changes, pull them immediately instead of waiting for polling.
+    this.cloudRelay.registerRemoteChangesHandler(async () => {
+      await this.pullFromCloud();
+    });
+  }
+
   async enqueueChange(
     action: SyncAction,
     entity: SyncEntity,
     entityId: string,
-    payload: Record<string, string | number | boolean | null>,
+    payload: Record<string, unknown>,
   ): Promise<void> {
     if (!SYNC_ACTIONS.includes(action)) {
       throw new Error(`Invalid sync action: ${action}`);
@@ -97,15 +109,20 @@ export class SyncService {
       return { processed: 0, succeeded: 0, failed: 0 };
     }
 
-    const cloudEnabled = this.cloudRelay.isCloudConfigured();
+    const cloudEnabled = await this.cloudRelay.isCloudConfigured();
+
+    // Offline-first: without cloud configured, leave every change pending.
+    // They stay queued until the user enables cloud sync in Settings.
+    if (!cloudEnabled) {
+      return { processed: 0, succeeded: 0, failed: 0 };
+    }
+
     let succeeded = 0;
     let failed = 0;
 
     for (const item of pending) {
       try {
-        if (cloudEnabled) {
-          await this.cloudRelay.pushToCloud(item);
-        }
+        await this.cloudRelay.pushToCloud(item);
         await this.syncRepo.markSynced(item.id);
         succeeded++;
       } catch (error) {
@@ -159,13 +176,15 @@ export class SyncService {
   }
 
   private async processOldestBatch(): Promise<void> {
+    if (!(await this.cloudRelay.isCloudConfigured())) {
+      return;
+    }
+
     const oldest = await this.syncRepo.findPending(10);
 
     for (const item of oldest) {
       try {
-        if (this.cloudRelay.isCloudConfigured()) {
-          await this.cloudRelay.pushToCloud(item);
-        }
+        await this.cloudRelay.pushToCloud(item);
         await this.syncRepo.markSynced(item.id);
       } catch (error) {
         const message =

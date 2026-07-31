@@ -27,6 +27,7 @@ describe('SyncService', () => {
     pushToCloud: jest.Mock;
     pullFromCloud: jest.Mock;
     isCloudConfigured: jest.Mock;
+    registerRemoteChangesHandler: jest.Mock;
   };
 
   beforeEach(() => {
@@ -57,7 +58,8 @@ describe('SyncService', () => {
     mockCloudRelay = {
       pushToCloud: jest.fn(),
       pullFromCloud: jest.fn(),
-      isCloudConfigured: jest.fn().mockReturnValue(false),
+      isCloudConfigured: jest.fn().mockResolvedValue(false),
+      registerRemoteChangesHandler: jest.fn(),
     };
 
     service = new SyncService(
@@ -111,7 +113,23 @@ describe('SyncService', () => {
       expect(result).toEqual({ processed: 0, succeeded: 0, failed: 0 });
     });
 
-    it('should process pending items and mark as synced', async () => {
+    it('should leave items pending when cloud is not configured', async () => {
+      const pendingItems = [
+        { id: 'sq-1', action: 'create', entity: 'sale', entityId: 's1', payload: '{"total":10}' },
+      ];
+      mockRepo.findPending.mockResolvedValue(pendingItems);
+
+      const result = await service.processPending();
+
+      expect(result).toEqual({ processed: 0, succeeded: 0, failed: 0 });
+      expect(mockRepo.markSynced).not.toHaveBeenCalled();
+      expect(mockRepo.markError).not.toHaveBeenCalled();
+    });
+
+    it('should process pending items and mark as synced when cloud is configured', async () => {
+      mockCloudRelay.isCloudConfigured.mockResolvedValue(true);
+      mockCloudRelay.pushToCloud.mockResolvedValue(undefined);
+
       const pendingItems = [
         { id: 'sq-1', action: 'create', entity: 'sale', entityId: 's1', payload: '{"total":10}' },
       ];
@@ -125,7 +143,7 @@ describe('SyncService', () => {
     });
 
     it('should mark items as error when push to cloud fails', async () => {
-      mockCloudRelay.isCloudConfigured.mockReturnValue(true);
+      mockCloudRelay.isCloudConfigured.mockResolvedValue(true);
       mockCloudRelay.pushToCloud.mockRejectedValue(new Error('Network timeout'));
 
       const pendingItems = [
