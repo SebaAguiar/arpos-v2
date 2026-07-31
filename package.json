@@ -14,6 +14,7 @@
     "build:admin": "nx build admin-panel",
     "build:launcher": "nx build arpos-launcher",
     "lint": "nx run-many -t lint",
+    "typecheck": "nx run-many -t typecheck",
     "prisma:generate": "nx run api:prisma:generate",
     "prisma:migrate": "nx run api:prisma:migrate",
     "prisma:studio": "nx run api:prisma:studio",
@@ -28,12 +29,19 @@
     "install:all": "pnpm install"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@nx/eslint": "^22.7.7",
     "@nx/js": "^22.3.0",
     "@nx/node": "^22.3.0",
     "@tauri-apps/cli": "^2.11.4",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.3",
+    "globals": "^17.8.0",
     "nx": "^22.3.0",
     "playwright": "^1.62.0",
-    "typescript": "~5.8.3"
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.65.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

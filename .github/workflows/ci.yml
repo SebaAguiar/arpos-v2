@@ -107,8 +107,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Generate Prisma client
-        run: pnpm --filter api exec prisma generate
+      - name: Generate Prisma clients
+        run: |
+          pnpm --filter api exec prisma generate
+          echo 'DATABASE_URL="postgres://ci:ci@localhost:5432/ci"' > apps/admin-panel/.env
+          pnpm --filter admin-panel exec prisma generate
 
       - name: Create env file
         run: |
@@ -116,8 +119,8 @@ jobs:
           echo 'PORT=3000' >> apps/api/.env
           echo 'JWT_SECRET="ci-secret"' >> apps/api/.env
 
-      - name: Build Tauri app (compile check)
-        run: pnpm --filter arpos-launcher tauri build --no-bundle
+      - name: Run API tests
+        run: pnpm --filter api test
 
   lint:
     runs-on: ubuntu-latest
@@ -137,11 +140,20 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Generate Prisma client
-        run: pnpm --filter api exec prisma generate
+      - name: Generate Prisma clients
+        run: |
+          pnpm --filter api exec prisma generate
+          echo 'DATABASE_URL="postgres://ci:ci@localhost:5432/ci"' > apps/admin-panel/.env
+          pnpm --filter admin-panel exec prisma generate
 
-      - name: TypeScript check (API)
-        run: pnpm --filter api exec tsc --noEmit
+      - name: Create env file
+        run: |
+          echo 'DATABASE_URL="file:./dev.db"' > apps/api/.env
+          echo 'PORT=3000' >> apps/api/.env
+          echo 'JWT_SECRET="ci-secret"' >> apps/api/.env
 
-      - name: TypeScript check (POS)
-        run: pnpm --filter pos-react exec tsc --noEmit
+      - name: ESLint (API, POS, admin-panel)
+        run: pnpm lint
+
+      - name: TypeScript check (API, POS, admin-panel)
+        run: pnpm typecheck

@@ -9,6 +9,12 @@
       "dependsOn": [
         "^build"
       ]
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": [
+        "{options.outputFile}"
+      ]
     }
   },
   "defaultProject": "api",

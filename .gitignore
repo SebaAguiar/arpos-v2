@@ -174,3 +174,5 @@ Thumbs.db
 # Impeccable tool artifacts
 .github/skills/impeccable/
 .github/hooks/impeccable.json
+# Generated Prisma client (custom output)
+apps/admin-panel/src/generated/prisma/
