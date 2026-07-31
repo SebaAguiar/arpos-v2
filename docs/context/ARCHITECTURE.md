@@ -1966,47 +1966,70 @@ test.describe('POS Workflow', () => {
 
 ### 12.1 Pipeline de Build (GitHub Actions)
 
+**Implementación real:** `.github/workflows/release.yml` (CI en `.github/workflows/ci.yml`).
+
 ```yaml
-name: Build & Release
+name: Release & Sign
 
 on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
 
 jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    
-    runs-on: ${{ matrix.os }}
-    
+        include:
+          - platform: macos-latest
+            args: --target aarch64-apple-darwin
+          - platform: macos-latest
+            args: --target x86_64-apple-darwin
+          - platform: ubuntu-22.04
+            args: ''
+          - platform: windows-latest
+            args: ''
+
+    runs-on: ${{ matrix.platform }}
+
     steps:
       - uses: actions/checkout@v4
-      
       - uses: pnpm/action-setup@v2
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
-      
       - uses: dtolnay/rust-toolchain@stable
-      
+        with:
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
       - name: Build Tauri App
-        run: pnpm -F arpos-launcher build
-      
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
-          name: arpos-${{ matrix.os }}
-          path: apps/arpos-launcher/src-tauri/target/release/bundle/
-      
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: apps/arpos-launcher/src-tauri/target/release/bundle/**/*
+          tagName: ${{ github.ref_name }}
+          releaseName: ${{ github.ref_name }}
+          releaseBody: 'See: CHANGELOG.md'
+          releaseDraft: false
+          prerelease: false
+          args: ${{ matrix.args }}
 ```
+
+> **Gotchas aprendidos en v0.1.0:**
+> - El signing key se pasa vía `TAURI_SIGNING_PRIVATE_KEY` (con su `_PASSWORD`). El pubkey debe coincidir
+>   exactamente con `tauri.conf.json → updater.pubkey`, o el updater rechaza las actualizaciones.
+> - El body de la release sale de `release.yml` (`releaseBody`), no del CHANGELOG automáticamente.
+> - **`bun.lock` rompe la detección de package manager en Nx** (CI detecta `bun` en vez de `pnpm` y falla
+>   con `Cannot determine the version of bun`). Se eliminó; `package.json` fija `"packageManager": "pnpm@11.11.0"`.
+> - WiX (Windows MSI) **no acepta `es-AR`** como locale; usar `es-ES` (bug corregido en v0.1.0).
+> - El pubkey se fija en `tauri.conf.json → updater.pubkey` (ver §12.3); los secrets en GitHub Actions
+>   son `TAURI_SIGNING_PRIVATE_KEY` + `_PASSWORD`.
+
+**CI (`.github/workflows/ci.yml`):** ESLint + typecheck vía Nx (`nx run-many`), corriendo en cada push/PR.
 
 ### 12.2 Instaladores
 
@@ -2026,17 +2049,11 @@ jobs:
 
 ### 12.3 Auto-updater (Tauri Built-in)
 
-El sistema de actualizaciones de ArPOS usa el updater built-in de Tauri, con fallback a GitHub Releases y soporte para differential updates.
+El sistema de actualizaciones de ArPOS usa el updater built-in de Tauri. **Canal activo: GitHub Releases**
+(implementado y en producción desde v0.1.0). El backend personalizado (`releases.arpos.app`) es la Opción B
+para Fase 2 — cuando se necesite rollout gradual, monitoring y A/B testing.
 
-**Tipos de actualización:**
-
-| Tipo | Versión | Ejemplo | Tamaño | Restart |
-|---|---|---|---|---|
-| **Hotfix** | Patch | v1.0.0 → v1.0.1 | 1-5 MB (differential) | Automático |
-| **Feature** | Minor | v1.0.0 → v1.1.0 | 80-100 MB (full) | Manual |
-| **Breaking** | Major | v1.0.0 → v2.0.0 | Full + migration | Forzado + wizard |
-
-**Configuración base (tauri.conf.json):**
+**Configuración real (tauri.conf.json, v0.1.0):**
 
 ```json
 {
@@ -2044,21 +2061,25 @@ El sistema de actualizaciones de ArPOS usa el updater built-in de Tauri, con fal
     "active": true,
     "dialog": true,
     "endpoints": [
-      "https://releases.arpos.app/update/{{target}}/{{current_version}}"
+      "https://api.github.com/repos/SebaAguiar/arpos-v2/releases/latest"
     ],
-    "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6..."
+    "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDY0OTFEQzFGNTRCQ0IzQjEKUldTeHM3eFVIOXlSWkhkMGNEWXA3R3NEcmF5RHNRUVhwQktjNlBJUUVKaDIvY3dYSjUwa1dZd3MK"
   }
 }
 ```
 
-**Flujo de actualización:**
-1. Background thread checkea cada 1 hora
-2. Si hay nueva versión: notificación discreta al usuario
-3. Descarga differential (patch) en lugar de full binary
-4. Verifica firma Ed25519
-5. Aplica patch + reinicia (2-5 minutos total)
+> El updater consulta la API de GitHub `releases/latest` y descarga el asset firmado del target correcto.
 
-**Rollback:** Si una versión tiene bugs, se marca como `broken` y se revierte a la versión anterior automáticamente.
+**Flujo de actualización:**
+1. Background thread checkea periódicamente (intervalo configurable)
+2. Si hay nueva versión: notificación discreta al usuario
+3. Descarga el bundle firmado para el target (Windows `.msi`/`.nsis`, macOS `.dmg`/`.app`, Linux `.deb`/`.AppImage`)
+4. Verifica firma Ed25519 contra la pubkey embebida
+5. Aplica + reinicia
+
+**Rollback (vía GitHub Releases):** No existe un flag `broken` central; el rollback es **forward-fix**.
+Ver `docs/context/UPDATES.md` §8 para el procedimiento completo (`gh release delete --cleanup-tag`,
+re-publicar corrección con semver superior).
 
 > **Especificación completa:** Ver `docs/context/UPDATES.md` para estrategia detallada de distribución, differential updates, rollback, monitoreo, CI/CD pipeline y troubleshooting.
 

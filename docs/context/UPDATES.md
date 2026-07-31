@@ -962,7 +962,46 @@ export class UpdatesAdminController {
 }
 ```
 
-### Recuperación Local (Device)
+### Rollback con GitHub Releases (Opción A — implementado)
+
+Con GitHub Releases **no hay status `broken` en un registro central** (el updater de Tauri consulta
+`releases/latest`). El rollback es **manipular las releases**, no marcar un flag:
+
+```
+Escenario: v0.1.0 publicada, los usuarios reportan un bug crítico.
+
+1. Detener la sangría:
+   gh release delete v0.1.0 --yes --cleanup-tag
+   (borra la release + sus assets. Los usuarios que ya instalaron la
+   quedaron en esa versión, pero nadie nuevo la puede descargar.)
+
+2. Opcional — si era un problema de empaquetado (ej. MSI roto):
+   git revert <commit> && git tag v0.1.0 && git push origin v0.1.0
+   (re-publica una release v0.1.0 corregida con el mismo número)
+
+3. Opción más limpia si el bug es de código (no de empaquetado):
+   fix en main → commit → push → git tag v0.1.1 → push
+   (release nueva con el fix; los devices en v0.1.0 ven la update)
+
+4. Si el bug es tan grave que se quiere "volver atrás":
+   No existe "degradar" en GitHub Releases: una vez publicado, los
+   clients apuntan al tag más nuevo. La vía real es publicar v0.1.1
+   que corrige el bug (forward-fix), no regresar a v0.1.0-beta.
+```
+
+**Reglas del rollback con GitHub Releases:**
+
+- **`gh release delete --cleanup-tag`** es la única forma de quitar una versión rota del reach de los
+  clientes. Hacerlo **antes** de publicar la corrección evita que más devices la descarguen.
+- **Forward-fix siempre**: publicar v0.1.1 con el fix es preferible a eliminar v0.1.0 y volver a
+  publicar v0.1.0-beta. El updater solo ve "última release con tag semver mayor".
+- **`pub_date`** es el `published_at` de la release; si se elimina y re-publica el mismo tag, los
+  clients que ya tienen esa versión la consideran "actual" (mismo semver → sin update).
+- **Nunca** reutilizar un número de versión con contenido distinto sin avisar: los devices con la
+  versión rota ya instalada **no se van a actualizar solos** a una re-publicación del mismo número.
+- Si el daño está **solo en la app instalada** (no en el bundle), la salida es v0.1.1.
+
+**Recuperación Local (Device)**
 
 Si un device se queda sin conectividad después de update fallido:
 
@@ -1286,9 +1325,10 @@ Gotchas documentados:
   (`Cannot determine the version of bun`). Localmente pasaba porque bun está instalado en la máquina
   del dev; en GitHub Actions no hay bun y `pnpm lint`/`pnpm typecheck` reventaban. Fix: eliminar
   `bun.lock` + fijar `"packageManager": "pnpm@11.11.0"` en el `package.json` raíz.
-- **Secrets y pubkey ya estaban configurados desde el 29-jul**: `~/.tauri/arpos.key` + `.pub` (la pubkey
-  coincide con la de `tauri.conf.json`), y `TAURI_SIGNING_PRIVATE_KEY` + `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`
-  como secrets del repo. El primer release real (`v0.1.0`, 2026-07-31) no requirió regenerar nada.
+- **Secrets y pubkey configurados**: la key original (29-jul) tenía un password que se perdió, así que
+  el 31-jul se **regeneró** `~/.tauri/arpos.key` (password `seba234`), se actualizó la pubkey en
+  `tauri.conf.json` y se re-setearon `TAURI_SIGNING_PRIVATE_KEY` + `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`.
+  Verificar siempre que pubkey de config y key local coincidan antes de taguear.
 - **`body_path: CHANGELOG.md`** en `softprops/action-gh-release` → el body del release es TODO el changelog.
   Conviene tener una entrada fresca del changelog ANTES de taguear, no después.
 - **Versión**: la app y el changelog comparten `0.1.0`. Si el tag apunta al mismo commit que el beta
@@ -1296,6 +1336,15 @@ Gotchas documentados:
 - **Primer release**: `v0.1.0-beta` (29-jul) apuntaba a un commit viejo y no incluía features posteriores
   (migration module, setup endpoints, guide de usuario). El tag `v0.1.0` real se creó sobre el HEAD
   actualizado con changelog al día.
+- **`createUpdaterArtifacts` es obligatorio para firmar**: en Tauri v2 el default es `false`, y tener
+  `plugins.updater.active: true` NO lo activa. Sin `"createUpdaterArtifacts": true` en `bundle`, el
+  bundler NO genera los `.sig` → el updater rechaza las updates por firma inválida. El primer release
+  de `v0.1.0` falló por esto (0 `.sig` en los assets).
+- **No subir el directorio `bundle/` entero a la release**: contiene el AppDir del AppImage (cientos de
+  `.so`, `gschema.xml`, `WebKitNetworkProcess`, internals de deb/rpm). Subirlo como assets rompió el
+  upload (404 en `im-thai.so`). Solo hay que publicar los instaladores (`deb`, `rpm`, `AppImage`, `dmg`,
+  `msi`, `exe`) + sus `.sig`. El workflow ahora filtra con `find ... -exec cp` y verifica que existan
+  `.sig` antes de crear la release.
 
 ---
 
@@ -1494,16 +1543,16 @@ Device:
 
 Estado real al 2026-07-31 (release `v0.1.0`):
 
-- [x] Keys Ed25519 generadas y guardadas en GitHub Secrets (29-jul, verificadas)
-- [x] tauri.conf.json configurado con endpoints (updater activo, pubkey, GitHub Releases)
+- [x] Keys Ed25519 generadas y guardadas en GitHub Secrets (regeneradas 31-jul, pubkey actualizada)
+- [x] tauri.conf.json configurado con endpoints (updater activo, pubkey, GitHub Releases, createUpdaterArtifacts)
 - [x] CI/CD pipeline tested (release `v0.1.0` en curso; CI verde tras fix de `bun.lock`)
 - [x] GitHub Releases o backend listo (repo privado `SebaAguiar/arpos-v2`)
 - [x] App version bumped en tauri.conf.json + package.json (todo en `0.1.0`)
 - [x] Release notes escritas (CHANGELOG.md actualizado al feature set real)
 - [ ] Beta testing con 10 users (Fase 6 — pendiente)
-- [ ] Rollback plan documentado
+- [x] Rollback plan documentado (GitHub Releases, §8 — forward-fix + `gh release delete`)
 - [ ] Monitoring + alertas configuradas (requiere backend personalizado, Fase 2)
-- [ ] Documentación actualizada
+- [x] Documentación actualizada (GUIDE.md, UPDATES.md, ROADMAP.md — commits `63f306b`, `1110ab9`, `869338e`)
 - [ ] Auto-updater end-to-end probado en device real (instalar bundle + update a versión nueva)
 - [ ] Code-signing Apple/Windows (certificados pagos — follow-up)
 
