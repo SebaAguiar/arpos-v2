@@ -1644,6 +1644,8 @@ fn main() {
 
 ## 10. Sincronización Multi-Dispositivo y Cloud Opcional
 
+> **Implementación vigente (Fase 5):** la especificación funcional del sistema de sync implementado (SyncQueue, CloudRelayService, WebSocket, endpoints, config por empresa, LWW) está en [`docs/context/SYNC.md`](./SYNC.md). Las subsecciones siguientes describen el diseño objetivo original.
+
 ### 10.1 Arquitectura de Sync
 
 **Premisa:** Usuario tiene ArPOS en laptop (POS) y tablet (inventario). Quiere que se sincronicen.

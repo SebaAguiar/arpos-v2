@@ -1263,6 +1263,25 @@ git push origin v1.0.1
 # 5. Users see update available (en ~5 minutos)
 ```
 
+### Learnings implementación real (2026-07-31)
+
+> `.github/workflows/release.yml` usa matriz de 3 OS (`ubuntu-latest`, `macos-latest`, `windows-latest`).
+> Con el endpoint GitHub (`https://api.github.com/repos/.../releases/latest`), el plugin de Tauri v2
+> **descubre automáticamente** los assets del release + sus archivos `.sig` — no se necesita manifest JSON
+> manual. `tauri build` genera los `.sig` automáticamente cuando `TAURI_SIGNING_PRIVATE_KEY` está seteado.
+
+Gotchas documentados:
+- **AppImage local**: requiere `patchelf` + FUSE funcional. Sin FUSE (contenedores) linuxdeploy falla con
+  `failed to run linuxdeploy` → correr con `--appimage-extract-and-run`. En runners de GitHub Actions
+  FUSE funciona, no se requiere workaround.
+- **`beforeBuildCommand`** corre `pnpm --filter api build && pnpm --filter pos-react build`; funciona en
+  `cmd` de Windows y bash de Linux/macOS.
+- **Firmas**: los `.sig` de updater son Ed25519 (via `TAURI_SIGNING_PRIVATE_KEY`), independientes del
+  code-signing de Apple/Windows que requieren certificados (follow-up pendiente).
+- **`pnpm --filter arpos-launcher tauri build`** compila bundles de todos los targets del
+  `tauri.conf.json`; Tauri filtra automáticamente por OS (deb/rpm/appimage en Linux, dmg en macOS,
+  msi/nsis en Windows), así que el workflow no necesita paths hardcodeados por plataforma.
+
 ---
 
 ## 11. Monitoreo y Telemetría

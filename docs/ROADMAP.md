@@ -43,17 +43,19 @@ Este documento recopila las fases de migración, features propuestas y roadmap d
 
 ### Fase 2: Tauri Setup (2-3 semanas)
 
-**Milestone:** Launcher compilable, NestJS como sidecar funcional.
+**Milestone:** Launcher compilable, NestJS como sidecar funcional. **COMPLETADA** (2026-07-30)
 
-- [ ] Setup proyecto Tauri 2.x
-- [ ] Implementar `ProcessManager` (spawn/kill NestJS)
-- [ ] Implementar `DatabaseManager` (init DB, run migrations)
-- [ ] Implementar `SystemManager` (CPU, RAM, disk)
-- [ ] Implementar `UpdaterManager` (check for updates)
-- [ ] Implementar `BackupManager` (backup/restore)
-- [ ] Implementar `ExportData` (SQLite → SQL export)
-- [ ] Configurar `tauri.conf.json` (windows, security, updater)
-- [ ] Auto-updater con GitHub Releases
+- [x] Setup proyecto Tauri 2.x
+- [x] Implementar `ProcessManager` (spawn/kill NestJS)
+- [x] Implementar `DatabaseManager` (init DB, run migrations)
+- [x] Implementar `SystemManager` (CPU, RAM, disk)
+- [x] Implementar `UpdaterManager` (check for updates)
+- [x] Implementar `BackupManager` (backup/restore)
+- [x] Implementar `ExportData` (SQLite → SQL export)
+- [x] Configurar `tauri.conf.json` (windows, security, updater)
+- [x] Auto-updater con GitHub Releases (config + plugin listos; release/CI pendiente en Fase 4)
+
+> **Nota:** Corregidos mismatches de rutas — el launcher referenciaba `apps/pos-api`/`--filter pos-api`, pero la app real es `apps/api`/`--filter api`. Verificado: `cargo check` ✓, `tauri build --no-bundle` ✓ (binario release), `beforeBuildCommand` ✓ (build api + pos-react), `beforeDevCommand` (dev.sh) ✓ (API en :3000 + Vite en :1420).
 
 **Bloqueadores:** Fase 1 completada
 **Dependencias:** Tauri 2.x, Rust toolchain, Node.js 20+
@@ -62,58 +64,60 @@ Este documento recopila las fases de migración, features propuestas y roadmap d
 
 ### Fase 3: React POS (6-8 semanas)
 
-**Milestone:** POS funcional en React con feature parity vs Angular.
+**Milestone:** POS funcional en React con feature parity vs Angular. **COMPLETADA** (2026-07-31)
 
 **Módulos críticos (en orden):**
 
 #### 3.1 Auth + Layout (1 semana)
-- [ ] LoginPage
-- [ ] FirstRunWizard
-- [ ] MainLayout, Sidebar, Header
-- [ ] Zustand auth store
-- [ ] useAuth hook
+- [x] LoginPage
+- [x] FirstRunWizard
+- [x] MainLayout, Sidebar, Header
+- [x] Zustand auth store
+- [x] useAuth hook
 
 #### 3.2 POS / Carrito (2 semanas)
-- [ ] POSPage (main cashier)
-- [ ] ProductSearch
-- [ ] ProductGrid
-- [ ] Cart
-- [ ] PaymentDialog
-- [ ] ReceiptPrinter
-- [ ] OfflineIndicator
-- [ ] Zustand sales store
+- [x] POSPage (main cashier)
+- [x] ProductSearch
+- [x] ProductGrid
+- [x] Cart
+- [x] PaymentDialog
+- [x] ReceiptPrinter
+- [x] OfflineIndicator
+- [x] Zustand sales store
 
 #### 3.3 Productos (1 semana)
-- [ ] ProductsPage
-- [ ] ProductForm
-- [ ] ProductVariants
-- [ ] PricingManager
-- [ ] Zustand products store
+- [x] ProductsPage
+- [x] ProductForm
+- [x] ProductVariants
+- [x] PricingManager
+- [x] Zustand products store
 
 #### 3.4 Inventario (1 semana)
-- [ ] InventoryPage
-- [ ] StockMovements
-- [ ] StockAdjustment
+- [x] InventoryPage
+- [x] StockMovements
+- [x] StockAdjustment
 
 #### 3.5 Reportes (1 semana)
-- [ ] ReportsPage
-- [ ] SalesReport
-- [ ] InventoryReport
-- [ ] CashReport
+- [x] ReportsPage
+- [x] SalesReport
+- [x] InventoryReport
+- [x] CashReport
 
 #### 3.6 Caja (1 semana)
-- [ ] CashRegisterPage
-- [ ] OpenRegisterModal
-- [ ] CloseRegisterModal
-- [ ] CashMovements
+- [x] CashRegisterPage
+- [x] OpenRegisterModal
+- [x] CloseRegisterModal
+- [x] CashMovements
 
 #### 3.7 Configuración (1 semana)
-- [ ] SettingsPage
-- [ ] CompanyForm
-- [ ] StoreForm
-- [ ] UsersManager
-- [ ] CloudSyncSettings
-- [ ] BackupRestore
+- [x] SettingsPage
+- [x] CompanyForm
+- [x] StoreForm
+- [x] UsersManager
+- [x] CloudSyncSettings
+- [x] BackupRestore
+
+> **Nota:** Los módulos de Fase 3 están implementados (pages + stores + services + repos). ProductSearch/ProductGrid viven dentro de `POSPage`; los reportes (sales/inventory/cash) dentro de `ReportsPage`. Frontend tests con Vitest: 30 tests (stores, api-client, SummaryPanel) en `apps/pos-react/src/__tests__/`. Pendiente real de hardening: ESLint no está configurado en el repo (script `lint` roto, CI usa `tsc --noEmit`).
 
 **Bloqueadores:** Fase 1 completada
 **Dependencias:** React 19, Shadcn/ui, Zustand 5, React Router 7
@@ -124,13 +128,17 @@ Este documento recopila las fases de migración, features propuestas y roadmap d
 
 **Milestone:** Instaladores para Windows, macOS, Linux.
 
-- [ ] Integrar React POS con NestJS API
-- [ ] Integrar Tauri con React POS
-- [ ] Configurar build pipeline (Vite + Tauri)
-- [ ] Generar installers (MSI, DMG, AppImage)
-- [ ] Testing cross-platform
-- [ ] Performance tuning
-- [ ] Documentación de usuario
+- [x] Integrar React POS con NestJS API (services + api-client, CORS 1420/5173)
+- [x] Integrar Tauri con React POS (bridge completo: 22 commands tipados, Service → Repository → Store)
+- [x] Configurar build pipeline (Vite + Tauri)
+- [x] Generar installers — deb ✓, rpm ✓, AppImage ✓ (validados localmente 2026-07-31); msi/nsis y dmg via CI matrix en `release.yml`
+- [x] Testing cross-platform — matrix ubuntu/macos/windows en `release.yml` + job `build-launcher` en `ci.yml` (valida Rust en cada PR)
+- [x] Performance tuning — `html2pdf.js` es lazy-import (975KB solo carga al imprimir); `chunkSizeWarningLimit: 1000`; bundle inicial ~284KB (< 300KB verificado en CI)
+- [x] Documentación de usuario — `docs/user/GUIDE.md` (instalación, primer arranque, POS, productos, inventario, reportes, caja, settings, backup, troubleshooting)
+
+> **Nota AppImage local:** requiere `patchelf` y FUSE real. En contenedores/CI sin FUSE, linuxdeploy falla con "failed to run linuxdeploy" — ejecutar con `--appimage-extract-and-run`. En GitHub Actions runners (ubuntu-latest) FUSE funciona, no requiere workaround.
+
+> **Nota firmas:** los `.sig` (updater) se generan automáticamente en CI cuando `TAURI_SIGNING_PRIVATE_KEY` está seteado. Apple code-signing/notarización y Windows code-signing quedan como follow-up (requieren certificados).
 
 **Bloqueadores:** Fases 2 y 3 completadas
 **Dependencias:** Tauri bundler, platform-specific toolchains
@@ -141,12 +149,12 @@ Este documento recopila las fases de migración, features propuestas y roadmap d
 
 **Milestone:** Multi-dispositivo funcional.
 
-- [ ] Implementar CloudRelayService (push/pull)
-- [ ] Implementar conflict resolution (last-write-wins)
-- [ ] WebSocket para notificaciones en tiempo real
-- [ ] Configuración de sync en Settings
+- [x] Implementar CloudRelayService (push/pull)
+- [x] Implementar conflict resolution (last-write-wins)
+- [x] WebSocket para notificaciones en tiempo real
+- [x] Configuración de sync en Settings
 - [ ] Testing de offline→online transitions
-- [ ] Documentación de sync
+- [x] Documentación de sync
 
 **Bloqueadores:** Fase 4 completada
 **Dependencias:** Neon PostgreSQL, WebSocket server
