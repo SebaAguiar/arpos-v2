@@ -1,12 +1,9 @@
 import { useState, useEffect } from "react";
+import { isTauri } from "@/lib/tauri";
 
 interface TauriState {
   isTauri: boolean;
   isLoading: boolean;
-}
-
-function detectTauri(): boolean {
-  return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 }
 
 export function useTauri(): TauriState {
@@ -16,7 +13,7 @@ export function useTauri(): TauriState {
   });
 
   useEffect(() => {
-    setState({ isTauri: detectTauri(), isLoading: false });
+    setState({ isTauri: isTauri(), isLoading: false });
   }, []);
 
   return state;

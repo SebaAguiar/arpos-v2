@@ -213,6 +213,26 @@ export interface CloudConfig {
   jwt: string;
 }
 
+export interface SyncConfigInfo {
+  cloud_configured: boolean;
+  cloud_url: string | null;
+  subscription: {
+    status: "active" | "inactive" | "none";
+    tier?: string;
+    expiresAt?: number;
+  } | null;
+}
+
+export interface SyncConfigInput {
+  cloud_url?: string;
+  cloud_jwt?: string;
+  subscription?: {
+    status: "active" | "inactive";
+    tier?: string;
+    expiresAt?: number;
+  };
+}
+
 export interface WalletTransaction {
   id: string;
   contactId: string;
@@ -242,6 +262,50 @@ export interface BackupInfo {
   path: string;
   size_bytes: number;
   created_at: string;
+}
+
+export interface BackendStatus {
+  running: boolean;
+  port: number;
+  pid: number | null;
+  uptime_seconds: number | null;
+}
+
+export interface DatabaseInfo {
+  exists: boolean;
+  path: string;
+  size_bytes: number;
+  migrations_applied: boolean;
+}
+
+export interface SystemInfo {
+  os_name: string;
+  os_version: string;
+  host_name: string;
+  cpu_count: number;
+  cpu_usage: number;
+  total_memory_mb: number;
+  used_memory_mb: number;
+  memory_usage_percent: number;
+  disk_total_gb: number;
+  disk_used_gb: number;
+  disk_usage_percent: number;
+}
+
+export type MemoryUsage = [total_mb: number, used_mb: number, percent: number];
+
+export interface ExportResult {
+  path: string;
+  format: string;
+  size_bytes: number;
+}
+
+export interface UpdateInfo {
+  available: boolean;
+  version: string;
+  notes: string | null;
+  published_at: string | null;
+  download_url: string | null;
 }
 
 export interface Company {

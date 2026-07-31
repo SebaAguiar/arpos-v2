@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { Text, TextField, Switch, Card, Select, Button, Badge } from "@radix-ui/themes";
+import { useState } from "react";
+import { Text, TextField, Switch, Card, Select, Badge } from "@radix-ui/themes";
 import {
   GearIcon,
   PersonIcon,
@@ -13,15 +13,17 @@ import {
   GlobeIcon,
   CheckCircledIcon,
   CrossCircledIcon,
-  UploadIcon,
-  DownloadIcon,
 } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
 import { useSettingsStore } from "@/stores/settings.store";
 import { useSyncStore } from "@/stores/sync.store";
+import { useTauri } from "@/hooks/useTauri";
 import { UsersManager } from "@/components/settings/UsersManager";
 import { StoreManager } from "@/components/settings/StoreManager";
 import { CompanyForm } from "@/components/settings/CompanyForm";
+import { SystemManager } from "@/components/settings/SystemManager";
+import { UpdateManager } from "@/components/settings/UpdateManager";
+import { CloudSyncSettings } from "@/components/settings/CloudSyncSettings";
 import type { PaymentMethod } from "@/lib/types";
 
 const METHOD_ICONS: Record<PaymentMethod, typeof GearIcon> = {
@@ -66,33 +68,10 @@ export function SettingsPage() {
   const setReceiptFooter = useSettingsStore((s) => s.setReceiptFooter);
 
   const subscription = useSyncStore((s) => s.subscription);
-  const setSubscription = useSyncStore((s) => s.setSubscription);
-  const clearSubscription = useSyncStore((s) => s.clearSubscription);
-  const lastSyncAt = useSyncStore((s) => s.lastSyncAt);
-  const pendingCount = useSyncStore((s) => s.pendingCount);
-  const isPulling = useSyncStore((s) => s.isPulling);
-  const isProcessing = useSyncStore((s) => s.isProcessing);
-  const processPending = useSyncStore((s) => s.processPending);
-  const pullFromCloud = useSyncStore((s) => s.pullFromCloud);
 
   const [editingLabel, setEditingLabel] = useState<PaymentMethod | null>(null);
-  const [cloudUrl, setCloudUrl] = useState(subscription?.cloudUrl ?? "");
-  const [cloudJwt, setCloudJwt] = useState(subscription?.cloudJwt ?? "");
 
-  const handleSaveCloudConfig = useCallback(() => {
-    if (!cloudUrl.trim() || !cloudJwt.trim()) return;
-    setSubscription({
-      status: "active",
-      cloudUrl: cloudUrl.trim(),
-      cloudJwt: cloudJwt.trim(),
-    });
-  }, [cloudUrl, cloudJwt, setSubscription]);
-
-  const handleDisconnectCloud = useCallback(() => {
-    setCloudUrl("");
-    setCloudJwt("");
-    clearSubscription();
-  }, [clearSubscription]);
+  const { isTauri } = useTauri();
 
   return (
     <div className="page" style={{ maxWidth: "700px" }}>
@@ -318,114 +297,7 @@ export function SettingsPage() {
         </Card>
 
         {/* Cloud Sync */}
-        <Card>
-          <Text size="3" weight="bold" style={{ display: "block", marginBottom: "12px" }}>
-            Sync Cloud
-          </Text>
-
-          {subscription?.status === "active" ? (
-            <>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-                <Badge color="green" variant="soft" size="1">
-                  <CheckCircledIcon width={12} height={12} />
-                  &nbsp;Conectado
-                </Badge>
-                {pendingCount > 0 && (
-                  <Badge color="orange" variant="soft" size="1">
-                    {pendingCount} pendientes
-                  </Badge>
-                )}
-              </div>
-
-              <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
-                <Button
-                  size="1"
-                  variant="soft"
-                  disabled={isProcessing}
-                  onClick={processPending}
-                >
-                  <UploadIcon width={12} height={12} />
-                  {isProcessing ? "Subiendo..." : "Subir cambios"}
-                </Button>
-                <Button
-                  size="1"
-                  variant="soft"
-                  disabled={isPulling}
-                  onClick={async () => {
-                    try {
-                      await pullFromCloud();
-                    } catch {
-                      // error handled in store
-                    }
-                  }}
-                >
-                  <DownloadIcon width={12} height={12} />
-                  {isPulling ? "Descargando..." : "Descargar cambios"}
-                </Button>
-              </div>
-
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <Text size="2" color="gray">Última sincronización</Text>
-                <Text size="2" color="gray">
-                  {lastSyncAt
-                    ? new Date(lastSyncAt).toLocaleString("es-AR")
-                    : "Nunca"}
-                </Text>
-              </div>
-
-              <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--border)" }}>
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <TextField.Root
-                    placeholder="URL del servidor cloud"
-                    value={cloudUrl}
-                    onChange={(e) => setCloudUrl(e.target.value)}
-                    size="1"
-                  />
-                  <TextField.Root
-                    type="password"
-                    placeholder="JWT token"
-                    value={cloudJwt}
-                    onChange={(e) => setCloudJwt(e.target.value)}
-                    size="1"
-                  />
-                  <div style={{ display: "flex", gap: "6px" }}>
-                    <Button size="1" onClick={handleSaveCloudConfig}>
-                      Guardar configuración
-                    </Button>
-                    <Button size="1" variant="soft" color="red" onClick={handleDisconnectCloud}>
-                      Desconectar
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              <Text size="2" color="gray" style={{ display: "block", marginBottom: "12px" }}>
-                Sincronizá tus datos con la nube para acceder desde múltiples dispositivos.
-              </Text>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                <TextField.Root
-                  placeholder="URL del servidor cloud"
-                  value={cloudUrl}
-                  onChange={(e) => setCloudUrl(e.target.value)}
-                  size="1"
-                />
-                <TextField.Root
-                  type="password"
-                  placeholder="JWT token"
-                  value={cloudJwt}
-                  onChange={(e) => setCloudJwt(e.target.value)}
-                  size="1"
-                />
-                <Button size="1" onClick={handleSaveCloudConfig}>
-                  Conectar
-                </Button>
-              </div>
-            </>
-          )}
-        </Card>
+        <CloudSyncSettings />
 
         {/* License */}
         <Card>
@@ -464,6 +336,9 @@ export function SettingsPage() {
             )}
           </div>
         </Card>
+
+        {isTauri && <SystemManager />}
+        {isTauri && <UpdateManager />}
       </div>
 
       {usersOpen && <UsersManager />}

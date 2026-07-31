@@ -1,7 +1,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { SyncService } from "@/services/sync.service";
-import type { SubscriptionInfo, PullResult } from "@/lib/types";
+import type {
+  SubscriptionInfo,
+  PullResult,
+  SyncConfigInfo,
+  SyncConfigInput,
+} from "@/lib/types";
 
 interface SyncState {
   pendingCount: number;
@@ -13,11 +18,15 @@ interface SyncState {
   lastSyncAt: number | null;
   subscription: SubscriptionInfo | null;
   lastPullResult: PullResult | null;
+  cloudConfig: SyncConfigInfo | null;
   pollingTimer: ReturnType<typeof setInterval> | null;
 
   fetchStatus: () => Promise<void>;
   processPending: () => Promise<void>;
   pullFromCloud: () => Promise<void>;
+  fetchConfig: () => Promise<void>;
+  saveConfig: (input: SyncConfigInput) => Promise<void>;
+  disconnect: () => Promise<void>;
   startPolling: (ms?: number) => void;
   stopPolling: () => void;
   setSubscription: (info: SubscriptionInfo) => void;
@@ -36,6 +45,7 @@ export const useSyncStore = create<SyncState>()(
       lastSyncAt: null,
       subscription: null,
       lastPullResult: null,
+      cloudConfig: null,
       pollingTimer: null,
 
       fetchStatus: async () => {
@@ -109,6 +119,49 @@ export const useSyncStore = create<SyncState>()(
       setSubscription: (info) => set({ subscription: info }),
 
       clearSubscription: () => set({ subscription: null }),
+
+      fetchConfig: async () => {
+        try {
+          const config = await SyncService.getConfig();
+          set({ cloudConfig: config, isBackendAvailable: true });
+          if (config.subscription) {
+            const { status, tier, expiresAt } = config.subscription;
+            set({
+              subscription: {
+                status,
+                tier,
+                expiresAt,
+                cloudUrl: config.cloud_url ?? undefined,
+              },
+            });
+          }
+        } catch {
+          set({ isBackendAvailable: false });
+        }
+      },
+
+      saveConfig: async (input) => {
+        const config = await SyncService.saveConfig(input);
+        set({ cloudConfig: config });
+        if (config.subscription) {
+          const { status, tier, expiresAt } = config.subscription;
+          set({
+            subscription: {
+              status,
+              tier,
+              expiresAt,
+              cloudUrl: config.cloud_url ?? input.cloud_url,
+              cloudJwt: input.cloud_jwt,
+            },
+          });
+        }
+        await get().processPending();
+      },
+
+      disconnect: async () => {
+        await SyncService.disconnect();
+        set({ cloudConfig: null, subscription: null });
+      },
     }),
     {
       name: "arpos-sync",

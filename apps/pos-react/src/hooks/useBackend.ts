@@ -1,12 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { invoke } from "@tauri-apps/api/core";
-
-interface BackendStatus {
-  running: boolean;
-  port: number;
-  pid: number | null;
-  uptime_seconds: number | null;
-}
+import { ProcessService } from "@/services/process.service";
+import { isTauri } from "@/lib/tauri";
+import type { BackendStatus } from "@/lib/types";
 
 interface UseBackendReturn {
   status: BackendStatus | null;
@@ -19,72 +14,68 @@ interface UseBackendReturn {
   waitForBackend: () => Promise<void>;
 }
 
-function detectTauri(): boolean {
-  return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
-}
-
 export function useBackend(): UseBackendReturn {
   const [status, setStatus] = useState<BackendStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const isTauri = detectTauri();
+  const tauri = isTauri();
 
   const startBackend = useCallback(async () => {
-    if (!isTauri) return;
+    if (!tauri) return;
     try {
       setError(null);
-      await invoke("start_backend");
+      await ProcessService.start();
     } catch (e) {
       setError(String(e));
     }
-  }, [isTauri]);
+  }, [tauri]);
 
   const stopBackend = useCallback(async () => {
-    if (!isTauri) return;
+    if (!tauri) return;
     try {
       setError(null);
-      await invoke("stop_backend");
+      await ProcessService.stop();
       setStatus(null);
     } catch (e) {
       setError(String(e));
     }
-  }, [isTauri]);
+  }, [tauri]);
 
   const restartBackend = useCallback(async () => {
-    if (!isTauri) return;
+    if (!tauri) return;
     try {
       setError(null);
-      await invoke("restart_backend");
+      await ProcessService.restart();
     } catch (e) {
       setError(String(e));
     }
-  }, [isTauri]);
+  }, [tauri]);
 
   const waitForBackend = useCallback(async () => {
-    if (!isTauri) return;
+    if (!tauri) return;
     try {
       setError(null);
-      await invoke("wait_for_backend");
+      await ProcessService.waitForReady();
     } catch (e) {
       setError(String(e));
     }
-  }, [isTauri]);
+  }, [tauri]);
 
   const fetchStatus = useCallback(async () => {
-    if (!isTauri) {
+    if (!tauri) {
       setIsLoading(false);
       return;
     }
     try {
-      const s = await invoke<BackendStatus>("get_backend_status");
+      const s = await ProcessService.status();
       setStatus(s);
     } catch {
       setStatus({ running: false, port: 3000, pid: null, uptime_seconds: null });
     }
-  }, [isTauri]);
+  }, [tauri]);
 
   useEffect(() => {
-    if (!isTauri) {
+    if (!tauri) {
       setIsLoading(false);
       return;
     }
@@ -94,7 +85,7 @@ export function useBackend(): UseBackendReturn {
     const init = async () => {
       await fetchStatus();
 
-      const s = await invoke<BackendStatus>("get_backend_status").catch(() => null);
+      const s = await ProcessService.status().catch(() => null);
       if (cancelled) return;
 
       if (!s?.running) {
@@ -102,7 +93,7 @@ export function useBackend(): UseBackendReturn {
         if (cancelled) return;
 
         try {
-          await invoke("wait_for_backend");
+          await ProcessService.waitForReady();
         } catch (e) {
           if (!cancelled) setError(String(e));
           return;
@@ -123,13 +114,13 @@ export function useBackend(): UseBackendReturn {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [isTauri, fetchStatus, startBackend]);
+  }, [tauri, fetchStatus, startBackend]);
 
   return {
     status,
     isLoading,
     error,
-    isTauri,
+    isTauri: tauri,
     startBackend,
     stopBackend,
     restartBackend,
