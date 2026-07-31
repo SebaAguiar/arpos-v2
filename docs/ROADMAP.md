@@ -142,6 +142,8 @@ Este documento recopila las fases de migración, features propuestas y roadmap d
 
 > **Nota firmas:** los `.sig` (updater) se generan automáticamente en CI cuando `TAURI_SIGNING_PRIVATE_KEY` está seteado. Apple code-signing/notarización y Windows code-signing quedan como follow-up (requieren certificados).
 
+> **Nota release v0.1.0 (2026-07-31):** primer release estable disparado con `git tag v0.1.0` → `release.yml` (matrix 3 SO + firmas). Los secrets `TAURI_SIGNING_PRIVATE_KEY` + `_PASSWORD` y la pubkey de `tauri.conf.json` ya estaban configurados desde el 29-jul. Bug de CI encontrado y corregido en el camino: `bun.lock` huérfano hacía que NX detectara bun (fallaba `pnpm lint`/`typecheck` en runners sin bun) → eliminado + `packageManager: pnpm@11.11.0` fijado. Detalles en `UPDATES.md` §10.
+
 **Bloqueadores:** Fases 2 y 3 completadas
 **Dependencias:** Tauri bundler, platform-specific toolchains
 

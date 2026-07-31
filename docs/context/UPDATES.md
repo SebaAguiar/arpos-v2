@@ -1281,6 +1281,21 @@ Gotchas documentados:
 - **`pnpm --filter arpos-launcher tauri build`** compila bundles de todos los targets del
   `tauri.conf.json`; Tauri filtra automáticamente por OS (deb/rpm/appimage en Linux, dmg en macOS,
   msi/nsis en Windows), así que el workflow no necesita paths hardcodeados por plataforma.
+- **NX detecta el package manager por lockfile, y `bun.lock` tiene prioridad sobre `pnpm-lock.yaml`.**
+  Un `bun.lock` huérfano (quedó de la migración al monorepo, 16-jul) hizo que NX usara bun en CI
+  (`Cannot determine the version of bun`). Localmente pasaba porque bun está instalado en la máquina
+  del dev; en GitHub Actions no hay bun y `pnpm lint`/`pnpm typecheck` reventaban. Fix: eliminar
+  `bun.lock` + fijar `"packageManager": "pnpm@11.11.0"` en el `package.json` raíz.
+- **Secrets y pubkey ya estaban configurados desde el 29-jul**: `~/.tauri/arpos.key` + `.pub` (la pubkey
+  coincide con la de `tauri.conf.json`), y `TAURI_SIGNING_PRIVATE_KEY` + `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`
+  como secrets del repo. El primer release real (`v0.1.0`, 2026-07-31) no requirió regenerar nada.
+- **`body_path: CHANGELOG.md`** en `softprops/action-gh-release` → el body del release es TODO el changelog.
+  Conviene tener una entrada fresca del changelog ANTES de taguear, no después.
+- **Versión**: la app y el changelog comparten `0.1.0`. Si el tag apunta al mismo commit que el beta
+  anterior, el release "estable" repite el body — verificar el ref del tag antes de publicar.
+- **Primer release**: `v0.1.0-beta` (29-jul) apuntaba a un commit viejo y no incluía features posteriores
+  (migration module, setup endpoints, guide de usuario). El tag `v0.1.0` real se creó sobre el HEAD
+  actualizado con changelog al día.
 
 ---
 
@@ -1477,16 +1492,20 @@ Device:
 
 ## Checklist Pre-Lanzamiento
 
-- [ ] Keys Ed25519 generadas y guardadas en GitHub Secrets
-- [ ] tauri.conf.json configurado con endpoints
-- [ ] CI/CD pipeline tested (release ficticio)
-- [ ] GitHub Releases o backend listo
-- [ ] App version bumped en tauri.conf.json + package.json
-- [ ] Release notes escritas
-- [ ] Beta testing con 10 users
+Estado real al 2026-07-31 (release `v0.1.0`):
+
+- [x] Keys Ed25519 generadas y guardadas en GitHub Secrets (29-jul, verificadas)
+- [x] tauri.conf.json configurado con endpoints (updater activo, pubkey, GitHub Releases)
+- [x] CI/CD pipeline tested (release `v0.1.0` en curso; CI verde tras fix de `bun.lock`)
+- [x] GitHub Releases o backend listo (repo privado `SebaAguiar/arpos-v2`)
+- [x] App version bumped en tauri.conf.json + package.json (todo en `0.1.0`)
+- [x] Release notes escritas (CHANGELOG.md actualizado al feature set real)
+- [ ] Beta testing con 10 users (Fase 6 — pendiente)
 - [ ] Rollback plan documentado
-- [ ] Monitoring + alertas configuradas
+- [ ] Monitoring + alertas configuradas (requiere backend personalizado, Fase 2)
 - [ ] Documentación actualizada
+- [ ] Auto-updater end-to-end probado en device real (instalar bundle + update a versión nueva)
+- [ ] Code-signing Apple/Windows (certificados pagos — follow-up)
 
 ---
 

@@ -26,10 +26,11 @@ Esta guía explica cómo usar ArPOS en el día a día: desde la instalación has
 
 La primera vez que inicia ArPOS, se presenta un asistente con estos pasos:
 
-1. **Datos de la empresa:** razón social, CUIT, domicilio, IVA y teléfono.
-2. **Sucursal:** nombre y dirección del local donde corre ArPOS.
-3. **Usuario administrador:** nombre, email y contraseña para el primer ingreso.
-4. **Medios de pago:** se preconfiguran Efectivo, Débito, Crédito, QR y Billetera. Se pueden ajustar luego en Configuración.
+1. **Datos del negocio:** nombre y CUIT/RUT. La sucursal principal se crea automáticamente.
+2. **Usuario administrador:** email y contraseña para el primer ingreso.
+3. Al finalizar, la base de datos queda inicializada y se inicia la sesión automáticamente.
+
+> Los **medios de pago** se configuran después en Configuración → Métodos de pago. Por defecto están habilitados Efectivo, Débito, Crédito, QR, Billetera, Transferencia y Puntos.
 
 > La app funciona **100% offline**. La sincronización a la nube es opcional y se habilita en Configuración.
 
@@ -48,10 +49,9 @@ Es la pantalla principal del cajero.
 
 ### Agregar productos
 
-- **Buscar** por nombre, código de barras o SKU en el campo de búsqueda.
+- **Buscar** por nombre, código interno o código de barras en el campo de búsqueda (el lector de código de barras escribe en ese campo).
 - Tocar o hacer clic en un producto para agregarlo al carrito.
 - Si el producto tiene **variantes** (por ejemplo talle y color), se abre un selector para elegir la combinación.
-- Para un producto sin código de barras (por ejemplo "Yerba extra"), usar **Producto libre** e ingresar nombre y precio.
 
 ### Editar el carrito
 
@@ -71,7 +71,7 @@ Es la pantalla principal del cajero.
 2. Seleccionar el **medio de pago** (Efectivo, Débito, Crédito, QR, etc.).
 3. Si el medio es crédito, se aplica el recargo configurado.
 4. Si se paga en efectivo, se muestra el **vuelto** calculado.
-5. Confirmar el cobro. Se puede **imprimir el ticket** (automático según configuración) o enviar el comprobante por otro medio.
+5. Confirmar el cobro. Se puede **imprimir el ticket** (automático según configuración), **descargarlo en PDF** o **compartirlo por WhatsApp**.
 
 > **Estado offline:** si la conexión se pierde, un indicador rojo aparece en la barra superior. El POS sigue funcionando normalmente: las ventas se guardan localmente y se sincronizan cuando se restablece la conexión.
 
@@ -81,10 +81,10 @@ Es la pantalla principal del cajero.
 
 El módulo de Productos permite administrar el catálogo.
 
-- **Crear producto:** nombre, precio, costo, SKU, código de barras, categoría e impuesto.
-- **Variantes:** talle, color, etc. Cada variante puede tener su propio precio y stock.
+- **Crear producto:** nombre, código de barras / código interno, categoría, costo y precio (el margen se calcula automáticamente).
+- **Variantes:** talle, color, etc. Cada variante puede tener su propio código de barras, SKU y precio.
 - **Editar y eliminar** productos existentes.
-- **Precios:** el IVA se calcula sobre el precio final; la app muestra el desglose automáticamente.
+- **Precios:** la tasa de IVA es global (Configuración → IVA). Los precios se cargan con IVA incluido.
 
 ---
 
@@ -98,21 +98,44 @@ Permite controlar el stock de cada sucursal.
 
 ---
 
-## 7. Reportes
+## 7. Clientes
+
+Permite administrar la cartera de clientes del negocio.
+
+- **Crear, editar y eliminar** clientes (nombre, email, teléfono).
+- **Buscar** clientes por nombre, email o teléfono.
+- Asignar un cliente a una venta desde el POS (botón del carrito).
+
+## 8. Compras
+
+Permite gestionar órdenes de compra a proveedores.
+
+- **Nueva orden:** seleccionar proveedor y productos a ordenar.
+- Los estados posibles son **Borrador**, **Pedido**, **Parcial**, **Recibido** y **Cancelado**.
+- **Recibir mercadería** actualiza el stock automáticamente.
+
+## 9. Tareas
+
+Permite registrar tareas operativas con prioridad y estado.
+
+- **Prioridades:** Urgente, Alta, Media, Baja.
+- **Estados:** Pendiente, En progreso, Completada.
+
+## 10. Reportes
 
 El módulo de Reportes agrupa las métricas del negocio:
 
-- **Resumen del día:** ventas, cantidad de tickets, ticket promedio.
-- **Ventas por medio de pago** (efectivo, débito, crédito, QR).
+- **Resumen:** ventas, cantidad de tickets, ticket promedio.
+- **Ventas por hora** y **por medio de pago** (efectivo, débito, crédito, QR, etc.).
 - **Productos más vendidos.**
-- **Reporte de inventario** (stock actual y valorizado).
-- **Caja:** aperturas, cierres y diferencias.
+- **Reporte de inventario:** valor del stock, productos con stock bajo y sin stock, y desglose por categoría.
+- **Caja:** turnos cerrados, ventas del turno y diferencias.
 
-Los reportes se pueden filtrar por rango de fechas y por sucursal.
+Los reportes se pueden filtrar por período: **Hoy**, **7 días**, **30 días** o **90 días**.
 
 ---
 
-## 8. Caja
+## 11. Caja
 
 El módulo de Caja registra el dinero físico de cada turno.
 
@@ -125,17 +148,17 @@ El módulo de Caja registra el dinero físico de cada turno.
 
 ---
 
-## 9. Configuración
+## 12. Configuración
 
 Disponible para usuarios administradores.
 
-- **Empresa:** razón social, CUIT, domicilio, IVA.
+- **Empresa:** nombre, CUIT/RUT, domicilio, email y teléfono.
 - **Sucursales:** alta y edición de sucursales.
-- **Usuarios:** crear usuarios, asignar rol y permisos.
-- **Medios de pago:** activar/desactivar, renombrar, recargo por crédito y orden de aparición.
+- **Usuarios:** crear usuarios y asignar rol (cajero o administrador).
+- **Medios de pago:** activar/desactivar cada método y renombrarlo. El recargo por crédito se configura aparte.
 - **Ticket:** impresión automática, tamaño de papel (80mm, 58mm, A4, A5), encabezado y pie de ticket.
 - **Impuestos:** tasa de IVA por defecto.
-- **Sincronización:** conexión a la nube (opcional). Muestra el estado de la cola de sincronización.
+- **Sincronización:** conexión a la nube (opcional). Muestra el estado de la cola de sincronización y la suscripción.
 
 ### Sincronización en la nube (Sync Cloud)
 
@@ -156,7 +179,7 @@ La sincronización es **opcional**: ArPOS funciona completo sin conexión, y los
 
 ---
 
-## 10. Copias de seguridad
+## 13. Copias de seguridad
 
 El módulo de Respaldo permite proteger la información:
 
@@ -167,7 +190,7 @@ El módulo de Respaldo permite proteger la información:
 
 ---
 
-## 11. Conceptos útiles
+## 14. Conceptos útiles
 
 | Término | Significado |
 |---|---|
@@ -178,10 +201,11 @@ El módulo de Respaldo permite proteger la información:
 | **Recargo** | Sobrecosto porcentual aplicado al crédito. |
 | **Arqueo de caja** | Conteo del efectivo físico al abrir y cerrar el turno. |
 | **Sync** | Sincronización de los datos locales con la nube. |
+| **Billetera (wallet)** | Saldo a favor de un cliente, acreditado o debitado manualmente. |
 
 ---
 
-## 12. Solución de problemas comunes
+## 15. Solución de problemas comunes
 
 | Problema | Solución |
 |---|---|
