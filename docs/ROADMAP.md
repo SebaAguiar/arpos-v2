@@ -153,7 +153,7 @@ Este documento recopila las fases de migración, features propuestas y roadmap d
 - [x] Implementar conflict resolution (last-write-wins)
 - [x] WebSocket para notificaciones en tiempo real
 - [x] Configuración de sync en Settings
-- [ ] Testing de offline→online transitions
+- [x] Testing de offline→online transitions
 - [x] Documentación de sync
 
 **Bloqueadores:** Fase 4 completada

@@ -156,5 +156,5 @@ Patrón Service → Store → Smart Component (ver AGENTS.md §4.6):
 ## 8. Testing
 
 - Unit: `cloud-relay.service.spec.ts` (push HTTP, pull con create/skip-outdated/errors, sale con items + decrement stock, placeholder user, wallet transaction, config save/clear) y `sync.service.spec.ts` (offline-first sin cloud configurado, encolado, batch).
-- Comando: `pnpm --filter api test`.
-- Pendiente: E2E de transiciones offline → online (marcar en `docs/ROADMAP.md` Fase 5).
+- E2E (Playwright): `offline-online.spec.ts` — sale creada offline queda encolada, se pushea al conectar vía Settings, se re-encola al desconectar y se pushea de nuevo al reconectar (stub HTTP en `:3457` simula el relay cloud). Suite completa: `pnpm --filter pos-e2e test` (24 specs).
+- Comando unit: `pnpm --filter api test`.
