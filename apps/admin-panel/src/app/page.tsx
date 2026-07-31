@@ -17,6 +17,9 @@ export default async function DashboardPage() {
     }),
   ]);
 
+  // Server component (force-dynamic): runs once per request on the server, so
+  // Date.now() is the intended source for the reporting window, not an impure render call.
+  // eslint-disable-next-line react-hooks/purity
   const now = Math.floor(Date.now() / 1000);
   const thirtyDaysAgo = now - 30 * 86400;
 
