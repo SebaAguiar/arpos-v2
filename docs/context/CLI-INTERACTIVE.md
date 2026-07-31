@@ -122,7 +122,7 @@ const FirstRunWizard = () => {
 ### 3.1 When It Triggers
 
 El Migration Wizard se ejecuta cuando:
-- El usuario tiene datos en la nube (PostgreSQL cloud) y quiere migrarlos a local.
+- El usuario tiene datos en la nube (Xata, PostgreSQL serverless) y quiere migrarlos a local.
 - Se detecta una instalación anterior de ArPOS cloud.
 - El usuario lo selecciona desde Settings > Backup & Restore.
 

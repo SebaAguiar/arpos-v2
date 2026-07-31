@@ -46,7 +46,7 @@ Este documento define las entidades de dominio, términos técnicos y conceptos 
 
 - **Local-first:** Paradigma donde la app funciona 100% offline con datos locales. La nube es opcional, no requerida.
 - **Offline-first:** Similar a local-first. La app prioriza el funcionamiento sin conexión y sincroniza cuando reconnecta.
-- **Cloud sync (Sincronización con nube):** Funcionalidad opcional que replica datos locales a PostgreSQL cloud (Neon) y viceversa.
+- **Cloud sync (Sincronización con nube):** Funcionalidad opcional que replica datos locales a Xata (PostgreSQL serverless) y viceversa.
 - **SyncQueue:** Cola de cambios pendientes de sincronizar. Cada escritura local se encola y se procesa cuando hay conexión.
 - **Last-write-wins:** Estrategia de resolución de conflictos donde el cambio más reciente (por timestamp) sobrescribe al anterior.
 - **Migration wizard:** Asistente React que guía al usuario en la migración de datos desde cloud (PostgreSQL) a local (SQLite).

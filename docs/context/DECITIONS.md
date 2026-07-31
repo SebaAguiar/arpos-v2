@@ -65,7 +65,7 @@ Este documento registra las decisiones arquitectónicas y técnicas tomadas dura
 
 ## 6. SQLite Local-First (vs PostgreSQL obligatorio)
 
-- **Decisión:** SQLite como base de datos principal, con sync opcional a PostgreSQL cloud.
+- **Decisión:** SQLite como base de datos principal, con sync opcional a Xata (PostgreSQL serverless) — ver decisión #13.
 - **Justificación:** SQLite es embebido (sin servidor), cero configuración, ideal para desktop. Para un POS típico (<1M transacciones/año), SQLite es más que suficiente.
 - **Alternativas consideradas:**
   - *PostgreSQL obligatorio:* Rechazado porque requiere Docker/servidor, incompatible con la propuesta de valor.
@@ -145,3 +145,30 @@ Este documento registra las decisiones arquitectónicas y técnicas tomadas dura
   - *Custom delta system:* Rechazado porque Tauri ya maneja esto nativamente.
   - *Block-level diff:* Rechazado porque Tauri usa diff a nivel de archivo, que es suficiente.
 - **Trade-off:** Requiere publicar versiones en orden (no se puede saltar de 1.0.0 a 1.0.2 sin publicar 1.0.1), pero esto es buena práctica de versionado semántico.
+
+---
+
+## 13. Xata (vs Neon) como PostgreSQL Serverless del Cloud
+
+- **Decisión:** Usar **Xata** (PostgreSQL serverless) como cloud target de sync, en lugar de Neon.
+- **Justificación:** El proyecto v1 ya vive en Xata (PostgreSQL). Reutilizar el mismo proveedor mantiene la v1 intacta como rollback durante la migración expand/contract y evita contratos/soporte con un segundo proveedor. Xata es compatible con Prisma (provider `postgresql`) y mantiene el modelo "serverless, sin servidor dedicado" de la propuesta de valor.
+- **Alternativas consideradas:**
+  - *Neon:* Rechazado porque agrega un segundo proveedor cloud sin beneficio respecto de Xata, y complica el rollback durante la migración.
+  - *PostgreSQL self-hosted:* Rechazado porque rompe la promesa de cero infraestructura.
+  - *Supabase:* Rechazado porque agrega capas (auth, storage) que no se usan.
+- **Trade-off:** Xata es un proveedor menos "mainstream" que Neon, pero ya es el proveedor del cliente en v1, lo que simplifica la operación y el rollback.
+- **Contexto:** El cloud es un **relay** (`synced_changes` JSON + tablas de plataforma del admin-panel), no un espejo del schema de negocio — ver `SYNC.md`. El negocio vive en SQLite local.
+
+---
+
+## 14. Migración de Datos v1 → v2 (Expand/Contract con v1 como Rollback)
+
+- **Decisión:** Migrar los datos del cliente con estrategia **expand/contract**: se lee v1 solo (read-only), se transforma contra SQLite local en dev, y se valida con checksums antes de tocar la nube. La DB v1 queda intacta como rollback.
+- **Justificación:** Local-first: el único contacto con la nube es lectura schema-only/dump; nunca se prueban transformaciones iterativas contra Xata. El resultado del negocio vive en SQLite local; la DB "v2" en Xata (nueva) es el cloud target con el schema del admin-panel.
+- **Decisiones de mapeo:**
+  - IDs `Int` v1 → `String` v2 con el mismo valor (evita mapas de FK, permite cruzar datos durante el solapamiento).
+  - Precios `DECIMAL` → centavos `INTEGER`; timestamps → segundos `Int`; enums → strings lowercase.
+  - `SyncQueue` v1 **no se migra** (cola operativa sin sentido en v2).
+  - Items de venta sin variante → producto genérico sintético `PRD-0`; `CashMovement` sin `cashShiftId` → caja sintética "Histórico" por store.
+- **Trade-off:** Al final del proceso la API v1 desaparece, pero la DB v1 en Xata se conserva; si la migración falla en producción, se restaura la v1 sin pérdida.
+- **Contexto:** Implementación y conteos en `ARCHITECTURE.md` §5.5. Scripts: `apps/api/scripts/migrate-v1.ts` y `validate-migrate.ts`.

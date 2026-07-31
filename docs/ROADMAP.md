@@ -34,7 +34,9 @@ Este documento recopila las fases de migración, features propuestas y roadmap d
 - [ ] Endpoint `POST /api/setup/init-company`
 - [ ] Endpoint `GET /api/setup/status`
 - [ ] Tests de integración con SQLite in-memory
-- [ ] Migration de datos desde PostgreSQL cloud
+- [x] Migration de datos desde PostgreSQL cloud
+
+> **Nota (2026-07-31):** Migración one-off del cliente "Libreria Magna" completada de ArPOS v1 (Xata) → v2 (SQLite local + cloud relay). Detalles y conteos en `ARCHITECTURE.md` §5.5. Lo que resta: el **wizard de migración del producto final** (§5.1–5.4) que permitirá migrar a usuarios futuros durante el setup.
 
 **Bloqueadores:** Fase 0 completada
 **Dependencias:** NestJS 11, Prisma 5.22, SQLite 3.46
@@ -157,7 +159,7 @@ Este documento recopila las fases de migración, features propuestas y roadmap d
 - [x] Documentación de sync
 
 **Bloqueadores:** Fase 4 completada
-**Dependencias:** Neon PostgreSQL, WebSocket server
+**Dependencias:** Xata (PostgreSQL serverless), WebSocket server
 
 ---
 

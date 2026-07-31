@@ -61,7 +61,7 @@
 | **Backend API** | NestJS | 11 | ✓ Keep (adaptado) | Reutilizar 95% del código |
 | **ORM** | Prisma | 5.22 | ↔ Adaptado | SQLite provider + migrations |
 | **DB Local** | SQLite | 3.46+ | ✗ Nuevo | Embebido, sin servidor |
-| **DB Sync (opt)** | PostgreSQL | 15 | ↔ Opcional | Solo si cloud está habilitado |
+| **DB Sync (opt)** | Xata (PostgreSQL serverless) | 15 | ↔ Opcional | Solo si cloud está habilitado |
 | **Frontend POS** | React | 19 | ✗ Nuevo | Reemplazo Angular |
 | **UI Components** | Radix UI | latest | ✗ Nuevo | Headless, accesible |
 | **UI Preset** | Shadcn/ui | latest | ✗ Nuevo | Built-in con TailwindCSS |
@@ -134,7 +134,7 @@
                               │ HTTP HTTPS + Sync Queue
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                    CLOUD (Neon PostgreSQL)                       │
+│                    CLOUD (Xata PostgreSQL serverless)            │
 │  ├── Réplica de datos (Sync bi-direccional)                     │
 │  ├── Multi-dispositivo (sincronización entre equipos)           │
 │  └── Backup remoto (redundancia)                                │
@@ -152,7 +152,7 @@ ESCRITURA LOCAL (POS - Venta):
 5. Respuesta JSON → React
 6. React actualiza Zustand store → re-render
 7. Si está online: SyncQueue encolama cambio
-8. Worker en background: replica a PostgreSQL cloud (async, sin bloquear)
+8. Worker en background: replica a Xata (PostgreSQL serverless, async, sin bloquear)
 9. Si está offline: cambio queda en localSync queue
 10. Al reconectar: worker sincroniza batch de cambios
 
@@ -746,6 +746,46 @@ async fn export_to_sql_script() -> Result<String, String> {
     Ok(export_path)
 }
 ```
+
+### 5.5 Migración One-off del Cliente (v1 → v2) — Implementada
+
+> Las secciones 5.1–5.4 describen el **wizard del producto final** (migración para usuarios finales durante el setup). Esta sección documenta la migración **one-off del equipo** que se ejecutó para llevar los datos reales del cliente de ArPOS v1 (Xata PostgreSQL) al formato v2.
+
+**Estrategia:** expand/contract con la DB v1 intacta como rollback.
+
+- La DB v1 (Xata) **no se toca** — se lee solo con queries read-only.
+- El transform/import/validación se hace **contra SQLite local** en dev (nunca pruebas iterativas contra la nube).
+- La DB **"v2" en Xata** (nueva, PostgreSQL serverless) es el cloud target de sync v2, inicializada con el schema del admin-panel (ver abajo).
+
+**Scripts (one-off, en `apps/api/scripts/`):**
+
+| Script | Rol |
+|---|---|
+| `migrate-v1.ts` | Lee v1 vía `pg` (env `V1_DATABASE_URL`, read-only), transforma y escribe a la DB de destino (env `DATABASE_URL`) |
+| `validate-migrate.ts` | Checksums cruzados v1↔v2: totales, conteos por tabla, precios, stock, movimientos por tipo, saldos |
+
+Corrida con `pnpm migrate:v1` / `pnpm validate:v1` (scripts npm en `apps/api`).
+
+**Transformaciones aplicadas:**
+
+| Regla v2 | Detalle |
+|---|---|
+| IDs | `Int` de v1 → `String` con el mismo valor (`"5"` → `"5"`); evita mapas de traducción de FK y permite cruzar datos v1/v2 durante el solapamiento |
+| Dinero | `DECIMAL` → `INTEGER` centavos (`_cents`) |
+| Timestamps | `DateTime` → `Int` segundos (`_at`) |
+| Enums | Strings lowercase (v2 no usa enums) |
+| Tablas | `@@map` snake_case |
+| `Sale.payment_method` | Derivado del `SalePayment` de mayor monto; todos los pagos se preservan en `payment_details` (JSON) |
+| `Customer` + `Contact` | Fusionados en `Contact` (campo `type`); `balance_cents` del `Customer` |
+| `CustomerTransaction` | → `WalletTransaction` |
+| `Product.storeId` | Store principal (v1 no tenía la relación en el producto) |
+| `SyncQueue` | **No se migra** (5.819 filas de cola v1 sin sentido en v2) |
+| SaleItems sin variante (free-text) | → producto genérico sintético `PRD-0` "Producto genérico" (inactivo) |
+| `CashMovement` sin `cashShiftId` | → `CashRegister` sintético "Histórico" por store (v2 exige FK a caja) |
+
+**Conteos migrados (cliente real "Libreria Magna", 2026-07-31):** 402 productos (403 con el genérico), 477 variantes, 440 inventory, 739 movimientos, 397 ventas, 884 items, 60 cajas (59 shifts + 1 histórica), 282 movimientos de caja, 2 tasks, 1 store config. Checksums OK (totales de ventas $1.386.373,00; caja $769.845). Única diferencia esperada: pagos vs totales de ventas difieren $6.100 — inconsistencia **pre-existente de v1** (ventas 62 y 48 con pagos mayores a su total), preservada fielmente.
+
+**Cloud target (Xata v2):** el schema de negocio vive solo en SQLite local. La DB cloud se inicializa con el schema del **admin-panel** (`apps/admin-panel/prisma/schema.prisma`, provider PostgreSQL: `plans`, `clients`, `licenses`, `payments`, `synced_changes`, `support_tickets`) vía `prisma db push`, y el tenant se siembra con `apps/admin-panel/scripts/seed-tenant.ts` (datos del cliente vía env, sin PII en el repo). Esto está alineado con el modelo de sync implementado (`SYNC.md`): el cloud es un **relay** (`synced_changes` JSON), no un espejo del schema de negocio.
 
 ---
 
@@ -1656,7 +1696,7 @@ fn main() {
 - Conflict resolution: last-write-wins
 
 **Solución con cloud:**
-- Ambos equipos se conectan a PostgreSQL cloud
+- Ambos equipos se conectan a Xata (PostgreSQL serverless)
 - Cloud Relay orquesta cambios
 - Sincronización bi-direccional en tiempo real
 
@@ -1677,7 +1717,7 @@ Laptop (SQLite)                   Tablet (SQLite)
     Ambas máquinas descarguen y mergeen cambios cada 30s
 
 
-ESCENARIO 2: With Cloud (Neon PostgreSQL)
+ESCENARIO 2: With Cloud (Xata PostgreSQL serverless)
 ──────────────────────────────────────────
 
 Laptop (SQLite)      Cloud Relay       Tablet (SQLite)
