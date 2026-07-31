@@ -117,7 +117,7 @@ Este documento recopila las fases de migración, features propuestas y roadmap d
 - [x] CloudSyncSettings
 - [x] BackupRestore
 
-> **Nota:** Los módulos de Fase 3 están implementados (pages + stores + services + repos). ProductSearch/ProductGrid viven dentro de `POSPage`; los reportes (sales/inventory/cash) dentro de `ReportsPage`. Frontend tests con Vitest: 30 tests (stores, api-client, SummaryPanel) en `apps/pos-react/src/__tests__/`. Pendiente real de hardening: ESLint no está configurado en el repo (script `lint` roto, CI usa `tsc --noEmit`).
+> **Nota:** Los módulos de Fase 3 están implementados (pages + stores + services + repos). ProductSearch/ProductGrid viven dentro de `POSPage`; los reportes (sales/inventory/cash) dentro de `ReportsPage`. Frontend tests con Vitest: 30 tests (stores, api-client, SummaryPanel) en `apps/pos-react/src/__tests__/`. Hardening de lint completado (2026-07-31): ESLint flat config (`eslint.config.mjs`) + `typescript-eslint` + react-hooks/react-refresh para los 3 apps; `pnpm lint` y `pnpm typecheck` verdes (api, pos-react, admin-panel); CI ejecuta ambos. Prisma clients con custom output por app (`admin-panel` → `src/generated/prisma`) para evitar pisarse en el store de pnpm.
 
 **Bloqueadores:** Fase 1 completada
 **Dependencias:** React 19, Shadcn/ui, Zustand 5, React Router 7
