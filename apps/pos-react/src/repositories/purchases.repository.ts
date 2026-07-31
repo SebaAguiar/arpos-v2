@@ -1,7 +1,7 @@
 import { PurchasesService } from "../services/purchases.service";
 import type { PurchaseOrder } from "@/lib/types";
 
-function mapOrder(order: any): PurchaseOrder {
+function mapOrder(order: PurchaseOrder): PurchaseOrder {
   return {
     id: order.id,
     companyId: order.companyId,
@@ -15,7 +15,7 @@ function mapOrder(order: any): PurchaseOrder {
     created_at: order.created_at,
     updated_at: order.updated_at,
     supplier: order.supplier,
-    items: (order.items ?? []).map((item: any) => ({
+    items: (order.items ?? []).map((item) => ({
       id: item.id,
       productId: item.productId,
       variantId: item.variantId ?? undefined,
@@ -27,7 +27,7 @@ function mapOrder(order: any): PurchaseOrder {
       variant: item.variant ?? undefined,
     })),
     receipts: order.receipts
-      ? order.receipts.map((r: any) => ({
+      ? order.receipts.map((r) => ({
           id: r.id,
           receipt_number: r.receipt_number ?? undefined,
           notes: r.notes ?? undefined,

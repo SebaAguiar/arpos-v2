@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import {
   Dialog,
   Button,
@@ -34,14 +34,16 @@ export function StockAdjustmentDialog({
 
   const currentStock = product?.variants?.[0]?.stockItems?.[0]?.quantity ?? 0;
 
-  useEffect(() => {
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
     if (open) {
       setMovType("INCOME");
       setQuantity("1");
       setReason("");
       setError(null);
     }
-  }, [open]);
+  }
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {

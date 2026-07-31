@@ -99,8 +99,7 @@ export function DashboardDialog() {
   const [hourlySales, setHourlySales] = useState<{ hour: string; amount: number }[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchData = useCallback(async (p: Period, initial = false) => {
-    if (initial) setLoading(true);
+  const fetchData = useCallback(async (p: Period) => {
     try {
       const { from, to } = getPeriodTimestamps(p);
       const [statsData, paymentsData, salesData] = await Promise.all([
@@ -134,12 +133,21 @@ export function DashboardDialog() {
   }, []);
 
   useEffect(() => {
-    fetchData(period, true);
+    let cancelled = false;
+    const load = async () => {
+      if (cancelled) return;
+      await fetchData(period);
+    };
+    void load();
     const interval = setInterval(() => fetchData(period), 5000);
-    return () => clearInterval(interval);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, [period, fetchData]);
 
   const handlePeriodChange = (value: string) => {
+    setLoading(true);
     setPeriod(value as Period);
   };
 

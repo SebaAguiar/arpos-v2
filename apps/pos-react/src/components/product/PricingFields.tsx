@@ -48,7 +48,7 @@ export function PricingFields({
       }
       setSyncing("cost");
     },
-    [values.margin, onChange],
+    [values, onChange],
   );
 
   const handleMarginChange = useCallback(
@@ -68,7 +68,7 @@ export function PricingFields({
       }
       setSyncing("margin");
     },
-    [values.cost, onChange],
+    [values, onChange],
   );
 
   const handlePriceChange = useCallback(
@@ -88,7 +88,7 @@ export function PricingFields({
       }
       setSyncing("price");
     },
-    [values.cost, onChange],
+    [values, onChange],
   );
 
   useEffect(() => {

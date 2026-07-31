@@ -26,8 +26,8 @@ export const usePurchasesStore = create<PurchasesState>((set) => ({
     try {
       const orders = await PurchasesRepository.getAll(status);
       set({ orders, loading: false, isStale: false });
-    } catch (e: any) {
-      set({ error: e?.message ?? "Error loading orders", loading: false });
+    } catch (e) {
+      set({ error: e instanceof Error ? e.message : "Error loading orders", loading: false });
     }
   },
 

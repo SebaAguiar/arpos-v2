@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import {
   Dialog,
   Button,
@@ -39,6 +39,11 @@ function nextVariantId() {
   return `v-${++variantIdCounter}`;
 }
 
+let defaultCodeCounter = 0;
+function nextDefaultCode() {
+  return `PROD-${1000 + defaultCodeCounter++}`;
+}
+
 export function ProductFormDialog({
   open,
   onOpenChange,
@@ -61,7 +66,9 @@ export function ProductFormDialog({
   const [error, setError] = useState<string | null>(null);
   const [loadingVariants, setLoadingVariants] = useState(false);
 
-  useEffect(() => {
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
     if (open) {
       setError(null);
       if (productToEdit) {
@@ -95,7 +102,7 @@ export function ProductFormDialog({
         setVariants(loaded);
         setLoadingVariants(false);
       } else {
-        setCode(`PROD-${Math.floor(1000 + Math.random() * 9000)}`);
+        setCode(nextDefaultCode());
         setName("");
         setDescription("");
         setPricingValues({ cost: "", margin: "", price: "" });
@@ -103,7 +110,7 @@ export function ProductFormDialog({
         setVariants([]);
       }
     }
-  }, [open, productToEdit]);
+  }
 
   const addVariant = useCallback(() => {
     setVariants((prev) => [

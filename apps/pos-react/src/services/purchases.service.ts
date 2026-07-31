@@ -1,13 +1,14 @@
 import { apiClient } from "./api-client";
+import type { PurchaseOrder } from "@/lib/types";
 
 export const PurchasesService = {
-  async list(status?: string) {
+  async list(status?: string): Promise<PurchaseOrder[]> {
     const params = status ? `?status=${status}` : "";
-    return apiClient.get<any[]>(`/purchases${params}`);
+    return apiClient.get<PurchaseOrder[]>(`/purchases${params}`);
   },
 
-  async get(id: string) {
-    return apiClient.get<any>(`/purchases/${id}`);
+  async get(id: string): Promise<PurchaseOrder> {
+    return apiClient.get<PurchaseOrder>(`/purchases/${id}`);
   },
 
   async create(input: {
@@ -21,7 +22,7 @@ export const PurchasesService = {
       unit_cost_cents: number;
     }>;
   }) {
-    return apiClient.post<any>("/purchases", input);
+    return apiClient.post<PurchaseOrder>("/purchases", input);
   },
 
   async update(
@@ -39,11 +40,11 @@ export const PurchasesService = {
       }>;
     },
   ) {
-    return apiClient.patch<any>(`/purchases/${id}`, input);
+    return apiClient.patch<PurchaseOrder>(`/purchases/${id}`, input);
   },
 
-  async remove(id: string) {
-    return apiClient.delete(`/purchases/${id}`);
+  async remove(id: string): Promise<unknown> {
+    return apiClient.delete<unknown>(`/purchases/${id}`);
   },
 
   async receive(input: {
@@ -55,6 +56,6 @@ export const PurchasesService = {
       quantity_received: number;
     }>;
   }) {
-    return apiClient.post<any>("/purchases/receive", input);
+    return apiClient.post<PurchaseOrder>("/purchases/receive", input);
   },
 };

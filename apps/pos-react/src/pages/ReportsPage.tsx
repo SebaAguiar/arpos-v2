@@ -110,8 +110,7 @@ export function ReportsPage() {
   const [shifts, setShifts] = useState<CashShiftData[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchData = useCallback(async (p: Period, initial = false) => {
-    if (initial) setLoading(true);
+  const fetchData = useCallback(async (p: Period) => {
     try {
       const { from, to } = getPeriodTimestamps(p);
       const [statsData, paymentsData, salesData, topProductsData, invReport, shiftsData] = await Promise.all([
@@ -154,9 +153,17 @@ export function ReportsPage() {
   }, []);
 
   useEffect(() => {
-    fetchData(period, true);
+    let cancelled = false;
+    const load = async () => {
+      if (cancelled) return;
+      await fetchData(period);
+    };
+    void load();
     const interval = setInterval(() => fetchData(period), 5000);
-    return () => clearInterval(interval);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, [period, fetchData]);
 
   const totalRevenue = (stats?.totalRevenue ?? 0) / 100;
@@ -180,7 +187,13 @@ export function ReportsPage() {
           <BarChartIcon width={20} height={20} />
           <Text size="5" weight="bold">Reportes</Text>
         </div>
-        <Select.Root value={period} onValueChange={(v) => setPeriod(v as Period)}>
+        <Select.Root
+          value={period}
+          onValueChange={(v) => {
+            setLoading(true);
+            setPeriod(v as Period);
+          }}
+        >
           <Select.Trigger className="select-compact" style={{ width: "180px" }} />
           <Select.Content>
             {Object.entries(PERIOD_LABELS).map(([key, label]) => (

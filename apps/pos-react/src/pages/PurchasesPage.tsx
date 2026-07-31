@@ -511,7 +511,9 @@ function ReceiveOrderDialog({
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
     if (open && order) {
       setItems(
         order.items
@@ -519,7 +521,7 @@ function ReceiveOrderDialog({
           .map((i) => ({ itemId: i.id, quantity_received: 1 })),
       );
     }
-  }, [open, order]);
+  }
 
   const updateQuantity = (itemId: string, qty: number) => {
     setItems(items.map((i) => (i.itemId === itemId ? { ...i, quantity_received: qty } : i)));

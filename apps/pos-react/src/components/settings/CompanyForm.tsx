@@ -10,7 +10,9 @@ export function CompanyForm() {
     fetchCompany();
   }, [fetchCompany]);
 
-  useEffect(() => {
+  const [prevCompany, setPrevCompany] = useState(company);
+  if (company !== prevCompany) {
+    setPrevCompany(company);
     if (company) {
       setForm({
         name: company.name,
@@ -20,7 +22,7 @@ export function CompanyForm() {
         phone: company.phone ?? "",
       });
     }
-  }, [company]);
+  }
 
   const handleSave = async () => {
     const input: Record<string, string | undefined> = {};

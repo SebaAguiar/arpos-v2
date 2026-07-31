@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import {
   Dialog,
   Button,
@@ -34,7 +34,9 @@ export function CustomerFormDialog({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
     if (open) {
       setError(null);
       if (customerToEdit) {
@@ -51,7 +53,7 @@ export function CustomerFormDialog({
         setTaxId("");
       }
     }
-  }, [open, customerToEdit]);
+  }
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {

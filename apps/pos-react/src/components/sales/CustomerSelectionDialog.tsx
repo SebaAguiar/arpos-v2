@@ -19,7 +19,6 @@ export function CustomerSelectionDialog() {
   const closeCustomerSelection = useDialogStore((s) => s.closeCustomerSelection);
 
   const fetchCustomers = useCallback(async () => {
-    setLoading(true);
     try {
       const data = await ContactsRepository.getAll("customer");
       setCustomers(data);
@@ -31,7 +30,15 @@ export function CustomerSelectionDialog() {
   }, []);
 
   useEffect(() => {
-    fetchCustomers();
+    let cancelled = false;
+    const load = async () => {
+      if (cancelled) return;
+      await fetchCustomers();
+    };
+    void load();
+    return () => {
+      cancelled = true;
+    };
   }, [fetchCustomers]);
 
   const filtered = customers.filter(

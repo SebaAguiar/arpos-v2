@@ -50,7 +50,6 @@ export function SalesHistoryDialog() {
   }, [company, receiptHeader, receiptFooter]);
 
   const fetchSales = useCallback(async (p: Period) => {
-    setLoading(true);
     try {
       const { from, to } = getPeriodTimestamps(p);
       const data = await SalesRepository.getAll({ from, to });
@@ -63,11 +62,20 @@ export function SalesHistoryDialog() {
   }, []);
 
   useEffect(() => {
-    fetchSales(period);
+    let cancelled = false;
+    const load = async () => {
+      if (cancelled) return;
+      await fetchSales(period);
+    };
+    void load();
     if (!company) fetchCompany();
+    return () => {
+      cancelled = true;
+    };
   }, [period, fetchSales, company, fetchCompany]);
 
   const handlePeriodChange = (p: Period) => {
+    setLoading(true);
     setPeriod(p);
   };
 

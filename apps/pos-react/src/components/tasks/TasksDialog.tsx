@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ComponentProps } from "react";
 import { Text, TextField, Badge, Select } from "@radix-ui/themes";
 import {
   Cross1Icon,
@@ -12,14 +12,16 @@ import { useDialogStore } from "@/stores/dialog.store";
 import { useTasksStore } from "@/stores/tasks.store";
 import type { TaskPriority, TaskStatus } from "@/stores/tasks.store";
 
-const PRIORITY_CONFIG: Record<TaskPriority, { label: string; color: string }> = {
+type BadgeColor = ComponentProps<typeof Badge>["color"];
+
+const PRIORITY_CONFIG: Record<TaskPriority, { label: string; color: BadgeColor }> = {
   URGENT: { label: "Urgente", color: "red" },
   HIGH: { label: "Alta", color: "orange" },
   MEDIUM: { label: "Media", color: "yellow" },
   LOW: { label: "Baja", color: "gray" },
 };
 
-const STATUS_CONFIG: Record<TaskStatus, { label: string; color: string }> = {
+const STATUS_CONFIG: Record<TaskStatus, { label: string; color: BadgeColor }> = {
   PENDING: { label: "Pendiente", color: "gray" },
   IN_PROGRESS: { label: "En progreso", color: "blue" },
   DONE: { label: "Completada", color: "green" },
@@ -291,10 +293,10 @@ export function TasksDialog() {
                     >
                       {task.title}
                     </Text>
-                    <Badge color={PRIORITY_CONFIG[task.priority].color as any} variant="soft" size="1">
+                    <Badge color={PRIORITY_CONFIG[task.priority].color} variant="soft" size="1">
                       {PRIORITY_CONFIG[task.priority].label}
                     </Badge>
-                    <Badge color={STATUS_CONFIG[task.status].color as any} variant="soft" size="1">
+                    <Badge color={STATUS_CONFIG[task.status].color} variant="soft" size="1">
                       {STATUS_CONFIG[task.status].label}
                     </Badge>
                   </div>

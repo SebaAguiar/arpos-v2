@@ -15,10 +15,10 @@ interface UseBackendReturn {
 }
 
 export function useBackend(): UseBackendReturn {
-  const [status, setStatus] = useState<BackendStatus | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const tauri = isTauri();
+  const [status, setStatus] = useState<BackendStatus | null>(null);
+  const [isLoading, setIsLoading] = useState(() => !tauri);
+  const [error, setError] = useState<string | null>(null);
 
   const startBackend = useCallback(async () => {
     if (!tauri) return;
@@ -75,10 +75,7 @@ export function useBackend(): UseBackendReturn {
   }, [tauri]);
 
   useEffect(() => {
-    if (!tauri) {
-      setIsLoading(false);
-      return;
-    }
+    if (!tauri) return;
 
     let cancelled = false;
 
