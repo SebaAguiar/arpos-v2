@@ -15,7 +15,9 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "prisma:seed": "ts-node prisma/seed.ts"
+    "prisma:seed": "ts-node prisma/seed.ts",
+    "migrate:v1": "ts-node scripts/migrate-v1.ts",
+    "validate:v1": "ts-node scripts/validate-migrate.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",
@@ -44,8 +46,10 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^22.0.0",
     "@types/passport-jwt": "^4.0.1",
+    "@types/pg": "^8.20.0",
     "@types/supertest": "^7.2.1",
     "jest": "^30.4.2",
+    "pg": "^8.22.0",
     "prisma": "^5.22.0",
     "supertest": "^7.2.2",
     "ts-jest": "^29.4.12",
