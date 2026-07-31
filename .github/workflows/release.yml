@@ -90,15 +90,29 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
 
-      # ── Upload bundles ──────────────────────────────
-      # Tauri only builds the bundle targets available on
-      # each OS, so uploading the whole bundle dir keeps
-      # the workflow OS-agnostic.
+      # ── Stage release artifacts ──────────────────────
+      # Upload only the final installers + their .sig files.
+      # Uploading the whole bundle dir would publish build
+      # internals (AppImage AppDir, .deb/.rpm temp files)
+      # and break the release upload.
+      - name: Stage release artifacts
+        run: |
+          mkdir -p staging
+          find apps/arpos-launcher/src-tauri/target/release/bundle -type f \( \
+            -name "*.deb" -o \
+            -name "*.rpm" -o \
+            -name "*.AppImage" -o \
+            -name "*.dmg" -o \
+            -name "*.msi" -o \
+            -name "*.exe" -o \
+            -name "*.sig" \
+          \) -exec cp {} staging/ \;
+
       - name: Upload bundles as artifacts
         uses: actions/upload-artifact@v6
         with:
           name: bundles-${{ matrix.bundle-name }}
-          path: apps/arpos-launcher/src-tauri/target/release/bundle/
+          path: staging/
           retention-days: 5
 
   # ── Create GitHub Release ───────────────────────────
@@ -121,6 +135,15 @@ jobs:
 
       - name: List artifacts
         run: find release-artifacts -type f | sort
+
+      - name: Verify updater signatures present
+        run: |
+          sigs=$(find release-artifacts -name "*.sig" | wc -l)
+          if [ "$sigs" -eq 0 ]; then
+            echo "::error::No .sig files found — updater artifacts were not generated (check createUpdaterArtifacts in tauri.conf.json)."
+            exit 1
+          fi
+          echo "Found $sigs signature file(s)"
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
