@@ -64,6 +64,9 @@ jobs:
       - name: Build POS
         run: pnpm --filter pos-react build
 
+      - name: Run POS tests
+        run: pnpm --filter pos-react test
+
       - name: Verify chunk splitting
         run: |
           ls -la apps/pos-react/dist/assets/
@@ -72,6 +75,49 @@ jobs:
           MAIN_SIZE=$(du -k apps/pos-react/dist/assets/index-*.js | cut -f1)
           echo "Main chunk: ${MAIN_SIZE}KB"
           [ "$MAIN_SIZE" -lt 300 ] && echo "OK" || echo "WARNING: main bundle > 300KB"
+
+  build-launcher:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            librsvg2-dev \
+            patchelf \
+            libssl-dev \
+            libayatana-appindicator3-dev
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm --filter api exec prisma generate
+
+      - name: Create env file
+        run: |
+          echo 'DATABASE_URL="file:./dev.db"' > apps/api/.env
+          echo 'PORT=3000' >> apps/api/.env
+          echo 'JWT_SECRET="ci-secret"' >> apps/api/.env
+
+      - name: Build Tauri app (compile check)
+        run: pnpm --filter arpos-launcher tauri build --no-bundle
 
   lint:
     runs-on: ubuntu-latest
