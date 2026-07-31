@@ -179,6 +179,8 @@ Paso 4: Complete
 
 ### 3.3 Technical Flow
 
+> **Nota de implementación (2026-07-31):** el flujo original suponía validar credenciales contra un API de export del cloud v1 (`validateCredentials(email, password)`), que **no existe**. La implementación actual (`MigrationService` + `POST /api/migration/import`, ver `ARCHITECTURE.md` §5.5) lee la base v1 **directamente** con una connection string read-only: el wizard pedirá la URL de conexión en lugar de email/password. El resto de la UX (selección, progreso, completado) se mantiene igual.
+
 ```typescript
 // apps/pos-react/src/components/auth/MigrationWizard.tsx
 
@@ -186,30 +188,16 @@ const MigrationWizard = () => {
   const [step, setStep] = useState<'select' | 'credentials' | 'progress' | 'complete'>('select');
   const [progress, setProgress] = useState({ current: 0, total: 0, table: '' });
 
-  const handleMigrate = async (email: string, password: string) => {
+  const handleMigrate = async (databaseUrl: string) => {
     setStep('progress');
 
-    // 1. Validate credentials with cloud API
-    const token = await validateCredentials(email, password);
+    // 1. La API local valida el estado (409 si ya hay company)
+    //    y ejecuta la migración v1 -> SQLite en el backend
+    const result = await MigrationRepository.importV1({ databaseUrl });
 
-    // 2. Download data in batches
-    const tables = ['companies', 'stores', 'users', 'products', 'inventory',
-                    'sales', 'sales_items', 'contacts', 'cash_registers'];
-
-    for (const table of tables) {
-      setProgress(prev => ({ ...prev, table }));
-      await downloadTable(table, token);
-    }
-
-    // 3. Create SQLite schema
-    await prisma.migrate.deploy();
-
-    // 4. Insert data from cache
-    await insertCachedData();
-
-    // 5. Validate migration
-    await validateMigration();
-
+    // 2. Progreso: el endpoint es síncrono; el wizard muestra el
+    //    resumen final (rowsMigrated por tabla) al completar
+    setProgress(prev => ({ ...prev, table: result.rowsMigrated }));
     setStep('complete');
   };
 

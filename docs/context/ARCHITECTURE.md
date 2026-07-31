@@ -787,6 +787,15 @@ Corrida con `pnpm migrate:v1` / `pnpm validate:v1` (scripts npm en `apps/api`).
 
 **Cloud target (Xata v2):** el schema de negocio vive solo en SQLite local. La DB cloud se inicializa con el schema del **admin-panel** (`apps/admin-panel/prisma/schema.prisma`, provider PostgreSQL: `plans`, `clients`, `licenses`, `payments`, `synced_changes`, `support_tickets`) vía `prisma db push`, y el tenant se siembra con `apps/admin-panel/scripts/seed-tenant.ts` (datos del cliente vía env, sin PII en el repo). Esto está alineado con el modelo de sync implementado (`SYNC.md`): el cloud es un **relay** (`synced_changes` JSON), no un espejo del schema de negocio.
 
+**Ladrillo reutilizable — endpoint `POST /api/migration/import`:** la misma lógica del script one-off está disponible como `MigrationService` (`apps/api/src/features/migration/`, módulo `MigrationModule`) y expuesta como endpoint público de la API local:
+
+- Contrato Zod (`dto/import-v1.schema.ts`): `{ databaseUrl: string, primaryStoreId?: string }`.
+- `@Public()` a propósito: corre durante el setup, antes de que existan company/usuario (no hay JWT posible). La credencial real es la **URL de conexión v1**; la guardia es el estado: responde `409 Conflict` si ya existe company (mismo patrón que `initCompany`).
+- `companyId` y `primaryStoreId` se **derivan de v1** (o `primaryStoreId` del dto), reemplazando los hardcodes `'1'`/`'4'` del script dev — desacoplado de los datos del cliente.
+- Respuesta `MigrationSummary`: `{ status, companyId, primaryStoreId, rowsMigrated, completedAt }`.
+- El script dev `apps/api/scripts/migrate-v1.ts` queda como herramienta histórica/rollback; se consolidará con el service cuando se construya el wizard UI.
+- **Frontend pendiente:** el wizard UI (CLI-INTERACTIVE §3) se construirá sobre este endpoint cuando exista demanda de usuarios v1.
+
 ---
 
 ## 6. Transición Transparente del Usuario
