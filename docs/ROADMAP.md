@@ -24,16 +24,16 @@ Este documento recopila las fases de migración, features propuestas y roadmap d
 
 ### Fase 1: Backend Adaptado (2-3 semanas)
 
-**Milestone:** NestJS funciona con SQLite, endpoints críticos operativos.
+**Milestone:** NestJS funciona con SQLite, endpoints críticos operativos. **COMPLETADA** (2026-07-31)
 
-- [ ] Adaptar `PrismaService` a SQLite
-- [ ] Implementar `LocalTenantMiddleware` (companyId único)
-- [ ] Adaptar repositories para SQLite types
-- [ ] Implementar `OfflineSyncService` (cola de sync local)
-- [ ] Endpoint `GET /api/health` para Tauri
-- [ ] Endpoint `POST /api/setup/init-company`
-- [ ] Endpoint `GET /api/setup/status`
-- [ ] Tests de integración con SQLite in-memory
+- [x] Adaptar `PrismaService` a SQLite
+- [x] Implementar `LocalTenantMiddleware` (companyId único)
+- [x] Adaptar repositories para SQLite types
+- [x] Implementar `OfflineSyncService` (cola de sync local)
+- [x] Endpoint `GET /api/health` para Tauri
+- [x] Endpoint `POST /api/setup/init-company`
+- [x] Endpoint `GET /api/setup/status`
+- [x] Tests de integración con SQLite in-memory
 - [x] Migration de datos desde PostgreSQL cloud
 
 > **Nota (2026-07-31):** Migración one-off del cliente "Libreria Magna" completada de ArPOS v1 (Xata) → v2 (SQLite local + cloud relay). Detalles y conteos en `ARCHITECTURE.md` §5.5. **Backend del Migration Wizard listo:** `POST /api/migration/import` (`MigrationService`, `@Public()`, 409 si ya hay company) — ladrillo reutilizable para el wizard. **Resta el wizard UI** (CLI-INTERACTIVE §3) que consumirá este endpoint; se construye cuando exista demanda de usuarios v1.
