@@ -1,6 +1,6 @@
-# Convenciones de Código — ArPOS Tauri v2
+# Convenciones de Código — Arcon Tauri v2
 
-Este documento define los estándares de código, patrones arquitectónicos, directrices de testing y protocolo de commits para el proyecto ArPOS.
+Este documento define los estándares de código, patrones arquitectónicos, directrices de testing y protocolo de commits para el proyecto Arcon.
 
 ---
 
@@ -23,7 +23,7 @@ Este documento define los estándares de código, patrones arquitectónicos, dir
 - **Stores Zustand:** `camelCase` con suffix `store` (`auth.store.ts`, `sales.store.ts`, `ui.store.ts`).
 - **Props interfaces:** `PascalCase` con suffix `Props` (`CartProps`, `ProductCardProps`).
 
-### Rust (apps/arpos-launcher/src-tauri)
+### Rust (apps/arcon-launcher/src-tauri)
 
 - **Archivos:** `snake_case` (`process_manager.rs`, `database_manager.rs`).
 - **Funciones:** `snake_case` (`start_api`, `get_db_path`).
@@ -47,7 +47,7 @@ Este documento define los estándares de código, patrones arquitectónicos, dir
 Agrupar imports en este orden, separados por línea en blanco:
 1. Built-ins de Node.js / Bun
 2. Paquetes de terceros (react, zod, prisma, @tauri-apps)
-3. Paquetes internos (`@arpos/*`)
+3. Paquetes internos (`@arcon/*`)
 4. Imports relativos (../, ./)
 
 ---
@@ -92,7 +92,7 @@ Agrupar imports en este orden, separados por línea en blanco:
 ### Coverage Targets
 - `libs/api/*/src/` — 80% mínimo para business logic.
 - `apps/pos-react/src/` — 70% para componentes críticos (POS, Cart, Payment).
-- `apps/arpos-launcher/src-tauri/` — 60% para comandos Rust.
+- `apps/arcon-launcher/src-tauri/` — 60% para comandos Rust.
 
 ### Running Tests
 ```bash
@@ -141,7 +141,7 @@ Todos los commits deben seguir **Conventional Commits**. Los mensajes deben escr
 |-------|-----------|
 | `api` | NestJS backend, controllers, services, Prisma |
 | `pos-react` | React frontend, components, stores, hooks |
-| `arpos-launcher` | Tauri Rust, process manager, commands |
+| `arcon-launcher` | Tauri Rust, process manager, commands |
 | `prisma` | Schema, migrations, seed data |
 | `common` | Utilidades compartidas, tipos globales |
 | `deps` | Actualización de dependencias |

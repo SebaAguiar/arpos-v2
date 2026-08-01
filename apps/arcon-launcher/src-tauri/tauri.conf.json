@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "ArPOS",
-  "version": "0.1.0",
-  "identifier": "com.arpos.desktop",
+  "productName": "Arcon",
+  "version": "1.0.0",
+  "identifier": "com.arcon.desktop",
   "build": {
     "beforeDevCommand": "bash scripts/dev.sh",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "ArPOS",
+        "title": "Arcon",
         "width": 1400,
         "height": 900,
         "minWidth": 800,
@@ -40,7 +40,7 @@
     ],
     "category": "Finance",
     "shortDescription": "Point of Sale System",
-    "longDescription": "ArPOS - A modern, offline-first point of sale system for retail businesses",
+    "longDescription": "Arcon - A modern, offline-first point of sale system for retail businesses",
     "windows": {
       "wix": {
         "language": "es-ES"

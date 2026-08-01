@@ -42,7 +42,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="card">
           <div className="mb-6 text-center">
-            <h1 className="text-2xl font-bold text-gray-900">ArPOS Admin</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Arcon Admin</h1>
             <p className="text-sm text-gray-500">Panel de administración</p>
           </div>
 

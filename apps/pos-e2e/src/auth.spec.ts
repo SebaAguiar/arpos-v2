@@ -8,7 +8,7 @@ test.describe("Auth", () => {
     await page.goto("/");
     await expect(page.getByText("Ingresá para continuar")).toBeVisible();
 
-    await page.getByPlaceholder("admin@arpos.com").fill("admin@arpos.com");
+    await page.getByPlaceholder("admin@arcon.com").fill("admin@arcon.com");
     await page.getByPlaceholder("\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022").fill("admin123");
     await page.getByText("Iniciar sesión").click();
 
@@ -23,7 +23,7 @@ test.describe("Auth", () => {
     await page.goto("/");
     await expect(page.getByText("Ingresá para continuar")).toBeVisible();
 
-    await page.getByPlaceholder("admin@arpos.com").fill("wrong@email.com");
+    await page.getByPlaceholder("admin@arcon.com").fill("wrong@email.com");
     await page.getByPlaceholder("\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022").fill("wrongpass");
     await page.getByText("Iniciar sesión").click();
 

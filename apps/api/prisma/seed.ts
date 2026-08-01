@@ -11,10 +11,10 @@ async function main() {
   // ── Company ──────────────────────────────────────────
   const company = await prisma.company.create({
     data: {
-      name: 'ArPOS Demo',
+      name: 'Arcon Demo',
       taxId: '20-12345678-9',
       address: 'Av. Demo 1234, CABA',
-      email: 'demo@arpos.com',
+      email: 'demo@arcon.com',
       phone: '+54 11 1234-5678',
       created_at: now,
       updated_at: now,
@@ -36,7 +36,7 @@ async function main() {
   const admin = await prisma.user.create({
     data: {
       companyId: company.id,
-      email: 'admin@arpos.com',
+      email: 'admin@arcon.com',
       password: adminPassword,
       name: 'Administrador',
       role: 'admin',

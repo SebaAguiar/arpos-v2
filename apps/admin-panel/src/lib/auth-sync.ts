@@ -2,7 +2,7 @@ import { jwtVerify } from "jose";
 import { prisma } from "./prisma";
 
 const secret = new TextEncoder().encode(
-  process.env.JWT_SECRET || "arpos-admin-secret-change-in-production"
+  process.env.JWT_SECRET || "arcon-admin-secret-change-in-production"
 );
 
 export interface SyncTokenPayload {

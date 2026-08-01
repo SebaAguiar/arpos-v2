@@ -1,6 +1,6 @@
-# Guía de Debugging — ArPOS Tauri v2
+# Guía de Debugging — Arcon Tauri v2
 
-Este documento cubre cómo investigar y resolver bugs en ArPOS, incluyendo dónde están los logs, cómo hacer profiling y referencia de patrones de error comunes.
+Este documento cubre cómo investigar y resolver bugs en Arcon, incluyendo dónde están los logs, cómo hacer profiling y referencia de patrones de error comunes.
 
 ---
 
@@ -16,7 +16,7 @@ pnpm dev --filter api
 pnpm dev --filter pos-react
 
 # Tauri (con dev server)
-pnpm dev --filter arpos-launcher
+pnpm dev --filter arcon-launcher
 ```
 
 ### 1.2 Debug con Chrome DevTools
@@ -36,7 +36,7 @@ Abrir `chrome://inspect` o usar VS Code's "Attach to Process".
 
 ```bash
 # Rust debugger (VS Code + rust-analyzer)
-# Abrir apps/arpos-launcher/src-tauri/ en VS Code
+# Abrir apps/arcon-launcher/src-tauri/ en VS Code
 # Usar launch.json con "type": "lldb"
 ```
 
@@ -46,7 +46,7 @@ Abrir `chrome://inspect` o usar VS Code's "Attach to Process".
 
 ### 2.1 Logs de la Aplicación
 
-ArPOS usa un logger inyectado por DI. Los logs van a stdout y a archivos:
+Arcon usa un logger inyectado por DI. Los logs van a stdout y a archivos:
 
 ```bash
 # Desarrollo — todos los logs a consola
@@ -61,7 +61,7 @@ LOG_LEVEL=debug pnpm dev
 ### 2.2 Logs de Archivo
 
 ```
-~/.arpos/logs/
+~/.arcon/logs/
 ├── app.log          # Logs de la aplicación React
 ├── api.log          # Logs de NestJS
 ├── tauri.log        # Logs de Tauri/Rust
@@ -100,13 +100,13 @@ prisma.$on('query', (e) => {
 
 ```bash
 # Verificar WAL mode
-sqlite3 ~/.arpos/data/app.db "PRAGMA journal_mode;"
+sqlite3 ~/.arcon/data/app.db "PRAGMA journal_mode;"
 
 # Ver stats de la DB
-sqlite3 ~/.arpos/data/app.db "PRAGMA stats;"
+sqlite3 ~/.arcon/data/app.db "PRAGMA stats;"
 
 # Ver tablas
-sqlite3 ~/.arpos/data/app.db ".tables"
+sqlite3 ~/.arcon/data/app.db ".tables"
 ```
 
 ---
@@ -166,12 +166,12 @@ async create(@Body() body: any) {
 **Check:**
 1. ¿La DB está corriendo? (SQLite no necesita servidor, verificar que el archivo exista)
 ```bash
-ls -la ~/.arpos/data/app.db
+ls -la ~/.arcon/data/app.db
 ```
 
 2. ¿La URL de conexión es correcta en `.env`?
 ```
-DATABASE_URL=file:~/.arpos/data/app.db
+DATABASE_URL=file:~/.arcon/data/app.db
 ```
 
 3. ¿Prisma puede conectarse?
@@ -225,7 +225,7 @@ lsof -i :3000
 
 3. Verificar logs de Tauri:
 ```bash
-cat ~/.arpos/logs/tauri.log
+cat ~/.arcon/logs/tauri.log
 ```
 
 ### 3.7 Offline Sync Conflicts
@@ -237,12 +237,12 @@ cat ~/.arpos/logs/tauri.log
 **Check:**
 1. Verificar cola de sync:
 ```bash
-sqlite3 ~/.arpos/data/app.db "SELECT * FROM sync_queue WHERE status='pending';"
+sqlite3 ~/.arcon/data/app.db "SELECT * FROM sync_queue WHERE status='pending';"
 ```
 
 2. Verificar logs de sync:
 ```bash
-cat ~/.arpos/logs/sync.log
+cat ~/.arcon/logs/sync.log
 ```
 
 3. Forzar resolución manual:
@@ -324,8 +324,8 @@ Crear `.vscode/launch.json`:
       "request": "launch",
       "name": "Debug Tauri Rust",
       "cargo": {
-        "args": ["build", "--manifest-path=${workspaceFolder}/apps/arpos-launcher/src-tauri/Cargo.toml"],
-        "filter": { "name": "arpos-launcher", "kind": "bin" }
+        "args": ["build", "--manifest-path=${workspaceFolder}/apps/arcon-launcher/src-tauri/Cargo.toml"],
+        "filter": { "name": "arcon-launcher", "kind": "bin" }
       }
     }
   ]
@@ -385,7 +385,7 @@ function createSale(input: CreateSaleInput) {
 | Request retorna 400 | Verificar contract schema — ¿campos requeridos presentes? |
 | Request retorna 401/403 | Verificar header Authorization y JWT |
 | Operaciones de DB fallan | ¿SQLite accessible? ¿Path correcto? |
-| Sync no funciona | Verificar `~/.arpos/logs/sync.log` |
+| Sync no funciona | Verificar `~/.arcon/logs/sync.log` |
 | POS lento | Habilitar query logging — buscar N+1 queries |
 | Tauri no compila | Verificar Rust toolchain: `rustc --version` |
 | Memoria crece | Heap snapshot comparison — buscar event listeners detachados |

@@ -83,7 +83,7 @@ export const useSettingsStore = create<SettingsState>()(
       setReceiptFooter: (text) => set({ receiptFooter: text }),
     }),
     {
-      name: "arpos-settings",
+      name: "arcon-settings",
       partialize: (state) => ({
         paymentMethods: state.paymentMethods,
         creditSurcharge: state.creditSurcharge,

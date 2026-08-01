@@ -39,7 +39,7 @@ export const useUpdaterStore = create<UpdaterState>()((set, get) => ({
     try {
       const { appDataDir, join } = await import("@tauri-apps/api/path");
       const dir = await appDataDir();
-      const filename = updateInfo.download_url.split("/").pop() ?? "ArPOS-update.zip";
+      const filename = updateInfo.download_url.split("/").pop() ?? "Arcon-update.zip";
       const destPath = await join(dir, filename);
       const downloadedTo = await UpdaterRepository.download(updateInfo.download_url, destPath);
       set({ downloadedTo, downloading: false });

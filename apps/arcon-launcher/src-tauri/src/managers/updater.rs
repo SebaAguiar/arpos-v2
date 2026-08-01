@@ -32,7 +32,7 @@ impl UpdaterManager {
         let response = self
             .client
             .get(&url)
-            .header("User-Agent", format!("arpos-updater/{}", current_version))
+            .header("User-Agent", format!("arcon-updater/{}", current_version))
             .send()
             .await
             .map_err(|e| format!("Failed to check for updates: {}", e))?;

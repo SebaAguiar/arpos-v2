@@ -24,7 +24,7 @@ describe('SalesRepository (integration)', () => {
       data: {
         id: USER_ID,
         companyId: COMPANY_ID,
-        email: 'test@arpos.com',
+        email: 'test@arcon.com',
         password: 'hashed',
         name: 'Test User',
         role: 'admin',

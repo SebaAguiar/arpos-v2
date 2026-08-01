@@ -164,7 +164,7 @@ export const useSyncStore = create<SyncState>()(
       },
     }),
     {
-      name: "arpos-sync",
+      name: "arcon-sync",
       partialize: (state) => ({
         subscription: state.subscription,
       }),

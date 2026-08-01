@@ -159,7 +159,7 @@ export function FirstRunWizard() {
                 />
               </div>
               <Text size="6" weight="bold" style={{ display: "block" }}>
-                ¡Bienvenido a ArPOS!
+                ¡Bienvenido a Arcon!
               </Text>
               <Text
                 size="3"
@@ -463,7 +463,7 @@ export function FirstRunWizard() {
                 color="gray"
                 style={{ display: "block", marginTop: "8px" }}
               >
-                Tu negocio está listo para usar ArPOS.
+                Tu negocio está listo para usar Arcon.
               </Text>
             </div>
 

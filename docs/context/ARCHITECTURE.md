@@ -1,9 +1,9 @@
-# ArPOS Tauri — Arquitectura Detallada y Procesos de Migración
+# Arcon Tauri — Arquitectura Detallada y Procesos de Migración
 
 **Versión:** 1.0  
 **Fecha:** 2026-07-16  
 **Estado:** Propuesta de implementación  
-**Objetivo:** Definir la arquitectura para la migración de ArPOS a Tauri con React + SQLite, garantizando continuidad de operación para usuarios existentes y migración automática de datos.
+**Objetivo:** Definir la arquitectura para la migración de Arcon a Tauri con React + SQLite, garantizando continuidad de operación para usuarios existentes y migración automática de datos.
 
 ---
 
@@ -29,7 +29,7 @@
 
 ### 1.1 Cero Disrupción para Usuarios Existentes
 
-**Objetivo:** Un usuario que usa ArPOS hoy debe sentir que sigue usando ArPOS mañana.
+**Objetivo:** Un usuario que usa Arcon hoy debe sentir que sigue usando Arcon mañana.
 
 - **Transición automática:** Instalador detecta instalación anterior y ofrece migración de datos
 - **Datos sin pérdida:** Toda la data de PostgreSQL se copia a SQLite sin necesidad de manual de usuario
@@ -112,15 +112,15 @@
 │  │                                               │          │  │
 │  │  ┌──────────────────────────────────────────▼┐          │  │
 │  │  │  PRISMA + SQLite                          │          │  │
-│  │  │  └─────► ~/.arpos/data/app.db            │          │  │
-│  │  │  └─────► ~/.arpos/backup/auto_*.tar.gz  │          │  │
+│  │  │  └─────► ~/.arcon/data/app.db            │          │  │
+│  │  │  └─────► ~/.arcon/backup/auto_*.tar.gz  │          │  │
 │  │  └──────────────────────────────────────────┘          │  │
 │  │                                                          │  │
 │  └──────────────────────────────────────────────────────────┘  │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────────┐  │
 │  │  FILE SYSTEM                                             │  │
-│  │  ~/.arpos/                                               │  │
+│  │  ~/.arcon/                                               │  │
 │  │  ├── data/                      (SQLite + logs)         │  │
 │  │  ├── backup/                    (Auto-backups)          │  │
 │  │  ├── config/                    (App settings)          │  │
@@ -164,7 +164,7 @@ LECTURA LOCAL (Listado de Productos):
 5. Datos en caché de Zustand para no re-fetchear
 
 MIGRACIÓN INICIAL (PostgreSQL → SQLite):
-1. Usuario instala ArPOS Tauri
+1. Usuario instala Arcon Tauri
 2. Launcher detecta versión anterior en sistema
 3. Ofrece: "¿Migrar datos de cloud a local?" 
 4. Si sí:
@@ -189,15 +189,15 @@ MIGRACIÓN INICIAL (PostgreSQL → SQLite):
 ### 4.1 Raíz del Monorepo (Sin cambios principales)
 
 ```
-arpos-monorepo/
+arcon-monorepo/
 ├── apps/
 │   ├── api/                    # ✓ NestJS (ADAPTADO a SQLite)
 │   ├── pos-react/              # ✗ NUEVO: React + Radix + Tailwind
 │   ├── pos-e2e/                # (Playwright tests → pos-react)
 │   ├── shop/                   # ✓ Next.js (SIN CAMBIOS)
 │   ├── marketing-landing/      # ✓ Astro (SIN CAMBIOS)
-│   ├── arpos-launcher/         # ✗ NUEVO: Tauri 2.x (reemplaza Electron)
-│   ├── arpos-updater/          # DEPRECADO (Tauri built-in updater)
+│   ├── arcon-launcher/         # ✗ NUEVO: Tauri 2.x (reemplaza Electron)
+│   ├── arcon-updater/          # DEPRECADO (Tauri built-in updater)
 │   └── api-e2e/                # ✓ Tests siguen igual
 │
 ├── libs/api/                   # ✓ ADAPTADA
@@ -389,10 +389,10 @@ apps/pos-react/
 └── package.json
 ```
 
-### 4.3 Estructura de `apps/arpos-launcher/` (Nueva - Tauri)
+### 4.3 Estructura de `apps/arcon-launcher/` (Nueva - Tauri)
 
 ```
-apps/arpos-launcher/
+apps/arcon-launcher/
 ├── src-tauri/                      # Código Rust (Tauri backend)
 │   ├── src/
 │   │   ├── main.rs                 # Entry point
@@ -409,12 +409,12 @@ apps/arpos-launcher/
 │   │   │
 │   │   ├── services/
 │   │   │   ├── logger.rs            # File logging (datos/logs/)
-│   │   │   ├── config.rs            # Lee .arpos/config/app.json
+│   │   │   ├── config.rs            # Lee .arcon/config/app.json
 │   │   │   ├── health_check.rs      # Polling NestJS :3000/health
 │   │   │   └── auto_backup.rs       # Cron-like backup scheduler
 │   │   │
 │   │   └── utils/
-│   │       ├── paths.rs             # ~/.arpos/
+│   │       ├── paths.rs             # ~/.arcon/
 │   │       └── errors.rs            # Custom error types
 │   │
 │   ├── Cargo.toml                  # Deps: tauri, tokio, serde, etc.
@@ -438,7 +438,7 @@ apps/arpos-launcher/
 
 **Premisa:** Migración **sin pérdida, sin downtime percibido, reversible**.
 
-El usuario instala ArPOS Tauri. Si tiene instalación anterior, se le ofrece:
+El usuario instala Arcon Tauri. Si tiene instalación anterior, se le ofrece:
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -454,7 +454,7 @@ Si elige "Migrar", aparece:
 
 ```
 ┌──────────────────────────────────────────────────┐
-│  Ingresá tu email y contraseña de ArPOS         │
+│  Ingresá tu email y contraseña de Arcon         │
 │                                                  │
 │  Email:    [____________________]               │
 │  Password: [____________________]               │
@@ -564,7 +564,7 @@ async fn download_company_data(
             
             // 4. Guardar en caché local (JSON)
             fs::write(
-                format!("~/.arpos/sync/import_cache_{}.json", table),
+                format!("~/.arcon/sync/import_cache_{}.json", table),
                 serde_json::to_string(&transformed)?
             )?;
             
@@ -651,7 +651,7 @@ async fn finalize_migration(
     // 3. Insertar datos desde caché en lotes
     for table in vec![...] {
         let data = fs::read_to_string(
-            format!("~/.arpos/sync/import_cache_{}.json", table)
+            format!("~/.arcon/sync/import_cache_{}.json", table)
         )?;
         let rows: Vec<Record> = serde_json::from_str(&data)?;
         
@@ -739,7 +739,7 @@ async fn export_to_sql_script() -> Result<String, String> {
     let transformed = sqlite_sql_to_postgres(&sql);
     
     // 3. Guardar a archivo descargable
-    let export_path = format!("~/.arpos/backup/export_{}.sql", now());
+    let export_path = format!("~/.arcon/backup/export_{}.sql", now());
     fs::write(&export_path, transformed)?;
     
     // 4. User puede uploadear manualmente o vía Tauri dialog
@@ -749,7 +749,7 @@ async fn export_to_sql_script() -> Result<String, String> {
 
 ### 5.5 Migración One-off del Cliente (v1 → v2) — Implementada
 
-> Las secciones 5.1–5.4 describen el **wizard del producto final** (migración para usuarios finales durante el setup). Esta sección documenta la migración **one-off del equipo** que se ejecutó para llevar los datos reales del cliente de ArPOS v1 (Xata PostgreSQL) al formato v2.
+> Las secciones 5.1–5.4 describen el **wizard del producto final** (migración para usuarios finales durante el setup). Esta sección documenta la migración **one-off del equipo** que se ejecutó para llevar los datos reales del cliente de Arcon v1 (Xata PostgreSQL) al formato v2.
 
 **Estrategia:** expand/contract con la DB v1 intacta como rollback.
 
@@ -803,10 +803,10 @@ Corrida con `pnpm migrate:v1` / `pnpm validate:v1` (scripts npm en `apps/api`).
 ### 6.1 Instalador Inteligente
 
 ```
-ARPOS_SETUP.exe (Windows)
+Arcon_SETUP.exe (Windows)
 
 1. ¿Dónde instalar?
-   └─► C:\Program Files\ArPOS\  [Browse]
+   └─► C:\Program Files\Arcon\  [Browse]
 
 2. ¿Primera vez?
    ○ Sí, empezar de cero
@@ -816,7 +816,7 @@ ARPOS_SETUP.exe (Windows)
 3. (Descarga ~80MB Tauri + Node + dependencies)
 
 4. Instalación finalizada
-   └─► Abre automáticamente ArPOS
+   └─► Abre automáticamente Arcon
    └─► Detona FirstRunWizard si es primera vez
 ```
 
@@ -950,7 +950,7 @@ generator client {
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
-  // url = "file:~/.arpos/data/app.db"
+  // url = "file:~/.arcon/data/app.db"
 }
 
 // Tabla Company (única en local, datos de configuración)
@@ -1529,7 +1529,7 @@ export function POSPage() {
   "app": {
     "windows": [
       {
-        "title": "ArPOS",
+        "title": "Arcon",
         "width": 1400,
         "height": 900,
         "minWidth": 800,
@@ -1547,7 +1547,7 @@ export function POSPage() {
   "updater": {
     "active": true,
     "endpoints": [
-      "https://updates.arpos.app/releases/{{target}}/{{version}}"
+      "https://updates.arcon.app/releases/{{target}}/{{version}}"
     ],
     "dialog": true,
     "pubkey": "..." // Ed25519 public key
@@ -1608,7 +1608,7 @@ impl ProcessManager {
     }
     
     fn get_db_path(&self) -> String {
-        format!("{}/.arpos/data/app.db", dirs::home_dir().unwrap().display())
+        format!("{}/.arcon/data/app.db", dirs::home_dir().unwrap().display())
     }
 }
 ```
@@ -1654,7 +1654,7 @@ async fn get_api_status() -> Result<ApiStatus, String> {
 
 #[tauri::command]
 async fn export_database() -> Result<String, String> {
-    let db_path = format!("{}/.arpos/data/app.db", 
+    let db_path = format!("{}/.arcon/data/app.db", 
         dirs::home_dir().unwrap().display());
     
     let output = Command::new("sqlite3")
@@ -1668,7 +1668,7 @@ async fn export_database() -> Result<String, String> {
     // Transformar SQLite SQL → PostgreSQL
     let postgres_sql = transform_to_postgres(&sql);
     
-    let export_path = format!("{}/.arpos/backup/export.sql", 
+    let export_path = format!("{}/.arcon/backup/export.sql", 
         dirs::home_dir().unwrap().display());
     
     std::fs::write(&export_path, postgres_sql)
@@ -1697,10 +1697,10 @@ fn main() {
 
 ### 10.1 Arquitectura de Sync
 
-**Premisa:** Usuario tiene ArPOS en laptop (POS) y tablet (inventario). Quiere que se sincronicen.
+**Premisa:** Usuario tiene Arcon en laptop (POS) y tablet (inventario). Quiere que se sincronicen.
 
 **Solución sin cloud:**
-- Ambos equipos comparten carpeta network (~/.arpos/shared/)
+- Ambos equipos comparten carpeta network (~/.arcon/shared/)
 - Cambios se replican automáticamente
 - Conflict resolution: last-write-wins
 
@@ -1717,7 +1717,7 @@ Laptop (SQLite)                   Tablet (SQLite)
     │                                 │
     │ (cambio: venta)               │ (cambio: inventario)
     │                                 │
-    └─────► \\NETWORK\shared\arpos/ ◄─┘
+    └─────► \\NETWORK\shared\arcon/ ◄─┘
             ├── products.json
             ├── sales.json
             ├── inventory.json
@@ -2035,22 +2035,22 @@ jobs:
 
 | Plataforma | Formato | Tamaño | Descarga |
 |---|---|---|---|
-| **Windows** | MSI (NSIS) | ~80MB | arpos-setup-1.0.0.msi |
-| **macOS** | DMG + App | ~90MB | arpos-1.0.0.dmg |
-| **Linux** | AppImage / DEB | ~75MB | arpos-1.0.0.AppImage |
+| **Windows** | MSI (NSIS) | ~80MB | arcon-setup-1.0.0.msi |
+| **macOS** | DMG + App | ~90MB | arcon-1.0.0.dmg |
+| **Linux** | AppImage / DEB | ~75MB | arcon-1.0.0.AppImage |
 
 **El instalador hace:**
 1. Detectar instalación anterior
 2. Ofrecer migración de datos
 3. Descargar binarios (Node.js, NestJS, Prisma)
-4. Crear carpeta ~/.arpos/
+4. Crear carpeta ~/.arcon/
 5. Inicializar SQLite
 6. Crear shortcut en menú Inicio / Applications
 
 ### 12.3 Auto-updater (Tauri Built-in)
 
-El sistema de actualizaciones de ArPOS usa el updater built-in de Tauri. **Canal activo: GitHub Releases**
-(implementado y en producción desde v0.1.0). El backend personalizado (`releases.arpos.app`) es la Opción B
+El sistema de actualizaciones de Arcon usa el updater built-in de Tauri. **Canal activo: GitHub Releases**
+(implementado y en producción desde v0.1.0). El backend personalizado (`releases.arcon.app`) es la Opción B
 para Fase 2 — cuando se necesite rollout gradual, monitoring y A/B testing.
 
 **Configuración real (tauri.conf.json, v0.1.0):**
@@ -2106,12 +2106,12 @@ re-publicar corrección con semver superior).
    - Resolución de conflictos
 
 4. **Backup y Restore**
-   - Backup automático diario (~/.arpos/backup/)
+   - Backup automático diario (~/.arcon/backup/)
    - Restaurar desde backup
    - Exportar a SQL
 
 5. **Soporte y Troubleshooting**
-   - Logs en ~/.arpos/logs/
+   - Logs en ~/.arcon/logs/
    - Health check (/api/health)
    - Contacto con soporte
 

@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-const APP_NAME: &str = "arpos";
+const APP_NAME: &str = "arcon";
 const DB_NAME: &str = "app.db";
 
 pub fn get_home_dir() -> PathBuf {

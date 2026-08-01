@@ -1,6 +1,6 @@
-# Decisiones Técnicas — ArPOS Tauri v2
+# Decisiones Técnicas — Arcon Tauri v2
 
-Este documento registra las decisiones arquitectónicas y técnicas tomadas durante la migración de ArPOS, incluyendo alternativas consideradas y trade-offs.
+Este documento registra las decisiones arquitectónicas y técnicas tomadas durante la migración de Arcon, incluyendo alternativas consideradas y trade-offs.
 
 ---
 
@@ -102,7 +102,7 @@ Este documento registra las decisiones arquitectónicas y técnicas tomadas dura
 ## 9. Sincronización Opcional (vs Obligatoria)
 
 - **Decisión:** La sincronización con cloud es opcional, no requerida.
-- **Justificación:** El usuario debe poder usar ArPOS 100% offline sin costo de infraestructura. La sincronización es un add-on para quienes necesitan multi-dispositivo.
+- **Justificación:** El usuario debe poder usar Arcon 100% offline sin costo de infraestructura. La sincronización es un add-on para quienes necesitan multi-dispositivo.
 - **Alternativas consideradas:**
   - *Sync obligatoria:* Rechazado porque requiere internet y servidor cloud.
   - *P2P sync:* Rechazado porque es más complejo y propenso a conflictos.
@@ -129,9 +129,9 @@ Este documento registra las decisiones arquitectónicas y técnicas tomadas dura
 - **Justificación:** El updater de Tauri maneja differential updates, firma Ed25519 y restart automático. GitHub Releases provee CDN gratis con versioning integrado. Para Fase 1 (lanzamiento), esto es suficiente. Para Fase 2 (>1000 usuarios), se agrega backend personalizado con rollout gradual y analytics.
 - **Alternativas consideradas:**
   - *Backend personalizado desde Fase 1:* Rechazado porque agrega complejidad innecesaria antes de tener usuarios reales. Requiere S3, servidor de updates, y dashboard.
-  - *Electron Updater:* Rechazado porque ArPOS migra a Tauri (decisión #5).
+  - *Electron Updater:* Rechazado porque Arcon migra a Tauri (decisión #5).
   - *Manual updates (sin auto-updater):* Rechazado porque usuarios no actualizarían, generando soporte técnico innecesario.
-  - *Docker-based updates:* Rechazado porque ArPOS no usa Docker (decisión #5).
+  - *Docker-based updates:* Rechazado porque Arcon no usa Docker (decisión #5).
 - **Trade-off:** GitHub Releases no tiene control fino de rollout (todos actualizan igual), pero para <1000 usuarios esto es aceptable. El backend personalizado en Fase 2 resuelve esta limitación.
 
 ---

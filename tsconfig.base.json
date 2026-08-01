@@ -15,10 +15,10 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@arpos/api/*": ["apps/api/src/*"],
-      "@arpos/contracts/*": ["libs/contracts/*"],
-      "@arpos/store/*": ["libs/store/*"],
-      "@arpos/common/*": ["libs/common/*"]
+      "@arcon/api/*": ["apps/api/src/*"],
+      "@arcon/contracts/*": ["libs/contracts/*"],
+      "@arcon/store/*": ["libs/store/*"],
+      "@arcon/common/*": ["libs/common/*"]
     },
     "strict": true,
     "noImplicitAny": true,

@@ -9,15 +9,15 @@ interface ThemeState {
 }
 
 export const useThemeStore = create<ThemeState>((set) => ({
-  theme: (localStorage.getItem("arpos-theme") as Theme) || "dark",
+  theme: (localStorage.getItem("arcon-theme") as Theme) || "dark",
   toggleTheme: () =>
     set((s) => {
       const next = s.theme === "dark" ? "light" : "dark";
-      localStorage.setItem("arpos-theme", next);
+      localStorage.setItem("arcon-theme", next);
       return { theme: next };
     }),
   setTheme: (theme) => {
-    localStorage.setItem("arpos-theme", theme);
+    localStorage.setItem("arcon-theme", theme);
     set({ theme });
   },
 }));

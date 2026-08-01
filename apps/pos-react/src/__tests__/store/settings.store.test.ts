@@ -39,6 +39,6 @@ describe("settings store", () => {
   it("persists state to localStorage", () => {
     useSettingsStore.getState().setTaxRate(0.0);
     expect(useSettingsStore.persist.hasHydrated()).toBe(true);
-    expect(localStorage.getItem("arpos-settings")).toContain("taxRate");
+    expect(localStorage.getItem("arcon-settings")).toContain("taxRate");
   });
 });

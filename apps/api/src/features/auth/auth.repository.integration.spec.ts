@@ -20,7 +20,7 @@ describe('AuthRepository (integration)', () => {
       data: {
         id: `user-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
         companyId: COMPANY_ID,
-        email: overrides.email ?? 'admin@arpos.com',
+        email: overrides.email ?? 'admin@arcon.com',
         password: overrides.password ?? '$2a$10$hashedpassword',
         name: 'Admin User',
         role: 'admin',
@@ -47,23 +47,23 @@ describe('AuthRepository (integration)', () => {
 
   describe('findActiveByEmail', () => {
     it('should find an active user by email', async () => {
-      await seedUser({ email: 'admin@arpos.com' });
+      await seedUser({ email: 'admin@arcon.com' });
 
-      const user = await repo.findActiveByEmail('admin@arpos.com');
+      const user = await repo.findActiveByEmail('admin@arcon.com');
       expect(user).not.toBeNull();
-      expect(user?.email).toBe('admin@arpos.com');
+      expect(user?.email).toBe('admin@arcon.com');
       expect(user?.role).toBe('admin');
     });
 
     it('should return null for nonexistent email', async () => {
-      const user = await repo.findActiveByEmail('nobody@arpos.com');
+      const user = await repo.findActiveByEmail('nobody@arcon.com');
       expect(user).toBeNull();
     });
 
     it('should return null for inactive user', async () => {
-      await seedUser({ email: 'inactive@arpos.com', is_active: false });
+      await seedUser({ email: 'inactive@arcon.com', is_active: false });
 
-      const user = await repo.findActiveByEmail('inactive@arpos.com');
+      const user = await repo.findActiveByEmail('inactive@arcon.com');
       expect(user).toBeNull();
     });
   });
@@ -74,7 +74,7 @@ describe('AuthRepository (integration)', () => {
 
       const user = await repo.findById(created.id);
       expect(user).not.toBeNull();
-      expect(user?.email).toBe('admin@arpos.com');
+      expect(user?.email).toBe('admin@arcon.com');
       expect(user?.role).toBe('admin');
       expect(user?.companyId).toBe(COMPANY_ID);
     });

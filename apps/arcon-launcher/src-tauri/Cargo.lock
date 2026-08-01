@@ -57,8 +57,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "arpos-v2"
-version = "0.1.0"
+name = "arcon-v2"
+version = "1.0.0"
 dependencies = [
  "chrono",
  "dirs 5.0.1",

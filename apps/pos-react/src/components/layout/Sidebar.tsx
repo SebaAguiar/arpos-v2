@@ -117,7 +117,7 @@ export function Sidebar() {
       {/* Logo */}
       <div style={{ padding: "16px 16px 12px" }}>
         <h1 style={{ fontSize: "20px", fontWeight: 700, color: "var(--accent)", margin: 0 }}>
-          ArPOS
+          Arcon
         </h1>
         <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: 0 }}>v2.0</p>
       </div>

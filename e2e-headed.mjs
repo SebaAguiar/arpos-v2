@@ -1,7 +1,7 @@
 import { chromium } from "playwright";
 
 const BASE_URL = "http://localhost:1420";
-const EMAIL = "admin@arpos.com";
+const EMAIL = "admin@arcon.com";
 const PASSWORD = "admin123";
 
 async function sleep(ms) {
@@ -9,7 +9,7 @@ async function sleep(ms) {
 }
 
 (async () => {
-  console.log("\n🚀 ArPOS E2E — slow headed mode\n");
+  console.log("\n🚀 Arcon E2E — slow headed mode\n");
 
   const browser = await chromium.launch({
     headless: false,

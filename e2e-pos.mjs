@@ -1,7 +1,7 @@
 import { chromium } from "playwright";
 
 const BASE_URL = "http://localhost:1420";
-const EMAIL = "admin@arpos.com";
+const EMAIL = "admin@arcon.com";
 const PASSWORD = "admin123";
 
 function sleep(ms) {
@@ -105,7 +105,7 @@ async function testUserMenu(page) {
 }
 
 (async () => {
-  console.log("\n🚀 ArPOS E2E Tests\n");
+  console.log("\n🚀 Arcon E2E Tests\n");
 
   const browser = await chromium.launch({
     headless: true,

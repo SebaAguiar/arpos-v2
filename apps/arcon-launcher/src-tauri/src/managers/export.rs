@@ -29,7 +29,7 @@ impl ExportManager {
             None => {
                 let export_dir = paths::ensure_export_dir()?;
                 let timestamp = chrono::Local::now().format("%Y%m%d_%H%M%S");
-                export_dir.join(format!("arpos_export_{}.sql", timestamp))
+                export_dir.join(format!("arcon_export_{}.sql", timestamp))
             }
         };
 
@@ -80,7 +80,7 @@ impl ExportManager {
             None => {
                 let export_dir = paths::ensure_export_dir()?;
                 let timestamp = chrono::Local::now().format("%Y%m%d_%H%M%S");
-                export_dir.join(format!("arpos_export_{}.json", timestamp))
+                export_dir.join(format!("arcon_export_{}.json", timestamp))
             }
         };
 

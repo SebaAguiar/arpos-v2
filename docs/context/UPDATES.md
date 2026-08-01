@@ -1,4 +1,4 @@
-# ArPOS Tauri — Estrategia Completa de Actualizaciones
+# Arcon Tauri — Estrategia Completa de Actualizaciones
 
 **Versión:** 1.0  
 **Fecha:** 2026-07-16  
@@ -29,7 +29,7 @@
 Los siguientes tipos se definen una sola vez y se reutilizan a lo largo de todo el documento.
 
 ```typescript
-// apps/arpos-launcher/src/types/updates.ts
+// apps/arcon-launcher/src/types/updates.ts
 
 export type UpdateStatus = 'beta' | 'stable' | 'broken' | 'rollback';
 
@@ -162,7 +162,7 @@ export interface UpdateState {
 
 ```
 ┌───────────────────────────────────────────────────────────┐
-│                  ArPOS v1.0.0 (Usuario)                   │
+│                  Arcon v1.0.0 (Usuario)                   │
 │            ┌────────────────────────────────────┐          │
 │            │ Check updates cada 1h (background) │          │
 │            └────────────────┬───────────────────┘          │
@@ -199,7 +199,7 @@ export interface UpdateState {
 ### Componentes del Sistema
 
 ```
-ArPOS v1.0.0 (Tauri app)
+Arcon v1.0.0 (Tauri app)
 ├── Updater thread (background)
 │   ├── Check version endpoint
 │   ├── Compare versions
@@ -246,22 +246,22 @@ v2.0.0  = Breaking change (migration requerida)
 ```json
 {
   "version": "1.0.1",
-  "name": "ArPOS v1.0.1",
+  "name": "Arcon v1.0.1",
   "notes": "Hotfix: ARCA sync bug, POS cart performance",
   "pub_date": "2026-07-16T14:30:00Z",
   "platforms": {
     "linux-x86_64": {
-      "url": "https://releases.arpos.app/arpos_1.0.1_amd64.AppImage",
+      "url": "https://releases.arcon.app/Arcon_1.0.1_amd64.AppImage",
       "signature": "...",
       "with_elevated_task": false
     },
     "darwin": {
-      "url": "https://releases.arpos.app/arpos_1.0.1_universal.dmg",
+      "url": "https://releases.arcon.app/Arcon_1.0.1_universal.dmg",
       "signature": "...",
       "with_elevated_task": false
     },
     "windows-x86_64": {
-      "url": "https://releases.arpos.app/ArPOS_1.0.1_x64_en-US.msi",
+      "url": "https://releases.arcon.app/Arcon_1.0.1_x64_en-US.msi",
       "signature": "...",
       "with_elevated_task": false
     }
@@ -285,7 +285,7 @@ v2.0.0  = Breaking change (migration requerida)
     "windows": true,
     "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6...",
     "endpoints": [
-      "https://releases.arpos.app/update/{{target}}/{{current_version}}"
+      "https://releases.arcon.app/update/{{target}}/{{current_version}}"
     ]
   }
 }
@@ -295,14 +295,14 @@ v2.0.0  = Breaking change (migration requerida)
 
 - `active`: Habilita updater
 - `dialog`: Muestra dialog de actualización al usuario
-- `windows`: Instala app en C:\Program Files\ArPOS (en lugar de roaming)
+- `windows`: Instala app en C:\Program Files\Arcon (en lugar de roaming)
 - `pubkey`: Public key Ed25519 para firmar updates (crítico para seguridad)
 - `endpoints`: URLs donde verificar nuevas versiones
 
 ### Generación de Keys (Una sola vez)
 
 ```bash
-# En arpos-launcher/
+# En arcon-launcher/
 npx tauri signer generate --key-path tauri.key
 
 # Genera:
@@ -318,7 +318,7 @@ npx tauri signer generate --key-path tauri.key
 ### Tauri Update Command (JavaScript)
 
 ```typescript
-// arpos-launcher/src/services/updater.service.ts
+// arcon-launcher/src/services/updater.service.ts
 
 import { check } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/api/process';
@@ -386,7 +386,7 @@ export async function downloadAndInstall(
 ### Auto-Check en Background
 
 ```typescript
-// arpos-launcher/src/App.tsx
+// arcon-launcher/src/App.tsx
 
 import { useEffect } from 'react';
 import { checkForUpdates } from './services/updater.service';
@@ -415,7 +415,7 @@ export function App() {
 #### Setup en GitHub
 
 ```bash
-# En arpos-launcher/
+# En arcon-launcher/
 
 # 1. Tag new version
 git tag v1.0.1
@@ -433,7 +433,7 @@ git push origin v1.0.1
 {
   "updater": {
     "endpoints": [
-      "https://releases.github.com/repos/arpos/launcher/releases/latest"
+      "https://releases.github.com/repos/arcon/launcher/releases/latest"
     ]
   }
 }
@@ -455,7 +455,7 @@ git push origin v1.0.1
 #### Arquitectura
 
 ```
-ArPOS Backend (NestJS)
+Arcon Backend (NestJS)
 │
 ├── GET /api/updates/check
 │   ├── Input: { os, arch, current_version, device_id }
@@ -505,7 +505,7 @@ export class UpdatesController {
     return {
       needsUpdate: true,
       version: update.version,
-      url: `https://releases.arpos.app/download/${update.id}`,
+      url: `https://releases.arcon.app/download/${update.id}`,
       signature: update.signature,
       notes: update.releaseNotes,
       critical: update.critical,
@@ -732,7 +732,7 @@ model UpdateReport {
 ### Paso a Paso (Usuario POV)
 
 ```
-T+0s:   User: Usando ArPOS v1.0.0
+T+0s:   User: Usando Arcon v1.0.0
         Background thread: "¿Hay updates?"
 
 T+1s:   API check: "Versión actual: 1.0.0"
@@ -803,7 +803,7 @@ export function UpdateDialog() {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-white rounded-lg p-6 w-96 space-y-4">
         <h2 className="text-lg font-semibold">Actualización Disponible</h2>
-        <p>ArPOS {updateInfo.version}</p>
+        <p>Arcon {updateInfo.version}</p>
         <div className="bg-gray-100 p-3 rounded max-h-32 overflow-auto">
           <p className="text-sm">{updateInfo.notes}</p>
         </div>
@@ -1055,7 +1055,7 @@ async fn manual_rollback_to_version(
 ```
 ┌────────────────────────────────┐
 │ 📦 Actualización disponible      │
-│ ArPOS v1.0.1 - Hotfix           │
+│ Arcon v1.0.1 - Hotfix           │
 │ 45 MB - ~2 minutos              │
 │ [Actualizar] [Más tarde]        │
 └────────────────────────────────┘
@@ -1124,7 +1124,7 @@ export function useUpdateNotifications(): void {
         setUpdateAvailable(update);
         toast.info({
           title: '📦 Actualización Disponible',
-          description: `ArPOS ${update.version} está listo`,
+          description: `Arcon ${update.version} está listo`,
           action: 'Actualizar',
           autoClose: 10000,
         });
@@ -1252,7 +1252,7 @@ jobs:
         run: |
           aws s3 cp \
             src-tauri/target/release/bundle/ \
-            s3://arpos-releases/${{ github.ref_name }}/ \
+            s3://arcon-releases/${{ github.ref_name }}/ \
             --recursive
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -1261,7 +1261,7 @@ jobs:
       # Registrar en backend
       - name: Register Release in Backend
         run: |
-          curl -X POST https://api.arpos.app/admin/updates/register \
+          curl -X POST https://api.arcon.app/admin/updates/register \
             -H "Authorization: Bearer ${{ secrets.ADMIN_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d '{
@@ -1317,7 +1317,7 @@ Gotchas documentados:
   `cmd` de Windows y bash de Linux/macOS.
 - **Firmas**: los `.sig` de updater son Ed25519 (via `TAURI_SIGNING_PRIVATE_KEY`), independientes del
   code-signing de Apple/Windows que requieren certificados (follow-up pendiente).
-- **`pnpm --filter arpos-launcher tauri build`** compila bundles de todos los targets del
+- **`pnpm --filter arcon-launcher tauri build`** compila bundles de todos los targets del
   `tauri.conf.json`; Tauri filtra automáticamente por OS (deb/rpm/appimage en Linux, dmg en macOS,
   msi/nsis en Windows), así que el workflow no necesita paths hardcodeados por plataforma.
 - **NX detecta el package manager por lockfile, y `bun.lock` tiene prioridad sobre `pnpm-lock.yaml`.**
@@ -1326,7 +1326,7 @@ Gotchas documentados:
   del dev; en GitHub Actions no hay bun y `pnpm lint`/`pnpm typecheck` reventaban. Fix: eliminar
   `bun.lock` + fijar `"packageManager": "pnpm@11.11.0"` en el `package.json` raíz.
 - **Secrets y pubkey configurados**: la key original (29-jul) tenía un password que se perdió, así que
-  el 31-jul se **regeneró** `~/.tauri/arpos.key` (password `seba234`), se actualizó la pubkey en
+  el 31-jul se **regeneró** `~/.tauri/arcon.key` (password `seba234`), se actualizó la pubkey en
   `tauri.conf.json` y se re-setearon `TAURI_SIGNING_PRIVATE_KEY` + `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`.
   Verificar siempre que pubkey de config y key local coincidan antes de taguear.
 - **`body_path: CHANGELOG.md`** en `softprops/action-gh-release` → el body del release es TODO el changelog.
@@ -1444,17 +1444,17 @@ IF adoption_rate < 10% after 7 days THEN
 
 ```bash
 # 1. Ver logs locales
-tail -f ~/.arpos/logs/tauri.log
-tail -f ~/.arpos/logs/app.log
+tail -f ~/.arcon/logs/tauri.log
+tail -f ~/.arcon/logs/app.log
 
 # 2. Verificar DB
-sqlite3 ~/.arpos/data/app.db "SELECT * FROM update_report ORDER BY timestamp DESC LIMIT 5;"
+sqlite3 ~/.arcon/data/app.db "SELECT * FROM update_report ORDER BY timestamp DESC LIMIT 5;"
 
 # 3. Forzar check manual
 # En settings: "Check for updates"
 
 # 4. Ver última versión registrada
-curl https://releases.arpos.app/latest
+curl https://releases.arcon.app/latest
 ```
 
 ### Problema: Usuario en v1.0.0, se queda atorado

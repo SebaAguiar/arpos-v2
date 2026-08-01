@@ -41,7 +41,7 @@ export function generateReceiptHtml(
   store?: StoreConfig | null,
   paperSize: PaperSize = "default"
 ): string {
-  const storeName = store?.name || "ArPOS Store";
+  const storeName = store?.name || "Arcon Store";
   const storeAddress = store?.address || "";
   const storePhone = store?.phone || "";
   const storeEmail = store?.email || "";
@@ -290,7 +290,7 @@ export function shareViaWhatsApp(
   sale: Sale,
   store?: StoreConfig | null
 ): void {
-  const storeName = store?.name || "ArPOS Store";
+  const storeName = store?.name || "Arcon Store";
   const ticketNum = sale.ticketNumber || 0;
   const date = new Date(sale.createdAt).toLocaleDateString("es-AR");
   const total = formatCurrency(sale.total);

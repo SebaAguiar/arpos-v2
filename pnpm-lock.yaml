@@ -206,7 +206,7 @@ importers:
         specifier: ~5.8.3
         version: 5.8.3
 
-  apps/arpos-launcher:
+  apps/arcon-launcher:
     devDependencies:
       '@tauri-apps/cli':
         specifier: ^2
