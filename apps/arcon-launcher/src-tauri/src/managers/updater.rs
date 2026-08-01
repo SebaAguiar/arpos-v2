@@ -119,6 +119,6 @@ struct GitHubAsset {
 
 fn get_repo_owner_name() -> String {
     option_env!("GITHUB_REPO")
-        .unwrap_or("SebaAguiar/arpos-v2")
+        .unwrap_or("SebaAguiar/arcon-releases")
         .to_string()
 }
