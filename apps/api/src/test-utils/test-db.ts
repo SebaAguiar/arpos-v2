@@ -15,7 +15,7 @@ export async function setupTestDb(): Promise<PrismaClient> {
 
   prisma = new PrismaClient({
     datasources: {
-      db: { url: `file:./${testId}.db` },
+      db: { url: `file:./${testId}.db?connection_limit=1` },
     },
   });
 
