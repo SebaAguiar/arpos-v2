@@ -1,42 +1,115 @@
+import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import * as fs from 'fs';
+import * as path from 'path';
 
 const prisma = new PrismaClient();
+
+const now = Math.floor(Date.now() / 1000);
+
+const COMPANY_TAX_ID = '20-12345678-9';
+const COMPANY_NAME = 'Arcon Demo';
+const STORE_NAME = 'Sucursal Principal';
+const ADMIN_EMAIL = 'admin@arcon.com';
+const CASH_REGISTER_NAME = 'Caja Principal';
+
+const ENV_PATH = path.resolve(process.cwd(), '.env');
+
+function setEnvValue(key: string, value: string): boolean {
+  if (!fs.existsSync(ENV_PATH)) return false;
+  const lines = fs.readFileSync(ENV_PATH, 'utf8').split('\n');
+  const idx = lines.findIndex((l) => l.startsWith(`${key}=`));
+  if (idx === -1) return false;
+  lines[idx] = `${key}="${value}"`;
+  fs.writeFileSync(ENV_PATH, lines.join('\n'));
+  process.env[key] = value;
+  return true;
+}
+
+async function getOrCreateCompany(): Promise<string> {
+  const envCompanyId = process.env.LOCAL_COMPANY_ID;
+  if (envCompanyId) {
+    const existing = await prisma.company.findUnique({ where: { id: envCompanyId } });
+    if (existing) return existing.id;
+  }
+
+  const byTaxId = await prisma.company.findUnique({ where: { taxId: COMPANY_TAX_ID } });
+  if (byTaxId) return byTaxId.id;
+
+  const anyCompany = await prisma.company.findFirst();
+  if (anyCompany) return anyCompany.id;
+
+  const created = await prisma.company.create({
+    data: {
+      id: envCompanyId || undefined,
+      name: COMPANY_NAME,
+      taxId: COMPANY_TAX_ID,
+      email: 'demo@arcon.com',
+      phone: '+54 11 1234-5678',
+      address: 'Av. Demo 1234, CABA',
+      created_at: now,
+      updated_at: now,
+    },
+  });
+  return created.id;
+}
+
+async function getOrCreateStore(companyId: string): Promise<string> {
+  const envStoreId = process.env.LOCAL_STORE_ID;
+  if (envStoreId) {
+    const existing = await prisma.store.findUnique({ where: { id: envStoreId } });
+    if (existing) return existing.id;
+  }
+
+  const byName = await prisma.store.findFirst({ where: { companyId, name: STORE_NAME } });
+  if (byName) return byName.id;
+
+  const created = await prisma.store.create({
+    data: {
+      companyId,
+      name: STORE_NAME,
+      address: 'Av. Demo 1234, CABA',
+      created_at: now,
+      updated_at: now,
+    },
+  });
+  return created.id;
+}
 
 async function main() {
   console.log('🌱 Seeding database...');
 
-  const now = Math.floor(Date.now() / 1000);
+  const companyId = await getOrCreateCompany();
 
-  // ── Company ──────────────────────────────────────────
-  const company = await prisma.company.create({
-    data: {
-      name: 'Arcon Demo',
-      taxId: '20-12345678-9',
-      address: 'Av. Demo 1234, CABA',
-      email: 'demo@arcon.com',
-      phone: '+54 11 1234-5678',
-      created_at: now,
-      updated_at: now,
-    },
+  const company = await prisma.company.update({
+    where: { id: companyId },
+    data: { name: COMPANY_NAME, updated_at: now },
   });
 
-  const store = await prisma.store.create({
-    data: {
-      companyId: company.id,
-      name: 'Sucursal Principal',
-      address: 'Av. Demo 1234, CABA',
-      created_at: now,
-      updated_at: now,
-    },
+  const storeId = await getOrCreateStore(companyId);
+  const store = await prisma.store.update({
+    where: { id: storeId },
+    data: { name: STORE_NAME, updated_at: now },
   });
 
+  console.log(`   Company: ${company.name} (${company.id})`);
+  console.log(`   Store: ${store.name} (${store.id})`);
+
+  // ── Admin user ────────────────────────────────────────
   const adminPassword = await bcrypt.hash('admin123', 10);
-
-  const admin = await prisma.user.create({
-    data: {
-      companyId: company.id,
-      email: 'admin@arcon.com',
+  const admin = await prisma.user.upsert({
+    where: { companyId_email: { companyId, email: ADMIN_EMAIL } },
+    update: {
+      name: 'Administrador',
+      role: 'admin',
+      password: adminPassword,
+      is_active: true,
+      updated_at: now,
+    },
+    create: {
+      companyId,
+      email: ADMIN_EMAIL,
       password: adminPassword,
       name: 'Administrador',
       role: 'admin',
@@ -44,6 +117,7 @@ async function main() {
       updated_at: now,
     },
   });
+  console.log(`   Admin: ${admin.email} (${admin.id})`);
 
   // ── Products ─────────────────────────────────────────
   const products = [
@@ -64,21 +138,28 @@ async function main() {
     { code: 'CIN001', name: 'Cinturón Cuero', price_cents: 550000, cost_cents: 230000, stock_quantity: 25, category_id: 'accesorios', sku: 'CIN-CRO-001' },
   ];
 
-  const createdProducts = [];
+  let createdProducts = 0;
+  let updatedProducts = 0;
   for (const p of products) {
-    const created = await prisma.product.create({
-      data: {
-        companyId: company.id,
-        storeId: store.id,
-        ...p,
-        created_at: now,
-        updated_at: now,
-      },
+    const { code, ...data } = p;
+    const existing = await prisma.product.findUnique({
+      where: { companyId_storeId_code: { companyId, storeId, code } },
     });
-    createdProducts.push(created);
+    if (existing) {
+      await prisma.product.update({
+        where: { id: existing.id },
+        data: { ...data, updated_at: now },
+      });
+      updatedProducts += 1;
+    } else {
+      await prisma.product.create({
+        data: { companyId, storeId, code, ...data, created_at: now, updated_at: now },
+      });
+      createdProducts += 1;
+    }
   }
 
-  console.log(`   Products: ${createdProducts.length} created`);
+  console.log(`   Products: ${createdProducts} created, ${updatedProducts} updated`);
 
   // ── Contacts (Customers) ─────────────────────────────
   const contacts = [
@@ -90,45 +171,55 @@ async function main() {
     { name: 'Lucía Rodríguez', email: 'lucia.rod@email.com', phone: '+54 11 5555-7890', tax_id: '20-27654321-5' },
   ];
 
-  const createdContacts = [];
+  await prisma.contact.deleteMany({ where: { companyId } });
   for (const c of contacts) {
-    const created = await prisma.contact.create({
+    await prisma.contact.create({
+      data: { companyId, type: 'customer', ...c, created_at: now, updated_at: now },
+    });
+  }
+
+  console.log(`   Contacts: ${contacts.length} (re-seeded)`);
+
+  // ── Cash Register (open shift) ───────────────────────
+  const existingRegister = await prisma.cashRegister.findFirst({
+    where: { companyId, name: CASH_REGISTER_NAME },
+  });
+  const cashRegister =
+    existingRegister ||
+    (await prisma.cashRegister.create({
       data: {
-        companyId: company.id,
-        type: 'customer',
-        ...c,
+        companyId,
+        storeId,
+        name: CASH_REGISTER_NAME,
+        status: 'open',
+        opening_amount: 500000,
+        opened_at: now,
         created_at: now,
         updated_at: now,
       },
-    });
-    createdContacts.push(created);
+    }));
+
+  console.log(`   Cash Register: ${cashRegister.name} (${cashRegister.status}, $${cashRegister.opening_amount / 100})`);
+
+  // ── Sync .env with actual tenant ids ─────────────────
+  let envChanged = false;
+  if (process.env.LOCAL_COMPANY_ID !== companyId) {
+    envChanged = setEnvValue('LOCAL_COMPANY_ID', companyId) || envChanged;
   }
-
-  console.log(`   Contacts: ${createdContacts.length} created`);
-
-  // ── Cash Register (open shift) ───────────────────────
-  const cashRegister = await prisma.cashRegister.create({
-    data: {
-      companyId: company.id,
-      storeId: store.id,
-      name: 'Caja Principal',
-      status: 'open',
-      opening_amount: 500000,
-      opened_at: now,
-      created_at: now,
-      updated_at: now,
-    },
-  });
-
-  console.log(`   Cash Register: ${cashRegister.name} (OPEN, $${cashRegister.opening_amount / 100})`);
+  if (process.env.LOCAL_STORE_ID !== storeId) {
+    envChanged = setEnvValue('LOCAL_STORE_ID', storeId) || envChanged;
+  }
+  if (envChanged) {
+    console.log('   .env: LOCAL_COMPANY_ID / LOCAL_STORE_ID synced to seeded tenant');
+  }
 
   console.log('\n✅ Seed completed:');
   console.log(`   Company: ${company.name} (${company.id})`);
   console.log(`   Store: ${store.name} (${store.id})`);
   console.log(`   Admin: ${admin.email} (${admin.id})`);
-  console.log(`   Products: ${createdProducts.length}`);
-  console.log(`   Contacts: ${createdContacts.length}`);
-  console.log(`   Cash Register: open with $${cashRegister.opening_amount / 100}`);
+  console.log(`   Products: ${createdProducts + updatedProducts}`);
+  console.log(`   Contacts: ${contacts.length}`);
+  console.log(`   Cash Register: ${cashRegister.status} with $${cashRegister.opening_amount / 100}`);
 }
 
 main()

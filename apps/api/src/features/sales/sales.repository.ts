@@ -109,6 +109,22 @@ export class SalesRepository {
       });
 
       for (const item of input.items) {
+        const itemTotalCents = item.unit_price_cents * item.quantity;
+
+        if (!item.productId) {
+          await tx.saleItem.create({
+            data: {
+              saleId: sale.id,
+              name: item.name,
+              quantity: item.quantity,
+              unit_price_cents: item.unit_price_cents,
+              total_cents: itemTotalCents,
+              discount_cents: item.discount_cents ?? 0,
+            },
+          });
+          continue;
+        }
+
         const product = await tx.product.findUnique({
           where: { id: item.productId },
           select: { stock_quantity: true, name: true },
@@ -123,8 +139,6 @@ export class SalesRepository {
             `Insufficient stock for "${product.name}": has ${product.stock_quantity}, needs ${item.quantity}`,
           );
         }
-
-        const itemTotalCents = item.unit_price_cents * item.quantity;
 
         await tx.saleItem.create({
           data: {
@@ -255,6 +269,7 @@ export class SalesRepository {
         items: {
           select: {
             productId: true,
+            name: true,
             quantity: true,
             total_cents: true,
             product: { select: { id: true, name: true, code: true } },
@@ -267,15 +282,16 @@ export class SalesRepository {
 
     for (const sale of sales) {
       for (const item of sale.items) {
-        const existing = productMap.get(item.productId) ?? {
-          name: item.product.name,
-          code: item.product.code,
+        const key = item.productId ?? 'custom';
+        const existing = productMap.get(key) ?? {
+          name: item.product?.name ?? item.name ?? 'Items custom',
+          code: item.product?.code ?? '',
           total_cents: 0,
           quantity: 0,
         };
         existing.total_cents += item.total_cents;
         existing.quantity += item.quantity;
-        productMap.set(item.productId, existing);
+        productMap.set(key, existing);
       }
     }
 

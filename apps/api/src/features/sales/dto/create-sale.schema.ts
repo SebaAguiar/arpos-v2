@@ -1,11 +1,17 @@
 import { z } from 'zod';
 
-const SaleItemSchema = z.object({
-  productId: z.string().min(1),
-  quantity: z.number().int().positive(),
-  unit_price_cents: z.number().int().nonnegative(),
-  discount_cents: z.number().int().nonnegative().optional(),
-});
+const SaleItemSchema = z
+  .object({
+    productId: z.string().min(1).optional(),
+    name: z.string().min(1).optional(),
+    quantity: z.number().int().positive(),
+    unit_price_cents: z.number().int().nonnegative(),
+    discount_cents: z.number().int().nonnegative().optional(),
+  })
+  .refine(
+    (item) => item.productId !== undefined || item.name !== undefined,
+    'Either productId or name is required for a sale item',
+  );
 
 const PaymentMethodEnum = z.enum([
   'CASH', 'DEBIT', 'CREDIT', 'TRANSFER', 'MIXED',

@@ -77,6 +77,7 @@ export class SalesService {
       items: sale.items.map((item) => ({
         productId: item.productId,
         variantId: item.variantId,
+        name: item.name,
         quantity: item.quantity,
         unit_price_cents: item.unit_price_cents,
         total_cents: item.total_cents,

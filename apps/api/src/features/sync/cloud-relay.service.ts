@@ -613,7 +613,7 @@ export class CloudRelayService implements OnModuleInit, OnModuleDestroy {
       if (itemCount === 0) {
         for (const raw of rawItems) {
           const item = raw as Record<string, unknown>;
-          const productId = item.productId as string;
+          const productId = item.productId as string | null;
           const unitPrice = (item.unit_price_cents as number) ?? 0;
           const quantity = (item.quantity as number) ?? 1;
 
@@ -622,12 +622,17 @@ export class CloudRelayService implements OnModuleInit, OnModuleDestroy {
               saleId: change.entityId,
               productId,
               variantId: (item.variantId as string) ?? null,
+              name: (item.name as string) ?? null,
               quantity,
               unit_price_cents: unitPrice,
               total_cents: (item.total_cents as number) ?? unitPrice * quantity,
               discount_cents: (item.discount_cents as number) ?? 0,
             },
           });
+
+          if (!productId) {
+            continue;
+          }
 
           const product = await tx.product.findUnique({
             where: { id: productId },
