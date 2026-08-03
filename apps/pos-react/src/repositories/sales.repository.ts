@@ -4,9 +4,9 @@ import type { Sale, SaleItem, PaymentMethod } from "@/lib/types";
 function mapSale(api: ApiSale): Sale {
   const items: SaleItem[] = (api.items ?? []).map((item) => ({
     id: item.id,
-    variantId: undefined,
-    description: item.product?.name ?? "",
-    productName: item.product?.name ?? "",
+    variantId: item.variantId ?? undefined,
+    description: item.product?.name ?? item.name ?? "",
+    productName: item.product?.name ?? item.name ?? "",
     quantity: item.quantity,
     unitPrice: item.unit_price_cents / 100,
     subtotal: item.total_cents / 100,
@@ -69,7 +69,8 @@ export const SalesRepository = {
 
   async create(input: {
     items: Array<{
-      productId: string;
+      productId?: string;
+      name?: string;
       quantity: number;
       unit_price_cents: number;
     }>;

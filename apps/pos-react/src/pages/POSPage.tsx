@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Text, TextField, Badge, Tooltip } from "@radix-ui/themes";
 import {
@@ -10,16 +10,22 @@ import {
   BarChartIcon,
   TimerIcon,
   CubeIcon,
+  PlusIcon,
 } from "@radix-ui/react-icons";
+import { useShallow } from "zustand/react/shallow";
 import { useCartStore } from "@/stores/cart.store";
-import { useProductsStore } from "@/stores/products.store";
+import { useProductsStore, selectCategories } from "@/stores/products.store";
 import { useDialogStore } from "@/stores/dialog.store";
 import { useLayoutStore } from "@/stores/layout.store";
 import { useCashRegisterStore } from "@/stores/cash-register.store";
 import { StaleIndicator } from "@/components/ui/StaleIndicator";
 import { ProductCard } from "@/components/product/ProductCard";
+import { CategoryTabs } from "@/components/product/CategoryTabs";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { useHotkeys } from "@/hooks/useHotkeys";
 import { VariantSelectionDialog } from "@/components/product/VariantSelectionDialog";
 import { CartItem } from "@/components/cart/CartItem";
+import { CustomItemDialog } from "@/components/cart/CustomItemDialog";
 import { SummaryPanel } from "@/components/cart/SummaryPanel";
 import { PaymentDialog } from "@/components/sales/PaymentDialog";
 import { CustomerSelectionDialog } from "@/components/sales/CustomerSelectionDialog";
@@ -42,6 +48,8 @@ export function POSPage() {
   const items = useCartStore((s) => s.items);
   const removeItem = useCartStore((s) => s.removeItem);
   const updateQuantity = useCartStore((s) => s.updateQuantity);
+  const updateCustomItem = useCartStore((s) => s.updateCustomItem);
+  const addCustomItem = useCartStore((s) => s.addCustomItem);
   const customerName = useCartStore((s) => s.customerName);
 
   const search = useProductsStore((s) => s.search);
@@ -51,6 +59,8 @@ export function POSPage() {
   const fetchCurrentShift = useCashRegisterStore((s) => s.fetchCurrentShift);
   const isProductsStale = useProductsStore((s) => s.isStale);
   const category = useProductsStore((s) => s.category);
+  const setCategory = useProductsStore((s) => s.setCategory);
+  const categories = useProductsStore(useShallow(selectCategories));
   const sortField = useProductsStore((s) => s.sortField);
   const sortDirection = useProductsStore((s) => s.sortDirection);
 
@@ -66,6 +76,13 @@ export function POSPage() {
     fetchCurrentShift();
     fetchCompany();
   }, [fetchProducts, fetchCurrentShift, fetchCompany]);
+
+  const [searchInput, setSearchInput] = useState("");
+  const debouncedSearch = useDebouncedValue(searchInput, 300);
+
+  useEffect(() => {
+    setSearch(debouncedSearch);
+  }, [debouncedSearch, setSearch]);
 
   // Sale success dialog state
   const [successDialog, setSuccessDialog] = useState<{
@@ -152,9 +169,18 @@ export function POSPage() {
   const displayProducts = filteredProducts;
 
   const [variantDialog, setVariantDialog] = useState<Product | null>(null);
+  const [customItemDialog, setCustomItemDialog] = useState(false);
+
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const handleAddToCart = useCallback(
     (product: Product) => {
+      const totalStock = product.variants.reduce(
+        (sum, v) => sum + v.stockItems.reduce((s, si) => s + si.quantity, 0),
+        0
+      );
+      if (totalStock === 0) return;
+
       if (product.variants.length > 1) {
         setVariantDialog(product);
         return;
@@ -189,6 +215,44 @@ export function POSPage() {
       setVariantDialog(null);
     },
     [addItem]
+  );
+
+  const handleSearchEnter = useCallback(() => {
+    const q = searchInput.trim().toLowerCase();
+    if (!q) return;
+    const matches = allProducts.filter((p) => {
+      if (!p.active) return false;
+      return (
+        p.name.toLowerCase().includes(q) ||
+        p.internalCode?.toLowerCase().includes(q) ||
+        p.description?.toLowerCase().includes(q) ||
+        p.variants.some(
+          (v) =>
+            v.barcode?.toLowerCase().includes(q) ||
+            v.sku?.toLowerCase().includes(q)
+        )
+      );
+    });
+    if (matches.length === 1) {
+      handleAddToCart(matches[0]);
+      setSearchInput("");
+      setSearch("");
+    }
+  }, [searchInput, allProducts, handleAddToCart, setSearch]);
+
+  const hasOpenDialog =
+    !!payment ||
+    !!customerSelection ||
+    !!salesHistory ||
+    variantDialog !== null ||
+    customItemDialog;
+
+  useHotkeys(
+    [
+      { keys: "F2", handler: () => searchRef.current?.focus(), allowInInput: true },
+      { keys: "Alt+N", handler: () => setCustomItemDialog(true), allowInInput: true },
+    ],
+    !hasOpenDialog
   );
 
   return (
@@ -273,10 +337,17 @@ export function POSPage() {
           }}
         >
           <TextField.Root
+            ref={searchRef}
             placeholder="Escanear código o buscar producto..."
             aria-label="Buscar productos o escanear código de barras"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleSearchEnter();
+              }
+            }}
             style={{ flex: 1 }}
           >
             <TextField.Slot>
@@ -289,6 +360,9 @@ export function POSPage() {
           <StaleIndicator isStale={isProductsStale} />
         </div>
 
+        {/* Category quick filters */}
+        <CategoryTabs categories={categories} active={category} onChange={setCategory} />
+
         {/* Product grid */}
         <div
           style={{
@@ -300,7 +374,7 @@ export function POSPage() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
               gap: "10px",
             }}
           >
@@ -346,25 +420,47 @@ export function POSPage() {
               </Badge>
             )}
           </div>
-          <button
-            onClick={openCustomerSelection}
-            aria-label="Seleccionar cliente para la venta"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              padding: "4px 8px",
-              border: "1px solid var(--border)",
-              borderRadius: "4px",
-              backgroundColor: customerName ? "var(--bg-surface-hover)" : "transparent",
-              color: customerName ? "var(--text-primary)" : "var(--text-secondary)",
-              cursor: "pointer",
-              fontSize: "11px",
-            }}
-          >
-            <PersonIcon width={12} height={12} />
-            {customerName || "Cliente"}
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <button
+              onClick={() => setCustomItemDialog(true)}
+              aria-label="Agregar ítem custom al carrito"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                padding: "4px 8px",
+                border: "1px dashed var(--accent)",
+                borderRadius: "4px",
+                backgroundColor: "var(--accent-subtle)",
+                color: "var(--accent)",
+                cursor: "pointer",
+                fontSize: "11px",
+                fontWeight: 500,
+              }}
+            >
+              <PlusIcon width={12} height={12} />
+              Ítem custom
+            </button>
+            <button
+              onClick={openCustomerSelection}
+              aria-label="Seleccionar cliente para la venta"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                padding: "4px 8px",
+                border: "1px solid var(--border)",
+                borderRadius: "4px",
+                backgroundColor: customerName ? "var(--bg-surface-hover)" : "transparent",
+                color: customerName ? "var(--text-primary)" : "var(--text-secondary)",
+                cursor: "pointer",
+                fontSize: "11px",
+              }}
+            >
+              <PersonIcon width={12} height={12} />
+              {customerName || "Cliente"}
+            </button>
+          </div>
         </div>
 
         {/* Cart items */}
@@ -381,7 +477,7 @@ export function POSPage() {
               }}
             >
               <Text size="2" color="gray">
-                Carrito vacío — escanee o seleccione un producto
+                Carrito vacío — escanee, seleccione un producto o agregue un ítem custom
               </Text>
             </div>
           ) : (
@@ -391,6 +487,7 @@ export function POSPage() {
                 item={item}
                 onUpdateQuantity={updateQuantity}
                 onRemove={removeItem}
+                onUpdateCustomItem={updateCustomItem}
               />
             ))
           )}
@@ -416,6 +513,15 @@ export function POSPage() {
           product={variantDialog}
           onSelect={handleVariantSelect}
           onClose={() => setVariantDialog(null)}
+        />
+      )}
+      {customItemDialog && (
+        <CustomItemDialog
+          onAdd={(name, price, quantity) => {
+            addCustomItem(name, price, quantity);
+            setCustomItemDialog(false);
+          }}
+          onClose={() => setCustomItemDialog(false)}
         />
       )}
     </div>

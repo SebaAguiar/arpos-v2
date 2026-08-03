@@ -73,41 +73,41 @@ export function PurchasesPage() {
   }, [fetchOrders]);
 
   return (
-    <div style={{ paddingBottom: "32px" }}>
-      <Flex align="center" justify="between" style={{ marginBottom: "20px" }}>
-        <div>
-          <Flex align="center" gap="3">
-            <Text size="6" weight="bold">
-              Órdenes de Compra
+    <div className="page">
+      <Flex direction="column" gap="5">
+        <Flex align="center" justify="between" wrap="wrap" gap="3">
+          <Flex direction="column" gap="1">
+            <Flex align="center" gap="3" wrap="wrap">
+              <Text size="5" weight="bold">
+                Órdenes de Compra
+              </Text>
+              <Badge color="gray" variant="soft" size="2">
+                {orders.length} órdenes
+              </Badge>
+              <StaleIndicator isStale={isStale} />
+            </Flex>
+            <Text size="2" color="gray">
+              Gestioná las órdenes de compra a proveedores y recibí mercadería.
             </Text>
-            <Badge color="gray" variant="soft" size="2">
-              {orders.length} órdenes
-            </Badge>
-            <StaleIndicator isStale={isStale} />
           </Flex>
-          <Text size="2" color="gray" style={{ marginTop: "4px" }}>
-            Gestioná las órdenes de compra a proveedores y recibí mercadería.
-          </Text>
-        </div>
 
-        <Button size="3" onClick={() => setCreateOpen(true)}>
-          <PlusIcon width={18} height={18} />
-          Nueva orden
-        </Button>
-      </Flex>
+          <Button size="2" onClick={() => setCreateOpen(true)}>
+            <PlusIcon width={16} height={16} />
+            Nueva orden
+          </Button>
+        </Flex>
 
-      <Flex
-        align="center"
-        justify="between"
-        gap="3"
-        style={{
-          backgroundColor: "var(--bg-surface)",
-          border: "1px solid var(--border)",
-          borderRadius: "8px",
-          padding: "12px 16px",
-          marginBottom: "16px",
-        }}
-      >
+        <Flex
+          align="center"
+          justify="between"
+          gap="3"
+          style={{
+            backgroundColor: "var(--bg-surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "8px",
+            padding: "12px 16px",
+          }}
+        >
         <Flex align="center" gap="3" style={{ flex: 1 }}>
           <TextField.Root
             placeholder="Buscar por proveedor o ID..."
@@ -273,7 +273,8 @@ export function PurchasesPage() {
             )}
           </Table.Body>
         </Table.Root>
-      </div>
+        </div>
+      </Flex>
 
       <CreateOrderDialog
         open={createOpen}

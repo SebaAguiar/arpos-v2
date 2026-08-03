@@ -3,7 +3,9 @@ import { apiClient } from "./api-client";
 export interface ApiSaleItem {
   id: string;
   saleId: string;
-  productId: string;
+  productId: string | null;
+  variantId?: string | null;
+  name?: string | null;
   quantity: number;
   unit_price_cents: number;
   total_cents: number;
@@ -112,7 +114,8 @@ export const SalesService = {
 
   async create(input: {
     items: Array<{
-      productId: string;
+      productId?: string;
+      name?: string;
       quantity: number;
       unit_price_cents: number;
     }>;

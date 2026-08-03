@@ -98,11 +98,19 @@ export function PaymentDialog({ creditSurcharge, onSaleComplete }: PaymentDialog
     setProcessing(true);
     setError(null);
     try {
-      const saleItems = items.map((item) => ({
-        productId: item.productId,
-        quantity: item.quantity,
-        unit_price_cents: Math.round(item.price * 100),
-      }));
+      const saleItems = items.map((item) =>
+        item.custom
+          ? {
+              name: item.name,
+              quantity: item.quantity,
+              unit_price_cents: Math.round(item.price * 100),
+            }
+          : {
+              productId: item.productId,
+              quantity: item.quantity,
+              unit_price_cents: Math.round(item.price * 100),
+            }
+      );
 
       const primaryMethod = payments[0]?.method ?? "CASH";
 

@@ -352,39 +352,39 @@ export function WalletPage() {
   const totalBalance = customers.reduce((sum, c) => sum + (c.balance ?? 0), 0);
 
   return (
-    <div style={{ paddingBottom: "32px" }}>
-      <Flex align="center" justify="between" style={{ marginBottom: "20px" }}>
-        <div>
-          <Flex align="center" gap="3">
-            <Text size="6" weight="bold">
-              Billetera
+    <div className="page">
+      <Flex direction="column" gap="5">
+        <Flex align="center" justify="between" wrap="wrap" gap="3">
+          <Flex direction="column" gap="1">
+            <Flex align="center" gap="3" wrap="wrap">
+              <Text size="5" weight="bold">
+                Billetera
+              </Text>
+              <Badge color="gray" variant="soft" size="2">
+                {customers.length} clientes
+              </Badge>
+              <Badge color="green" variant="soft" size="2">
+                Saldo total: {formatBalance(Math.round(totalBalance * 100))}
+              </Badge>
+              <StaleIndicator isStale={isStale} />
+            </Flex>
+            <Text size="2" color="gray">
+              Gestioná las billeteras de tus clientes: acreditá o debitá saldo y consultá el historial.
             </Text>
-            <Badge color="gray" variant="soft" size="2">
-              {customers.length} clientes
-            </Badge>
-            <Badge color="green" variant="soft" size="2">
-              Saldo total: {formatBalance(Math.round(totalBalance * 100))}
-            </Badge>
-            <StaleIndicator isStale={isStale} />
           </Flex>
-          <Text size="2" color="gray" style={{ marginTop: "4px" }}>
-            Gestioná las billeteras de tus clientes: acreditá o debitá saldo y consultá el historial.
-          </Text>
-        </div>
-      </Flex>
+        </Flex>
 
-      <Flex
-        align="center"
-        justify="between"
-        gap="3"
-        style={{
-          backgroundColor: "var(--bg-surface)",
-          border: "1px solid var(--border)",
-          borderRadius: "8px",
-          padding: "12px 16px",
-          marginBottom: "16px",
-        }}
-      >
+        <Flex
+          align="center"
+          justify="between"
+          gap="3"
+          style={{
+            backgroundColor: "var(--bg-surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "8px",
+            padding: "12px 16px",
+          }}
+        >
         <Flex align="center" gap="3" style={{ flex: 1 }}>
           <TextField.Root
             ref={searchInputRef}
@@ -499,7 +499,8 @@ export function WalletPage() {
             )}
           </Table.Body>
         </Table.Root>
-      </div>
+        </div>
+      </Flex>
 
       <CustomerWalletDialog
         open={walletOpen}

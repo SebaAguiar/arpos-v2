@@ -14,6 +14,7 @@ interface CartState {
 
   addItem: (item: Omit<CartItem, "id">) => void;
   addCustomItem: (name: string, price: number, quantity?: number) => void;
+  updateCustomItem: (itemId: string, patch: { name?: string; price?: number }) => void;
   removeItem: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
   setDiscount: (value: number, type: "percentage" | "fixed") => void;
@@ -72,6 +73,13 @@ export const useCartStore = create<CartState>((set) => ({
           custom: true,
         },
       ],
+    })),
+
+  updateCustomItem: (itemId, patch) =>
+    set((state) => ({
+      items: state.items.map((i) =>
+        i.id === itemId && i.custom ? { ...i, ...patch } : i
+      ),
     })),
 
   removeItem: (itemId) =>

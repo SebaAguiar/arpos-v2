@@ -5,6 +5,8 @@ import {
   CrossCircledIcon,
   UploadIcon,
   DownloadIcon,
+  GearIcon,
+  QuestionMarkCircledIcon,
 } from "@radix-ui/react-icons";
 import { useSyncStore } from "@/stores/sync.store";
 
@@ -27,6 +29,8 @@ export function CloudSyncSettings() {
   const [cloudJwt, setCloudJwt] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSetup, setShowSetup] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
     fetchConfig();
@@ -66,9 +70,10 @@ export function CloudSyncSettings() {
 
   return (
     <Card>
-      <Text size="3" weight="bold" style={{ display: "block", marginBottom: "12px" }}>
-        Sync Cloud
-      </Text>
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+        <GearIcon width={16} height={16} />
+        <Text size="3" weight="bold">Sync Cloud</Text>
+      </div>
 
       {error && (
         <div
@@ -90,8 +95,8 @@ export function CloudSyncSettings() {
       {connected ? (
         <>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-            <Badge color="green" variant="soft" size="1">
-              <CheckCircledIcon width={12} height={12} />
+            <Badge color="green" variant="soft" size="2">
+              <CheckCircledIcon width={14} height={14} />
               &nbsp;Conectado
             </Badge>
             {pendingCount > 0 && (
@@ -137,56 +142,116 @@ export function CloudSyncSettings() {
             </Text>
           </div>
 
-          <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--border)" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <TextField.Root
-                placeholder="URL del servidor cloud"
-                value={cloudUrl}
-                onChange={(e) => setCloudUrl(e.target.value)}
-                size="1"
-              />
-              <TextField.Root
-                type="password"
-                placeholder="JWT token"
-                value={cloudJwt}
-                onChange={(e) => setCloudJwt(e.target.value)}
-                size="1"
-              />
-              <div style={{ display: "flex", gap: "6px" }}>
-                <Button size="1" onClick={handleSave} disabled={isSaving}>
-                  {isSaving ? "Guardando..." : "Guardar configuración"}
-                </Button>
-                <Button size="1" variant="soft" color="red" onClick={handleDisconnect}>
-                  Desconectar
-                </Button>
+          <Button
+            size="1"
+            variant="ghost"
+            onClick={() => setShowSetup((v) => !v)}
+            style={{ marginTop: "12px" }}
+          >
+            {showSetup ? "Ocultar configuración" : "Configuración avanzada"}
+          </Button>
+
+          {showSetup && (
+            <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--border)" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <TextField.Root
+                  placeholder="URL del servidor cloud"
+                  value={cloudUrl}
+                  onChange={(e) => setCloudUrl(e.target.value)}
+                  size="1"
+                  aria-label="URL del servidor cloud"
+                />
+                <TextField.Root
+                  type="password"
+                  placeholder="JWT token"
+                  value={cloudJwt}
+                  onChange={(e) => setCloudJwt(e.target.value)}
+                  size="1"
+                  aria-label="Token JWT"
+                />
+                <div style={{ display: "flex", gap: "6px" }}>
+                  <Button size="1" onClick={handleSave} disabled={isSaving}>
+                    {isSaving ? "Guardando..." : "Guardar configuración"}
+                  </Button>
+                  <Button size="1" variant="soft" color="red" onClick={handleDisconnect}>
+                    Desconectar
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </>
       ) : (
         <>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+            <Badge color="orange" variant="soft" size="2">
+              <CrossCircledIcon width={14} height={14} />
+              &nbsp;No conectado
+            </Badge>
+            {pendingCount > 0 && (
+              <Badge color="orange" variant="soft" size="1">
+                {pendingCount} pendientes
+              </Badge>
+            )}
+          </div>
+
           <Text size="2" color="gray" style={{ display: "block", marginBottom: "12px" }}>
             Sincronizá tus datos con la nube para acceder desde múltiples dispositivos.
           </Text>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <TextField.Root
-              placeholder="URL del servidor cloud"
-              value={cloudUrl}
-              onChange={(e) => setCloudUrl(e.target.value)}
-              size="1"
-            />
-            <TextField.Root
-              type="password"
-              placeholder="JWT token"
-              value={cloudJwt}
-              onChange={(e) => setCloudJwt(e.target.value)}
-              size="1"
-            />
-            <Button size="1" onClick={handleSave} disabled={isSaving}>
-              {isSaving ? "Conectando..." : "Conectar"}
-            </Button>
-          </div>
+          <Button size="1" onClick={() => setShowSetup((v) => !v)}>
+            {showSetup ? "Ocultar configuración" : "Activar sincronización"}
+          </Button>
+
+          {showSetup && (
+            <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--border)" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <TextField.Root
+                  placeholder="URL del servidor cloud"
+                  value={cloudUrl}
+                  onChange={(e) => setCloudUrl(e.target.value)}
+                  size="1"
+                  aria-label="URL del servidor cloud"
+                />
+                <TextField.Root
+                  type="password"
+                  placeholder="JWT token"
+                  value={cloudJwt}
+                  onChange={(e) => setCloudJwt(e.target.value)}
+                  size="1"
+                  aria-label="Token JWT"
+                />
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Button size="1" onClick={handleSave} disabled={isSaving}>
+                    {isSaving ? "Conectando..." : "Conectar"}
+                  </Button>
+                  <button
+                    onClick={() => setShowHelp((v) => !v)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      background: "none",
+                      border: "none",
+                      color: "var(--text-secondary)",
+                      cursor: "pointer",
+                      fontSize: "13px",
+                    }}
+                  >
+                    <QuestionMarkCircledIcon width={14} height={14} />
+                    ¿Cómo obtengo esto?
+                  </button>
+                </div>
+                {showHelp && (
+                  <Text size="1" color="gray" as="p" style={{ margin: 0 }}>
+                    Creá una cuenta en tu proveedor de sincronización, generá un token JWT desde el
+                    panel de administración y pegá la URL del servidor. El token se guarda solo en
+                    este dispositivo.
+                  </Text>
+                )}
+              </div>
+            </div>
+          )}
         </>
       )}
     </Card>

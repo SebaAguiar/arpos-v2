@@ -1,15 +1,17 @@
 import { useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { useLayoutStore } from "@/stores/layout.store";
 import { useSyncStore } from "@/stores/sync.store";
 import { useDialogStore } from "@/stores/dialog.store";
+import { useHotkeys } from "@/hooks/useHotkeys";
 import { OpenRegisterModal } from "@/components/sales/OpenRegisterModal";
 import { CloseRegisterModal } from "@/components/sales/CloseRegisterModal";
 import { useCashRegisterStore } from "@/stores/cash-register.store";
 
 export function AppLayout() {
+  const navigate = useNavigate();
   const sidebarOpen = useLayoutStore((s) => s.sidebarOpen);
   const toggleSidebar = useLayoutStore((s) => s.toggleSidebar);
   const startPolling = useSyncStore((s) => s.startPolling);
@@ -21,6 +23,8 @@ export function AppLayout() {
     startPolling(30_000);
     return () => stopPolling();
   }, [startPolling, stopPolling]);
+
+  useHotkeys([{ keys: "Alt+P", handler: () => navigate("/"), allowInInput: true }]);
 
   return (
     <div style={{ display: "flex", height: "100vh" }}>

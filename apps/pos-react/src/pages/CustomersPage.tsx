@@ -120,42 +120,42 @@ export function CustomersPage() {
   const displayedCustomers = filteredCustomers;
 
   return (
-    <div style={{ paddingBottom: "32px" }}>
-      <Flex align="center" justify="between" style={{ marginBottom: "20px" }}>
-        <div>
-          <Flex align="center" gap="3">
-            <Text size="6" weight="bold">
-              Clientes
+    <div className="page">
+      <Flex direction="column" gap="5">
+        <Flex align="center" justify="between" wrap="wrap" gap="3">
+          <Flex direction="column" gap="1">
+            <Flex align="center" gap="3" wrap="wrap">
+              <Text size="5" weight="bold">
+                Clientes
+              </Text>
+              <Badge color="gray" variant="soft" size="2">
+                {totalCustomers} clientes
+              </Badge>
+              <StaleIndicator isStale={isStale} />
+            </Flex>
+            <Text size="2" color="gray">
+              Administrá la cartera de clientes del negocio.
             </Text>
-            <Badge color="gray" variant="soft" size="2">
-              {totalCustomers} clientes
-            </Badge>
-            <StaleIndicator isStale={isStale} />
           </Flex>
-          <Text size="2" color="gray" style={{ marginTop: "4px" }}>
-            Administrá la cartera de clientes del negocio.
-          </Text>
-        </div>
 
-        <Button size="3" onClick={handleOpenCreate} aria-label="Crear nuevo cliente (Presioná N)">
-          <PlusIcon width={18} height={18} />
-          Nuevo cliente
-          <KbdShortcut label="N" />
-        </Button>
-      </Flex>
+          <Button size="2" onClick={handleOpenCreate} aria-label="Crear nuevo cliente (Presioná N)">
+            <PlusIcon width={16} height={16} />
+            Nuevo cliente
+            <KbdShortcut label="N" />
+          </Button>
+        </Flex>
 
-      <Flex
-        align="center"
-        justify="between"
-        gap="3"
-        style={{
-          backgroundColor: "var(--bg-surface)",
-          border: "1px solid var(--border)",
-          borderRadius: "8px",
-          padding: "12px 16px",
-          marginBottom: "16px",
-        }}
-      >
+        <Flex
+          align="center"
+          justify="between"
+          gap="3"
+          style={{
+            backgroundColor: "var(--bg-surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "8px",
+            padding: "12px 16px",
+          }}
+        >
         <Flex align="center" gap="3" style={{ flex: 1 }}>
           <TextField.Root
             ref={searchInputRef}
@@ -322,7 +322,8 @@ export function CustomersPage() {
             )}
           </Table.Body>
         </Table.Root>
-      </div>
+        </div>
+      </Flex>
 
       <CustomerFormDialog
         open={formOpen}

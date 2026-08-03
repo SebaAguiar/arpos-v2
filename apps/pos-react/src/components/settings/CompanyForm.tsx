@@ -1,10 +1,32 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Text, TextField, Card, Button } from "@radix-ui/themes";
+import { CheckIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { useCompanyStore } from "@/stores/company.store";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const CUIT_WEIGHTS = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
+
+function isValidCuit(raw: string): boolean {
+  const digits = raw.replace(/[^\d]/g, "");
+  if (digits.length !== 11) return false;
+
+  const sum = CUIT_WEIGHTS.reduce((acc, weight, i) => acc + Number(digits[i]) * weight, 0);
+  const remainder = sum % 11;
+  const expected =
+    remainder === 0 ? 0 : remainder === 1 ? -1 : 11 - remainder;
+
+  return expected === Number(digits[10]);
+}
+
+type FormField = "name" | "taxId" | "address" | "email" | "phone";
 
 export function CompanyForm() {
   const { company, loading, saving, error, fetchCompany, updateCompany } = useCompanyStore();
   const [form, setForm] = useState({ name: "", taxId: "", address: "", email: "", phone: "" });
+  const [touched, setTouched] = useState<Partial<Record<FormField, boolean>>>({});
+  const [justSaved, setJustSaved] = useState(false);
+  const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     fetchCompany();
@@ -24,7 +46,21 @@ export function CompanyForm() {
     }
   }
 
+  const setField = (field: FormField, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const markTouched = (field: FormField) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+  };
+
+  const nameError = form.name.trim() === "";
+  const emailError = form.email.trim() !== "" && !EMAIL_RE.test(form.email.trim());
+  const cuitError = form.taxId.trim() !== "" && !isValidCuit(form.taxId);
+  const hasErrors = nameError || emailError;
+
   const handleSave = async () => {
+    if (hasErrors) return;
     const input: Record<string, string | undefined> = {};
     if (form.name !== company?.name) input.name = form.name;
     if (form.taxId !== company?.taxId) input.taxId = form.taxId;
@@ -34,7 +70,13 @@ export function CompanyForm() {
 
     if (Object.keys(input).length === 0) return;
 
-    await updateCompany(input);
+    if (savedTimer.current) clearTimeout(savedTimer.current);
+    setJustSaved(false);
+    const ok = await updateCompany(input);
+    if (ok) {
+      setJustSaved(true);
+      savedTimer.current = setTimeout(() => setJustSaved(false), 2000);
+    }
   };
 
   const hasChanges =
@@ -44,6 +86,33 @@ export function CompanyForm() {
     form.email !== (company?.email ?? "") ||
     form.phone !== (company?.phone ?? "");
 
+  if (error && !company) {
+    return (
+      <Card>
+        <Text size="3" weight="bold" style={{ display: "block", marginBottom: "12px" }}>
+          Datos de la empresa
+        </Text>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "12px",
+            padding: "16px 0",
+          }}
+        >
+          <ExclamationTriangleIcon width={28} height={28} color="var(--red-9)" />
+          <Text size="2" color="gray" style={{ textAlign: "center" }}>
+            {error}
+          </Text>
+          <Button size="1" variant="soft" onClick={() => fetchCompany()}>
+            Reintentar
+          </Button>
+        </div>
+      </Card>
+    );
+  }
+
   if (loading && !company) {
     return (
       <Card>
@@ -52,39 +121,85 @@ export function CompanyForm() {
     );
   }
 
+  const fieldLabel = (label: string) => (
+    <Text size="2" weight="medium" style={{ display: "block", marginBottom: "6px" }}>
+      {label}
+    </Text>
+  );
+
   return (
     <Card>
       <Text size="3" weight="bold" style={{ display: "block", marginBottom: "12px" }}>
         Datos de la empresa
       </Text>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-        <TextField.Root
-          placeholder="Nombre"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-        />
-        <TextField.Root
-          placeholder="CUIT / RUT"
-          value={form.taxId}
-          onChange={(e) => setForm({ ...form, taxId: e.target.value })}
-        />
-        <TextField.Root
-          placeholder="Dirección"
-          value={form.address}
-          onChange={(e) => setForm({ ...form, address: e.target.value })}
-        />
-        <TextField.Root
-          placeholder="Email"
-          type="email"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
-        <TextField.Root
-          placeholder="Teléfono"
-          value={form.phone}
-          onChange={(e) => setForm({ ...form, phone: e.target.value })}
-        />
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        <div>
+          {fieldLabel("Nombre")}
+          <TextField.Root
+            value={form.name}
+            onChange={(e) => setField("name", e.target.value)}
+            onBlur={() => markTouched("name")}
+            aria-label="Nombre de la empresa"
+            aria-invalid={touched.name && nameError}
+          />
+          {touched.name && nameError && (
+            <Text size="1" color="red" style={{ display: "block", marginTop: "4px" }}>
+              El nombre es obligatorio
+            </Text>
+          )}
+        </div>
+
+        <div>
+          {fieldLabel("CUIT / RUT")}
+          <TextField.Root
+            value={form.taxId}
+            onChange={(e) => setField("taxId", e.target.value)}
+            onBlur={() => markTouched("taxId")}
+            aria-label="CUIT o RUT de la empresa"
+            aria-invalid={touched.taxId && cuitError}
+          />
+          {touched.taxId && cuitError && (
+            <Text size="1" color="red" style={{ display: "block", marginTop: "4px" }}>
+              Formato de CUIT inválido (11 dígitos)
+            </Text>
+          )}
+        </div>
+
+        <div>
+          {fieldLabel("Dirección")}
+          <TextField.Root
+            value={form.address}
+            onChange={(e) => setField("address", e.target.value)}
+            aria-label="Dirección de la empresa"
+          />
+        </div>
+
+        <div>
+          {fieldLabel("Email")}
+          <TextField.Root
+            type="email"
+            value={form.email}
+            onChange={(e) => setField("email", e.target.value)}
+            onBlur={() => markTouched("email")}
+            aria-label="Email de la empresa"
+            aria-invalid={touched.email && emailError}
+          />
+          {touched.email && emailError && (
+            <Text size="1" color="red" style={{ display: "block", marginTop: "4px" }}>
+              Ingresá un email válido
+            </Text>
+          )}
+        </div>
+
+        <div>
+          {fieldLabel("Teléfono")}
+          <TextField.Root
+            value={form.phone}
+            onChange={(e) => setField("phone", e.target.value)}
+            aria-label="Teléfono de la empresa"
+          />
+        </div>
       </div>
 
       {error && (
@@ -93,19 +208,26 @@ export function CompanyForm() {
             padding: "8px 12px",
             backgroundColor: "var(--color-danger-subtle)",
             borderRadius: "6px",
-            marginTop: "10px",
+            marginTop: "12px",
           }}
         >
           <Text size="2" color="red">{error}</Text>
         </div>
       )}
 
-      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "12px" }}>
-        <Button
-          size="1"
-          disabled={!hasChanges || saving}
-          onClick={handleSave}
-        >
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "12px" }}>
+        <div>
+          {hasChanges && !justSaved && !saving && (
+            <Text size="1" color="orange">Hay cambios sin guardar</Text>
+          )}
+          {justSaved && (
+            <Text size="1" color="green" style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+              <CheckIcon width={12} height={12} />
+              Guardado
+            </Text>
+          )}
+        </div>
+        <Button size="1" disabled={!hasChanges || saving || hasErrors} onClick={handleSave}>
           {saving ? "Guardando..." : "Guardar cambios"}
         </Button>
       </div>

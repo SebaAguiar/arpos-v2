@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { CompanyRepository } from "@/repositories/company.repository";
-import { ApiError } from "@/services/api-client";
 import type { Company, UpdateCompanyInput } from "@/lib/types";
 
 interface CompanyState {
@@ -26,11 +25,8 @@ export const useCompanyStore = create<CompanyState>((set) => ({
       const company = await CompanyRepository.getCompany();
       set({ company, loading: false });
     } catch (e) {
-      let message = "Error al cargar datos de la empresa";
-      if (e instanceof ApiError) {
-        message = e.message;
-      }
-      set({ loading: false, error: message });
+      console.error("[Company] Failed to load company:", e);
+      set({ loading: false, error: "No pudimos cargar los datos de la empresa." });
     }
   },
 
@@ -41,11 +37,8 @@ export const useCompanyStore = create<CompanyState>((set) => ({
       set({ company, saving: false });
       return true;
     } catch (e) {
-      let message = "Error al actualizar datos de la empresa";
-      if (e instanceof ApiError) {
-        message = e.message;
-      }
-      set({ saving: false, error: message });
+      console.error("[Company] Failed to update company:", e);
+      set({ saving: false, error: "No pudimos guardar los cambios. Reintentá." });
       return false;
     }
   },

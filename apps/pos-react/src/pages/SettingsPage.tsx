@@ -1,18 +1,11 @@
-import { useState } from "react";
-import { Text, TextField, Switch, Card, Select, Badge } from "@radix-ui/themes";
+import { Tabs, Text, TextField, Switch, Select, Card, Badge } from "@radix-ui/themes";
 import {
   GearIcon,
   PersonIcon,
-  CameraIcon,
-  IdCardIcon,
-  LaptopIcon,
-  FileTextIcon,
-  ReaderIcon,
-  TokensIcon,
   HomeIcon,
-  GlobeIcon,
   CheckCircledIcon,
   CrossCircledIcon,
+  GlobeIcon,
 } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
 import { useSettingsStore } from "@/stores/settings.store";
@@ -21,43 +14,18 @@ import { useTauri } from "@/hooks/useTauri";
 import { UsersManager } from "@/components/settings/UsersManager";
 import { StoreManager } from "@/components/settings/StoreManager";
 import { CompanyForm } from "@/components/settings/CompanyForm";
+import { PaymentMethodsEditor } from "@/components/settings/PaymentMethodsEditor";
+import { GeneralSettingsEditor } from "@/components/settings/GeneralSettingsEditor";
+import { CloudSyncSettings } from "@/components/settings/CloudSyncSettings";
+import { AutosaveBadge } from "@/components/settings/AutosaveBadge";
 import { SystemManager } from "@/components/settings/SystemManager";
 import { UpdateManager } from "@/components/settings/UpdateManager";
-import { CloudSyncSettings } from "@/components/settings/CloudSyncSettings";
-import type { PaymentMethod } from "@/lib/types";
-
-const METHOD_ICONS: Record<PaymentMethod, typeof GearIcon> = {
-  CASH: PersonIcon,
-  DEBIT: IdCardIcon,
-  CREDIT: LaptopIcon,
-  QR: CameraIcon,
-  WALLET: FileTextIcon,
-  TRANSFER: ReaderIcon,
-  POINTS: TokensIcon,
-};
-
-const METHOD_COLORS: Record<PaymentMethod, string> = {
-  CASH: "#30a46c",
-  DEBIT: "#3b82f6",
-  CREDIT: "#8b5cf6",
-  QR: "#f59e0b",
-  WALLET: "#ec4899",
-  TRANSFER: "#06b6d4",
-  POINTS: "#84cc16",
-};
 
 export function SettingsPage() {
   const usersOpen = useDialogStore((s) => s.users);
   const openUsers = useDialogStore((s) => s.openUsers);
   const storesOpen = useDialogStore((s) => s.stores);
   const openStores = useDialogStore((s) => s.openStores);
-  const paymentMethods = useSettingsStore((s) => s.paymentMethods);
-  const togglePaymentMethod = useSettingsStore((s) => s.togglePaymentMethod);
-  const updatePaymentMethodLabel = useSettingsStore((s) => s.updatePaymentMethodLabel);
-  const creditSurcharge = useSettingsStore((s) => s.creditSurcharge);
-  const setCreditSurcharge = useSettingsStore((s) => s.setCreditSurcharge);
-  const taxRate = useSettingsStore((s) => s.taxRate);
-  const setTaxRate = useSettingsStore((s) => s.setTaxRate);
   const autoPrint = useSettingsStore((s) => s.autoPrint);
   const setAutoPrint = useSettingsStore((s) => s.setAutoPrint);
   const paperSize = useSettingsStore((s) => s.paperSize);
@@ -69,277 +37,200 @@ export function SettingsPage() {
 
   const subscription = useSyncStore((s) => s.subscription);
 
-  const [editingLabel, setEditingLabel] = useState<PaymentMethod | null>(null);
-
   const { isTauri } = useTauri();
 
   return (
     <div className="page" style={{ maxWidth: "700px" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "20px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
         <GearIcon width={20} height={20} />
         <Text size="5" weight="bold">Configuración</Text>
       </div>
+      <Text size="1" color="gray" style={{ display: "block", marginBottom: "20px" }}>
+        Los cambios en pagos, impresión y configuración general se guardan automáticamente en este
+        dispositivo. Los datos de la empresa se guardan con el botón correspondiente.
+      </Text>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "16px", maxWidth: "700px" }}>
-        {/* Company Data */}
-        <CompanyForm />
+      <Tabs.Root defaultValue="general">
+        <Tabs.List style={{ flexWrap: "wrap" }}>
+          <Tabs.Trigger value="general">General</Tabs.Trigger>
+          <Tabs.Trigger value="pagos">Pagos</Tabs.Trigger>
+          <Tabs.Trigger value="impresion">Impresión</Tabs.Trigger>
+          <Tabs.Trigger value="sincronizacion">Sincronización</Tabs.Trigger>
+          <Tabs.Trigger value="gestion">Usuarios y sucursales</Tabs.Trigger>
+          {isTauri && <Tabs.Trigger value="sistema">Sistema</Tabs.Trigger>}
+        </Tabs.List>
 
-        {/* Payment Methods */}
-        <Card>
-          <Text size="3" weight="bold" style={{ display: "block", marginBottom: "12px" }}>
-            Métodos de pago
-          </Text>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {paymentMethods.map((config) => {
-              const Icon = METHOD_ICONS[config.id];
-              const color = METHOD_COLORS[config.id];
-              return (
-                <div
-                  key={config.id}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "10px 12px",
-                    backgroundColor: "var(--bg-surface-hover)",
-                    borderRadius: "6px",
-                    opacity: config.enabled ? 1 : 0.6,
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <div
-                      style={{
-                        width: "28px",
-                        height: "28px",
-                        borderRadius: "6px",
-                        backgroundColor: `${color}20`,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Icon width={14} height={14} color={color} />
-                    </div>
-                    {editingLabel === config.id ? (
-                      <TextField.Root
-                        autoFocus
-                        defaultValue={config.label}
-                        onBlur={(e) => {
-                          updatePaymentMethodLabel(config.id, e.target.value || config.label);
-                          setEditingLabel(null);
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            (e.target as HTMLInputElement).blur();
-                          }
-                          if (e.key === "Escape") {
-                            setEditingLabel(null);
-                          }
-                        }}
-                        style={{ width: "140px" }}
-                      />
-                    ) : (
-                      <Text
-                        size="2"
-                        style={{ cursor: "pointer", minWidth: "100px" }}
-                        onClick={() => setEditingLabel(config.id)}
-                      >
-                        {config.label}
-                      </Text>
-                    )}
-                  </div>
-                  <Switch
-                    checked={config.enabled}
-                    onCheckedChange={() => togglePaymentMethod(config.id)}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </Card>
-
-        {/* General Settings */}
-        <Card>
-          <Text size="3" weight="bold" style={{ display: "block", marginBottom: "12px" }}>
-            Configuración general
-          </Text>
+        <Tabs.Content value="general" style={{ paddingTop: "16px" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <CompanyForm />
+            <GeneralSettingsEditor />
+          </div>
+        </Tabs.Content>
+
+        <Tabs.Content value="pagos" style={{ paddingTop: "16px" }}>
+          <PaymentMethodsEditor />
+        </Tabs.Content>
+
+        <Tabs.Content value="impresion" style={{ paddingTop: "16px" }}>
+          <Card>
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                padding: "10px 12px",
-                backgroundColor: "var(--bg-surface-hover)",
-                borderRadius: "6px",
+                marginBottom: "12px",
               }}
             >
-              <Text size="2">IVA (%)</Text>
-              <TextField.Root
-                type="number"
-                value={taxRate * 100}
-                onChange={(e) => setTaxRate(parseFloat(e.target.value) / 100 || 0)}
-                style={{ width: "80px" }}
-              />
+              <Text size="3" weight="bold">Impresión</Text>
+              <AutosaveBadge revision={[autoPrint, paperSize, receiptHeader, receiptFooter]} />
             </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "10px 12px",
-                backgroundColor: "var(--bg-surface-hover)",
-                borderRadius: "6px",
-              }}
-            >
-              <Text size="2">Recargo crédito (%)</Text>
-              <TextField.Root
-                type="number"
-                value={creditSurcharge}
-                onChange={(e) => setCreditSurcharge(parseFloat(e.target.value) || 0)}
-                style={{ width: "80px" }}
-              />
-            </div>
-          </div>
-        </Card>
-
-        {/* Management */}
-        <Card>
-          <Text size="3" weight="bold" style={{ display: "block", marginBottom: "12px" }}>
-            Gestión
-          </Text>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <button
-              onClick={openStores}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                width: "100%",
-                padding: "10px 12px",
-                backgroundColor: "var(--bg-surface-hover)",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                color: "var(--text-primary)",
-                textAlign: "left",
-              }}
-            >
-              <HomeIcon width={16} height={16} color="var(--text-secondary)" />
-              <Text size="2">Sucursales</Text>
-            </button>
-            <button
-              onClick={openUsers}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                width: "100%",
-                padding: "10px 12px",
-                backgroundColor: "var(--bg-surface-hover)",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                color: "var(--text-primary)",
-                textAlign: "left",
-              }}
-            >
-              <PersonIcon width={16} height={16} color="var(--text-secondary)" />
-              <Text size="2">Usuarios</Text>
-            </button>
-          </div>
-        </Card>
-
-        {/* Printing */}
-        <Card>
-          <Text size="3" weight="bold" style={{ display: "block", marginBottom: "12px" }}>
-            Impresión
-          </Text>
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <Text size="2">Auto-imprimir tickets</Text>
-              <Switch checked={autoPrint} onCheckedChange={setAutoPrint} />
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <Text size="2">Tamaño de papel</Text>
-              <Select.Root value={paperSize} onValueChange={(v) => setPaperSize(v as typeof paperSize)}>
-                <Select.Trigger />
-                <Select.Content>
-                  <Select.Item value="80mm">80mm (térmico)</Select.Item>
-                  <Select.Item value="58mm">58mm (térmico chico)</Select.Item>
-                  <Select.Item value="a4">A4</Select.Item>
-                  <Select.Item value="a5">A5</Select.Item>
-                  <Select.Item value="default">Automático</Select.Item>
-                </Select.Content>
-              </Select.Root>
-            </div>
-            <div>
-              <Text size="2" weight="bold" style={{ display: "block", marginBottom: "4px" }}>
-                Encabezado del ticket
-              </Text>
-              <TextField.Root
-                placeholder="Ej: Gracias por elegirnos..."
-                value={receiptHeader}
-                onChange={(e) => setReceiptHeader(e.target.value)}
-              />
-            </div>
-            <div>
-              <Text size="2" weight="bold" style={{ display: "block", marginBottom: "4px" }}>
-                Pie del ticket
-              </Text>
-              <TextField.Root
-                placeholder="Ej: ¡Vuelva pronto!"
-                value={receiptFooter}
-                onChange={(e) => setReceiptFooter(e.target.value)}
-              />
-            </div>
-          </div>
-        </Card>
-
-        {/* Cloud Sync */}
-        <CloudSyncSettings />
-
-        {/* License */}
-        <Card>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-            <GlobeIcon width={16} height={16} />
-            <Text size="3" weight="bold">Cloud Sync — Suscripción</Text>
-          </div>
-          <div style={{ display: "grid", gap: "8px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <Text size="2">Estado</Text>
-              {subscription?.status === "active" ? (
-                <Badge color="green" variant="soft" size="1">
-                  <CheckCircledIcon width={12} height={12} />
-                  &nbsp;Activo
-                </Badge>
-              ) : (
-                <Badge color="gray" variant="soft" size="1">
-                  <CrossCircledIcon width={12} height={12} />
-                  &nbsp;Inactivo
-                </Badge>
-              )}
-            </div>
-            {subscription?.tier && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <Text size="2">Plan</Text>
-                <Text size="2" weight="bold">{subscription.tier}</Text>
+                <Text size="2">Auto-imprimir tickets</Text>
+                <Switch
+                  checked={autoPrint}
+                  onCheckedChange={setAutoPrint}
+                  aria-label={`Auto-imprimir tickets: ${autoPrint ? "habilitado" : "deshabilitado"}`}
+                />
               </div>
-            )}
-            {subscription?.expiresAt && (
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <Text size="2">Vence</Text>
-                <Text size="2" color="gray">
-                  {new Date(subscription.expiresAt * 1000).toLocaleDateString("es-AR")}
+                <Text size="2">Tamaño de papel</Text>
+                <Select.Root value={paperSize} onValueChange={(v) => setPaperSize(v as typeof paperSize)}>
+                  <Select.Trigger aria-label="Tamaño de papel" />
+                  <Select.Content>
+                    <Select.Item value="80mm">80mm (térmico)</Select.Item>
+                    <Select.Item value="58mm">58mm (térmico chico)</Select.Item>
+                    <Select.Item value="a4">A4</Select.Item>
+                    <Select.Item value="a5">A5</Select.Item>
+                    <Select.Item value="default">Automático</Select.Item>
+                  </Select.Content>
+                </Select.Root>
+              </div>
+              <div>
+                <Text size="2" weight="medium" style={{ display: "block", marginBottom: "6px" }}>
+                  Encabezado del ticket
                 </Text>
+                <TextField.Root
+                  placeholder="Ej: Gracias por elegirnos..."
+                  value={receiptHeader}
+                  onChange={(e) => setReceiptHeader(e.target.value)}
+                  aria-label="Encabezado del ticket"
+                />
               </div>
-            )}
-          </div>
-        </Card>
+              <div>
+                <Text size="2" weight="medium" style={{ display: "block", marginBottom: "6px" }}>
+                  Pie del ticket
+                </Text>
+                <TextField.Root
+                  placeholder="Ej: ¡Vuelva pronto!"
+                  value={receiptFooter}
+                  onChange={(e) => setReceiptFooter(e.target.value)}
+                  aria-label="Pie del ticket"
+                />
+              </div>
+            </div>
+          </Card>
+        </Tabs.Content>
 
-        {isTauri && <SystemManager />}
-        {isTauri && <UpdateManager />}
-      </div>
+        <Tabs.Content value="sincronizacion" style={{ paddingTop: "16px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <CloudSyncSettings />
+            <Card>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+                <GlobeIcon width={16} height={16} />
+                <Text size="3" weight="bold">Cloud Sync — Suscripción</Text>
+              </div>
+              <div style={{ display: "grid", gap: "8px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <Text size="2">Estado</Text>
+                  {subscription?.status === "active" ? (
+                    <Badge color="green" variant="soft" size="2">
+                      <CheckCircledIcon width={12} height={12} />
+                      &nbsp;Activo
+                    </Badge>
+                  ) : (
+                    <Badge color="orange" variant="soft" size="2">
+                      <CrossCircledIcon width={12} height={12} />
+                      &nbsp;Sin suscripción activa
+                    </Badge>
+                  )}
+                </div>
+                {subscription?.tier && (
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <Text size="2">Plan</Text>
+                    <Text size="2" weight="bold">{subscription.tier}</Text>
+                  </div>
+                )}
+                {subscription?.expiresAt && (
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <Text size="2">Vence</Text>
+                    <Text size="2" color="gray">
+                      {new Date(subscription.expiresAt * 1000).toLocaleDateString("es-AR")}
+                    </Text>
+                  </div>
+                )}
+              </div>
+            </Card>
+          </div>
+        </Tabs.Content>
+
+        <Tabs.Content value="gestion" style={{ paddingTop: "16px" }}>
+          <Card>
+            <Text size="3" weight="bold" style={{ display: "block", marginBottom: "12px" }}>
+              Usuarios y sucursales
+            </Text>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              <button
+                onClick={openStores}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  width: "100%",
+                  padding: "10px 12px",
+                  backgroundColor: "var(--bg-surface-hover)",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  color: "var(--text-primary)",
+                  textAlign: "left",
+                }}
+              >
+                <HomeIcon width={16} height={16} color="var(--text-secondary)" />
+                <Text size="2">Sucursales</Text>
+              </button>
+              <button
+                onClick={openUsers}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  width: "100%",
+                  padding: "10px 12px",
+                  backgroundColor: "var(--bg-surface-hover)",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  color: "var(--text-primary)",
+                  textAlign: "left",
+                }}
+              >
+                <PersonIcon width={16} height={16} color="var(--text-secondary)" />
+                <Text size="2">Usuarios</Text>
+              </button>
+            </div>
+          </Card>
+        </Tabs.Content>
+
+        {isTauri && (
+          <Tabs.Content value="sistema" style={{ paddingTop: "16px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <SystemManager />
+              <UpdateManager />
+            </div>
+          </Tabs.Content>
+        )}
+      </Tabs.Root>
 
       {usersOpen && <UsersManager />}
       {storesOpen && <StoreManager />}

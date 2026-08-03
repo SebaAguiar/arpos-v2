@@ -3,10 +3,10 @@ import type { Company, UpdateCompanyInput } from "@/lib/types";
 
 export const CompanyService = {
   async getCompany(): Promise<Company> {
-    return apiClient.get<Company>("/api/company");
+    return apiClient.get<Company>("/company");
   },
 
   async updateCompany(input: UpdateCompanyInput): Promise<Company> {
-    return apiClient.patch<Company>("/api/company", input);
+    return apiClient.patch<Company>("/company", input);
   },
 };
