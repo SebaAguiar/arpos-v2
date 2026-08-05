@@ -8,6 +8,9 @@ export interface StockItem {
   productName: string;
   stock_quantity: number;
   cost_cents: number | null;
+  min_stock: number | null;
+  category_id: string | null;
+  last_movement_at: number | null;
 }
 
 export interface InventoryMovementData {
@@ -74,9 +77,28 @@ export class InventoryRepository {
         name: true,
         stock_quantity: true,
         cost_cents: true,
+        category_id: true,
+        inventory: {
+          where: { storeId },
+          select: { min_stock: true },
+        },
       },
       orderBy: { name: 'asc' },
     });
+
+    const lastMovements = await this.prisma.inventoryMovement.groupBy({
+      by: ['productId'],
+      where: {
+        companyId,
+        storeId,
+        productId: { in: products.map((p) => p.id) },
+      },
+      _max: { created_at: true },
+    });
+
+    const movementMap = new Map<string, number | null>(
+      lastMovements.map((m) => [m.productId, m._max.created_at ?? null]),
+    );
 
     return products.map((p) => ({
       productId: p.id,
@@ -84,6 +106,9 @@ export class InventoryRepository {
       productName: p.name,
       stock_quantity: p.stock_quantity,
       cost_cents: p.cost_cents,
+      min_stock: p.inventory[0]?.min_stock ?? null,
+      category_id: p.category_id,
+      last_movement_at: movementMap.get(p.id) ?? null,
     }));
   }
 

@@ -29,7 +29,7 @@ describe('InventoryService', () => {
   describe('listStock', () => {
     it('should return stock for all active products', async () => {
       const stock = [
-        { productId: 'p1', productCode: 'A001', productName: 'Product A', stock_quantity: 10, cost_cents: 500 },
+        { productId: 'p1', productCode: 'A001', productName: 'Product A', stock_quantity: 10, cost_cents: 500, min_stock: 5, category_id: 'cat1', last_movement_at: 1000 },
       ];
       mockRepo.getStock.mockResolvedValue(stock);
 
