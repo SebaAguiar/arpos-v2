@@ -11,6 +11,9 @@ export interface StockItemData {
   productName: string;
   stockQuantity: number;
   costCents: number | null;
+  minStock: number | null;
+  categoryId: string | null;
+  lastMovementAt: number | null;
 }
 
 export interface InventoryMovementData {
@@ -33,6 +36,9 @@ function mapStock(api: ApiStockItem): StockItemData {
     productName: api.productName,
     stockQuantity: api.stock_quantity,
     costCents: api.cost_cents,
+    minStock: api.min_stock,
+    categoryId: api.category_id,
+    lastMovementAt: api.last_movement_at,
   };
 }
 

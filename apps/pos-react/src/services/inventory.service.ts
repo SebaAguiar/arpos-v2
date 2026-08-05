@@ -6,6 +6,9 @@ export interface ApiStockItem {
   productName: string;
   stock_quantity: number;
   cost_cents: number | null;
+  min_stock: number | null;
+  category_id: string | null;
+  last_movement_at: number | null;
 }
 
 export interface ApiInventoryMovement {
