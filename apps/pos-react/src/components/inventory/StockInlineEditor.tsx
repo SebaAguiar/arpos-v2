@@ -14,10 +14,6 @@ export function StockInlineEditor({ item, onSave }: StockInlineEditorProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setInputValue(String(item.stockQuantity));
-  }, [item.stockQuantity]);
-
-  useEffect(() => {
     if (isEditing) {
       inputRef.current?.focus();
       inputRef.current?.select();
@@ -119,7 +115,10 @@ export function StockInlineEditor({ item, onSave }: StockInlineEditorProps) {
         borderRadius: "4px",
         transition: "background-color 0.15s",
       }}
-      onDoubleClick={() => setIsEditing(true)}
+      onDoubleClick={() => {
+        setInputValue(String(item.stockQuantity));
+        setIsEditing(true);
+      }}
       onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--bg-surface-hover)")}
       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
       title="Doble click para editar stock"
