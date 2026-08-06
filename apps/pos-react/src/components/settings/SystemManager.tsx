@@ -7,8 +7,11 @@ import {
   ReloadIcon,
   CheckCircledIcon,
   CrossCircledIcon,
+  InfoCircledIcon,
 } from "@radix-ui/react-icons";
 import { useSystemStore } from "@/stores/system.store";
+import { isTauri } from "@/lib/tauri";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -179,6 +182,34 @@ export function SystemManager() {
                 Guardado en: {lastExport.path}
               </Text>
             )}
+          </div>
+
+          <div>
+            <Text size="2" weight="bold" style={{ display: "block", marginBottom: "8px" }}>
+              Soporte
+            </Text>
+            <Button
+              size="1"
+              variant="soft"
+              onClick={async () => {
+                const url = "https://arcon.arsian.dev/soporte";
+                if (isTauri()) {
+                  try {
+                    await openUrl(url);
+                  } catch {
+                    window.open(url, "_blank");
+                  }
+                } else {
+                  window.open(url, "_blank");
+                }
+              }}
+            >
+              <InfoCircledIcon width={12} height={12} />
+              Reportar un problema
+            </Button>
+            <Text size="2" color="gray" style={{ display: "block", marginTop: "8px" }}>
+              Abre el formulario de soporte en arcon.arsian.dev.
+            </Text>
           </div>
         </div>
       )}
