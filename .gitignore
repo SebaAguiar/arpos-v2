@@ -149,6 +149,11 @@ vite.config.ts.timestamp-*
 .impeccable/
 .commandcode/
 
+# Playwright CLI QA artifacts (ad-hoc page dumps & screenshots)
+.playwright-cli/
+qa-*.yml
+qa-*.png
+
 .nx/
 *.db
 *.db-journal
