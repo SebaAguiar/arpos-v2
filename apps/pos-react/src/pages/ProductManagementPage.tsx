@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Text,
   TextField,
@@ -75,6 +75,10 @@ export function ProductManagementPage() {
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("list");
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const filtered = products.filter(
     (p) =>
