@@ -152,7 +152,7 @@ export function Sidebar() {
         <div>
           <div style={SECTION_HEADER}>Gestión</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-            <SidebarNavLink to="/products-management" icon={CubeIcon} label="Productos" />
+            <SidebarNavLink to="/products" icon={CubeIcon} label="Productos" />
             <SidebarNavLink to="/inventory" icon={LayersIcon} label="Inventario" />
             <SidebarNavLink to="/purchases" icon={ClipboardIcon} label="Compras" />
             <SidebarNavLink to="/customers" icon={PersonIcon} label="Clientes" />

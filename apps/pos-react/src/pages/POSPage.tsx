@@ -23,6 +23,7 @@ import { ProductCard } from "@/components/product/ProductCard";
 import { CategoryTabs } from "@/components/product/CategoryTabs";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useHotkeys } from "@/hooks/useHotkeys";
+import { getProductStock } from "@/lib/stock";
 import { VariantSelectionDialog } from "@/components/product/VariantSelectionDialog";
 import { CartItem } from "@/components/cart/CartItem";
 import { CustomItemDialog } from "@/components/cart/CustomItemDialog";
@@ -175,10 +176,7 @@ export function POSPage() {
 
   const handleAddToCart = useCallback(
     (product: Product) => {
-      const totalStock = product.variants.reduce(
-        (sum, v) => sum + v.stockItems.reduce((s, si) => s + si.quantity, 0),
-        0
-      );
+      const totalStock = getProductStock(product);
       if (totalStock === 0) return;
 
       if (product.variants.length > 1) {
@@ -275,7 +273,7 @@ export function POSPage() {
               { icon: BackpackIcon, label: "POS", action: undefined },
               { icon: LightningBoltIcon, label: "Caja", action: () => navigate("/cash-register") },
               { icon: TimerIcon, label: "Tareas", action: () => navigate("/tasks") },
-              { icon: CubeIcon, label: "Productos", action: () => navigate("/products-management") },
+              { icon: CubeIcon, label: "Productos", action: () => navigate("/products") },
               { icon: BarChartIcon, label: "Reportes", action: () => navigate("/reports") },
               { icon: GearIcon, label: "Configuración", action: () => navigate("/settings") },
             ].map(({ icon: Icon, label, action }) =>

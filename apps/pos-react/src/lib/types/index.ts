@@ -9,6 +9,7 @@ export interface Product {
   category?: string;
   internalCode?: string;
   image?: string;
+  stockQuantity?: number;
   variants: ProductVariant[];
 }
 

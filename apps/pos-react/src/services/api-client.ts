@@ -1,4 +1,6 @@
-const API_BASE = "http://localhost:3000/api";
+import { apiBaseUrl } from "@/config";
+
+const API_BASE = apiBaseUrl;
 
 export class ApiError extends Error {
   constructor(
@@ -51,6 +53,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
+    cache: "no-store",
   });
 
   if (res.status === 401) {
@@ -71,7 +74,10 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   }
 
   if (res.status === 204) return undefined as T;
-  return res.json() as Promise<T>;
+
+  const text = await res.text();
+  if (!text) return undefined as T;
+  return JSON.parse(text) as T;
 }
 
 export const apiClient = {

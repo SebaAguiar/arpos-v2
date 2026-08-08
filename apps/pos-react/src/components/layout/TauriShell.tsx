@@ -7,18 +7,10 @@ interface TauriShellProps {
 }
 
 export function TauriShell({ children }: TauriShellProps) {
-  const { isLoading, error, isTauri, restartBackend } = useBackend();
+  const { isLoading, error, retry } = useBackend();
 
-  if (!isTauri) {
-    return <>{children}</>;
-  }
-
-  if (isLoading) {
-    return <BackendLoading error={error} onRetry={restartBackend} />;
-  }
-
-  if (error) {
-    return <BackendLoading error={error} onRetry={restartBackend} />;
+  if (isLoading || error) {
+    return <BackendLoading error={error} onRetry={retry} />;
   }
 
   return <>{children}</>;

@@ -7,8 +7,11 @@ import {
   DownloadIcon,
   CheckCircledIcon,
   CrossCircledIcon,
+  CubeIcon,
 } from "@radix-ui/react-icons";
 import { useBackupStore } from "@/stores/backup.store";
+import { MigrationWizard } from "@/components/auth/MigrationWizard";
+import { isTauri } from "@/lib/tauri";
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -40,10 +43,14 @@ export function BackupPage() {
   const [restoreTarget, setRestoreTarget] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [migrationOpen, setMigrationOpen] = useState(false);
+
+  const tauri = isTauri();
 
   useEffect(() => {
+    if (!tauri) return;
     fetchBackups();
-  }, [fetchBackups]);
+  }, [tauri, fetchBackups]);
 
   const handleRestore = async () => {
     if (!restoreTarget) return;
@@ -67,36 +74,67 @@ export function BackupPage() {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-        {/* Create backup */}
+        {/* Migrate from v1 */}
         <Card>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div>
               <Text size="3" weight="bold" style={{ display: "block", marginBottom: "4px" }}>
-                Crear copia de seguridad
+                Migrar desde Arcon v1
               </Text>
               <Text size="2" color="gray">
-                Genera un respaldo completo de la base de datos actual
+                Importá tus datos existentes desde la nube a esta instalación
               </Text>
             </div>
-            <Button
-              onClick={createBackup}
-              disabled={creating}
-              size="2"
-            >
-              {creating ? (
-                <>
-                  <ReloadIcon className="spin" width={14} height={14} />
-                  Creando...
-                </>
-              ) : (
-                <>
-                  <DownloadIcon width={14} height={14} />
-                  Crear backup
-                </>
-              )}
+            <Button onClick={() => setMigrationOpen(true)} size="2" variant="soft">
+              <CubeIcon width={14} height={14} />
+              Migrar datos
             </Button>
           </div>
         </Card>
+
+        {/* Create backup */}
+        {tauri && (
+          <Card>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div>
+                <Text size="3" weight="bold" style={{ display: "block", marginBottom: "4px" }}>
+                  Crear copia de seguridad
+                </Text>
+                <Text size="2" color="gray">
+                  Genera un respaldo completo de la base de datos actual
+                </Text>
+              </div>
+              <Button
+                onClick={createBackup}
+                disabled={creating}
+                size="2"
+              >
+                {creating ? (
+                  <>
+                    <ReloadIcon className="spin" width={14} height={14} />
+                    Creando...
+                  </>
+                ) : (
+                  <>
+                    <DownloadIcon width={14} height={14} />
+                    Crear backup
+                  </>
+                )}
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        {!tauri && (
+          <Card>
+            <Flex align="center" gap="2">
+              <ArchiveIcon width={16} height={16} color="var(--text-secondary)" />
+              <Text size="2" color="gray">
+                La gestión de copias de seguridad está disponible solo en la aplicación de escritorio.
+              </Text>
+            </Flex>
+          </Card>
+        )}
 
         {/* Success */}
         {success && (
@@ -135,68 +173,70 @@ export function BackupPage() {
         )}
 
         {/* Backup list */}
-        <Card>
-          <Text size="3" weight="bold" style={{ display: "block", marginBottom: "12px" }}>
-            Backups disponibles
-          </Text>
+        {tauri && (
+          <Card>
+            <Text size="3" weight="bold" style={{ display: "block", marginBottom: "12px" }}>
+              Backups disponibles
+            </Text>
 
-          {loading ? (
-            <Text size="2" color="gray">Cargando...</Text>
-          ) : backups.length === 0 ? (
-            <Text size="2" color="gray">No hay copias de seguridad todavía</Text>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              {backups.map((backup) => (
-                <div
-                  key={backup.path}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "10px 12px",
-                    backgroundColor: "var(--bg-surface-hover)",
-                    borderRadius: "6px",
-                  }}
-                >
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <Text size="2" style={{ display: "block", fontWeight: 500 }}>
-                      {backup.filename}
-                    </Text>
-                    <div style={{ display: "flex", gap: "8px", marginTop: "2px" }}>
-                      <Badge size="1" variant="soft">
-                        {formatSize(backup.size_bytes)}
-                      </Badge>
-                      <Badge size="1" variant="soft" color="gray">
-                        {formatDate(backup.created_at)}
-                      </Badge>
+            {loading ? (
+              <Text size="2" color="gray">Cargando...</Text>
+            ) : backups.length === 0 ? (
+              <Text size="2" color="gray">No hay copias de seguridad todavía</Text>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                {backups.map((backup) => (
+                  <div
+                    key={backup.path}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "10px 12px",
+                      backgroundColor: "var(--bg-surface-hover)",
+                      borderRadius: "6px",
+                    }}
+                  >
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <Text size="2" style={{ display: "block", fontWeight: 500 }}>
+                        {backup.filename}
+                      </Text>
+                      <div style={{ display: "flex", gap: "8px", marginTop: "2px" }}>
+                        <Badge size="1" variant="soft">
+                          {formatSize(backup.size_bytes)}
+                        </Badge>
+                        <Badge size="1" variant="soft" color="gray">
+                          {formatDate(backup.created_at)}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
+                      <Button
+                        size="1"
+                        variant="soft"
+                        color="green"
+                        disabled={restoring}
+                        onClick={() => setRestoreTarget(backup.path)}
+                      >
+                        <ReloadIcon width={12} height={12} />
+                        Restaurar
+                      </Button>
+                      <Button
+                        size="1"
+                        variant="soft"
+                        color="red"
+                        onClick={() => setDeleteTarget(backup.path)}
+                      >
+                        <TrashIcon width={12} height={12} />
+                      </Button>
                     </div>
                   </div>
-
-                  <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
-                    <Button
-                      size="1"
-                      variant="soft"
-                      color="green"
-                      disabled={restoring}
-                      onClick={() => setRestoreTarget(backup.path)}
-                    >
-                      <ReloadIcon width={12} height={12} />
-                      Restaurar
-                    </Button>
-                    <Button
-                      size="1"
-                      variant="soft"
-                      color="red"
-                      onClick={() => setDeleteTarget(backup.path)}
-                    >
-                      <TrashIcon width={12} height={12} />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </Card>
+                ))}
+              </div>
+            )}
+          </Card>
+        )}
       </div>
 
       {/* Restore confirmation */}
@@ -243,6 +283,8 @@ export function BackupPage() {
           </Flex>
         </AlertDialog.Content>
       </AlertDialog.Root>
+
+      <MigrationWizard open={migrationOpen} onClose={() => setMigrationOpen(false)} />
     </div>
   );
 }

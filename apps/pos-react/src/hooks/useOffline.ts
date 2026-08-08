@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { apiBaseUrl } from "@/config";
 
 interface OfflineState {
   isOnline: boolean;
@@ -24,7 +25,7 @@ export function useOffline(): OfflineState {
 
     const interval = setInterval(async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/health", {
+        const res = await fetch(`${apiBaseUrl}/health`, {
           method: "HEAD",
           cache: "no-store",
         });

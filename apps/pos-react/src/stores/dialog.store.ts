@@ -7,7 +7,6 @@ interface DialogState {
   cashControl: boolean;
   cashMovement: boolean;
   settings: boolean;
-  productManagement: boolean;
   dashboard: boolean;
   tasks: boolean;
   reports: boolean;
@@ -29,8 +28,6 @@ interface DialogState {
   closeCashMovement: () => void;
   openSettings: () => void;
   closeSettings: () => void;
-  openProductManagement: () => void;
-  closeProductManagement: () => void;
   openDashboard: () => void;
   closeDashboard: () => void;
   openTasks: () => void;
@@ -55,7 +52,6 @@ export const useDialogStore = create<DialogState>((set) => ({
   cashControl: false,
   cashMovement: false,
   settings: false,
-  productManagement: false,
   dashboard: false,
   tasks: false,
   reports: false,
@@ -77,8 +73,6 @@ export const useDialogStore = create<DialogState>((set) => ({
   closeCashMovement: () => set({ cashMovement: false }),
   openSettings: () => set({ settings: true }),
   closeSettings: () => set({ settings: false }),
-  openProductManagement: () => set({ productManagement: true }),
-  closeProductManagement: () => set({ productManagement: false }),
   openDashboard: () => set({ dashboard: true }),
   closeDashboard: () => set({ dashboard: false }),
   openTasks: () => set({ tasks: true }),
@@ -103,7 +97,6 @@ export const useDialogStore = create<DialogState>((set) => ({
       cashControl: false,
       cashMovement: false,
       settings: false,
-      productManagement: false,
       dashboard: false,
       tasks: false,
       reports: false,

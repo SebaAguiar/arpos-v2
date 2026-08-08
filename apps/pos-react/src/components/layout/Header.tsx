@@ -9,6 +9,7 @@ import {
   MoonIcon,
   LockOpen1Icon,
   LockClosedIcon,
+  BarChartIcon,
 } from "@radix-ui/react-icons";
 import { useThemeStore } from "@/stores/theme.store";
 import { useAuth } from "@/hooks/useAuth";
@@ -33,6 +34,7 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
   const isBackendAvailable = useSyncStore((s) => s.isBackendAvailable);
   const fetchStatus = useSyncStore((s) => s.fetchStatus);
   const openCashControl = useDialogStore((s) => s.openCashControl);
+  const openDashboard = useDialogStore((s) => s.openDashboard);
   const currentShift = useCashRegisterStore((s) => s.currentShift);
 
   useEffect(() => {
@@ -113,6 +115,17 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
           )}
           {currentShift ? "Cerrar caja" : "Abrir caja"}
         </button>
+      </Tooltip>
+
+      <Tooltip content="Dashboard">
+        <IconButton
+          variant="ghost"
+          size="1"
+          onClick={openDashboard}
+          style={{ cursor: "pointer", color: "var(--text-secondary)" }}
+        >
+          <BarChartIcon width={16} height={16} />
+        </IconButton>
       </Tooltip>
 
       <NetworkIndicator

@@ -1,28 +1,28 @@
-import { invoke } from "@tauri-apps/api/core";
+import { safeInvoke } from "@/lib/tauri";
 import type { DatabaseInfo } from "@/lib/types";
 
 export const DatabaseService = {
   async init(): Promise<string> {
-    return invoke<string>("init_database");
+    return safeInvoke<string>("init_database");
   },
 
   async runMigrations(): Promise<string> {
-    return invoke<string>("run_migrations");
+    return safeInvoke<string>("run_migrations");
   },
 
   async pushSchema(): Promise<string> {
-    return invoke<string>("push_schema");
+    return safeInvoke<string>("push_schema");
   },
 
   async checkIntegrity(): Promise<boolean> {
-    return invoke<boolean>("check_db_integrity");
+    return safeInvoke<boolean>("check_db_integrity");
   },
 
   async info(): Promise<DatabaseInfo> {
-    return invoke<DatabaseInfo>("get_database_info");
+    return safeInvoke<DatabaseInfo>("get_database_info");
   },
 
   async ensure(): Promise<string> {
-    return invoke<string>("ensure_database");
+    return safeInvoke<string>("ensure_database");
   },
 };

@@ -8,6 +8,7 @@ import { useDialogStore } from "@/stores/dialog.store";
 import { useHotkeys } from "@/hooks/useHotkeys";
 import { OpenRegisterModal } from "@/components/sales/OpenRegisterModal";
 import { CloseRegisterModal } from "@/components/sales/CloseRegisterModal";
+import { DashboardDialog } from "@/components/dashboard/DashboardDialog";
 import { useCashRegisterStore } from "@/stores/cash-register.store";
 
 export function AppLayout() {
@@ -16,13 +17,22 @@ export function AppLayout() {
   const toggleSidebar = useLayoutStore((s) => s.toggleSidebar);
   const startPolling = useSyncStore((s) => s.startPolling);
   const stopPolling = useSyncStore((s) => s.stopPolling);
+  const isBackendAvailable = useSyncStore((s) => s.isBackendAvailable);
   const cashControl = useDialogStore((s) => s.cashControl);
   const currentShift = useCashRegisterStore((s) => s.currentShift);
+  const fetchCurrentShift = useCashRegisterStore((s) => s.fetchCurrentShift);
+  const dashboard = useDialogStore((s) => s.dashboard);
 
   useEffect(() => {
     startPolling(30_000);
     return () => stopPolling();
   }, [startPolling, stopPolling]);
+
+  useEffect(() => {
+    if (isBackendAvailable) {
+      void fetchCurrentShift();
+    }
+  }, [isBackendAvailable, fetchCurrentShift]);
 
   useHotkeys([{ keys: "Alt+P", handler: () => navigate("/"), allowInInput: true }]);
 
@@ -37,6 +47,7 @@ export function AppLayout() {
       </div>
 
       {cashControl && (currentShift ? <CloseRegisterModal /> : <OpenRegisterModal />)}
+      {dashboard && <DashboardDialog />}
     </div>
   );
 }

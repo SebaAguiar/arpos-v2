@@ -1,7 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { ProcessService } from "@/services/process.service";
 import { isTauri } from "@/lib/tauri";
+import { apiBaseUrl } from "@/config";
 import type { BackendStatus } from "@/lib/types";
+
+const HEALTH_URL = `${apiBaseUrl}/health`;
+const HEALTH_POLL_INTERVAL_MS = 500;
+const HEALTH_TIMEOUT_MS = 60_000;
 
 interface UseBackendReturn {
   status: BackendStatus | null;
@@ -12,13 +17,15 @@ interface UseBackendReturn {
   stopBackend: () => Promise<void>;
   restartBackend: () => Promise<void>;
   waitForBackend: () => Promise<void>;
+  retry: () => void;
 }
 
 export function useBackend(): UseBackendReturn {
   const tauri = isTauri();
   const [status, setStatus] = useState<BackendStatus | null>(null);
-  const [isLoading, setIsLoading] = useState(() => !tauri);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryNonce, setRetryNonce] = useState(0);
 
   const startBackend = useCallback(async () => {
     if (!tauri) return;
@@ -61,11 +68,17 @@ export function useBackend(): UseBackendReturn {
     }
   }, [tauri]);
 
-  const fetchStatus = useCallback(async () => {
-    if (!tauri) {
-      setIsLoading(false);
-      return;
+  const checkHealth = useCallback(async (): Promise<boolean> => {
+    try {
+      const res = await fetch(HEALTH_URL, { signal: AbortSignal.timeout(2_000) });
+      return res.ok;
+    } catch {
+      return false;
     }
+  }, []);
+
+  const fetchStatus = useCallback(async () => {
+    if (!tauri) return;
     try {
       const s = await ProcessService.status();
       setStatus(s);
@@ -75,32 +88,55 @@ export function useBackend(): UseBackendReturn {
   }, [tauri]);
 
   useEffect(() => {
-    if (!tauri) return;
-
     let cancelled = false;
 
     const init = async () => {
-      await fetchStatus();
-
-      const s = await ProcessService.status().catch(() => null);
+      const healthy = await checkHealth();
       if (cancelled) return;
 
-      if (!s?.running) {
-        await startBackend();
+      if (healthy) {
+        setIsLoading(false);
+        return;
+      }
+
+      if (tauri && !import.meta.env.DEV) {
+        await fetchStatus();
+        const s = await ProcessService.status().catch(() => null);
         if (cancelled) return;
 
-        try {
-          await ProcessService.waitForReady();
-        } catch (e) {
-          if (!cancelled) setError(String(e));
-          return;
+        if (!s?.running) {
+          await startBackend();
+          if (cancelled) return;
+
+          try {
+            await ProcessService.waitForReady();
+          } catch (e) {
+            if (!cancelled) setError(String(e));
+            return;
+          }
         }
+
+        if (!cancelled) {
+          await fetchStatus();
+          setIsLoading(false);
+        }
+        return;
       }
 
-      if (!cancelled) {
-        await fetchStatus();
-        setIsLoading(false);
+      const startedAt = Date.now();
+      while (!cancelled && Date.now() - startedAt < HEALTH_TIMEOUT_MS) {
+        if (await checkHealth()) {
+          if (cancelled) return;
+          setIsLoading(false);
+          return;
+        }
+        await new Promise((resolve) => setTimeout(resolve, HEALTH_POLL_INTERVAL_MS));
       }
+      if (cancelled) return;
+      setError(
+        `No se pudo conectar al servidor local en ${HEALTH_TIMEOUT_MS / 1000}s. Verificá que el backend esté corriendo (pnpm dev:api).`,
+      );
+      setIsLoading(false);
     };
 
     init();
@@ -111,7 +147,13 @@ export function useBackend(): UseBackendReturn {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [tauri, fetchStatus, startBackend]);
+  }, [tauri, fetchStatus, startBackend, checkHealth, retryNonce]);
+
+  const retry = useCallback(() => {
+    setError(null);
+    setIsLoading(true);
+    setRetryNonce((n) => n + 1);
+  }, []);
 
   return {
     status,
@@ -122,5 +164,6 @@ export function useBackend(): UseBackendReturn {
     stopBackend,
     restartBackend,
     waitForBackend,
+    retry,
   };
 }

@@ -16,7 +16,7 @@ export function NetworkIndicator({
   if (isProcessing) {
     return (
       <Badge color="blue" variant="soft" size="1">
-        Syncing...
+        Sincronizando...
       </Badge>
     );
   }
@@ -24,7 +24,7 @@ export function NetworkIndicator({
   if (!isBackendAvailable) {
     return (
       <Badge color="red" variant="soft" size="1">
-        Backend offline
+        Sin conexión al servidor
       </Badge>
     );
   }
@@ -32,7 +32,7 @@ export function NetworkIndicator({
   if (!isOnline) {
     return (
       <Badge color="yellow" variant="soft" size="1">
-        Sin internet
+        Modo offline
       </Badge>
     );
   }
@@ -40,14 +40,14 @@ export function NetworkIndicator({
   if (pendingCount > 0) {
     return (
       <Badge color="yellow" variant="soft" size="1">
-        Sync pending ({pendingCount})
+        Sync pendiente ({pendingCount})
       </Badge>
     );
   }
 
   return (
     <Badge color="green" variant="soft" size="1">
-      Online
+      Sincronizado
     </Badge>
   );
 }

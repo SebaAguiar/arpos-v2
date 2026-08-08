@@ -22,11 +22,6 @@ const CashRegisterPage = lazy(() =>
 const TasksPage = lazy(() =>
   import("@/pages/TasksPage").then((m) => ({ default: m.TasksPage }))
 );
-const ProductManagementPage = lazy(() =>
-  import("@/pages/ProductManagementPage").then((m) => ({
-    default: m.ProductManagementPage,
-  }))
-);
 const CustomersPage = lazy(() =>
   import("@/pages/CustomersPage").then((m) => ({ default: m.CustomersPage }))
 );
@@ -145,14 +140,6 @@ export function App() {
             element={
               <Suspense fallback={<PageFallback />}>
                 <TasksPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/products-management"
-            element={
-              <Suspense fallback={<PageFallback />}>
-                <ProductManagementPage />
               </Suspense>
             }
           />
