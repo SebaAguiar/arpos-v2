@@ -203,7 +203,7 @@ export function DashboardDialog() {
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <Select.Root value={period} onValueChange={handlePeriodChange}>
               <Select.Trigger className="select-compact" style={{ width: "160px" }} />
-              <Select.Content>
+              <Select.Content position="popper">
                 {Object.entries(PERIOD_LABELS).map(([key, label]) => (
                   <Select.Item key={key} value={key}>{label}</Select.Item>
                 ))}

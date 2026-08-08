@@ -92,7 +92,7 @@ export function StockAdjustmentDialog({ preselectedProductId, onClose }: StockAd
             <Text size="2" color="gray" style={{ display: "block", marginBottom: "4px" }}>Producto</Text>
             <Select.Root value={productId} onValueChange={setProductId}>
               <Select.Trigger style={{ width: "100%" }} placeholder="Seleccionar producto" />
-              <Select.Content>
+              <Select.Content position="popper">
                 {stock.map((item) => (
                   <Select.Item key={item.productId} value={item.productId}>
                     {item.productCode} - {item.productName} (stock: {item.stockQuantity})
@@ -106,7 +106,7 @@ export function StockAdjustmentDialog({ preselectedProductId, onClose }: StockAd
             <Text size="2" color="gray" style={{ display: "block", marginBottom: "4px" }}>Tipo</Text>
             <Select.Root value={type} onValueChange={(v) => setType(v as typeof type)}>
               <Select.Trigger style={{ width: "100%" }} />
-              <Select.Content>
+              <Select.Content position="popper">
                 <Select.Item value="entry">
                   <PlusIcon width={12} /> Entrada
                 </Select.Item>

@@ -297,7 +297,7 @@ export function CashControlDialog() {
                     <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
                       <Select.Root value={movType} onValueChange={(v) => setMovType(v as typeof movType)}>
                         <Select.Trigger style={{ width: "160px" }} />
-                        <Select.Content style={{ height: "auto" }}>
+                        <Select.Content position="popper">
                           <Select.Item value="INCOME">
                             <PlusIcon width={12} /> Ingreso
                           </Select.Item>

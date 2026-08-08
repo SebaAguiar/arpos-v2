@@ -140,7 +140,7 @@ export function PurchasesPage() {
           onValueChange={(v) => setStatusFilter(v)}
         >
           <Select.Trigger placeholder="Filtrar por estado" />
-          <Select.Content>
+          <Select.Content position="popper">
             <Select.Item value="all">Todos</Select.Item>
             <Select.Item value="draft">Borrador</Select.Item>
             <Select.Item value="ordered">Pedido</Select.Item>
@@ -392,7 +392,7 @@ function CreateOrderDialog({
             </Text>
             <Select.Root value={supplierId} onValueChange={setSupplierId}>
               <Select.Trigger placeholder="Seleccionar proveedor..." />
-              <Select.Content>
+              <Select.Content position="popper">
                 {suppliers.map((s) => (
                   <Select.Item key={s.id} value={s.id}>
                     {s.name}
@@ -413,7 +413,7 @@ function CreateOrderDialog({
                   onValueChange={(v) => updateItem(index, "productId", v)}
                 >
                   <Select.Trigger placeholder="Seleccionar producto..." style={{ width: "100%" }} />
-                  <Select.Content>
+                  <Select.Content position="popper">
                     {products.map((p) => (
                       <Select.Item key={p.id} value={p.id}>
                         {p.name} — ${p.price.toFixed(2)}

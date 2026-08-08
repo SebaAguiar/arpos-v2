@@ -123,6 +123,22 @@ html, body, #root {
   padding: 0 10px !important;
 }
 
+/* ─── Select Dropdown Dynamic Height ─── */
+.rt-SelectContent {
+  max-height: min(280px, var(--radix-select-content-available-height, 280px)) !important;
+}
+
+.rt-SelectViewport {
+  height: auto !important;
+  padding: 4px !important;
+}
+
+.rt-SelectItem {
+  height: 32px !important;
+  font-size: 13px !important;
+  border-radius: 4px !important;
+}
+
 /* ─── Page container ─── */
 .page {
   margin: 0 auto;

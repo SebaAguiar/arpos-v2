@@ -204,7 +204,7 @@ export function UsersManager() {
                   className="select-compact"
                   style={{ minWidth: "140px" }}
                 />
-                <Select.Content>
+                <Select.Content position="popper">
                   <Select.Item value="admin">Administrador</Select.Item>
                   <Select.Item value="manager">Gerente</Select.Item>
                   <Select.Item value="cashier">Cajero</Select.Item>

@@ -123,7 +123,7 @@ export function StockAdjustmentDialog({
               </Text>
               <Select.Root value={movType} onValueChange={(v) => setMovType(v as MovementType)}>
                 <Select.Trigger style={{ width: "100%" }} aria-label="Tipo de movimiento de stock" />
-                <Select.Content style={{ height: "auto" }}>
+                <Select.Content position="popper">
                   <Select.Item value="INCOME">
                     <Flex align="center" gap="2">
                       <PlusIcon color="green" />

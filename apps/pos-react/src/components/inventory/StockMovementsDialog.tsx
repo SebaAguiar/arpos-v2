@@ -76,7 +76,7 @@ export function StockMovementsDialog({ preselectedProductId, onClose }: StockMov
         <div style={{ padding: "12px 20px", display: "flex", gap: "8px" }}>
           <Select.Root value={typeFilter} onValueChange={setTypeFilter}>
             <Select.Trigger style={{ width: "140px" }} placeholder="Todos los tipos" />
-            <Select.Content>
+            <Select.Content position="popper">
               <Select.Item value="">Todos</Select.Item>
               <Select.Item value="sale">Ventas</Select.Item>
               <Select.Item value="entry">Entradas</Select.Item>

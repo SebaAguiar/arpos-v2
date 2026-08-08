@@ -165,7 +165,7 @@ export function TasksDialog() {
                 <div style={{ display: "flex", gap: "8px" }}>
                   <Select.Root value={priority} onValueChange={(v) => setPriority(v as TaskPriority)}>
                     <Select.Trigger style={{ flex: 1 }} />
-                    <Select.Content>
+                    <Select.Content position="popper">
                       {Object.entries(PRIORITY_CONFIG).map(([key, cfg]) => (
                         <Select.Item key={key} value={key}>{cfg.label}</Select.Item>
                       ))}

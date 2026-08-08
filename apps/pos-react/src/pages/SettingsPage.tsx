@@ -97,7 +97,7 @@ export function SettingsPage() {
                 <Text size="2">Tamaño de papel</Text>
                 <Select.Root value={paperSize} onValueChange={(v) => setPaperSize(v as typeof paperSize)}>
                   <Select.Trigger aria-label="Tamaño de papel" />
-                  <Select.Content>
+                  <Select.Content position="popper">
                     <Select.Item value="80mm">80mm (térmico)</Select.Item>
                     <Select.Item value="58mm">58mm (térmico chico)</Select.Item>
                     <Select.Item value="a4">A4</Select.Item>
