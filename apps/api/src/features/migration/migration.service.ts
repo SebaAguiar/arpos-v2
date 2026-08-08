@@ -243,6 +243,14 @@ export interface MigrationSummary {
   completedAt: number;
 }
 
+export interface MigrationProgress {
+  step: number;
+  total: number;
+  label: string;
+}
+
+export type MigrationProgressFn = (progress: MigrationProgress) => void;
+
 // ── helpers ───────────────────────────────────────────────────────────────────
 
 const toCents = (v: string | null | undefined): number =>
@@ -282,13 +290,23 @@ export class MigrationService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async importFromV1(dto: ImportV1Input): Promise<MigrationSummary> {
+  async importFromV1(
+    dto: ImportV1Input,
+    onProgress?: MigrationProgressFn,
+  ): Promise<MigrationSummary> {
     const existingCompanies = await this.prisma.company.count();
     if (existingCompanies > 0) {
       throw new ConflictException(
         'Company already initialized; import is only allowed on an empty database',
       );
     }
+
+    const totalSteps = 9;
+    const emit = (step: number, label: string): void => {
+      onProgress?.({ step, total: totalSteps, label });
+    };
+
+    emit(1, 'Conectando a la base de datos v1');
 
     const client = new Client({ connectionString: dto.databaseUrl });
     await client.connect();
@@ -337,6 +355,8 @@ export class MigrationService {
           `sales=${sales.length} saleItems=${saleItems.length} cashMovements=${cashMovements.length}`,
       );
 
+      emit(2, 'Leyendo datos de la instalación anterior');
+
       const companyV1 = companies[0];
       if (!companyV1) {
         throw new Error('v1 database has no Company rows');
@@ -354,6 +374,7 @@ export class MigrationService {
       const batchSize = 500;
 
       // ── 1. Company + entitlement snapshot ──────────────────────────────────
+      emit(3, 'Migrando empresa y sucursales');
       const clientV1 = clients[0];
       const plan = clientV1?.plan.toLowerCase() ?? 'basic';
       const config = JSON.stringify({
@@ -404,6 +425,7 @@ export class MigrationService {
       });
 
       // ── 4. Contacts (v1 Contact + Customer merged) ──────────────────────────
+      emit(4, 'Migrando usuarios y contactos');
       const customerByContact = new Map<number, V1Customer>();
       for (const c of customers) {
         customerByContact.set(c.contactId, c);
@@ -438,6 +460,7 @@ export class MigrationService {
       }
 
       // ── 5. Products (denormalized from variants/prices/stock) ────────────────
+      emit(5, 'Migrando productos y variantes');
       const variantByProduct = new Map<number, V1ProductVariant[]>();
       for (const v of variants) {
         const list = variantByProduct.get(v.productId) ?? [];
@@ -515,6 +538,7 @@ export class MigrationService {
       });
 
       // ── 7. Inventory (v1 StockItem) ──────────────────────────────────────────
+      emit(6, 'Migrando inventario y movimientos');
       const variantProductMap = new Map<number, number>();
       for (const v of variants) {
         variantProductMap.set(v.id, v.productId);
@@ -556,6 +580,7 @@ export class MigrationService {
       }
 
       // ── 9. Cash registers (v1 CashShift + synthetic "Histórico") ─────────────
+      emit(7, 'Migrando cajas y movimientos de caja');
       await this.prisma.cashRegister.createMany({
         data: cashShifts.map((cs) => {
           return {
@@ -628,6 +653,7 @@ export class MigrationService {
       });
 
       // ── 12. Sales (ticket number assigned sequentially per store) ────────────
+      emit(8, 'Migrando ventas');
       const paymentsBySale = new Map<number, V1SalePayment[]>();
       for (const sp of salePayments) {
         const list = paymentsBySale.get(sp.saleId) ?? [];
@@ -724,6 +750,7 @@ export class MigrationService {
       }
 
       // ── 14. Tasks ────────────────────────────────────────────────────────────
+      emit(9, 'Finalizando migración');
       await this.prisma.task.createMany({
         data: tasks.map((t) => ({
           id: String(t.id),

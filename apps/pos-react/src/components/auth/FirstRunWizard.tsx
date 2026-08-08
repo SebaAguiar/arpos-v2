@@ -5,9 +5,11 @@ import {
   CheckCircledIcon,
   ArrowRightIcon,
   ArrowLeftIcon,
+  DownloadIcon,
 } from "@radix-ui/react-icons";
 import { useAuthStore } from "@/stores/auth.store";
 import { SetupRepository } from "@/repositories/setup.repository";
+import { MigrationWizard } from "@/components/auth/MigrationWizard";
 
 type WizardStep = "welcome" | "company" | "admin" | "success";
 
@@ -44,6 +46,7 @@ export function FirstRunWizard() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
+  const [migrationOpen, setMigrationOpen] = useState(false);
 
   const login = useAuthStore((s) => s.login);
   const checkSetup = useAuthStore((s) => s.checkSetup);
@@ -189,6 +192,27 @@ export function FirstRunWizard() {
             >
               Comenzar configuración
               <ArrowRightIcon width={16} height={16} />
+            </button>
+            <button
+              onClick={() => setMigrationOpen(true)}
+              style={{
+                width: "100%",
+                padding: "12px",
+                backgroundColor: "transparent",
+                color: "var(--text-primary)",
+                border: "1px solid var(--border)",
+                borderRadius: "6px",
+                fontSize: "14px",
+                fontWeight: 600,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+              }}
+            >
+              <DownloadIcon width={16} height={16} />
+              Migrar mis datos desde Arcon v1
             </button>
           </>
         )}
@@ -490,6 +514,14 @@ export function FirstRunWizard() {
           </>
         )}
       </div>
+
+      <MigrationWizard
+        open={migrationOpen}
+        onClose={() => setMigrationOpen(false)}
+        onComplete={async () => {
+          await checkSetup();
+        }}
+      />
     </div>
   );
 }
