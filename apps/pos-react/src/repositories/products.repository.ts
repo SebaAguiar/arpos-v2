@@ -57,6 +57,7 @@ function mapProduct(api: ApiProductWithInventory): Product {
     category: api.category_id ?? undefined,
     internalCode: api.code,
     image: undefined,
+    stockQuantity: api.stock_quantity,
     variants,
   };
 }

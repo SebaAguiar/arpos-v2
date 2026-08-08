@@ -1,4 +1,5 @@
 import type { Product, ProductVariant } from "@/lib/types";
+import { getProductStock } from "@/lib/stock";
 
 interface VariantSelectionDialogProps {
   product: Product;
@@ -15,6 +16,9 @@ export function VariantSelectionDialog({
   onSelect,
   onClose,
 }: VariantSelectionDialogProps) {
+  const totalStock = getProductStock(product);
+  const hasStock = totalStock > 0;
+
   return (
     <div
       onClick={onClose}
@@ -85,13 +89,14 @@ export function VariantSelectionDialog({
         <div style={{ flex: 1, overflowY: "auto", padding: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
           {product.variants.map((variant) => {
             const stock = getStock(variant);
+            const available = stock > 0 ? stock : totalStock;
             const price = variant.price ?? product.price;
 
             return (
               <button
                 key={variant.id}
                 onClick={() => onSelect(product, variant)}
-                disabled={stock <= 0}
+                disabled={!hasStock}
                 style={{
                   width: "100%",
                   textAlign: "left",
@@ -99,8 +104,8 @@ export function VariantSelectionDialog({
                   borderRadius: "10px",
                   border: "1px solid var(--border)",
                   backgroundColor: "var(--bg-surface)",
-                  cursor: stock > 0 ? "pointer" : "not-allowed",
-                  opacity: stock > 0 ? 1 : 0.5,
+                  cursor: hasStock ? "pointer" : "not-allowed",
+                  opacity: hasStock ? 1 : 0.5,
                   transition: "border-color 150ms ease",
                   display: "flex",
                   justifyContent: "space-between",
@@ -140,9 +145,9 @@ export function VariantSelectionDialog({
                   <div style={{ fontWeight: 700, fontSize: "16px", color: "var(--accent)" }}>
                     ${price.toLocaleString("es-AR")}
                   </div>
-                  {stock > 0 ? (
+                  {available > 0 ? (
                     <div style={{ fontSize: "11px", fontWeight: 500, color: "var(--color-success)" }}>
-                      {stock} disponibles
+                      {available} disponibles
                     </div>
                   ) : (
                     <div style={{ fontSize: "11px", fontWeight: 500, color: "var(--color-danger)" }}>

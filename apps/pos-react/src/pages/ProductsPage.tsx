@@ -21,6 +21,7 @@ import {
   ExclamationTriangleIcon,
   UpdateIcon,
 } from "@radix-ui/react-icons";
+import { useShallow } from "zustand/react/shallow";
 import {
   useProductsStore,
   selectFilteredProducts,
@@ -48,8 +49,8 @@ export function ProductsPage() {
     setSort,
   } = useProductsStore();
 
-  const filteredProducts = useProductsStore(selectFilteredProducts);
-  const categories = useProductsStore(selectCategories);
+  const filteredProducts = useProductsStore(useShallow(selectFilteredProducts));
+  const categories = useProductsStore(useShallow(selectCategories));
 
   // Filters & State
   const [lowStockOnly, setLowStockOnly] = useState(false);
@@ -150,9 +151,9 @@ export function ProductsPage() {
   }, [deletingProduct, fetchProducts]);
 
   return (
-    <div style={{ paddingBottom: "32px" }}>
+    <div className="page" >
       {/* Header */}
-      <Flex align="center" justify="between" style={{ marginBottom: "20px" }}>
+      <Flex align="center" justify="between" gap="5">
         <div>
           <Flex align="center" gap="3">
             <Text size="6" weight="bold">
@@ -232,7 +233,7 @@ export function ProductsPage() {
               onValueChange={(val) => setCategory(val === "all" ? null : val)}
             >
               <Select.Trigger style={{ minWidth: "160px" }} aria-label="Filtrar por categoría" />
-              <Select.Content style={{ height: "auto" }}>
+              <Select.Content position="popper">
                 <Select.Item value="all">Todas las categorías</Select.Item>
                 {categories.map((cat) => (
                   <Select.Item key={cat} value={cat}>
@@ -272,7 +273,7 @@ export function ProductsPage() {
             }}
           >
             <Select.Trigger style={{ minWidth: "160px" }} aria-label="Ordenar productos" />
-            <Select.Content style={{ height: "auto" }}>
+            <Select.Content position="popper">
               <Select.Item value="name-asc">Nombre (A-Z)</Select.Item>
               <Select.Item value="name-desc">Nombre (Z-A)</Select.Item>
               <Select.Item value="price-asc">Precio: menor a mayor</Select.Item>
@@ -472,6 +473,8 @@ export function ProductsPage() {
         open={formOpen}
         onOpenChange={setFormOpen}
         productToEdit={editingProduct}
+        categories={categories}
+        products={products}
         onSuccess={fetchProducts}
       />
 

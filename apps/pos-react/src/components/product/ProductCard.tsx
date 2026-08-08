@@ -1,6 +1,7 @@
 import type { KeyboardEvent, MouseEvent } from "react";
 import { PlusIcon } from "@radix-ui/react-icons";
 import type { Product } from "@/lib/types";
+import { getProductStock } from "@/lib/stock";
 
 interface ProductCardProps {
   product: Product;
@@ -8,10 +9,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onAddToCart }: ProductCardProps) {
-  const totalStock = product.variants.reduce(
-    (sum, v) => sum + v.stockItems.reduce((s, si) => s + si.quantity, 0),
-    0
-  );
+  const totalStock = getProductStock(product);
 
   const variantCount = product.variants.length;
   const hasMultipleVariants = variantCount > 1;

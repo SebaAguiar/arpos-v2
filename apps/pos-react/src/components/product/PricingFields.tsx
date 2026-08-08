@@ -1,10 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback } from "react";
 import { TextField, Text } from "@radix-ui/themes";
-import {
-  calcPriceFromCost,
-  calcMarginFromPrice,
-  parseNumericInput,
-} from "@/lib/pricing";
+import { calcMarginFromPrice, parseNumericInput } from "@/lib/pricing";
+import { CurrencyField } from "@/components/product/CurrencyField";
 
 export interface PricingValues {
   cost: string;
@@ -27,76 +24,29 @@ export function PricingFields({
   marginLabel = "Margen (%)",
   priceLabel = "Precio de Venta ($)",
 }: PricingFieldsProps) {
-  const [syncing, setSyncing] = useState<"cost" | "margin" | "price" | null>(
-    null,
+  const recalcMargin = useCallback(
+    (cost: string, price: string) => {
+      const c = parseNumericInput(cost);
+      const p = parseNumericInput(price);
+      const margin = c > 0 && p > 0 ? calcMarginFromPrice(c, p).toFixed(1) : "";
+      return { cost, margin, price };
+    },
+    [],
   );
 
   const handleCostChange = useCallback(
     (raw: string) => {
-      const cost = parseNumericInput(raw);
-      const currentMargin = parseNumericInput(values.margin);
-
-      if (cost > 0 && currentMargin > 0) {
-        const price = calcPriceFromCost(cost, currentMargin);
-        onChange({
-          cost: raw,
-          margin: values.margin,
-          price: price.toFixed(2),
-        });
-      } else {
-        onChange({ ...values, cost: raw });
-      }
-      setSyncing("cost");
+      onChange(recalcMargin(raw, values.price));
     },
-    [values, onChange],
-  );
-
-  const handleMarginChange = useCallback(
-    (raw: string) => {
-      const margin = parseNumericInput(raw);
-      const cost = parseNumericInput(values.cost);
-
-      if (cost > 0 && margin > 0) {
-        const price = calcPriceFromCost(cost, margin);
-        onChange({
-          cost: values.cost,
-          margin: raw,
-          price: price.toFixed(2),
-        });
-      } else {
-        onChange({ ...values, margin: raw });
-      }
-      setSyncing("margin");
-    },
-    [values, onChange],
+    [onChange, recalcMargin, values.price],
   );
 
   const handlePriceChange = useCallback(
     (raw: string) => {
-      const price = parseNumericInput(raw);
-      const cost = parseNumericInput(values.cost);
-
-      if (cost > 0 && price > 0) {
-        const margin = calcMarginFromPrice(cost, price);
-        onChange({
-          cost: values.cost,
-          margin: margin.toFixed(1),
-          price: raw,
-        });
-      } else {
-        onChange({ ...values, price: raw });
-      }
-      setSyncing("price");
+      onChange(recalcMargin(values.cost, raw));
     },
-    [values, onChange],
+    [onChange, recalcMargin, values.cost],
   );
-
-  useEffect(() => {
-    if (syncing) {
-      const timer = setTimeout(() => setSyncing(null), 600);
-      return () => clearTimeout(timer);
-    }
-  }, [syncing]);
 
   return (
     <div
@@ -110,14 +60,10 @@ export function PricingFields({
         <Text size="1" weight="bold" style={{ marginBottom: "4px", display: "block" }}>
           {costLabel}
         </Text>
-        <TextField.Root
-          type="number"
-          step="0.01"
-          min="0"
-          placeholder="0.00"
+        <CurrencyField
           value={values.cost}
-          onChange={(e) => handleCostChange(e.target.value)}
-          aria-label={costLabel}
+          onChange={handleCostChange}
+          ariaLabel={costLabel}
         />
       </div>
       <div>
@@ -125,27 +71,21 @@ export function PricingFields({
           {marginLabel}
         </Text>
         <TextField.Root
-          type="number"
-          step="0.1"
-          min="0"
-          placeholder="0.0"
-          value={values.margin}
-          onChange={(e) => handleMarginChange(e.target.value)}
+          value={values.margin ? `${values.margin}%` : ""}
+          placeholder="—"
           aria-label={marginLabel}
+          disabled
+          style={{ backgroundColor: "var(--bg-surface-hover)" }}
         />
       </div>
       <div>
         <Text size="1" weight="bold" style={{ marginBottom: "4px", display: "block" }}>
           {priceLabel} *
         </Text>
-        <TextField.Root
-          type="number"
-          step="0.01"
-          min="0"
-          placeholder="0.00"
+        <CurrencyField
           value={values.price}
-          onChange={(e) => handlePriceChange(e.target.value)}
-          aria-label={priceLabel}
+          onChange={handlePriceChange}
+          ariaLabel={priceLabel}
         />
       </div>
     </div>
