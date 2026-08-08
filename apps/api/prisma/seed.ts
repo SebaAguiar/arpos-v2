@@ -28,7 +28,29 @@ function epochAt(daysAgo: number, hour: number, minute: number): number {
 }
 
 function epochRandomDayHour(daysAgo: number): number {
-  return epochAt(daysAgo, 9 + Math.floor(Math.random() * 11), Math.floor(Math.random() * 60));
+  const currentHour = new Date().getHours();
+  const maxAllowedHour = daysAgo === 0 ? Math.max(8, Math.min(currentHour, 20)) : 21;
+  const minAllowedHour = 8;
+
+  if (maxAllowedHour <= minAllowedHour) {
+    return epochAt(daysAgo, minAllowedHour, Math.floor(Math.random() * 60));
+  }
+
+  const roll = Math.random();
+  let hour: number;
+  if (roll < 0.25) {
+    hour = 8 + Math.floor(Math.random() * 4); // 08:00 - 11:59
+  } else if (roll < 0.55) {
+    hour = 12 + Math.floor(Math.random() * 3); // 12:00 - 14:59
+  } else if (roll < 0.75) {
+    hour = 15 + Math.floor(Math.random() * 3); // 15:00 - 17:59
+  } else {
+    hour = 18 + Math.floor(Math.random() * 4); // 18:00 - 21:59
+  }
+
+  const clampedHour = Math.min(hour, maxAllowedHour);
+  const minute = Math.floor(Math.random() * 60);
+  return epochAt(daysAgo, clampedHour, minute);
 }
 
 function pick<T>(arr: readonly T[]): T {
@@ -121,21 +143,21 @@ interface ProductSeed {
 }
 
 const PRODUCTS: ProductSeed[] = [
-  { code: 'REM001', name: 'Remera Básica Algodón', description: 'Algodón peinado 24/1, corte clásico, talle amplio.', price_cents: 250000, cost_cents: 120000, stock_quantity: 45, category_id: 'remeras', sku: 'REM-BAS-001', min_stock: 10, max_stock: 100, variants: ['S', 'M', 'L', 'XL'] },
-  { code: 'REM002', name: 'Remera Polo', description: 'Piqué frisado, cuello con botones, ideal oficina.', price_cents: 450000, cost_cents: 220000, stock_quantity: 30, category_id: 'remeras', sku: 'REM-POL-002', min_stock: 8, max_stock: 80, variants: ['S', 'M', 'L', 'XL'] },
-  { code: 'REM003', name: 'Remera Manga Larga', description: 'Rib liso, puños elastizados, abrigo liviano.', price_cents: 320000, cost_cents: 150000, stock_quantity: 25, category_id: 'remeras', sku: 'REM-MLG-003', min_stock: 8, max_stock: 80, variants: ['S', 'M', 'L', 'XL'] },
-  { code: 'JNS001', name: 'Jeans Clásico Straight', description: 'Denim 12 oz, corte recto, lavado medio.', price_cents: 890000, cost_cents: 400000, stock_quantity: 20, category_id: 'pantalones', sku: 'JNS-STR-001', min_stock: 5, max_stock: 50 },
-  { code: 'JNS002', name: 'Jeans Slim Fit', description: 'Denim con elastano, tiro medio, ajuste slim.', price_cents: 950000, cost_cents: 420000, stock_quantity: 18, category_id: 'pantalones', sku: 'JNS-SLM-002', min_stock: 5, max_stock: 50 },
-  { code: 'BER001', name: 'Bermuda Cargo', description: 'Pie de soldado, bolsillos cargo, corte urbano.', price_cents: 650000, cost_cents: 300000, stock_quantity: 35, category_id: 'pantalones', sku: 'BER-CRG-001', min_stock: 10, max_stock: 60 },
-  { code: 'CMP001', name: 'Campera Slim Forro Polar', description: 'Exterior de nylon matte, forro polar desmontable.', price_cents: 2200000, cost_cents: 900000, stock_quantity: 12, category_id: 'camperas', sku: 'CMP-SLM-001', min_stock: 4, max_stock: 30 },
-  { code: 'CMP002', name: 'Campera Puffer Liviana', description: 'Puffer ultraliviano, relleno sintético, comprimible.', price_cents: 1800000, cost_cents: 750000, stock_quantity: 15, category_id: 'camperas', sku: 'CMP-PFF-002', min_stock: 4, max_stock: 30 },
-  { code: 'ZAP001', name: 'Zapatillas Run Max', description: 'Runner con amortiguación de espuma, malla transpirable.', price_cents: 1500000, cost_cents: 650000, stock_quantity: 8, category_id: 'calzado', sku: 'ZAP-RUN-001', min_stock: 5, max_stock: 25 },
-  { code: 'ZAP002', name: 'Zapatillas Urban Street', description: 'Silueta street, suela de goma, parte superior de cuero.', price_cents: 1200000, cost_cents: 500000, stock_quantity: 6, category_id: 'calzado', sku: 'ZAP-URB-002', min_stock: 5, max_stock: 25 },
-  { code: 'GOR001', name: 'Gorro Lana Clásico', description: 'Lana merino, tejido grueso, color carbón.', price_cents: 180000, cost_cents: 80000, stock_quantity: 50, category_id: 'accesorios', sku: 'GOR-CLX-001', min_stock: 15, max_stock: 120 },
-  { code: 'BUF001', name: 'Bufanda Algodón Twill', description: 'Twill de algodón suave, 180 cm, terminación flecos.', price_cents: 320000, cost_cents: 140000, stock_quantity: 40, category_id: 'accesorios', sku: 'BUF-ALG-001', min_stock: 10, max_stock: 100 },
-  { code: 'MED001', name: 'Medias Pack x3', description: 'Algodón 26/1, caña media, pack de 3 unidades.', price_cents: 150000, cost_cents: 60000, stock_quantity: 80, category_id: 'accesorios', sku: 'MED-PK3-001', min_stock: 20, max_stock: 200 },
-  { code: 'COL001', name: 'Collar Plata 925', description: 'Plata 925 con cadena ajustable, baño rodio.', price_cents: 850000, cost_cents: 350000, stock_quantity: 4, category_id: 'accesorios', sku: 'COL-PLT-001', min_stock: 5, max_stock: 30 },
-  { code: 'CIN001', name: 'Cinturón Cuero', description: 'Cuero vacuno, hebilla metálica, 3.5 cm.', price_cents: 550000, cost_cents: 230000, stock_quantity: 0, category_id: 'accesorios', sku: 'CIN-CRO-001', min_stock: 5, max_stock: 40 },
+  { code: 'REM001', name: 'Remera Básica Algodón', description: 'Algodón peinado 24/1, corte clásico, talle amplio.', price_cents: 250000, cost_cents: 120000, stock_quantity: 250, category_id: 'remeras', sku: 'REM-BAS-001', min_stock: 15, max_stock: 300, variants: ['S', 'M', 'L', 'XL'] },
+  { code: 'REM002', name: 'Remera Polo', description: 'Piqué frisado, cuello con botones, ideal oficina.', price_cents: 450000, cost_cents: 220000, stock_quantity: 200, category_id: 'remeras', sku: 'REM-POL-002', min_stock: 12, max_stock: 250, variants: ['S', 'M', 'L', 'XL'] },
+  { code: 'REM003', name: 'Remera Manga Larga', description: 'Rib liso, puños elastizados, abrigo liviano.', price_cents: 320000, cost_cents: 150000, stock_quantity: 180, category_id: 'remeras', sku: 'REM-MLG-003', min_stock: 10, max_stock: 200, variants: ['S', 'M', 'L', 'XL'] },
+  { code: 'JNS001', name: 'Jeans Clásico Straight', description: 'Denim 12 oz, corte recto, lavado medio.', price_cents: 890000, cost_cents: 400000, stock_quantity: 150, category_id: 'pantalones', sku: 'JNS-STR-001', min_stock: 10, max_stock: 150 },
+  { code: 'JNS002', name: 'Jeans Slim Fit', description: 'Denim con elastano, tiro medio, ajuste slim.', price_cents: 950000, cost_cents: 420000, stock_quantity: 140, category_id: 'pantalones', sku: 'JNS-SLM-002', min_stock: 10, max_stock: 150 },
+  { code: 'BER001', name: 'Bermuda Cargo', description: 'Pie de soldado, bolsillos cargo, corte urbano.', price_cents: 650000, cost_cents: 300000, stock_quantity: 160, category_id: 'pantalones', sku: 'BER-CRG-001', min_stock: 12, max_stock: 200 },
+  { code: 'CMP001', name: 'Campera Slim Forro Polar', description: 'Exterior de nylon matte, forro polar desmontable.', price_cents: 2200000, cost_cents: 900000, stock_quantity: 90, category_id: 'camperas', sku: 'CMP-SLM-001', min_stock: 5, max_stock: 100 },
+  { code: 'CMP002', name: 'Campera Puffer Liviana', description: 'Puffer ultraliviano, relleno sintético, comprimible.', price_cents: 1800000, cost_cents: 750000, stock_quantity: 110, category_id: 'camperas', sku: 'CMP-PFF-002', min_stock: 5, max_stock: 120 },
+  { code: 'ZAP001', name: 'Zapatillas Run Max', description: 'Runner con amortiguación de espuma, malla transpirable.', price_cents: 1500000, cost_cents: 650000, stock_quantity: 100, category_id: 'calzado', sku: 'ZAP-RUN-001', min_stock: 8, max_stock: 120 },
+  { code: 'ZAP002', name: 'Zapatillas Urban Street', description: 'Silueta street, suela de goma, parte superior de cuero.', price_cents: 1200000, cost_cents: 500000, stock_quantity: 95, category_id: 'calzado', sku: 'ZAP-URB-002', min_stock: 8, max_stock: 100 },
+  { code: 'GOR001', name: 'Gorro Lana Clásico', description: 'Lana merino, tejido grueso, color carbón.', price_cents: 180000, cost_cents: 80000, stock_quantity: 300, category_id: 'accesorios', sku: 'GOR-CLX-001', min_stock: 20, max_stock: 350 },
+  { code: 'BUF001', name: 'Bufanda Algodón Twill', description: 'Twill de algodón suave, 180 cm, terminación flecos.', price_cents: 320000, cost_cents: 140000, stock_quantity: 250, category_id: 'accesorios', sku: 'BUF-ALG-001', min_stock: 15, max_stock: 300 },
+  { code: 'MED001', name: 'Medias Pack x3', description: 'Algodón 26/1, caña media, pack de 3 unidades.', price_cents: 150000, cost_cents: 60000, stock_quantity: 400, category_id: 'accesorios', sku: 'MED-PK3-001', min_stock: 30, max_stock: 500 },
+  { code: 'COL001', name: 'Collar Plata 925', description: 'Plata 925 con cadena ajustable, baño rodio.', price_cents: 850000, cost_cents: 350000, stock_quantity: 50, category_id: 'accesorios', sku: 'COL-PLT-001', min_stock: 5, max_stock: 60 },
+  { code: 'CIN001', name: 'Cinturón Cuero', description: 'Cuero vacuno, hebilla metálica, 3.5 cm.', price_cents: 550000, cost_cents: 230000, stock_quantity: 120, category_id: 'accesorios', sku: 'CIN-CRO-001', min_stock: 10, max_stock: 150 },
 ];
 
 interface ContactSeed {
@@ -204,16 +226,10 @@ const WALLET_SPECS: { contactName: string; ops: WalletOp[] }[] = [
   },
 ];
 
-const SALE_SLOTS: { daysAgo: number; count: number }[] = [
-  { daysAgo: 0, count: 6 },
-  { daysAgo: 1, count: 7 },
-  { daysAgo: 3, count: 5 },
-  { daysAgo: 5, count: 6 },
-  { daysAgo: 8, count: 7 },
-  { daysAgo: 12, count: 6 },
-  { daysAgo: 18, count: 6 },
-  { daysAgo: 25, count: 7 },
-];
+const SALE_SLOTS: { daysAgo: number; count: number }[] = Array.from({ length: 30 }, (_, i) => ({
+  daysAgo: i,
+  count: (i % 7 === 0 || i % 7 === 6) ? 14 + Math.floor(Math.random() * 8) : 8 + Math.floor(Math.random() * 6),
+}));
 
 const PAYMENT_METHODS = ['cash', 'cash', 'cash', 'debit', 'debit', 'credit', 'transfer', 'qr'] as const;
 
@@ -323,6 +339,11 @@ async function insertSeedSale(
     await prisma.product.update({
       where: { id: item.productId },
       data: { stock_quantity: { decrement: item.quantity }, updated_at: now },
+    });
+
+    await prisma.inventory.updateMany({
+      where: { companyId, storeId, productId: item.productId, variantId: null },
+      data: { quantity: { decrement: item.quantity }, updated_at: now },
     });
 
     await prisma.inventoryMovement.create({
