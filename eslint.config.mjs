@@ -14,7 +14,7 @@ export default tseslint.config(
       "**/coverage/**",
       "**/playwright-report/**",
       "**/test-results/**",
-      "apps/arcon-launcher/**",
+      "apps/arcom-launcher/**",
       "apps/api/prisma/**",
       "apps/admin-panel/prisma/**",
       "apps/admin-panel/src/generated/**",

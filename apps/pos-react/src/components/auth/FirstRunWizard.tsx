@@ -162,7 +162,7 @@ export function FirstRunWizard() {
                 />
               </div>
               <Text size="6" weight="bold" style={{ display: "block" }}>
-                ¡Bienvenido a Arcon!
+                ¡Bienvenido a Arcom!
               </Text>
               <Text
                 size="3"
@@ -212,7 +212,7 @@ export function FirstRunWizard() {
               }}
             >
               <DownloadIcon width={16} height={16} />
-              Migrar mis datos desde Arcon v1
+              Migrar mis datos desde Arcom v1
             </button>
           </>
         )}
@@ -487,7 +487,7 @@ export function FirstRunWizard() {
                 color="gray"
                 style={{ display: "block", marginTop: "8px" }}
               >
-                Tu negocio está listo para usar Arcon.
+                Tu negocio está listo para usar Arcom.
               </Text>
             </div>
 

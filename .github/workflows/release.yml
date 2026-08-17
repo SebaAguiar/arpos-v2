@@ -50,8 +50,8 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            apps/arcon-launcher/src-tauri/target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('apps/arcon-launcher/src-tauri/Cargo.lock') }}
+            apps/arcom-launcher/src-tauri/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('apps/arcom-launcher/src-tauri/Cargo.lock') }}
 
       # ── Linux system deps (Tauri) ────────────────────
       - name: Install Linux dependencies
@@ -85,7 +85,7 @@ jobs:
       #    The updater .sig files are generated here when
       #    TAURI_SIGNING_PRIVATE_KEY is set. ────────────
       - name: Build Tauri app (signed bundles)
-        run: pnpm --filter arcon-launcher tauri build
+        run: pnpm --filter arcom-launcher tauri build
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
@@ -98,7 +98,7 @@ jobs:
       - name: Stage release artifacts
         run: |
           mkdir -p staging
-          find apps/arcon-launcher/src-tauri/target/release/bundle -type f \( \
+          find apps/arcom-launcher/src-tauri/target/release/bundle -type f \( \
             -name "*.deb" -o \
             -name "*.rpm" -o \
             -name "*.AppImage" -o \
@@ -149,7 +149,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
-          name: Arcon ${{ github.ref_name }}
+          name: Arcom ${{ github.ref_name }}
           body_path: CHANGELOG.md
           files: release-artifacts/**/*
           generate_release_notes: true

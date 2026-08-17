@@ -2,7 +2,7 @@ import { Client, type QueryResultRow } from 'pg';
 import { PrismaClient, Prisma } from '@prisma/client';
 
 /**
- * One-off migration script: Xata v1 (PostgreSQL) -> Arcon v2 (SQLite).
+ * One-off migration script: Xata v1 (PostgreSQL) -> Arcom v2 (SQLite).
  *
  * Reads the v1 database read-only, transforms rows into the v2 schema and
  * writes them to a local SQLite database via Prisma.

@@ -1,12 +1,12 @@
-# Presupuestos de Performance — Arcon Tauri v2
+# Presupuestos de Performance — Arcom Tauri v2
 
-Este documento define targets concretos de performance para Arcon, cómo medirlos y qué regresiones son aceptables o no.
+Este documento define targets concretos de performance para Arcom, cómo medirlos y qué regresiones son aceptables o no.
 
 ---
 
 ## 1. Filosofía de Performance
 
-Arcon debe ser rápido como un POS tradicional: arranque instantáneo, queries ágiles, UI responsiva. La migración a Tauri + React + SQLite debe ser una mejora, no una regresión.
+Arcom debe ser rápido como un POS tradicional: arranque instantáneo, queries ágiles, UI responsiva. La migración a Tauri + React + SQLite debe ser una mejora, no una regresión.
 
 **Principio core:** El usuario nunca debe sentir que la app es lenta. El POS es crítico — cada ms de latencia en una venta impacta la experiencia del cajero.
 
@@ -24,13 +24,13 @@ Arcon debe ser rápido como un POS tradicional: arranque instantáneo, queries �
 | Total: app lista para usar | <5s | <10s |
 
 **Qué se mide:**
-- Desde que el usuario hace doble-click en el icono de Arcon hasta que el POS está operativo.
+- Desde que el usuario hace doble-click en el icono de Arcom hasta que el POS está operativo.
 - Incluye: Tauri window init, NestJS spawn, SQLite connect, React render, first API call.
 
 **Cómo medir:**
 ```bash
 # Time Tauri window
-time ./arcon-launcher
+time ./arcom-launcher
 
 # Time NestJS health check
 time curl http://localhost:3000/api/health
@@ -121,10 +121,10 @@ app.use((req, res, next) => {
 **Cómo medir:**
 ```bash
 # Monitor en real-time
-pidstat -r -p $(pgrep -f "arcon") 1
+pidstat -r -p $(pgrep -f "arcom") 1
 
 # Linux
-cat /proc/$(pgrep -f arcon)/status | grep VmRSS
+cat /proc/$(pgrep -f arcom)/status | grep VmRSS
 
 # macOS
 vmmap <PID> | grep "Physical footprint"

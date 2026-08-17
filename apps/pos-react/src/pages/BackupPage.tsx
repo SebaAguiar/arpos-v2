@@ -79,7 +79,7 @@ export function BackupPage() {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div>
               <Text size="3" weight="bold" style={{ display: "block", marginBottom: "4px" }}>
-                Migrar desde Arcon v1
+                Migrar desde Arcom v1
               </Text>
               <Text size="2" color="gray">
                 Importá tus datos existentes desde la nube a esta instalación

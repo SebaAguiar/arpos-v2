@@ -1,6 +1,6 @@
-# Estrategia de Testing — Arcon Tauri v2
+# Estrategia de Testing — Arcom Tauri v2
 
-Este documento define cómo escribir y estructurar tests en Arcon, incluyendo unit tests, integration tests y E2E tests.
+Este documento define cómo escribir y estructurar tests en Arcom, incluyendo unit tests, integration tests y E2E tests.
 
 ---
 
@@ -129,7 +129,7 @@ libs/api/sales/src/
 // libs/api/sales/src/__tests__/sales.service.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
 import { SalesService } from '../sales.service';
-import { PrismaService } from '@arcon/prisma';
+import { PrismaService } from '@arcom/prisma';
 
 describe('SalesService', () => {
   let service: SalesService;
@@ -223,7 +223,7 @@ describe('Sale Contract Validation', () => {
 ```typescript
 // libs/api/sales/src/__tests__/sales.repository.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
-import { PrismaService } from '@arcon/prisma';
+import { PrismaService } from '@arcom/prisma';
 import { execSync } from 'child_process';
 
 describe('SalesRepository (SQLite)', () => {
@@ -432,7 +432,7 @@ test.describe('POS Workflow', () => {
 | `libs/api/cash-register/` | 80% |
 | `libs/api/common/` | 85% |
 | `apps/pos-react/` | 70% |
-| `apps/arcon-launcher/` | 60% |
+| `apps/arcom-launcher/` | 60% |
 
 ### 6.2 Ejecutar Coverage
 

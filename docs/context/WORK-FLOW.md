@@ -1,6 +1,6 @@
-# Flujo de Trabajo — Arcon Tauri v2
+# Flujo de Trabajo — Arcom Tauri v2
 
-Este documento describe los pasos para implementar cambios, la checklist de Definition of Done (DoD) y el proceso de build/deploy de Arcon.
+Este documento describe los pasos para implementar cambios, la checklist de Definition of Done (DoD) y el proceso de build/deploy de Arcom.
 
 ---
 
@@ -96,19 +96,19 @@ pnpm nx serve pos-react
 
 ```bash
 # Development
-pnpm nx serve arcon-launcher
+pnpm nx serve arcom-launcher
 
 # Production (genera instalador)
-pnpm nx build arcon-launcher
+pnpm nx build arcom-launcher
 
 # Output:
-# apps/arcon-launcher/src-tauri/target/release/bundle/
+# apps/arcom-launcher/src-tauri/target/release/bundle/
 #   ├── windows/
-#   │   └── nsis/Arcon_1.0.0_x64-setup.exe
+#   │   └── nsis/Arcom_1.0.0_x64-setup.exe
 #   ├── macos/
-#   │   └── dmg/Arcon_1.0.0_aarch64.dmg
+#   │   └── dmg/Arcom_1.0.0_aarch64.dmg
 #   └── linux/
-#       └── appimage/Arcon_1.0.0_amd64.AppImage
+#       └── appimage/Arcom_1.0.0_amd64.AppImage
 ```
 
 ### 3.3 Publishing
@@ -188,9 +188,9 @@ jobs:
         with: { node-version: '20', cache: 'pnpm' }
       - uses: dtolnay/rust-toolchain@stable
       - run: pnpm install --frozen-lockfile
-      - run: pnpm nx build arcon-launcher
+      - run: pnpm nx build arcom-launcher
       - uses: actions/upload-artifact@v3
         with:
-          name: arcon-${{ matrix.os }}
-          path: apps/arcon-launcher/src-tauri/target/release/bundle/
+          name: arcom-${{ matrix.os }}
+          path: apps/arcom-launcher/src-tauri/target/release/bundle/
 ```

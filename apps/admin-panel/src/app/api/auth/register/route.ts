@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 function generateLicenseKey(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const segments = ["ARCON"];
+  const segments = ["ARCOM"];
   for (let s = 0; s < 3; s++) {
     let segment = "";
     for (let i = 0; i < 4; i++) {

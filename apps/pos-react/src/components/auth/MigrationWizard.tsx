@@ -73,7 +73,7 @@ export function MigrationWizard({ open, onClose, onComplete }: MigrationWizardPr
   return (
     <Dialog.Root open={open} onOpenChange={(o) => { if (!o && !loading) { onClose(); setStep("select"); setSummary(null); setError(null); } }}>
       <Dialog.Content style={{ maxWidth: "520px" }}>
-        <Dialog.Title>Migrar datos de Arcon v1</Dialog.Title>
+        <Dialog.Title>Migrar datos de Arcom v1</Dialog.Title>
         <Dialog.Description size="2" color="gray">
           Importá tus datos existentes desde la nube a esta instalación local.
         </Dialog.Description>

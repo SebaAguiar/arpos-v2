@@ -1,6 +1,6 @@
-# Marketing Landing — Arcon
+# Marketing Landing — Arcom
 
-Landing page estática para Arcon, desarrollada con Astro + Tailwind CSS.
+Landing page estática para Arcom, desarrollada con Astro + Tailwind CSS.
 
 ## Commands
 

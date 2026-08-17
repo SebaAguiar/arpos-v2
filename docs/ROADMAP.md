@@ -1,6 +1,6 @@
-# Roadmap de Features y Migración — Arcon Tauri v2
+# Roadmap de Features y Migración — Arcom Tauri v2
 
-Este documento recopila las fases de migración, features propuestas y roadmap de Arcon v2.
+Este documento recopila las fases de migración, features propuestas y roadmap de Arcom v2.
 
 ---
 
@@ -38,7 +38,7 @@ Este documento recopila las fases de migración, features propuestas y roadmap d
 - [x] Tests de integración con SQLite in-memory
 - [x] Migration de datos desde PostgreSQL cloud
 
-> **Nota (2026-07-31):** Migración one-off del cliente "Libreria Magna" completada de Arcon v1 (Xata) → v2 (SQLite local + cloud relay). Detalles y conteos en `ARCHITECTURE.md` §5.5. **Backend del Migration Wizard listo:** `POST /api/migration/import` (`MigrationService`, `@Public()`, 409 si ya hay company) — ladrillo reutilizable para el wizard. **Resta el wizard UI** (CLI-INTERACTIVE §3) que consumirá este endpoint; se construye cuando exista demanda de usuarios v1.
+> **Nota (2026-07-31):** Migración one-off del cliente "Libreria Magna" completada de Arcom v1 (Xata) → v2 (SQLite local + cloud relay). Detalles y conteos en `ARCHITECTURE.md` §5.5. **Backend del Migration Wizard listo:** `POST /api/migration/import` (`MigrationService`, `@Public()`, 409 si ya hay company) — ladrillo reutilizable para el wizard. **Resta el wizard UI** (CLI-INTERACTIVE §3) que consumirá este endpoint; se construye cuando exista demanda de usuarios v1.
 
 **Bloqueadores:** Fase 0 completada
 **Dependencias:** NestJS 11, Prisma 5.22, SQLite 3.46
@@ -177,12 +177,12 @@ Este documento recopila las fases de migración, features propuestas y roadmap d
 - [ ] Completar documentación
 - [ ] Launch público
 
-**Landing page de Arcon** (v1 existe en repo `arpos` con Astro — migrar a v2 + rebrandear a Arcon):
+**Landing page de Arcom** (v1 existe en repo `arpos` con Astro — migrar a v2 + rebrandear a Arcom):
 
-- [ ] Migrar `apps/marketing-landing` de v1 (Astro) al monorepo v2 y rebrandear a Arcon
-- [ ] Botones de descarga por SO (deb/rpm/AppImage/dmg/msi/exe) apuntando a los assets de `SebaAguiar/arcon-releases`; resolver `releases/latest` en build-time
+- [x] Migrar `apps/marketing-landing` de v1 (Astro) al monorepo v2 y rebrandear a Arcom
+- [ ] Botones de descarga por SO (deb/rpm/AppImage/dmg/msi/exe) apuntando a los assets de `SebaAguiar/arcom-releases`; resolver `releases/latest` en build-time
 - [ ] Pasarela de pagos con **MercadoPago subscriptions** (requiere backend externo para checkout + webhooks; NO usar `apps/api` — es sidecar local offline-first)
-- [ ] Apartado de **issues/reportes**: GitHub Issues del repo público `arcon-releases` con issue templates; enlaces desde la landing y la app
+- [ ] Apartado de **issues/reportes**: GitHub Issues del repo público `arcom-releases` con issue templates; enlaces desde la landing y la app
 
 **Bloqueadores:** Fase 5 completada
 **Dependencias:** Beta testers, infraestructura de updates

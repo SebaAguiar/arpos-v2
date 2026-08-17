@@ -32,7 +32,7 @@ impl UpdaterManager {
         let response = self
             .client
             .get(&url)
-            .header("User-Agent", format!("arcon-updater/{}", current_version))
+            .header("User-Agent", format!("arcom-updater/{}", current_version))
             .send()
             .await
             .map_err(|e| format!("Failed to check for updates: {}", e))?;
@@ -119,6 +119,6 @@ struct GitHubAsset {
 
 fn get_repo_owner_name() -> String {
     option_env!("GITHUB_REPO")
-        .unwrap_or("SebaAguiar/arcon-releases")
+        .unwrap_or("SebaAguiar/arcom-releases")
         .to_string()
 }

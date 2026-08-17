@@ -1,12 +1,12 @@
-# Sincronización Cloud — Arcon Tauri v2
+# Sincronización Cloud — Arcom Tauri v2
 
-Este documento especifica el sistema de sincronización de Arcon (Fase 5 del ROADMAP): cómo los POS locales (SQLite) replican datos a un servidor cloud y viceversa, de forma opcional y offline-first.
+Este documento especifica el sistema de sincronización de Arcom (Fase 5 del ROADMAP): cómo los POS locales (SQLite) replican datos a un servidor cloud y viceversa, de forma opcional y offline-first.
 
 ---
 
 ## 1. Principios
 
-- **Cloud es opcional.** Arcon funciona 100% local. La sincronización es una feature que el usuario habilita en Settings.
+- **Cloud es opcional.** Arcom funciona 100% local. La sincronización es una feature que el usuario habilita en Settings.
 - **Offline-first.** Todo cambio local se encola en `SyncQueue`. Si cloud no está configurado, los cambios quedan en la cola (estado `pending`) hasta que el usuario conecta el cloud. **Nunca** se marcan como `synced` sin haber sido confirmados por el cloud.
 - **Last-write-wins (LWW).** El conflicto se resuelve comparando timestamps: gana el cambio cuyo `updated_at` sea más reciente. Un cambio remoto se ignora (skip) si el registro local ya tiene `updated_at >= change.updatedAt`.
 - **Tenant aislado.** Todo acceso a la cola y a la configuración cloud es por `companyId` + `storeId` vía `TenantContextService`. No hay datos cruzados entre empresas.
@@ -112,7 +112,7 @@ Se persiste en el JSON de `company.config` (columna `config` de `companies`), ba
 
 Una venta remota puede referenciar un `user_id` que aún no existe localmente. En ese caso se crea un usuario sintético:
 
-- `email`: `sync-{userId}@local.arcon`
+- `email`: `sync-{userId}@local.arcom`
 - `role`: `cashier`
 - `is_active`: `false`
 - `password`: placeholder no utilizable (constante `SPEC_ENTITY_PLACEHOLDER_PASSWORD`)
@@ -128,7 +128,7 @@ Una venta remota puede referenciar un `user_id` que aún no existe localmente. E
 Patrón Service → Store → Smart Component (ver AGENTS.md §4.6):
 
 - `services/sync.service.ts` — `getStatus`, `processPending`, `pullFromCloud`, `getConfig`, `saveConfig`, `disconnect`, `reconnect`.
-- `stores/sync.store.ts` — estado global (pending/synced/failed, `cloudConfig`, `subscription`, `lastPullResult`) + acciones. Persiste `subscription` en `localStorage` (`arcon-sync`). Polling de `fetchStatus` cada 30s.
+- `stores/sync.store.ts` — estado global (pending/synced/failed, `cloudConfig`, `subscription`, `lastPullResult`) + acciones. Persiste `subscription` en `localStorage` (`arcom-sync`). Polling de `fetchStatus` cada 30s.
 - `components/settings/CloudSyncSettings.tsx` — smart component que conecta el store, muestra estado de conexión, botones Subir/Descargar, y form de URL + JWT.
 - `pages/SettingsPage.tsx` — monta `<CloudSyncSettings />` y la tarjeta de Suscripción.
 

@@ -1,4 +1,4 @@
-# AGENTS.md — Guía del Agente para Arcon Tauri v2
+# AGENTS.md — Guía del Agente para Arcom Tauri v2
 
 > **Si hay algún conflicto entre este archivo y `docs/context/ARCHITECTURE.md`,
 > el archivo `docs/context/ARCHITECTURE.md` siempre tiene la razón.**
@@ -30,11 +30,11 @@ Sos un **Senior Staff Engineer con experiencia profunda en TypeScript, Tauri, Ne
 
 ### Tu rol tiene una jerarquía estricta de responsabilidades:
 
-1. **Primero enseñás.** Antes de mostrar cualquier línea de código, explicás en español qué problema resuelve, por qué esa es la solución correcta dentro de la arquitectura de Arcon, y qué consecuencias tendría hacerlo de otra manera.
+1. **Primero enseñás.** Antes de mostrar cualquier línea de código, explicás en español qué problema resuelve, por qué esa es la solución correcta dentro de la arquitectura de Arcom, y qué consecuencias tendría hacerlo de otra manera.
 
 2. **Segundo, mostrás el camino.** Explicás el enfoque paso a paso para que el desarrollador lo implemente él mismo. No implementás código completo de forma autónoma salvo que se te pida explícitamente con la frase **"implementalo vos"**. Si no aparece esa frase, respondés con explicación y pseudocódigo orientativo, no con implementación lista para pegar.
 
-3. **Tercero, protegés la arquitectura.** Si alguien te pide algo que viola los principios de Arcon (local-first, offline-first, multi-tenant estricto, repository pattern, thin controllers), lo decís claramente, explicás por qué viola la arquitectura y proponés el camino correcto. Consultá `docs/context/DECITIONS.md` para entender el razonamiento detrás de cada decisión. No implementás la versión incorrecta "porque te lo pidieron".
+3. **Tercero, protegés la arquitectura.** Si alguien te pide algo que viola los principios de Arcom (local-first, offline-first, multi-tenant estricto, repository pattern, thin controllers), lo decís claramente, explicás por qué viola la arquitectura y proponés el camino correcto. Consultá `docs/context/DECITIONS.md` para entender el razonamiento detrás de cada decisión. No implementás la versión incorrecta "porque te lo pidieron".
 
 4. **Anticipás problemas antes de que ocurran.** Revisá `docs/context/KNOWN-ERRORS.md` para identificar edge cases, vulnerabilidades de rendimiento y gotchas sistémicos. Mencioná estos riesgos **antes** de que el desarrollador toque el teclado, no después de que rompan producción.
 
@@ -63,7 +63,7 @@ Sos un **Senior Staff Engineer con experiencia profunda en TypeScript, Tauri, Ne
 
 ## 2. Resumen del proyecto
 
-- **Proyecto:** Arcon Tauri v2 — Aplicación desktop de punto de venta (POS) con arquitectura local-first, SQLite embebido, NestJS como backend sidecar, y sync opcional a cloud.
+- **Proyecto:** Arcom Tauri v2 — Aplicación desktop de punto de venta (POS) con arquitectura local-first, SQLite embebido, NestJS como backend sidecar, y sync opcional a cloud.
 - **Filosofía:** `Local-first`, `Offline-first`, `Type-safe end-to-end`, `Zero-config`, `Multi-tenant estricto`.
 - **Dominios principales:**
   - POS con carrito, código de barras, medios de pago, impresión de tickets.
@@ -125,7 +125,7 @@ Todos los documentos se encuentran bajo `docs/context/`. Estos son autoridad abs
 
 **`any` está terminantemente prohibido en todo el código del proyecto. Sin excepciones.**
 
-Esto no es una recomendación. Es una regla arquitectónica. Arcon es un sistema donde los tipos fluyen de punta a punta (Prisma types → NestJS DTOs/contracts → React hooks → UI). Si se usa `any` en cualquier punto de esa cadena, se pierde la garantía de tipo en todos los downstreams.
+Esto no es una recomendación. Es una regla arquitectónica. Arcom es un sistema donde los tipos fluyen de punta a punta (Prisma types → NestJS DTOs/contracts → React hooks → UI). Si se usa `any` en cualquier punto de esa cadena, se pierde la garantía de tipo en todos los downstreams.
 
 ```typescript
 // ❌ Prohibido — anula todas las garantías del sistema de tipos
@@ -417,7 +417,7 @@ git diff --staged
 | `chore` | Tareas de mantenimiento (actualizar dependencias, configuración) |
 | `build` | Cambios en el sistema de build o dependencias externas |
 
-**Scopes específicos de Arcon Tauri:**
+**Scopes específicos de Arcom Tauri:**
 
 | Scope | Qué cubre |
 |---|---|
@@ -429,7 +429,7 @@ git diff --staged
 | `sync` | NestJS sync module, SyncQueue, CloudRelay |
 | `pos-react` | Frontend React POS |
 | `pos` | POS (puede usarse indistintamente con pos-react) |
-| `arcon-launcher` | Tauri desktop app, Rust commands |
+| `arcom-launcher` | Tauri desktop app, Rust commands |
 | `updater` | Tauri updater, distribution, rollback, CI/CD releases |
 | `prisma` | Schema, migrations, transformer service |
 | `common` | Utilidades compartidas, tipos globales |
@@ -666,4 +666,4 @@ arpos-v2/
 
 ---
 
-_AGENTS.md v1.0 — Arcon Tauri v2 con NestJS backend y integración completa de `docs/context/`. **Si este archivo contradice `docs/context/ARCHITECTURE.md`, gana `docs/context/ARCHITECTURE.md`.**_
+_AGENTS.md v1.0 — Arcom Tauri v2 con NestJS backend y integración completa de `docs/context/`. **Si este archivo contradice `docs/context/ARCHITECTURE.md`, gana `docs/context/ARCHITECTURE.md`.**_

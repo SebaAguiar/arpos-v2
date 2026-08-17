@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    arcon_v2_lib::run()
+    arcom_v2_lib::run()
 }

@@ -1,5 +1,5 @@
 {
-  "name": "arcon-launcher",
+  "name": "arcom-launcher",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "targets": {
@@ -7,14 +7,14 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "tauri dev",
-        "cwd": "apps/arcon-launcher"
+        "cwd": "apps/arcom-launcher"
       }
     },
     "build": {
       "executor": "nx:run-commands",
       "options": {
         "command": "tauri build",
-        "cwd": "apps/arcon-launcher"
+        "cwd": "apps/arcom-launcher"
       }
     }
   },

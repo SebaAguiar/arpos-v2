@@ -1,12 +1,12 @@
 [package]
-name = "arcon-v2"
+name = "arcom-v2"
 version = "1.0.0"
-description = "Arcon - Point of Sale System"
+description = "Arcom - Point of Sale System"
 authors = ["SebaAguiar"]
 edition = "2021"
 
 [lib]
-name = "arcon_v2_lib"
+name = "arcom_v2_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

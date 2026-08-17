@@ -4,7 +4,7 @@ import sitemap from "@astrojs/sitemap";
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://arcon.com.ar', 
+  site: 'https://arcom.com.ar', 
   integrations: [tailwind(), sitemap()],
   outDir: '../../dist/apps/marketing-landing',
   vite: {

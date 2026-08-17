@@ -1,12 +1,12 @@
-# Glosario de Términos — Arcon Tauri v2
+# Glosario de Términos — Arcom Tauri v2
 
-Este documento define las entidades de dominio, términos técnicos y conceptos arquitectónicos utilizados en el código y documentación de Arcon.
+Este documento define las entidades de dominio, términos técnicos y conceptos arquitectónicos utilizados en el código y documentación de Arcom.
 
 ---
 
 ## 1. Entidades de Dominio
 
-- **Company:** Empresa o negocio que utiliza Arcon. En modo local, cada instalación tiene una única Company. Conserva el campo `companyId` para ser reversible a cloud.
+- **Company:** Empresa o negocio que utiliza Arcom. En modo local, cada instalación tiene una única Company. Conserva el campo `companyId` para ser reversible a cloud.
 - **Store (Sucursal):** Unidad física o lógica dentro de una Company. Cada Store tiene inventario, caja y ventas independientes.
 - **Product (Producto):** Artículo o servicio que se vende. Tiene código, nombre, precio (en centavos), costo, stock y categoría.
 - **ProductVariant (Variante):** Variación de un producto (talle, color, tamaño). Permite múltiples precios y stocks por variante.
@@ -17,24 +17,24 @@ Este documento define las entidades de dominio, términos técnicos y conceptos 
 - **CashMovement (Movimiento de Caja):** Entrada o salida de dinero en una caja (venta, retiro, depósito, ajuste).
 - **Inventory (Inventario):** Stock actual de un producto en una Store. Se actualiza con cada venta y movimiento.
 - **InventoryMovement (Movimiento de Inventario):** Registro de entrada, salida o ajuste de stock de un producto.
-- **User (Usuario):** Persona que opera Arcon. Tiene email, contraseña hasheada y rol (admin, cashier, inventory).
+- **User (Usuario):** Persona que opera Arcom. Tiene email, contraseña hasheada y rol (admin, cashier, inventory).
 - **SyncQueue (Cola de Sincronización):** Cola de cambios pendientes de sincronizar con cloud. Almacena la acción (create/update/delete), entidad, payload y estado (pending/synced/error).
 
 ---
 
 ## 2. Términos Técnicos
 
-- **Tauri:** Framework de escritorio que empaqueta una app web (React) con un backend Rust. Reemplaza Electron en Arcon v2. Genera instaladores nativos para Windows, macOS y Linux.
+- **Tauri:** Framework de escritorio que empaqueta una app web (React) con un backend Rust. Reemplaza Electron en Arcom v2. Genera instaladores nativos para Windows, macOS y Linux.
 - **Rust:** Lenguaje de programación used en el backend de Tauri para gestión de procesos, filesystem, actualizaciones y comandos nativos.
-- **NestJS:** Framework de backend Node.js con arquitectura modular, DI y TypeScript. Reutilizado del 95% del código existente de Arcon v1.
-- **Prisma:** ORM para TypeScript que genera tipos desde un schema. En Arcon v2 usa SQLite como provider local.
-- **SQLite:** Base de datos embebida, sin servidor. Almacena toda la data localmente en `~/.arcon/data/app.db`.
-- **WAL (Write-Ahead Logging):** Modo de journaling de SQLite que permite lecturas concurrentes durante escrituras. Habilitado por defecto en Arcon.
-- **React:** Librería de UI para el frontend del POS. Reemplaza Angular en Arcon v2.
+- **NestJS:** Framework de backend Node.js con arquitectura modular, DI y TypeScript. Reutilizado del 95% del código existente de Arcom v1.
+- **Prisma:** ORM para TypeScript que genera tipos desde un schema. En Arcom v2 usa SQLite como provider local.
+- **SQLite:** Base de datos embebida, sin servidor. Almacena toda la data localmente en `~/.arcom/data/app.db`.
+- **WAL (Write-Ahead Logging):** Modo de journaling de SQLite que permite lecturas concurrentes durante escrituras. Habilitado por defecto en Arcom.
+- **React:** Librería de UI para el frontend del POS. Reemplaza Angular en Arcom v2.
 - **Zustand:** Biblioteca de state management para React. Reemplaza NGRx. Más simple, menos boilerplate.
 - **Shadcn/ui:** Biblioteca de componentes UI construida sobre Radix UI y TailwindCSS. Componentes copy-paste, no una librería instalada.
 - **Radix UI:** Primitivas de UI headless (sin estilos) para construir componentes accesibles.
-- **TailwindCSS:** Framework de CSS utility-first. Mismo sistema que Arcon v1.
+- **TailwindCSS:** Framework de CSS utility-first. Mismo sistema que Arcom v1.
 - **React Router:** Router para React con lazy-loaded routes y layouts anidados.
 - **Vite:** Build tool para React. Dev server ultrarrápido con HMR.
 - **Prisma Migrate:** Herramienta de migración de schema de Prisma. Genera SQL desde el schema.prisma.
@@ -57,16 +57,16 @@ Este documento define las entidades de dominio, términos técnicos y conceptos 
 - **Auto-updater:** Mecanismo de Tauri que descarga e instala actualizaciones desde GitHub Releases. Usa differential updates (patch) para hotfixes y full binary para features.
 - **Differential Update:** Actualización que solo descarga los archivos modificados (patch), en lugar del binario completo. Tauri genera diffs automáticamente entre versiones consecutivas.
 - **Rollback:** Revertir a una versión anterior de la aplicación cuando la versión actual tiene bugs críticos. Se marca la versión rota como `broken` y se ofrece la anterior como `stable`.
-- **Ed25519 Signing:** Firma criptográfica de binarios para garantizar que las actualizaciones provienen de Arcon y no fueron alteradas. La clave privada firma el binario, la pública (en tauri.conf.json) verifica la integridad.
+- **Ed25519 Signing:** Firma criptográfica de binarios para garantizar que las actualizaciones provienen de Arcom y no fueron alteradas. La clave privada firma el binario, la pública (en tauri.conf.json) verifica la integridad.
 - **Rollout gradual:** Estrategia de distribución donde una nueva versión se libera progresivamente (5% → 25% → 100%) en lugar de todos los usuarios simultáneamente. Reduce el impacto de bugs en producción.
-- **Monorepo:** Estructura de repositorio con múltiples apps/packages en un solo repo. Arcon usa pnpm workspaces + Nx.
+- **Monorepo:** Estructura de repositorio con múltiples apps/packages en un solo repo. Arcom usa pnpm workspaces + Nx.
 - **Nx:** Herramienta de monorepo que gestiona builds, tests y dependencias entre apps/packages.
 
 ---
 
 ## 4. Términos de Persistencia
 
-- **`~/.arcon/`:** Directorio raíz de datos de Arcon en la máquina del usuario.
+- **`~/.arcom/`:** Directorio raíz de datos de Arcom en la máquina del usuario.
   - `data/app.db` — Base de datos SQLite principal
   - `backup/` — Backups automáticos diarios (JSON comprimido)
   - `config/` — Configuración de la aplicación

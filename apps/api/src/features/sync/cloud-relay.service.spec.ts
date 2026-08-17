@@ -363,7 +363,7 @@ describe('CloudRelayService', () => {
         expect.objectContaining({
           data: expect.objectContaining({
             id: 'remote-user-1',
-            email: 'sync-remote-user-1@local.arcon',
+            email: 'sync-remote-user-1@local.arcom',
             is_active: false,
           }),
         }),

@@ -56,7 +56,7 @@ export function LoginPage() {
             <LightningBoltIcon width={24} height={24} style={{ color: "var(--accent)" }} />
           </div>
           <Text size="5" weight="bold" style={{ display: "block" }}>
-            Arcon
+            Arcom
           </Text>
           <Text size="2" color="gray">
             Ingresá para continuar
@@ -71,7 +71,7 @@ export function LoginPage() {
             </Text>
             <TextField.Root
               type="email"
-              placeholder="admin@arcon.com"
+              placeholder="admin@arcom.com"
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);

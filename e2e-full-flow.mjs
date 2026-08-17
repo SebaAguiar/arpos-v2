@@ -22,7 +22,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   console.log(`\n${step}. LOGIN`);
   await page.goto(`${BASE_URL}/login`, { waitUntil: "networkidle" });
   await page.waitForSelector('input[type="email"]', { timeout: 10000 });
-  await page.locator('input[type="email"]').fill("admin@arcon.com");
+  await page.locator('input[type="email"]').fill("admin@arcom.com");
   await page.locator('input[type="password"]').fill("admin123");
   await page.locator("button:has-text('Iniciar sesión')").click();
 
@@ -30,7 +30,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   await sleep(2000);
   await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
   await page.waitForSelector('input[aria-label="Buscar productos o escanear código de barras"]', { timeout: 10000 });
-  console.log("   ✓ Logged in as admin@arcon.com");
+  console.log("   ✓ Logged in as admin@arcom.com");
 
   // ============================================================
   // STEP 2 — OPEN CASH REGISTER

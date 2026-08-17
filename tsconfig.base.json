@@ -15,10 +15,10 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@arcon/api/*": ["apps/api/src/*"],
-      "@arcon/contracts/*": ["libs/contracts/*"],
-      "@arcon/store/*": ["libs/store/*"],
-      "@arcon/common/*": ["libs/common/*"]
+      "@arcom/api/*": ["apps/api/src/*"],
+      "@arcom/contracts/*": ["libs/contracts/*"],
+      "@arcom/store/*": ["libs/store/*"],
+      "@arcom/common/*": ["libs/common/*"]
     },
     "strict": true,
     "noImplicitAny": true,

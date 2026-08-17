@@ -32,7 +32,7 @@ export interface CloudSyncConfig {
 }
 
 const SYNC_RELAY_CHANNEL = 'sync:changes';
-const PLACEHOLDER_PASSWORD = '!arcon-sync-placeholder!';
+const PLACEHOLDER_PASSWORD = '!arcom-sync-placeholder!';
 
 @Injectable()
 export class CloudRelayService implements OnModuleInit, OnModuleDestroy {
@@ -662,7 +662,7 @@ export class CloudRelayService implements OnModuleInit, OnModuleDestroy {
     });
     if (existing) return userId;
 
-    const placeholderEmail = `sync-${userId}@local.arcon`;
+    const placeholderEmail = `sync-${userId}@local.arcom`;
     const placeholder = await this.prisma.user.create({
       data: {
         id: userId,

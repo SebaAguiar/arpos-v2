@@ -192,7 +192,7 @@ export function SystemManager() {
               size="1"
               variant="soft"
               onClick={async () => {
-                const url = "https://arcon.arsian.dev/soporte";
+                const url = "https://arcom.arsian.dev/soporte";
                 if (isTauri()) {
                   try {
                     await openUrl(url);
@@ -208,7 +208,7 @@ export function SystemManager() {
               Reportar un problema
             </Button>
             <Text size="2" color="gray" style={{ display: "block", marginTop: "8px" }}>
-              Abre el formulario de soporte en arcon.arsian.dev.
+              Abre el formulario de soporte en arcom.arsian.dev.
             </Text>
           </div>
         </div>

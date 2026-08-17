@@ -11,9 +11,9 @@ const SEED_TAG = 'seed-demo';
 const TAX_RATE_BPS = 2100;
 
 const COMPANY_TAX_ID = '20-12345678-9';
-const COMPANY_NAME = 'Arcon Demo';
+const COMPANY_NAME = 'Arcom Demo';
 const STORE_NAME = 'Sucursal Principal';
-const ADMIN_EMAIL = 'admin@arcon.com';
+const ADMIN_EMAIL = 'admin@arcom.com';
 const CASH_REGISTER_NAME = 'Caja Principal';
 
 const ENV_PATH = path.resolve(process.cwd(), '.env');
@@ -96,7 +96,7 @@ async function getOrCreateCompany(): Promise<string> {
       id: envCompanyId || undefined,
       name: COMPANY_NAME,
       taxId: COMPANY_TAX_ID,
-      email: 'demo@arcon.com',
+      email: 'demo@arcom.com',
       phone: '+54 11 1234-5678',
       address: 'Av. Demo 1234, CABA',
       created_at: now,
@@ -710,7 +710,7 @@ async function main() {
     {
       created_at: epochRandomDayHour(9),
       ticket_number: ticketCounter(epochAt(9, 12, 0)),
-      items: [{ productId: null, name: 'Gift card Arcon', quantity: 1, unit_price_cents: 50000 }],
+      items: [{ productId: null, name: 'Gift card Arcom', quantity: 1, unit_price_cents: 50000 }],
       payment_method: 'transfer',
       contact_id: null,
       discount_cents: 0,
@@ -775,13 +775,13 @@ async function main() {
     where: { storeId },
     update: {
       receipt_header: 'GRACIAS POR SU COMPRA',
-      receipt_footer: 'Arcon POS — Venta de prueba',
+      receipt_footer: 'Arcom POS — Venta de prueba',
       tax_rate_bps: TAX_RATE_BPS,
     },
     create: {
       storeId,
       receipt_header: 'GRACIAS POR SU COMPRA',
-      receipt_footer: 'Arcon POS — Venta de prueba',
+      receipt_footer: 'Arcom POS — Venta de prueba',
       tax_rate_bps: TAX_RATE_BPS,
     },
   });

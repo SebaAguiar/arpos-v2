@@ -13,7 +13,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET', 'arcon-local-dev-secret'),
+        secret: configService.get<string>('JWT_SECRET', 'arcom-local-dev-secret'),
         signOptions: { expiresIn: '24h' },
       }),
       inject: [ConfigService],

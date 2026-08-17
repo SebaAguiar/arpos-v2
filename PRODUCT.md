@@ -29,7 +29,7 @@ Diferencial de 4 pilares:
 ## Capabilities and Constraints
 - **Capacidades confirmadas:** POS con carrito y cobro ágil, catálogo de productos con variantes (talle/color), control de inventario por sucursal, arqueo y cierre de caja, facturación fiscal ARCA/AFIP, respaldos automáticos a JSON comprimido, sync opcional vía SyncQueue.
 - **Restricciones técnicas:** Arquitectura Multi-tenant estricta (`companyId`/`storeId`), SQLite con transacciones estrictas y precios almacenados en enteros (centavos), TypeScript strict (`any` prohibido), backend NestJS 11 local embebido en Tauri 2.x.
-- **Datos no decididos / Variables:** Nombre comercial definitivo (nombre actual "Arcon" adoptado en el rename v1.0.0; se descartó "ArPOS" por homónimos en el mercado).
+- **Datos no decididos / Variables:** Nombre comercial definitivo (nombre actual "Arcom" adoptado en el rename v1.0.0; se descartó "ArPOS" por homónimos en el mercado).
 
 ## Brand Commitments
 - **Voz de marca:** Cercana pero profesional, inspirando confianza operativa y robustez tecnológica.

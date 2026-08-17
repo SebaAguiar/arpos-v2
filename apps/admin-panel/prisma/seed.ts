@@ -80,10 +80,10 @@ async function main() {
   // ─── Admin user ───
   const adminPassword = await hash("admin123", 12);
   await prisma.adminUser.upsert({
-    where: { email: "admin@arcon.local" },
+    where: { email: "admin@arcom.local" },
     update: {},
     create: {
-      email: "admin@arcon.local",
+      email: "admin@arcom.local",
       passwordHash: adminPassword,
       name: "Admin",
       role: "admin",
@@ -91,16 +91,16 @@ async function main() {
       updatedAt: now,
     },
   });
-  console.log("Created admin user: admin@arcon.local");
+  console.log("Created admin user: admin@arcom.local");
 
   // ─── Demo client ───
   const demoPassword = await hash("demo123", 12);
   const demoClient = await prisma.client.upsert({
-    where: { email: "demo@arcon.local" },
+    where: { email: "demo@arcom.local" },
     update: {},
     create: {
       name: "Demo Store",
-      email: "demo@arcon.local",
+      email: "demo@arcom.local",
       passwordHash: demoPassword,
       phone: "+54 11 1234-5678",
       company: "Demo S.A.",
@@ -121,7 +121,7 @@ async function main() {
         id: "demo-license-free",
         clientId: demoClient.id,
         planId: freePlan.id,
-        key: "ARCON-FREE-DEMO-0001",
+        key: "ARCOM-FREE-DEMO-0001",
         status: "pending",
         createdAt: now,
         updatedAt: now,
@@ -129,7 +129,7 @@ async function main() {
     });
   }
 
-  console.log("Created demo client: demo@arcon.local");
+  console.log("Created demo client: demo@arcom.local");
   console.log("Seed complete!");
 }
 

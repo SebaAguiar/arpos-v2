@@ -3,7 +3,7 @@ import { LoginSchema } from './login.schema';
 describe('LoginSchema', () => {
   it('should accept valid login input', () => {
     const result = LoginSchema.safeParse({
-      email: 'admin@arcon.com',
+      email: 'admin@arcom.com',
       password: 'password123',
     });
     expect(result.success).toBe(true);
@@ -27,7 +27,7 @@ describe('LoginSchema', () => {
 
   it('should reject empty password', () => {
     const result = LoginSchema.safeParse({
-      email: 'admin@arcon.com',
+      email: 'admin@arcom.com',
       password: '',
     });
     expect(result.success).toBe(false);
@@ -35,7 +35,7 @@ describe('LoginSchema', () => {
 
   it('should reject missing password', () => {
     const result = LoginSchema.safeParse({
-      email: 'admin@arcon.com',
+      email: 'admin@arcom.com',
     });
     expect(result.success).toBe(false);
   });

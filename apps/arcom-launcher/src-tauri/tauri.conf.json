@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Arcon",
+  "productName": "Arcom",
   "version": "1.0.0",
-  "identifier": "com.arcon.desktop",
+  "identifier": "com.arcom.desktop",
   "build": {
     "beforeDevCommand": "bash scripts/dev.sh",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Arcon",
+        "title": "Arcom",
         "width": 1400,
         "height": 900,
         "minWidth": 800,
@@ -40,7 +40,7 @@
     ],
     "category": "Finance",
     "shortDescription": "Point of Sale System",
-    "longDescription": "Arcon - A modern, offline-first point of sale system for retail businesses",
+    "longDescription": "Arcom - A modern, offline-first point of sale system for retail businesses",
     "windows": {
       "wix": {
         "language": "es-ES"
@@ -60,7 +60,7 @@
       "active": true,
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDY0OTFEQzFGNTRCQ0IzQjEKUldTeHM3eFVIOXlSWkhkMGNEWXA3R3NEcmF5RHNRUVhwQktjNlBJUUVKaDIvY3dYSjUwa1dZd3MK",
       "endpoints": [
-        "https://api.github.com/repos/SebaAguiar/arcon-releases/releases/latest"
+        "https://api.github.com/repos/SebaAguiar/arcom-releases/releases/latest"
       ],
       "dialog": true
     }

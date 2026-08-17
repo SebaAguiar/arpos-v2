@@ -1,6 +1,6 @@
-# Wizards Interactivos — Arcon Tauri v2
+# Wizards Interactivos — Arcom Tauri v2
 
-Este documento especifica los asistentes interactivos (wizards) de Arcon: FirstRunWizard, Migration Wizard y configuración de sync.
+Este documento especifica los asistentes interactivos (wizards) de Arcom: FirstRunWizard, Migration Wizard y configuración de sync.
 
 ---
 
@@ -15,16 +15,16 @@ Mejorar la experiencia del usuario (UX) proporcionando **asistentes paso a paso*
 ### 2.1 When It Triggers
 
 El FirstRunWizard se ejecuta automáticamente cuando:
-- Arcon se instala por primera vez.
+- Arcom se instala por primera vez.
 - No existe Company configurada en la base de datos.
-- El usuario abre Arcon después de la instalación.
+- El usuario abre Arcom después de la instalación.
 
 ### 2.2 Flow
 
 ```
 Paso 1: Welcome
 ┌─────────────────────────────────────────────┐
-│  ¡Bienvenido a Arcon!                       │
+│  ¡Bienvenido a Arcom!                       │
 │                                             │
 │  Vamos a configurar tu negocio en           │
 │  unos simples pasos.                        │
@@ -74,7 +74,7 @@ Paso 5: Success
 ┌─────────────────────────────────────────────┐
 │  ✅ ¡Configuración completada!              │
 │                                             │
-│  Tu negocio está listo para usar Arcon.     │
+│  Tu negocio está listo para usar Arcom.     │
 │                                             │
 │  • 1 sucursal creada                        │
 │  • 1 usuario admin creado                   │
@@ -123,7 +123,7 @@ const FirstRunWizard = () => {
 
 El Migration Wizard se ejecuta cuando:
 - El usuario tiene datos en la nube (Xata, PostgreSQL serverless) y quiere migrarlos a local.
-- Se detecta una instalación anterior de Arcon cloud.
+- Se detecta una instalación anterior de Arcom cloud.
 - El usuario lo selecciona desde Settings > Backup & Restore.
 
 ### 3.2 Flow
@@ -142,7 +142,7 @@ Paso 1: Selection
 
 Paso 2: Credentials
 ┌─────────────────────────────────────────────┐
-│  Ingresá tu email y contraseña de Arcon    │
+│  Ingresá tu email y contraseña de Arcom    │
 │                                             │
 │  Email:    [____________________]           │
 │  Password: [____________________]           │
@@ -228,7 +228,7 @@ const MigrationWizard = () => {
 │                                             │
 │  ─────────────────────────────────────────  │
 │                                             │
-│  Cloud URL:  [https://cloud.arcon.app  ]    │
+│  Cloud URL:  [https://cloud.arcom.app  ]    │
 │  JWT Token:  [••••••••••••••••••••••••••]   │
 │                                             │
 │  [✓] Sincronizar automáticamente           │
@@ -242,7 +242,7 @@ const MigrationWizard = () => {
 │  ─────────────────────────────────────────  │
 │                                             │
 │  ⚠️ La sincronización es opcional.          │
-│  Arcon funciona 100% offline sin ella.     │
+│  Arcom funciona 100% offline sin ella.     │
 │                                             │
 │         [ Guardar ]    [ Cancelar ]         │
 └─────────────────────────────────────────────┘

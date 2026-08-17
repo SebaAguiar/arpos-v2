@@ -3,9 +3,9 @@
 ## [1.0.0] - 2026-08-01
 
 ### Changed
-- Rebranded the entire product from "ArPOS" to "Arcon" (desktop app, identifiers, package names, data directories, docs). The GitHub repository `SebaAguiar/arpos-v2` keeps its name.
-- Package scope changed from `@arpos/*` to `@arcon/*`; launcher directory renamed `apps/arpos-launcher` → `apps/arcon-launcher`.
-- Desktop identifier changed to `com.arcon.desktop`; product name now "Arcon".
+- Rebranded the entire product from "ArPOS" to "Arcom" (desktop app, identifiers, package names, data directories, docs). The GitHub repository `SebaAguiar/arpos-v2` keeps its name.
+- Package scope changed from `@arpos/*` to `@arcom/*`; launcher directory renamed `apps/arpos-launcher` → `apps/arcom-launcher`.
+- Desktop identifier changed to `com.arcom.desktop`; product name now "Arcom".
 
 ## [0.1.0] - 2026-07-31
 

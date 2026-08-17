@@ -1,6 +1,6 @@
-# Errores Conocidos y Gotchas — Arcon Tauri v2
+# Errores Conocidos y Gotchas — Arcom Tauri v2
 
-Este documento lista edge cases conocidos, vulnerabilidades de rendimiento y quirks del sistema en Arcon.
+Este documento lista edge cases conocidos, vulnerabilidades de rendimiento y quirks del sistema en Arcom.
 
 ---
 
@@ -24,7 +24,7 @@ Este documento lista edge cases conocidos, vulnerabilidades de rendimiento y qui
 - **Solución:**
   ```bash
   # Ejecutar VACUUM periódicamente
-  sqlite3 ~/.arcon/data/app.db "VACUUM;"
+  sqlite3 ~/.arcom/data/app.db "VACUUM;"
   ```
 - **Prevención:** Ejecutar VACUUM en el backup automático diario.
 
@@ -68,7 +68,7 @@ Este documento lista edge cases conocidos, vulnerabilidades de rendimiento y qui
   lsof -i :3000
 
   # Verificar logs de Tauri
-  cat ~/.arcon/logs/tauri.log
+  cat ~/.arcom/logs/tauri.log
   ```
 - **Solución:** Verificar que Node.js esté instalado y que el puerto 3000 esté libre.
 
@@ -300,10 +300,10 @@ Este documento lista edge cases conocidos, vulnerabilidades de rendimiento y qui
 - **Check:**
   ```bash
   # Verificar backups disponibles
-  ls -la ~/.arcon/backup/
+  ls -la ~/.arcom/backup/
 
   # Verificar integridad de un backup
-  file ~/.arcon/backup/arcon_1.0.0.tar.gz
+  file ~/.arcom/backup/arcom_1.0.0.tar.gz
   ```
 - **Solución:** Si el backup local no existe, descargar la versión anterior desde GitHub Releases.
 - **Prevención:** Crear backup del binario anterior ANTES de aplicar cada update. Mantener al menos 2 versiones de backup.
@@ -317,7 +317,7 @@ Este documento lista edge cases conocidos, vulnerabilidades de rendimiento y qui
 - **Check:**
   ```bash
   # Verificar versión actual
-  cat ~/.arcon/config/version.json
+  cat ~/.arcom/config/version.json
   ```
 - **Solución:** Tauri cae automáticamente a full binary download. No hay forma de forzar delta desde versiones muy viejas.
 - **Prevención:** Mantener el updater habilitado para que los usuarios se mantengan al día. Las actualizaciones incrementales (v1.0.0 → v1.0.1 → v1.0.2) siempre funcionan con delta.

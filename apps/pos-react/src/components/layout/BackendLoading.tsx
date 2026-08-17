@@ -25,7 +25,7 @@ export function BackendLoading({ error, onRetry }: BackendLoadingProps) {
             letterSpacing: "-0.5px",
           }}
         >
-          Arcon
+          Arcom
         </div>
         <div
           style={{

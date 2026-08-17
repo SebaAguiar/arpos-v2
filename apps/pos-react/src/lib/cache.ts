@@ -1,4 +1,4 @@
-const CACHE_PREFIX = "arcon-cache:";
+const CACHE_PREFIX = "arcom-cache:";
 const CACHE_TTL = 24 * 60 * 60 * 1000;
 
 interface CacheEntry<T> {

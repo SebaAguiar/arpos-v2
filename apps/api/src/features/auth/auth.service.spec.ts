@@ -30,7 +30,7 @@ describe('AuthService', () => {
     it('should return user payload when credentials are valid', async () => {
       const user = {
         id: 'u1',
-        email: 'admin@arcon.com',
+        email: 'admin@arcom.com',
         name: 'Admin',
         role: 'admin',
         companyId: 'c1',
@@ -40,10 +40,10 @@ describe('AuthService', () => {
       mockRepo.findActiveByEmail.mockResolvedValue(user);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
-      const result = await service.validateUser('admin@arcon.com', 'password123');
+      const result = await service.validateUser('admin@arcom.com', 'password123');
       expect(result).toEqual({
         id: 'u1',
-        email: 'admin@arcon.com',
+        email: 'admin@arcom.com',
         name: 'Admin',
         role: 'admin',
         companyId: 'c1',
@@ -53,21 +53,21 @@ describe('AuthService', () => {
     it('should return null when user not found', async () => {
       mockRepo.findActiveByEmail.mockResolvedValue(null);
 
-      const result = await service.validateUser('nobody@arcon.com', 'pass');
+      const result = await service.validateUser('nobody@arcom.com', 'pass');
       expect(result).toBeNull();
     });
 
     it('should return null when password is invalid', async () => {
       const user = {
         id: 'u1',
-        email: 'admin@arcon.com',
+        email: 'admin@arcom.com',
         password: '$2a$10$hashedpassword',
         is_active: true,
       };
       mockRepo.findActiveByEmail.mockResolvedValue(user);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-      const result = await service.validateUser('admin@arcon.com', 'wrongpassword');
+      const result = await service.validateUser('admin@arcom.com', 'wrongpassword');
       expect(result).toBeNull();
     });
   });
@@ -76,7 +76,7 @@ describe('AuthService', () => {
     it('should return access token and user info', async () => {
       const user = {
         id: 'u1',
-        email: 'admin@arcon.com',
+        email: 'admin@arcom.com',
         name: 'Admin',
         role: 'admin',
         companyId: 'c1',
@@ -86,7 +86,7 @@ describe('AuthService', () => {
       expect(result.access_token).toBe('mock-jwt-token');
       expect(result.user).toEqual({
         id: 'u1',
-        email: 'admin@arcon.com',
+        email: 'admin@arcom.com',
         name: 'Admin',
         role: 'admin',
       });
@@ -96,7 +96,7 @@ describe('AuthService', () => {
 
   describe('getProfile', () => {
     it('should return user profile', async () => {
-      const user = { id: 'u1', email: 'admin@arcon.com', name: 'Admin', role: 'admin', companyId: 'c1' };
+      const user = { id: 'u1', email: 'admin@arcom.com', name: 'Admin', role: 'admin', companyId: 'c1' };
       mockRepo.findById.mockResolvedValue(user);
 
       const result = await service.getProfile('u1');

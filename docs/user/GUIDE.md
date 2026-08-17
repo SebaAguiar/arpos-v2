@@ -1,6 +1,6 @@
-# Guía de Usuario — Arcon
+# Guía de Usuario — Arcom
 
-Esta guía explica cómo usar Arcon en el día a día: desde la instalación hasta el cierre de caja. Está pensada para el personal de mostrador, encargados y administradores.
+Esta guía explica cómo usar Arcom en el día a día: desde la instalación hasta el cierre de caja. Está pensada para el personal de mostrador, encargados y administradores.
 
 ---
 
@@ -18,13 +18,13 @@ Esta guía explica cómo usar Arcon en el día a día: desde la instalación has
 2. Ejecutar el instalador y seguir el asistente.
 3. La primera vez que se abre la app, el asistente de configuración inicial guía la creación de la empresa.
 
-> **Actualizaciones:** Arcon se actualiza automáticamente cuando hay una versión nueva. El indicador de actualización aparece en la barra superior. Si no se actualiza en el momento, se puede aplicar luego desde Configuración → Actualizaciones.
+> **Actualizaciones:** Arcom se actualiza automáticamente cuando hay una versión nueva. El indicador de actualización aparece en la barra superior. Si no se actualiza en el momento, se puede aplicar luego desde Configuración → Actualizaciones.
 
 ---
 
 ## 2. Primer arranque (Asistente de configuración)
 
-La primera vez que inicia Arcon, se presenta un asistente con estos pasos:
+La primera vez que inicia Arcom, se presenta un asistente con estos pasos:
 
 1. **Datos del negocio:** nombre y CUIT/RUT. La sucursal principal se crea automáticamente.
 2. **Usuario administrador:** email y contraseña para el primer ingreso.
@@ -162,7 +162,7 @@ Disponible para usuarios administradores.
 
 ### Sincronización en la nube (Sync Cloud)
 
-La sincronización es **opcional**: Arcon funciona completo sin conexión, y los cambios quedan encolados en el dispositivo hasta que conectás la nube.
+La sincronización es **opcional**: Arcom funciona completo sin conexión, y los cambios quedan encolados en el dispositivo hasta que conectás la nube.
 
 - **Conectar:** ingresá la URL del servidor cloud y el token JWT, y tocá **Conectar**. La nube debe estar activa en tu suscripción.
 - **Estado:** el panel muestra si estás conectado, cuántos cambios quedan por subir y la última sincronización.

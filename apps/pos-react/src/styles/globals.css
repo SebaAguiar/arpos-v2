@@ -146,14 +146,14 @@ html, body, #root {
 }
 
 /* ─── Pulsing alert for out-of-stock rows ─── */
-@keyframes arcon-pulse {
+@keyframes arcom-pulse {
   0%   { box-shadow: 0 0 0 0 rgba(229, 72, 77, 0.45); }
   50%  { box-shadow: 0 0 0 6px rgba(229, 72, 77, 0); }
   100% { box-shadow: 0 0 0 0 rgba(229, 72, 77, 0); }
 }
 
 .inventory-row--critical {
-  animation: arcon-pulse 2.5s ease-in-out infinite;
+  animation: arcom-pulse 2.5s ease-in-out infinite;
 }
 
 
