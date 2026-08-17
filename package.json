@@ -9,12 +9,16 @@
     "dev:pos": "nx dev pos-react",
     "dev:admin": "nx dev admin-panel",
     "dev:launcher": "nx dev arcon-launcher",
+    "dev:landing": "nx dev marketing-landing",
+    "dev:landing:direct": "cd apps/marketing-landing && npx astro dev",
     "build": "nx build api && nx build admin-panel && nx build pos-react && nx build arcon-launcher",
     "build:api": "nx build api",
     "build:pos": "nx build pos-react",
     "build:admin": "nx build admin-panel",
     "build:launcher": "nx build arcon-launcher",
+    "build:landing": "nx build marketing-landing",
     "lint": "nx run-many -t lint",
+    "check:landing": "nx check marketing-landing",
     "typecheck": "nx run-many -t typecheck",
     "prisma:generate": "nx run api:prisma:generate",
     "prisma:migrate": "nx run api:prisma:migrate",
@@ -43,10 +47,5 @@
     "playwright": "^1.62.0",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.65.0"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "core-js"
-    ]
   }
 }

@@ -8,4 +8,5 @@ allowBuilds:
   esbuild: true
   nx: true
   prisma: true
+  sharp: true
   unrs-resolver: false
