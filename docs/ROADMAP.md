@@ -8,14 +8,16 @@ Este documento recopila las fases de migración, features propuestas y roadmap d
 
 ### Fase 0: Fundación (1-2 semanas)
 
-**Milestone:** Schema SQLite validado, Prisma adapter funcional.
+**Milestone:** Schema SQLite validado, Prisma adapter funcional. **COMPLETADA** (2026-08-08)
 
-- [ ] ~~Adaptar `schema.prisma` a provider SQLite~~ **DEFERRED — no prioridad ahora**
-- [ ] Implementar type conversions (DECIMAL→INT, JSONB→TEXT, TIMESTAMP→INT)
-- [ ] Crear migraciones SQLite
-- [ ] Validar schema con datos reales
-- [ ] Tests unitarios del transformer service
-- [ ] Seed data para desarrollo
+- [x] Adaptar `schema.prisma` a provider SQLite (`apps/api/prisma/schema.prisma`, `provider = "sqlite"`)
+- [x] Implementar type conversions (DECIMAL→INT, JSONB→TEXT, TIMESTAMP→INT) — `apps/api/src/common/transformers/` (`cents`, `json`, `timestamp`)
+- [x] Crear migraciones SQLite — 9 migraciones (22-jul → 03-ago)
+- [x] Validar schema con datos reales — `migrate deploy` + seed sobre DB limpia en `/tmp`: 396 sales, 880 sale_items, 893 inventory_movements, FKs íntegros
+- [x] Tests unitarios del transformer service — 30 tests pasando (3 suites)
+- [x] Seed data para desarrollo — `seed.ts` enriquecido (386→396 sales, 30 días, picos horarios)
+
+> **Nota (2026-08-08):** La Fase 0 se completó de facto mientras se resolvían las Fases 1-4 (el schema SQLite era prerequisito de todo). Validación de cierre: DB limpia en `/tmp`, 9 migraciones aplicadas sin error, seed sin errores, conteos coherentes, y `apps/api/.env` restaurado tras la validación (el seed escribe `LOCAL_COMPANY_ID`/`LOCAL_STORE_ID`).
 
 **Bloqueadores:** Ninguno
 **Dependencias:** Prisma 5.22+
