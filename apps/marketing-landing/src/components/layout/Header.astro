@@ -1,0 +1,39 @@
+---
+const links = [
+  { text: 'Funciones', href: '#features' },
+  { text: 'Planes', href: '#pricing' },
+  { text: 'Migración', href: '#migration' },
+  { text: 'Contacto', href: '#contact' },
+];
+---
+
+<header class="bg-[#0b2545] sticky top-0 z-50 shadow-md">
+  <div class="max-w-[1280px] mx-auto flex justify-between items-center px-4 md:px-12 h-20">
+    <a href="/" class="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+      <span class="w-8 h-8 rounded-lg bg-[#10B981] text-white flex items-center justify-center text-lg font-extrabold shadow-xs">A</span>
+      ARCON POS
+    </a>
+
+    <nav class="hidden md:flex gap-8">
+      {
+        links.map((link) => (
+          <a
+            href={link.href}
+            class="text-slate-200 hover:text-white font-semibold text-sm transition-colors"
+          >
+            {link.text}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="flex items-center gap-4">
+      <a
+        href="#pricing"
+        class="bg-[#10B981] hover:bg-emerald-600 text-white font-bold text-sm px-6 py-3 rounded-lg shadow-sm transition-all duration-200 hover:scale-105"
+      >
+        Probar gratis
+      </a>
+    </div>
+  </div>
+</header>

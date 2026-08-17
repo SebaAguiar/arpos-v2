@@ -1,0 +1,50 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="bg-[#0b2545] text-white border-t border-slate-800 mt-auto">
+  <div class="max-w-[1280px] mx-auto px-4 md:px-12 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div class="col-span-1 md:col-span-1">
+        <div class="text-xl font-bold tracking-tight text-white flex items-center gap-2 mb-4">
+          <span class="w-7 h-7 rounded-lg bg-[#10B981] text-white flex items-center justify-center text-sm font-extrabold">A</span>
+          ARCON POS
+        </div>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          El Punto de Venta Local-First que opera 100% sin internet y se sincroniza en segundo plano.
+        </p>
+      </div>
+
+      <div>
+        <h3 class="text-xs font-bold uppercase tracking-wider text-[#F59E0B] mb-4">Producto</h3>
+        <ul class="space-y-2.5 text-xs text-slate-300">
+          <li><a href="#features" class="hover:text-white transition-colors">Funciones</a></li>
+          <li><a href="#pricing" class="hover:text-white transition-colors">Planes & Precios</a></li>
+          <li><a href="#migration" class="hover:text-white transition-colors">Migración de Datos</a></li>
+          <li><a href="#faq" class="hover:text-white transition-colors">Preguntas Frecuentes</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="text-xs font-bold uppercase tracking-wider text-[#F59E0B] mb-4">Legal</h3>
+        <ul class="space-y-2.5 text-xs text-slate-300">
+          <li><a href="/terms" class="hover:text-white transition-colors">Términos del Servicio</a></li>
+          <li><a href="/privacy" class="hover:text-white transition-colors">Política de Privacidad</a></li>
+          <li><a href="/arca" class="hover:text-white transition-colors">Homologación ARCA/AFIP</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="text-xs font-bold uppercase tracking-wider text-[#F59E0B] mb-4">Contacto & Soporte</h3>
+        <ul class="space-y-2.5 text-xs text-slate-300">
+          <li><a href="mailto:soporte@arcon.com.ar" class="hover:text-white transition-colors">soporte@arcon.com.ar</a></li>
+          <li><span class="text-slate-400">Atención Lunes a Sábado: 8 a 20hs</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-12 border-t border-slate-800 pt-8 text-center text-xs text-slate-400">
+      &copy; {year} Arcon POS. Todos los derechos reservados. Sistema registrado e impulsado por Arcon Tauri v2 Architecture.
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,54 @@
+{
+  "name": "marketing-landing",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/marketing-landing/src",
+  "projectType": "application",
+  "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx astro dev",
+        "cwd": "apps/marketing-landing"
+      },
+      "continuous": true
+    },
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx astro dev",
+        "cwd": "apps/marketing-landing"
+      },
+      "continuous": true
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "../../node_modules/.bin/astro build",
+        "cwd": "apps/marketing-landing",
+        "outputPath": "dist/apps/marketing-landing"
+      }
+    },
+    "preview": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "../../node_modules/.bin/astro preview",
+        "cwd": "apps/marketing-landing"
+      }
+    },
+    "check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "../../node_modules/.bin/astro check",
+        "cwd": "apps/marketing-landing"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint .",
+        "cwd": "apps/marketing-landing"
+      }
+    }
+  },
+  "tags": []
+}

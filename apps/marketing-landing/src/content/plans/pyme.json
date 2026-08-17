@@ -1,0 +1,10 @@
+{
+  "name": "Pyme",
+  "price": "$ 45.000",
+  "period": "/mes/sucursal",
+  "description": "Para negocios en expansión.",
+  "features": ["Usuarios ilimitados", "Multi-sucursal", "Productos ilimitados", "Facturación Electrónica", "Soporte Prioritario"],
+  "cta": "Empezar ahora",
+  "href": "/register",
+  "featured": true
+}

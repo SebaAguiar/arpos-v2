@@ -1,0 +1,10 @@
+{
+  "name": "Enterprise",
+  "price": "Consultar",
+  "period": "",
+  "description": "Grandes redes y franquicias.",
+  "features": ["API personalizada", "Gestor de cuenta", "SLA garantizado", "Onboarding asistido"],
+  "cta": "Contactar ventas",
+  "href": "mailto:ventas@arcon.com.ar",
+  "featured": false
+}

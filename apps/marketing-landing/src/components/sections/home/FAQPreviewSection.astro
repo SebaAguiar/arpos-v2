@@ -1,0 +1,58 @@
+---
+
+---
+
+<section id="faq" class="py-24 px-4 md:px-12 bg-[#f5f3f6] border-y border-slate-200">
+  <div class="max-w-[1280px] mx-auto max-w-4xl">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl md:text-4xl font-bold text-[#0b2545] mb-4 tracking-tight">
+        Preguntas Frecuentes
+      </h2>
+      <p class="text-slate-600 text-lg">
+        Todo lo que necesitás saber antes de instalar Arcon POS.
+      </p>
+    </div>
+
+    <div class="space-y-4">
+      <details class="group bg-white p-6 rounded-2xl border border-slate-200 shadow-xs cursor-pointer">
+        <summary class="flex justify-between items-center font-bold text-[#0b2545] text-base list-none">
+          <span>¿Qué pasa si mi negocio se queda sin conexión a internet durante horas o días?</span>
+          <span class="material-symbols-outlined group-open:rotate-180 transition-transform text-slate-400">expand_more</span>
+        </summary>
+        <p class="mt-4 text-slate-600 text-sm leading-relaxed">
+          Absolutamente nada. Arcon sigue operando normalmente. Podés cobrar, registrar ventas, consultar stock e imprimir tickets. Apenas regrese la conexión, las ventas se sincronizan solas con la nube y las facturas se envían a ARCA/AFIP.
+        </p>
+      </details>
+
+      <details class="group bg-white p-6 rounded-2xl border border-slate-200 shadow-xs cursor-pointer">
+        <summary class="flex justify-between items-center font-bold text-[#0b2545] text-base list-none">
+          <span>¿Necesito comprar hardware especial o una computadora potente?</span>
+          <span class="material-symbols-outlined group-open:rotate-180 transition-transform text-slate-400">expand_more</span>
+        </summary>
+        <p class="mt-4 text-slate-600 text-sm leading-relaxed">
+          No. Arcon está desarrollado sobre Tauri 2 (Rust + SQLite), ocupando solo ~85MB de espacio y consumiendo un mínimo de memoria RAM. Funciona en cualquier PC estándar con Windows 10/11 o Linux.
+        </p>
+      </details>
+
+      <details class="group bg-white p-6 rounded-2xl border border-slate-200 shadow-xs cursor-pointer">
+        <summary class="flex justify-between items-center font-bold text-[#0b2545] text-base list-none">
+          <span>¿Cómo se realiza la homologación con ARCA / AFIP?</span>
+          <span class="material-symbols-outlined group-open:rotate-180 transition-transform text-slate-400">expand_more</span>
+        </summary>
+        <p class="mt-4 text-slate-600 text-sm leading-relaxed">
+          Arcon incluye un módulo fiscal integrado. Solo cargás tus certificados digitales o CUIT en el panel de configuración y podés emitir Facturas A, B, C y Notas de Crédito de forma directa.
+        </p>
+      </details>
+
+      <details class="group bg-white p-6 rounded-2xl border border-slate-200 shadow-xs cursor-pointer">
+        <summary class="flex justify-between items-center font-bold text-[#0b2545] text-base list-none">
+          <span>¿Mis datos quedan respaldados en caso de que se rompa la PC?</span>
+          <span class="material-symbols-outlined group-open:rotate-180 transition-transform text-slate-400">expand_more</span>
+        </summary>
+        <p class="mt-4 text-slate-600 text-sm leading-relaxed">
+          Sí. Además de la base de datos SQLite local, Arcon realiza copias de seguridad automáticas y sincroniza la información de tu negocio en la nube de Neon Postgres cuando hay conexión.
+        </p>
+      </details>
+    </div>
+  </div>
+</section>

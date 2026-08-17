@@ -1,0 +1,10 @@
+{
+  "name": "Emprendedor",
+  "price": "$ 15.000",
+  "period": "/mes",
+  "description": "Ideal para empezar tu primer local.",
+  "features": ["1 Usuario", "1 Sucursal", "Hasta 500 productos", "Soporte x Email"],
+  "cta": "Prueba gratis",
+  "href": "/register",
+  "featured": false
+}
