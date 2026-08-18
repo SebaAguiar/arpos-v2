@@ -1,0 +1,12 @@
+{
+  "version": "0.1.0",
+  "githubUrl": "https://github.com/SebaAguiar/arcom-releases/releases/latest",
+  "assets": {
+    "windows_msi": "https://github.com/SebaAguiar/arcom-releases/releases/download/v0.1.0/Arcom_0.1.0_x64_en-US.msi",
+    "windows_exe": "https://github.com/SebaAguiar/arcom-releases/releases/download/v0.1.0/Arcom_0.1.0_x64_en-US.exe",
+    "macos_dmg": "https://github.com/SebaAguiar/arcom-releases/releases/download/v0.1.0/Arcom_0.1.0_universal.dmg",
+    "linux_appimage": "https://github.com/SebaAguiar/arcom-releases/releases/download/v0.1.0/Arcom_0.1.0_amd64.AppImage",
+    "linux_deb": "https://github.com/SebaAguiar/arcom-releases/releases/download/v0.1.0/Arcom_0.1.0_amd64.deb",
+    "linux_rpm": "https://github.com/SebaAguiar/arcom-releases/releases/download/v0.1.0/Arcom_0.1.0_amd64.rpm"
+  }
+}

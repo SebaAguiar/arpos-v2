@@ -2061,7 +2061,7 @@ para Fase 2 — cuando se necesite rollout gradual, monitoring y A/B testing.
     "active": true,
     "dialog": true,
     "endpoints": [
-      "https://api.github.com/repos/SebaAguiar/arpos-v2/releases/latest"
+      "https://api.github.com/repos/SebaAguiar/arcom-releases/releases/latest"
     ],
     "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDY0OTFEQzFGNTRCQ0IzQjEKUldTeHM3eFVIOXlSWkhkMGNEWXA3R3NEcmF5RHNRUVhwQktjNlBJUUVKaDIvY3dYSjUwa1dZd3MK"
   }
