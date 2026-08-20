@@ -1,5 +1,5 @@
 import { Injectable } from '@kanjijs/core';
-import { Controller, Post, Get, KANJI_CTX } from '@kanjijs/platform-hono';
+import { Controller, Post, Get, KANJI_CTX, RateLimit } from '@kanjijs/platform-hono';
 import { AuthGuard, UseGuards } from '@kanjijs/auth';
 import { Contract } from '@kanjijs/contracts';
 import { z } from 'zod';
@@ -12,6 +12,7 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('/login')
+  @RateLimit({ limit: 5, window: '1m', by: 'ip' })
   @Contract({
     method: 'POST',
     path: '/auth/login',
@@ -20,7 +21,11 @@ export class AuthController {
   })
   async login(c: Context) {
     const body = c.get('kanji.validated.body') as z.infer<typeof LoginRequestSchema>;
-    return this.authService.login(body);
+    try {
+      return await this.authService.login(body);
+    } catch (e) {
+      return c.json({ error: 'Unauthorized', message: 'Credenciales inválidas' }, 401);
+    }
   }
 
   @Get('/me')

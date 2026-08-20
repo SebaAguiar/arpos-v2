@@ -57,7 +57,7 @@ export class ProjectsController {
     try {
       return await this.projectsService.create(body);
     } catch (e) {
-      return c.json({ error: 'Bad Request', message: (e as Error).message }, 400);
+      return c.json({ error: 'Bad Request', message: 'Invalid input data' }, 400);
     }
   }
 

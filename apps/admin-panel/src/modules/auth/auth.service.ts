@@ -2,10 +2,11 @@ import { Injectable, Inject } from '@kanjijs/core';
 import { DATABASE_CLIENT } from '@kanjijs/store';
 import type { Database } from '@kanjijs/store';
 import { SessionProvider } from '@kanjijs/auth';
-import { eq } from 'drizzle-orm';
+import bcrypt from 'bcryptjs';
 import { adminUsers } from '@/database/schema';
-import { createHash, randomBytes, timingSafeEqual } from 'crypto';
 import type { LoginRequest, LoginResponse } from './contracts';
+
+const BCRYPT_ROUNDS = 12;
 
 @Injectable()
 export class AuthService {
@@ -14,16 +15,8 @@ export class AuthService {
     private session: SessionProvider,
   ) {}
 
-  private hashPassword(password: string, salt: string): string {
-    return createHash('sha256')
-      .update(salt + password)
-      .digest('hex');
-  }
-
-  private verifyPassword(password: string, passwordHash: string): boolean {
-    const [storedHash, salt] = passwordHash.split(':');
-    const computedHash = this.hashPassword(password, salt);
-    return computedHash === storedHash;
+  private async verifyPassword(password: string, passwordHash: string): Promise<boolean> {
+    return bcrypt.compare(password, passwordHash);
   }
 
   async login(input: LoginRequest): Promise<LoginResponse> {
@@ -40,7 +33,7 @@ export class AuthService {
       throw new Error('Usuario desactivado');
     }
 
-    const valid = this.verifyPassword(input.password, user.password_hash as string);
+    const valid = await this.verifyPassword(input.password, user.password_hash as string);
     if (!valid) {
       throw new Error('Credenciales inválidas');
     }
@@ -87,11 +80,7 @@ export class AuthService {
     };
   }
 
-  static hashPasswordStatic(password: string): string {
-    const salt = randomBytes(16).toString('hex');
-    const hash = createHash('sha256')
-      .update(salt + password)
-      .digest('hex');
-    return `${hash}:${salt}`;
+  static async hashPassword(password: string): Promise<string> {
+    return bcrypt.hash(password, BCRYPT_ROUNDS);
   }
 }

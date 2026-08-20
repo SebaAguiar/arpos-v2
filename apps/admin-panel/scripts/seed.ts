@@ -5,16 +5,11 @@
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import { createHash, randomBytes, randomUUID } from 'crypto';
+import { randomUUID } from 'crypto';
+import bcrypt from 'bcryptjs';
 import * as schema from '../src/database/schema';
 
-function hashPassword(password: string): string {
-  const salt = randomBytes(16).toString('hex');
-  const hash = createHash('sha256')
-    .update(salt + password)
-    .digest('hex');
-  return `${hash}:${salt}`;
-}
+const BCRYPT_ROUNDS = 12;
 
 async function main() {
   const client = postgres(process.env.DATABASE_URL!);
@@ -24,7 +19,7 @@ async function main() {
 
   // Admin user
   const adminId = randomUUID();
-  const adminPasswordHash = hashPassword('admin123');
+  const adminPasswordHash = await bcrypt.hash('admin123', BCRYPT_ROUNDS);
 
   await db
     .insert(schema.adminUsers)

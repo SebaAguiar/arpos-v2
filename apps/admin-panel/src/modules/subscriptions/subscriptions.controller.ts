@@ -61,7 +61,7 @@ export class SubscriptionsController {
     try {
       return await this.subscriptionsService.create(body);
     } catch (e) {
-      return c.json({ error: 'Bad Request', message: (e as Error).message }, 400);
+      return c.json({ error: 'Bad Request', message: 'Invalid input data' }, 400);
     }
   }
 
