@@ -1,6 +1,7 @@
 packages:
   - "apps/*"
   - "libs/*"
+  - "../kanji-v1/packages/*"
 allowBuilds:
   '@prisma/client': true
   '@prisma/engines': true
