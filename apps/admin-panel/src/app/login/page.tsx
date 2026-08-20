@@ -16,7 +16,7 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const response = await fetch("/api/auth/admin/login", {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -24,26 +24,32 @@ export default function LoginPage() {
 
       if (!response.ok) {
         const data = await response.json();
-        setError(data.error || "Login failed");
+        setError(data.message || data.error || "Credenciales inválidas");
         return;
       }
+
+      const data = await response.json();
+      localStorage.setItem("arcom_token", data.token);
+      localStorage.setItem("arcom_user", JSON.stringify(data.user));
+
+      document.cookie = `arcom_token=${data.token}; path=/; max-age=86400; SameSite=Lax`;
 
       router.push("/");
       router.refresh();
     } catch {
-      setError("Network error");
+      setError("Error de red");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md">
+    <div className="flex min-h-screen items-center" style={{ background: "var(--background)" }}>
+      <div className="w-full max-w-md mx-auto">
         <div className="card">
           <div className="mb-6 text-center">
-            <h1 className="text-2xl font-bold text-gray-900">Arcom Admin</h1>
-            <p className="text-sm text-gray-500">Panel de administración</p>
+            <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Arcom Admin</h1>
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>Panel de administración</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

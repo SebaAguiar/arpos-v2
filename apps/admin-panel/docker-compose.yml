@@ -1,0 +1,16 @@
+services:
+  admin-db:
+    image: postgres:16-alpine
+    container_name: arcom-admin-db
+    restart: unless-stopped
+    ports:
+      - "5436:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: admin_panel
+    volumes:
+      - admin-db-data:/var/lib/postgresql/data
+
+volumes:
+  admin-db-data:

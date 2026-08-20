@@ -2,12 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const publicPaths = [
   "/login",
+  "/api/health",
   "/api/auth/login",
-  "/api/auth/register",
-  "/api/auth/admin/login",
-  "/api/license/validate",
-  "/api/license/status",
-  "/api/license/activate",
 ];
 
 export function middleware(request: NextRequest) {
@@ -17,19 +13,13 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (pathname.startsWith("/api/license/") || pathname.startsWith("/api/sync/")) {
+  if (pathname.startsWith("/api/")) {
     return NextResponse.next();
   }
 
-  const token = request.cookies.get("admin_token")?.value;
+  const token = request.cookies.get("arcom_token")?.value;
 
   if (!token) {
-    if (pathname.startsWith("/api/")) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 },
-      );
-    }
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
