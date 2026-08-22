@@ -27,7 +27,7 @@ export const productsRouter = router({
     }),
 
   create: protectedProcedure
-    .input(z.object({ name: z.string().min(1), type: z.string().default('saas'), clientId: z.string().nullable().optional() }))
+    .input(z.object({ name: z.string().min(1, 'El nombre es obligatorio'), type: z.string().default('saas'), clientId: z.string().nullable().optional() }))
     .mutation(async ({ ctx, input }) => {
       return ctx.db.product.create({ data: input });
     }),

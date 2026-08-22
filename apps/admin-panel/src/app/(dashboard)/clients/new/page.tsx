@@ -3,9 +3,11 @@
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
 import Link from "next/link";
-import { Button, Text, TextField, Select, Flex, Heading, Card, Grid, Callout } from "@radix-ui/themes";
-import { ArrowLeftIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import { Button, Text, TextField, Select, Flex, Heading, Card, Grid } from "@radix-ui/themes";
+import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
+import { getFormErrorMessages } from "@/lib/form-errors";
+import { ErrorCallout } from "@/components/ui/error-callout";
 
 const onlyPhoneChars = (value: string) => value.replace(/[^0-9+()\s-]/g, "");
 const onlyTaxIdChars = (value: string) => value.replace(/[^0-9-]/g, "");
@@ -55,10 +57,7 @@ export default function NewClientPage() {
       <Heading size="6" mb="4">Nuevo Cliente</Heading>
 
       {createClient.isError && (
-        <Callout.Root color="red" mb="4">
-          <Callout.Icon><ExclamationTriangleIcon /></Callout.Icon>
-          <Callout.Text>{createClient.error.message}</Callout.Text>
-        </Callout.Root>
+        <ErrorCallout messages={getFormErrorMessages(createClient.error)} />
       )}
 
       <Card size="3">

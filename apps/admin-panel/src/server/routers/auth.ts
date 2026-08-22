@@ -11,8 +11,8 @@ export const authRouter = router({
   login: publicProcedure
     .input(
       z.object({
-        email: z.string().email(),
-        password: z.string().min(1),
+        email: z.string().email('El email no tiene un formato válido'),
+        password: z.string().min(1, 'La contraseña es obligatoria'),
       }),
     )
     .mutation(async ({ ctx, input }) => {

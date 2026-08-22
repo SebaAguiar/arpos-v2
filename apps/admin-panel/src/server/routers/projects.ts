@@ -30,7 +30,7 @@ export const projectsRouter = router({
     .input(
       z.object({
         clientId: z.string(),
-        name: z.string().min(1),
+        name: z.string().min(1, 'El nombre es obligatorio'),
         type: z.string().default('dev_custom'),
         status: z.string().default('backlog'),
         startDate: z.date().nullable().optional(),

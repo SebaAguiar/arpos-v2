@@ -7,13 +7,21 @@ const PHONE_REGEX = /^[0-9+()\s-]*$/;
 const TAX_ID_REGEX = /^[0-9-]*$/;
 
 const clientSchema = z.object({
-  name: z.string().min(1),
-  email: z.string().trim().toLowerCase().email(),
+  name: z.string().min(1, 'El nombre es obligatorio'),
+  email: z.string().trim().toLowerCase().email('El email no tiene un formato válido'),
   type: z.enum(['persona', 'empresa']).default('persona'),
   source: z.string().default('saas_signup'),
-  phone: z.string().regex(PHONE_REGEX).nullable().optional(),
+  phone: z
+    .string()
+    .regex(PHONE_REGEX, 'El telefono solo admite numeros y los simbolos + ( ) -')
+    .nullable()
+    .optional(),
   company: z.string().nullable().optional(),
-  taxId: z.string().regex(TAX_ID_REGEX).nullable().optional(),
+  taxId: z
+    .string()
+    .regex(TAX_ID_REGEX, 'El CUIT / Tax ID solo admite numeros y guiones')
+    .nullable()
+    .optional(),
   country: z.string().default('AR'),
   notes: z.string().nullable().optional(),
 });

@@ -23,8 +23,8 @@ export const plansRouter = router({
     .input(
       z.object({
         productId: z.string(),
-        name: z.string().min(1),
-        slug: z.string().min(1),
+        name: z.string().min(1, 'El nombre es obligatorio'),
+        slug: z.string().min(1, 'El slug es obligatorio'),
         maxStoresDefault: z.number().default(1),
         priceDefaultCents: z.number().default(0),
         currency: z.string().default('ARS'),

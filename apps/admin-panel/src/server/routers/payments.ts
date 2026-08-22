@@ -57,7 +57,7 @@ export const paymentsRouter = router({
         clientId: z.string(),
         subscriptionId: z.string().nullable().optional(),
         projectId: z.string().nullable().optional(),
-        amountCents: z.number().min(0),
+        amountCents: z.number().min(0, 'El monto debe ser mayor o igual a 0'),
         currency: z.string().default('ARS'),
         status: z.string().default('pending'),
         method: z.string().nullable().optional(),

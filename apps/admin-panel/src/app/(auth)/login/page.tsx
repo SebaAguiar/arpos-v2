@@ -3,13 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
-import { Box, Card, Heading, Text, TextField, Button, Flex, Callout } from "@radix-ui/themes";
-import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import { Card, Heading, Text, TextField, Button, Flex } from "@radix-ui/themes";
+import { getFormErrorMessages } from "@/lib/form-errors";
+import { ErrorCallout } from "@/components/ui/error-callout";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<string[]>([]);
   const router = useRouter();
 
   const loginMutation = api.auth.login.useMutation({
@@ -19,13 +20,13 @@ export default function LoginPage() {
       router.refresh();
     },
     onError: (err) => {
-      setError(err.message || "Credenciales invalidas");
+      setErrors(getFormErrorMessages(err));
     },
   });
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
+    setErrors([]);
     loginMutation.mutate({ email, password });
   }
 
@@ -39,12 +40,7 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit}>
           <Flex direction="column" gap="4">
-            {error && (
-              <Callout.Root color="red">
-                <Callout.Icon><ExclamationTriangleIcon /></Callout.Icon>
-                <Callout.Text>{error}</Callout.Text>
-              </Callout.Root>
-            )}
+            {errors.length > 0 && <ErrorCallout messages={errors} />}
 
             <Flex direction="column" gap="1">
               <Text size="2" weight="medium">Email</Text>

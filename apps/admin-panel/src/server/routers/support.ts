@@ -53,7 +53,7 @@ export const supportRouter = router({
     .input(
       z.object({
         clientId: z.string(),
-        subject: z.string().min(1),
+        subject: z.string().min(1, 'El asunto es obligatorio'),
         description: z.string().nullable().optional(),
         status: z.string().default('open'),
         priority: z.string().default('medium'),
