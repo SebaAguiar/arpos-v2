@@ -6,7 +6,7 @@
     "dev": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "bun --watch node_modules/.bin/next dev --turbopack",
+        "command": "npx next dev",
         "cwd": "apps/admin-panel"
       }
     },
@@ -30,24 +30,31 @@
         "cwd": "apps/admin-panel"
       }
     },
-    "db:push": {
+    "prisma:generate": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npx drizzle-kit push",
+        "command": "npx prisma generate",
         "cwd": "apps/admin-panel"
       }
     },
-    "db:studio": {
+    "prisma:push": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npx drizzle-kit studio",
+        "command": "npx prisma db push",
         "cwd": "apps/admin-panel"
       }
     },
-    "db:seed": {
+    "prisma:studio": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "bun src/database/seed.ts",
+        "command": "npx prisma studio",
+        "cwd": "apps/admin-panel"
+      }
+    },
+    "prisma:seed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx tsx prisma/seed.ts",
         "cwd": "apps/admin-panel"
       }
     }

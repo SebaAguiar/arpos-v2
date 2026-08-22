@@ -2,8 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const publicPaths = [
   "/login",
-  "/api/health",
-  "/api/auth/login",
+  "/api/trpc",
 ];
 
 export function middleware(request: NextRequest) {

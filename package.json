@@ -8,6 +8,7 @@
     "dev:api": "nx dev api",
     "dev:pos": "nx dev pos-react",
     "dev:admin": "nx dev admin-panel",
+    "dev:panel": "nx dev admin-panel",
     "dev:launcher": "nx dev arcom-launcher",
     "dev:landing": "nx dev marketing-landing",
     "dev:landing:direct": "cd apps/marketing-landing && npx astro dev",
