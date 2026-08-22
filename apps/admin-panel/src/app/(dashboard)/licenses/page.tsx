@@ -1,13 +1,21 @@
 "use client";
 
-import { useState } from 'react';
-import { api } from '@/trpc/react';
+import { useState } from "react";
+import { api } from "@/trpc/react";
+import { Heading, Table, Badge, Flex, Text, Select, Button, TextField } from "@radix-ui/themes";
+import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 
-const STATUS_OPTIONS = ['', 'active', 'trialing', 'past_due', 'canceled'] as const;
+const STATUS_OPTIONS = ["", "active", "trialing", "past_due", "canceled"] as const;
+
+function badgeColor(s: string) {
+  if (s === "active") return "green";
+  if (s === "canceled") return "red";
+  return "gray";
+}
 
 export default function LicensesPage() {
-  const [status, setStatus] = useState('');
-  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState("");
+  const [search, setSearch] = useState("");
   const [cursor, setCursor] = useState<string | undefined>();
 
   const { data, isLoading } = api.subscriptions.list.useQuery({
@@ -17,88 +25,73 @@ export default function LicensesPage() {
     cursor,
   });
 
-  function badgeClass(s: string) {
-    if (s === 'active') return 'badge-active';
-    if (s === 'canceled') return 'badge-expired';
-    return 'badge-inactive';
-  }
-
   return (
-    <div>
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Licencias</h2>
-      </div>
+    <>
+      <Heading size="6" mb="4">Licencias</Heading>
 
-      <div className="mb-4 flex gap-3">
-        <input
-          type="text"
+      <Flex gap="3" mb="4">
+        <TextField.Root
           placeholder="Buscar por cliente..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); setCursor(undefined); }}
-          className="input max-w-sm"
-        />
-        <select
-          value={status}
-          onChange={(e) => { setStatus(e.target.value); setCursor(undefined); }}
-          className="input max-w-xs"
+          style={{ maxWidth: 300 }}
         >
-          {STATUS_OPTIONS.map((s) => (
-            <option key={s} value={s}>{s || 'Todos los estados'}</option>
-          ))}
-        </select>
-      </div>
+          <TextField.Slot>
+            <MagnifyingGlassIcon height="16" width="16" />
+          </TextField.Slot>
+        </TextField.Root>
 
-      <div className="card overflow-hidden">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr style={{ borderBottom: "1px solid var(--border)" }}>
-              <th className="p-3 font-medium" style={{ color: "var(--text-muted)" }}>Cliente</th>
-              <th className="p-3 font-medium" style={{ color: "var(--text-muted)" }}>Producto</th>
-              <th className="p-3 font-medium" style={{ color: "var(--text-muted)" }}>Plan</th>
-              <th className="p-3 font-medium" style={{ color: "var(--text-muted)" }}>Estado</th>
-              <th className="p-3 font-medium" style={{ color: "var(--text-muted)" }}>Tiendas</th>
-              <th className="p-3 font-medium" style={{ color: "var(--text-muted)" }}>Renovacion</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <tr>
-                <td colSpan={6} className="p-8 text-center" style={{ color: "var(--text-muted)" }}>Cargando...</td>
-              </tr>
-            ) : data?.items.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="p-8 text-center" style={{ color: "var(--text-muted)" }}>No hay suscripciones</td>
-              </tr>
-            ) : (
-              data?.items.map((sub) => (
-                <tr key={sub.id} style={{ borderBottom: "1px solid var(--border)" }}>
-                  <td className="p-3">
-                    <div className="font-medium" style={{ color: "var(--text-primary)" }}>{sub.client.name}</div>
-                    <div className="text-xs" style={{ color: "var(--text-muted)" }}>{sub.client.email}</div>
-                  </td>
-                  <td className="p-3" style={{ color: "var(--text-secondary)" }}>{sub.product.name}</td>
-                  <td className="p-3" style={{ color: "var(--text-secondary)" }}>{sub.plan.name}</td>
-                  <td className="p-3">
-                    <span className={`badge ${badgeClass(sub.status)}`}>{sub.status}</span>
-                  </td>
-                  <td className="p-3" style={{ color: "var(--text-secondary)" }}>{sub.maxStoresOverride ?? sub.plan.maxStoresDefault}</td>
-                  <td className="p-3" style={{ color: "var(--text-muted)" }}>
-                    {sub.renewalDate ? new Date(sub.renewalDate).toLocaleDateString('es-AR') : '-'}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+        <Select.Root value={status} onValueChange={(v) => { setStatus(v === "all" ? "" : v); setCursor(undefined); }}>
+          <Select.Trigger placeholder="Estado" />
+          <Select.Content>
+            <Select.Item value="all">Todos los estados</Select.Item>
+            <Select.Item value="active">Activo</Select.Item>
+            <Select.Item value="trialing">Trial</Select.Item>
+            <Select.Item value="past_due">Vencido</Select.Item>
+            <Select.Item value="canceled">Cancelado</Select.Item>
+          </Select.Content>
+        </Select.Root>
+      </Flex>
+
+      <Table.Root variant="surface">
+        <Table.Header>
+          <Table.Row>
+            <Table.ColumnHeaderCell>Cliente</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Producto</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Plan</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Estado</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Tiendas</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Renovacion</Table.ColumnHeaderCell>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {isLoading ? (
+            <Table.Row><Table.Cell colSpan={6}><Text color="gray" align="center">Cargando...</Text></Table.Cell></Table.Row>
+          ) : data?.items.length === 0 ? (
+            <Table.Row><Table.Cell colSpan={6}><Text color="gray" align="center">No hay suscripciones</Text></Table.Cell></Table.Row>
+          ) : (
+            data?.items.map((sub) => (
+              <Table.Row key={sub.id}>
+                <Table.Cell>
+                  <Text weight="medium">{sub.client.name}</Text>
+                  <Text size="1" color="gray">{sub.client.email}</Text>
+                </Table.Cell>
+                <Table.Cell><Text color="gray">{sub.product.name}</Text></Table.Cell>
+                <Table.Cell><Text color="gray">{sub.plan.name}</Text></Table.Cell>
+                <Table.Cell><Badge color={badgeColor(sub.status)} variant="soft">{sub.status}</Badge></Table.Cell>
+                <Table.Cell><Text color="gray">{sub.maxStoresOverride ?? sub.plan.maxStoresDefault}</Text></Table.Cell>
+                <Table.Cell><Text color="gray">{sub.renewalDate ? new Date(sub.renewalDate).toLocaleDateString("es-AR") : "-"}</Text></Table.Cell>
+              </Table.Row>
+            ))
+          )}
+        </Table.Body>
+      </Table.Root>
 
       {data?.nextCursor && (
-        <div className="mt-4 flex justify-center">
-          <button onClick={() => setCursor(data.nextCursor)} className="btn-secondary">
-            Cargar mas
-          </button>
-        </div>
+        <Flex justify="center" mt="4">
+          <Button variant="soft" onClick={() => setCursor(data.nextCursor)}>Cargar mas</Button>
+        </Flex>
       )}
-    </div>
+    </>
   );
 }

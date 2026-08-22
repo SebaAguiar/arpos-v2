@@ -1,49 +1,74 @@
-import "../globals.css";
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Box, Flex, Heading, Text } from "@radix-ui/themes";
+import {
+  DashboardIcon,
+  PersonIcon,
+  LockClosedIcon,
+  QuestionMarkCircledIcon,
+  StarIcon,
+} from "@radix-ui/react-icons";
+
+const NAV_ITEMS = [
+  { href: "/", label: "Dashboard", icon: DashboardIcon },
+  { href: "/clients", label: "Clientes", icon: PersonIcon },
+  { href: "/licenses", label: "Licencias", icon: LockClosedIcon },
+  { href: "/payments", label: "Pagos", icon: StarIcon },
+  { href: "/support", label: "Soporte", icon: QuestionMarkCircledIcon },
+];
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
   return (
-    <div className="flex min-h-screen">
-      <aside className="w-64 border-r" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-        <div className="border-b p-4" style={{ borderColor: "var(--border)" }}>
-          <h1 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>Arcom Admin</h1>
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>Panel de administracion</p>
-        </div>
-        <nav className="p-4">
-          <ul className="space-y-1">
-            <li>
-              <Link href="/" className="block rounded-lg px-3 py-2 hover:opacity-80" style={{ color: "var(--text-secondary)" }}>
-                Dashboard
+    <Flex style={{ minHeight: "100vh" }}>
+      <Box
+        style={{
+          width: 256,
+          borderRight: "1px solid var(--gray-6)",
+          background: "var(--color-surface)",
+          flexShrink: 0,
+        }}
+      >
+        <Box p="4" style={{ borderBottom: "1px solid var(--gray-6)" }}>
+          <Heading size="4">Arcom Admin</Heading>
+          <Text size="1" color="gray">Panel de administracion</Text>
+        </Box>
+        <Flex direction="column" gap="1" p="3">
+          {NAV_ITEMS.map((item) => {
+            const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+            return (
+              <Link key={item.href} href={item.href} style={{ textDecoration: "none" }}>
+                <Flex
+                  align="center"
+                  gap="2"
+                  px="3"
+                  py="2"
+                  style={{
+                    borderRadius: 6,
+                    background: isActive ? "var(--accent-9)" : "transparent",
+                    color: isActive ? "white" : "var(--gray-11)",
+                    fontWeight: isActive ? 600 : 400,
+                    transition: "background 0.15s",
+                  }}
+                >
+                  <item.icon style={{ width: 16, height: 16 }} />
+                  <Text size="2">{item.label}</Text>
+                </Flex>
               </Link>
-            </li>
-            <li>
-              <Link href="/clients" className="block rounded-lg px-3 py-2 hover:opacity-80" style={{ color: "var(--text-secondary)" }}>
-                Clientes
-              </Link>
-            </li>
-            <li>
-              <Link href="/licenses" className="block rounded-lg px-3 py-2 hover:opacity-80" style={{ color: "var(--text-secondary)" }}>
-                Licencias
-              </Link>
-            </li>
-            <li>
-              <Link href="/payments" className="block rounded-lg px-3 py-2 hover:opacity-80" style={{ color: "var(--text-secondary)" }}>
-                Pagos
-              </Link>
-            </li>
-            <li>
-              <Link href="/support" className="block rounded-lg px-3 py-2 hover:opacity-80" style={{ color: "var(--text-secondary)" }}>
-                Soporte
-              </Link>
-            </li>
-          </ul>
-        </nav>
-      </aside>
-      <main className="flex-1 p-8">{children}</main>
-    </div>
+            );
+          })}
+        </Flex>
+      </Box>
+      <Box style={{ flex: 1, padding: 32 }}>
+        {children}
+      </Box>
+    </Flex>
   );
 }

@@ -1,18 +1,29 @@
 import { z } from 'zod';
 import { router, protectedProcedure } from '../trpc';
 import { TRPCError } from '@trpc/server';
+import { Prisma } from '@prisma/client';
+
+const PHONE_REGEX = /^[0-9+()\s-]*$/;
+const TAX_ID_REGEX = /^[0-9-]*$/;
 
 const clientSchema = z.object({
   name: z.string().min(1),
-  email: z.string().email(),
+  email: z.string().trim().toLowerCase().email(),
   type: z.enum(['persona', 'empresa']).default('persona'),
   source: z.string().default('saas_signup'),
-  phone: z.string().nullable().optional(),
+  phone: z.string().regex(PHONE_REGEX).nullable().optional(),
   company: z.string().nullable().optional(),
-  taxId: z.string().nullable().optional(),
+  taxId: z.string().regex(TAX_ID_REGEX).nullable().optional(),
   country: z.string().default('AR'),
   notes: z.string().nullable().optional(),
 });
+
+function isUniqueEmailError(error: unknown): boolean {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === 'P2002'
+  );
+}
 
 export const clientsRouter = router({
   list: protectedProcedure
@@ -68,14 +79,34 @@ export const clientsRouter = router({
     }),
 
   create: protectedProcedure.input(clientSchema).mutation(async ({ ctx, input }) => {
-    return ctx.db.client.create({ data: input });
+    try {
+      return await ctx.db.client.create({ data: input });
+    } catch (error) {
+      if (isUniqueEmailError(error)) {
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: 'Ya existe un cliente con ese email',
+        });
+      }
+      throw error;
+    }
   }),
 
   update: protectedProcedure
     .input(z.object({ id: z.string() }).merge(clientSchema.partial()))
     .mutation(async ({ ctx, input }) => {
       const { id, ...data } = input;
-      return ctx.db.client.update({ where: { id }, data });
+      try {
+        return await ctx.db.client.update({ where: { id }, data });
+      } catch (error) {
+        if (isUniqueEmailError(error)) {
+          throw new TRPCError({
+            code: 'CONFLICT',
+            message: 'Ya existe un cliente con ese email',
+          });
+        }
+        throw error;
+      }
     }),
 
   delete: protectedProcedure

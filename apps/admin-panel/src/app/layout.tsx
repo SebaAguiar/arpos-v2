@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { TRPCProvider } from "@/trpc/provider";
+import { Theme } from "@radix-ui/themes";
+import "@radix-ui/themes/styles.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Arcom Admin Panel",
-  description: "Panel de administración de Arsian",
+  description: "Panel de administracion de Arsian",
 };
 
 export default function RootLayout({
@@ -15,7 +17,11 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body>
-        <TRPCProvider>{children}</TRPCProvider>
+        <TRPCProvider>
+          <Theme accentColor="indigo" grayColor="slate" radius="medium" scaling="100%">
+            {children}
+          </Theme>
+        </TRPCProvider>
       </body>
     </html>
   );

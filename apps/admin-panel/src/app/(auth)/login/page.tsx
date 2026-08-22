@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
+import { Box, Card, Heading, Text, TextField, Button, Flex, Callout } from "@radix-ui/themes";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -17,7 +19,7 @@ export default function LoginPage() {
       router.refresh();
     },
     onError: (err) => {
-      setError(err.message || "Credenciales inválidas");
+      setError(err.message || "Credenciales invalidas");
     },
   });
 
@@ -28,53 +30,50 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center" style={{ background: "var(--background)" }}>
-      <div className="w-full max-w-md mx-auto">
-        <div className="card">
-          <div className="mb-6 text-center">
-            <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Arcom Admin</h1>
-            <p className="text-sm" style={{ color: "var(--text-muted)" }}>Panel de administración</p>
-          </div>
+    <Flex align="center" justify="center" style={{ minHeight: "100vh" }}>
+      <Card style={{ width: 400 }}>
+        <Flex direction="column" align="center" gap="1" mb="6">
+          <Heading size="6">Arcom Admin</Heading>
+          <Text size="2" color="gray">Panel de administracion</Text>
+        </Flex>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit}>
+          <Flex direction="column" gap="4">
             {error && (
-              <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">
-                {error}
-              </div>
+              <Callout.Root color="red">
+                <Callout.Icon><ExclamationTriangleIcon /></Callout.Icon>
+                <Callout.Text>{error}</Callout.Text>
+              </Callout.Root>
             )}
 
-            <div>
-              <label className="label">Email</label>
-              <input
+            <Flex direction="column" gap="1">
+              <Text size="2" weight="medium">Email</Text>
+              <TextField.Root
                 type="email"
+                placeholder="admin@arcom.local"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="input"
                 required
               />
-            </div>
+            </Flex>
 
-            <div>
-              <label className="label">Password</label>
-              <input
+            <Flex direction="column" gap="1">
+              <Text size="2" weight="medium">Password</Text>
+              <TextField.Root
                 type="password"
+                placeholder="admin123"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="input"
                 required
               />
-            </div>
+            </Flex>
 
-            <button
-              type="submit"
-              disabled={loginMutation.isPending}
-              className="btn-primary w-full"
-            >
-              {loginMutation.isPending ? "Ingresando..." : "Ingresar"}
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
+            <Button type="submit" loading={loginMutation.isPending} style={{ width: "100%" }}>
+              Ingresar
+            </Button>
+          </Flex>
+        </form>
+      </Card>
+    </Flex>
   );
 }
