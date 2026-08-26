@@ -11,6 +11,7 @@ import {
   ClipboardIcon,
   CardStackIcon,
   ArchiveIcon,
+  FileTextIcon,
 } from "@radix-ui/react-icons";
 
 const ITEM_BASE: React.CSSProperties = {
@@ -165,6 +166,14 @@ export function Sidebar() {
           <div style={SECTION_HEADER}>Analítica</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
             <SidebarNavLink to="/reports" icon={BarChartIcon} label="Reportes" />
+          </div>
+        </div>
+
+        {/* Fiscal */}
+        <div>
+          <div style={SECTION_HEADER}>Fiscal</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+            <SidebarNavLink to="/invoices" icon={FileTextIcon} label="Comprobantes" />
           </div>
         </div>
       </div>

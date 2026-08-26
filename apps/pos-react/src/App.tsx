@@ -34,6 +34,9 @@ const WalletPage = lazy(() =>
 const BackupPage = lazy(() =>
   import("@/pages/BackupPage").then((m) => ({ default: m.BackupPage }))
 );
+const InvoicesPage = lazy(() =>
+  import("@/pages/InvoicesPage").then((m) => ({ default: m.InvoicesPage }))
+);
 
 function PageFallback() {
   return (
@@ -148,6 +151,14 @@ export function App() {
             element={
               <Suspense fallback={<PageFallback />}>
                 <BackupPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/invoices"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <InvoicesPage />
               </Suspense>
             }
           />

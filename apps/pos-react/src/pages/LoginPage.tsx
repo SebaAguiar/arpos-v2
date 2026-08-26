@@ -4,17 +4,16 @@ import { ExclamationTriangleIcon, LightningBoltIcon } from "@radix-ui/react-icon
 import { useAuth } from "@/hooks/useAuth";
 
 export function LoginPage() {
-  const { login, loading, error, clearError } = useAuth();
+  const { loginWithLicense, loading, error, clearError } = useAuth();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      if (!email.trim() || !password || loading) return;
-      await login(email.trim(), password);
+      if (!email.trim() || loading) return;
+      await loginWithLicense(email.trim());
     },
-    [email, password, loading, login]
+    [email, loading, loginWithLicense]
   );
 
   return (
@@ -59,7 +58,7 @@ export function LoginPage() {
             Arcom
           </Text>
           <Text size="2" color="gray">
-            Ingresá para continuar
+            Ingresa tu email para continuar
           </Text>
         </div>
 
@@ -71,29 +70,13 @@ export function LoginPage() {
             </Text>
             <TextField.Root
               type="email"
-              placeholder="admin@arcom.com"
+              placeholder="tu@email.com"
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
                 clearError();
               }}
               autoFocus
-            />
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <Text size="2" weight="bold">
-              Contraseña
-            </Text>
-            <TextField.Root
-              type="password"
-              autoComplete="current-password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                clearError();
-              }}
             />
           </div>
 
@@ -118,24 +101,24 @@ export function LoginPage() {
 
           <button
             type="submit"
-            disabled={!email.trim() || !password || loading}
+            disabled={!email.trim() || loading}
             style={{
               width: "100%",
               padding: "12px",
               backgroundColor:
-                email.trim() && password && !loading ? "var(--accent)" : "var(--bg-surface)",
+                email.trim() && !loading ? "var(--accent)" : "var(--bg-surface)",
               color:
-                email.trim() && password && !loading ? "#fff" : "var(--text-secondary)",
+                email.trim() && !loading ? "#fff" : "var(--text-secondary)",
               border: "none",
               borderRadius: "6px",
               fontSize: "15px",
               fontWeight: 600,
               cursor:
-                email.trim() && password && !loading ? "pointer" : "not-allowed",
+                email.trim() && !loading ? "pointer" : "not-allowed",
               transition: "background-color 150ms ease",
             }}
           >
-            {loading ? "Ingresando..." : "Iniciar sesión"}
+            {loading ? "Verificando..." : "Iniciar sesion"}
           </button>
         </form>
       </div>

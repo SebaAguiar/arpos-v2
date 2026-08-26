@@ -6,6 +6,7 @@ import {
   CheckCircledIcon,
   CrossCircledIcon,
   GlobeIcon,
+  FileTextIcon,
 } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
 import { useSettingsStore } from "@/stores/settings.store";
@@ -20,6 +21,8 @@ import { CloudSyncSettings } from "@/components/settings/CloudSyncSettings";
 import { AutosaveBadge } from "@/components/settings/AutosaveBadge";
 import { SystemManager } from "@/components/settings/SystemManager";
 import { UpdateManager } from "@/components/settings/UpdateManager";
+import { ArcaConfigForm } from "@/components/settings/ArcaConfigForm";
+import { FiscalDashboard } from "@/components/settings/FiscalDashboard";
 
 export function SettingsPage() {
   const usersOpen = useDialogStore((s) => s.users);
@@ -55,6 +58,10 @@ export function SettingsPage() {
           <Tabs.Trigger value="general">General</Tabs.Trigger>
           <Tabs.Trigger value="pagos">Pagos</Tabs.Trigger>
           <Tabs.Trigger value="impresion">Impresión</Tabs.Trigger>
+          <Tabs.Trigger value="facturacion">
+            <FileTextIcon width={14} height={14} style={{ marginRight: "4px" }} />
+            Facturación
+          </Tabs.Trigger>
           <Tabs.Trigger value="sincronizacion">Sincronización</Tabs.Trigger>
           <Tabs.Trigger value="gestion">Usuarios y sucursales</Tabs.Trigger>
           {isTauri && <Tabs.Trigger value="sistema">Sistema</Tabs.Trigger>}
@@ -130,6 +137,13 @@ export function SettingsPage() {
               </div>
             </div>
           </Card>
+        </Tabs.Content>
+
+        <Tabs.Content value="facturacion" style={{ paddingTop: "16px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <ArcaConfigForm />
+            <FiscalDashboard />
+          </div>
         </Tabs.Content>
 
         <Tabs.Content value="sincronizacion" style={{ paddingTop: "16px" }}>

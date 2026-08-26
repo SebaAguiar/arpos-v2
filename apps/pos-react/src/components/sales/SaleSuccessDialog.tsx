@@ -9,7 +9,7 @@ interface SaleSuccessDialogProps {
   change: number;
   email?: string;
   store?: StoreConfig | null;
-  onClose: (action: "close" | "print" | "download" | "whatsapp") => void;
+  onClose: (action: "close" | "print" | "download" | "whatsapp" | "invoice") => void;
 }
 
 export function SaleSuccessDialog({
@@ -301,6 +301,30 @@ export function SaleSuccessDialog({
               WhatsApp
             </button>
           </div>
+
+          {/* Facturación */}
+          <button
+            onClick={() => onClose("invoice")}
+            style={{
+              width: "100%",
+              height: "40px",
+              backgroundColor: "var(--color-panel-solid)",
+              border: "1px solid var(--gray-a5)",
+              borderRadius: "12px",
+              color: "var(--text-secondary)",
+              fontWeight: 600,
+              fontSize: "12px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "6px",
+              marginTop: "4px",
+            }}
+          >
+            <FileTextIcon width={15} height={15} />
+            Crear Factura
+          </button>
         </div>
       </div>
     </div>

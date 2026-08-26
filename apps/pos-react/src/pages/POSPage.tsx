@@ -40,6 +40,7 @@ import {
 } from "@/services/receipt.service";
 import { useCompanyStore } from "@/stores/company.store";
 import { useSettingsStore } from "@/stores/settings.store";
+import { useArcaStore } from "@/stores/arca.store";
 import type { Product, ProductVariant, Sale, StoreConfig } from "@/lib/types";
 
 export function POSPage() {
@@ -118,7 +119,7 @@ export function POSPage() {
   );
 
   const handleSuccessClose = useCallback(
-    (action: "close" | "print" | "download" | "whatsapp") => {
+    (action: "close" | "print" | "download" | "whatsapp" | "invoice") => {
       const { sale } = successDialog;
       if (sale) {
         switch (action) {
@@ -131,6 +132,11 @@ export function POSPage() {
           case "whatsapp":
             shareViaWhatsApp(sale, storeConfig);
             break;
+          case "invoice": {
+            const { createInvoice } = useArcaStore.getState();
+            createInvoice(sale.id).catch(() => {});
+            break;
+          }
         }
       }
       setSuccessDialog({ open: false, sale: null, change: 0, email: "" });
