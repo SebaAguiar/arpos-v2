@@ -17,6 +17,8 @@ import { SyncModule } from './features/sync/sync.module';
 import { PurchasesModule } from './features/purchases/purchases.module';
 import { WalletModule } from './features/wallet/wallet.module';
 import { MigrationModule } from './features/migration/migration.module';
+import { ArcaModule } from './features/arca/arca.module';
+import { InvoiceModule } from './features/invoices/invoice.module';
 import { LocalTenantMiddleware } from './core/tenant/local-tenant.middleware';
 import { JwtAuthGuard } from './features/auth/guards/jwt-auth.guard';
 
@@ -39,6 +41,8 @@ import { JwtAuthGuard } from './features/auth/guards/jwt-auth.guard';
     PurchasesModule,
     WalletModule,
     MigrationModule,
+    ArcaModule,
+    InvoiceModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

@@ -8,116 +8,118 @@ datasource db {
 }
 
 model Company {
-  id                String   @id @default(cuid())
-  name              String
-  taxId             String   @unique
-  address           String?
-  email             String?
-  phone             String?
-  created_at        Int      @default(0)
-  updated_at        Int
-  config            String?
+  id         String  @id @default(cuid())
+  name       String
+  taxId      String  @unique
+  address    String?
+  email      String?
+  phone      String?
+  created_at Int     @default(0)
+  updated_at Int
+  config     String?
 
-  stores            Store[]
-  users             User[]
-  products          Product[]
-  product_variants  ProductVariant[]
-  inventory         Inventory[]
+  stores              Store[]
+  arca_configs        ArcaConfig[]
+  users               User[]
+  products            Product[]
+  product_variants    ProductVariant[]
+  inventory           Inventory[]
   inventory_movements InventoryMovement[]
-  sales             Sale[]
-  contacts          Contact[]
-  cash_registers    CashRegister[]
-  cash_movements    CashMovement[]
-  purchase_orders   PurchaseOrder[]
-  purchase_receipts PurchaseReceipt[]
+  sales               Sale[]
+  contacts            Contact[]
+  cash_registers      CashRegister[]
+  cash_movements      CashMovement[]
+  purchase_orders     PurchaseOrder[]
+  purchase_receipts   PurchaseReceipt[]
   wallet_transactions WalletTransaction[]
-  tasks             Task[]
-  transfers         Transfer[]
-  invoices          Invoice[]
-  cost_histories    CostHistory[]
-  inventory_costs   InventoryCost[]
+  tasks               Task[]
+  transfers           Transfer[]
+  invoices            Invoice[]
+  cost_histories      CostHistory[]
+  inventory_costs     InventoryCost[]
 
   @@map("companies")
 }
 
 model Store {
-  id                String   @id @default(cuid())
-  companyId         String
-  name              String
-  address           String?
-  phone             String?
-  is_active         Boolean  @default(true)
-  created_at        Int      @default(0)
-  updated_at        Int
+  id         String  @id @default(cuid())
+  companyId  String
+  name       String
+  address    String?
+  phone      String?
+  is_active  Boolean @default(true)
+  created_at Int     @default(0)
+  updated_at Int
 
-  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  products          Product[]
-  inventory         Inventory[]
+  company             Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  products            Product[]
+  inventory           Inventory[]
   inventory_movements InventoryMovement[]
-  sales             Sale[]
-  cash_registers    CashRegister[]
-  cash_movements    CashMovement[]
-  purchase_orders   PurchaseOrder[]
-  purchase_receipts PurchaseReceipt[]
-  tasks             Task[]
-  transfers_from    Transfer[] @relation("transfer_from")
-  transfers_to      Transfer[] @relation("transfer_to")
-  cost_histories    CostHistory[]
-  inventory_costs   InventoryCost[]
-  store_config      StoreConfig?
+  sales               Sale[]
+  cash_registers      CashRegister[]
+  cash_movements      CashMovement[]
+  purchase_orders     PurchaseOrder[]
+  purchase_receipts   PurchaseReceipt[]
+  tasks               Task[]
+  transfers_from      Transfer[]          @relation("transfer_from")
+  transfers_to        Transfer[]          @relation("transfer_to")
+  cost_histories      CostHistory[]
+  inventory_costs     InventoryCost[]
+  store_config        StoreConfig?
+  arca_config         ArcaConfig?         @relation("StoreArcaConfig")
 
   @@map("stores")
 }
 
 model User {
-  id                String   @id @default(cuid())
-  companyId         String
-  email             String
-  password          String
-  name              String
-  role              String   @default("cashier")
-  is_active         Boolean  @default(true)
-  created_at        Int      @default(0)
-  updated_at        Int
+  id         String  @id @default(cuid())
+  companyId  String
+  email      String
+  password   String
+  name       String
+  role       String  @default("cashier")
+  is_active  Boolean @default(true)
+  created_at Int     @default(0)
+  updated_at Int
 
-  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  sales             Sale[]
+  company             Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  sales               Sale[]
   inventory_movements InventoryMovement[]
-  created_orders    PurchaseOrder[] @relation("created_orders")
-  created_receipts  PurchaseReceipt[] @relation("created_receipts")
-  created_tasks     Task[] @relation("created_tasks")
-  assigned_tasks    Task[] @relation("assigned_tasks")
-  completed_tasks   Task[] @relation("completed_tasks")
-  created_transfers Transfer[] @relation("created_transfers")
-  received_transfers Transfer[] @relation("received_transfers")
+  created_orders      PurchaseOrder[]     @relation("created_orders")
+  created_receipts    PurchaseReceipt[]   @relation("created_receipts")
+  created_tasks       Task[]              @relation("created_tasks")
+  assigned_tasks      Task[]              @relation("assigned_tasks")
+  completed_tasks     Task[]              @relation("completed_tasks")
+  created_transfers   Transfer[]          @relation("created_transfers")
+  received_transfers  Transfer[]          @relation("received_transfers")
 
   @@unique([companyId, email])
   @@map("users")
 }
 
 model Product {
-  id                String   @id @default(cuid())
-  companyId         String
-  storeId           String
-  code              String
-  name              String
-  description       String?
-  price_cents       Int
-  cost_cents        Int?
-  stock_quantity    Int      @default(0)
-  sku               String?
-  category_id       String?
-  metadata          String?
-  is_active         Boolean  @default(true)
-  created_at        Int      @default(0)
-  updated_at        Int
+  id             String  @id @default(cuid())
+  companyId      String
+  storeId        String
+  code           String
+  name           String
+  description    String?
+  price_cents    Int
+  cost_cents     Int?
+  stock_quantity Int     @default(0)
+  sku            String?
+  category_id    String?
+  metadata       String?
+  is_active      Boolean @default(true)
+  created_at     Int     @default(0)
+  updated_at     Int
 
-  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  store             Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  variants          ProductVariant[]
-  inventory         Inventory[]
-  inventory_movements InventoryMovement[]
-  sale_items        SaleItem[]
+  company              Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  store                Store               @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  variants             ProductVariant[]
+  inventory            Inventory[]
+  inventory_movements  InventoryMovement[]
+  sale_items           SaleItem[]
   purchase_order_items PurchaseOrderItem[]
 
   @@unique([companyId, storeId, code])
@@ -125,73 +127,73 @@ model Product {
 }
 
 model ProductVariant {
-  id                String   @id @default(cuid())
-  companyId         String
-  productId         String
-  size              String?
-  color             String?
-  barcode           String?
-  sku               String?
-  price_cents       Int      @default(0)
-  cost_cents        Int?
-  is_active         Boolean  @default(true)
-  created_at        Int      @default(0)
-  updated_at        Int
+  id          String  @id @default(cuid())
+  companyId   String
+  productId   String
+  size        String?
+  color       String?
+  barcode     String?
+  sku         String?
+  price_cents Int     @default(0)
+  cost_cents  Int?
+  is_active   Boolean @default(true)
+  created_at  Int     @default(0)
+  updated_at  Int
 
-  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  inventory         Inventory[]
-  sale_items        SaleItem[]
-  inventory_movements InventoryMovement[]
+  company              Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  product              Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
+  inventory            Inventory[]
+  sale_items           SaleItem[]
+  inventory_movements  InventoryMovement[]
   purchase_order_items PurchaseOrderItem[]
-  transfer_items    TransferItem[]
-  cost_histories    CostHistory[]
-  inventory_costs   InventoryCost[]
+  transfer_items       TransferItem[]
+  cost_histories       CostHistory[]
+  inventory_costs      InventoryCost[]
 
   @@unique([companyId, barcode])
   @@map("product_variants")
 }
 
 model Inventory {
-  id                String   @id @default(cuid())
-  companyId         String
-  storeId           String
-  productId         String
-  variantId         String?
-  quantity          Int      @default(0)
-  min_stock         Int      @default(0)
-  max_stock         Int?
-  created_at        Int      @default(0)
-  updated_at        Int
+  id         String  @id @default(cuid())
+  companyId  String
+  storeId    String
+  productId  String
+  variantId  String?
+  quantity   Int     @default(0)
+  min_stock  Int     @default(0)
+  max_stock  Int?
+  created_at Int     @default(0)
+  updated_at Int
 
-  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  store             Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variant           ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  company Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  store   Store           @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  product Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
 
   @@unique([storeId, variantId])
   @@map("inventory")
 }
 
 model InventoryMovement {
-  id              String   @id @default(cuid())
-  companyId       String
-  storeId         String
-  productId       String
-  variantId       String?
-  userId          String?
-  type            String
-  quantity        Int
-  reason          String
-  reference_type  String?
-  reference_id    String?
-  created_at      Int      @default(0)
+  id             String  @id @default(cuid())
+  companyId      String
+  storeId        String
+  productId      String
+  variantId      String?
+  userId         String?
+  type           String
+  quantity       Int
+  reason         String
+  reference_type String?
+  reference_id   String?
+  created_at     Int     @default(0)
 
-  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  store           Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variant         ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
-  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  company Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  store   Store           @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  product Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  user    User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([companyId, storeId])
   @@index([productId])
@@ -200,33 +202,33 @@ model InventoryMovement {
 }
 
 model Sale {
-  id                String   @id @default(cuid())
-  companyId         String
-  storeId           String
-  cash_register_id  String?
-  user_id           String
-  contact_id        String?
-  ticket_number     Int      @default(0)
+  id               String  @id @default(cuid())
+  companyId        String
+  storeId          String
+  cash_register_id String?
+  user_id          String
+  contact_id       String?
+  ticket_number    Int     @default(0)
 
-  total_cents       Int
-  discount_cents    Int      @default(0)
-  tax_cents         Int      @default(0)
+  total_cents    Int
+  discount_cents Int @default(0)
+  tax_cents      Int @default(0)
 
-  status            String   @default("completed")
-  payment_method    String
-  payment_details   String?
+  status          String  @default("completed")
+  payment_method  String
+  payment_details String?
 
-  notes             String?
-  synced_at         Int?
+  notes     String?
+  synced_at Int?
 
-  created_at        Int      @default(0)
-  updated_at        Int
+  created_at Int @default(0)
+  updated_at Int
 
-  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  store             Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  user              User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  items             SaleItem[]
-  invoice           Invoice?
+  company Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  store   Store      @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  user    User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  items   SaleItem[]
+  invoice Invoice?
 
   @@index([companyId, storeId])
   @@index([companyId, storeId, ticket_number])
@@ -235,63 +237,63 @@ model Sale {
 }
 
 model SaleItem {
-  id                String   @id @default(cuid())
-  saleId            String
-  productId         String?
-  variantId         String?
-  name              String?
-  quantity          Int
-  unit_price_cents  Int
-  total_cents       Int
-  discount_cents    Int      @default(0)
+  id               String  @id @default(cuid())
+  saleId           String
+  productId        String?
+  variantId        String?
+  name             String?
+  quantity         Int
+  unit_price_cents Int
+  total_cents      Int
+  discount_cents   Int     @default(0)
 
-  sale              Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
-  product           Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variant           ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  sale    Sale            @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product Product?        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
 
   @@map("sale_items")
 }
 
 model Contact {
-  id                String   @id @default(cuid())
-  companyId         String
-  type              String   @default("customer")
-  name              String
-  email             String?
-  phone             String?
-  address           String?
-  tax_id            String?
-  notes             String?
-  is_active         Boolean  @default(true)
-  balance_cents     Int      @default(0)
-  created_at        Int      @default(0)
-  updated_at        Int
+  id            String  @id @default(cuid())
+  companyId     String
+  type          String  @default("customer")
+  name          String
+  email         String?
+  phone         String?
+  address       String?
+  tax_id        String?
+  notes         String?
+  is_active     Boolean @default(true)
+  balance_cents Int     @default(0)
+  created_at    Int     @default(0)
+  updated_at    Int
 
-  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  purchase_orders   PurchaseOrder[] @relation("order_supplier")
-  purchase_receipts PurchaseReceipt[] @relation("receipt_supplier")
-  wallet_transactions WalletTransaction[]
-  supplier_cost_histories CostHistory[] @relation("supplier_cost_history")
+  company                 Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  purchase_orders         PurchaseOrder[]     @relation("order_supplier")
+  purchase_receipts       PurchaseReceipt[]   @relation("receipt_supplier")
+  wallet_transactions     WalletTransaction[]
+  supplier_cost_histories CostHistory[]       @relation("supplier_cost_history")
 
   @@map("contacts")
 }
 
 model WalletTransaction {
-  id                String   @id @default(cuid())
-  companyId         String
-  contactId         String
-  type              String
-  amount_cents      Int
-  balance_before    Int
-  balance_after     Int
-  reference         String?
-  reference_id      String?
-  notes             String?
-  created_by        String?
-  created_at        Int      @default(0)
+  id             String  @id @default(cuid())
+  companyId      String
+  contactId      String
+  type           String
+  amount_cents   Int
+  balance_before Int
+  balance_after  Int
+  reference      String?
+  reference_id   String?
+  notes          String?
+  created_by     String?
+  created_at     Int     @default(0)
 
-  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  contact           Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
 
   @@index([companyId, contactId])
   @@index([created_at])
@@ -299,25 +301,25 @@ model WalletTransaction {
 }
 
 model PurchaseOrder {
-  id                String   @id @default(cuid())
-  companyId         String
-  storeId           String
-  supplierId        String
-  status            String   @default("draft")
-  expected_date     Int?
-  notes             String?
-  total_cents       Int      @default(0)
-  created_by        String
-  created_at        Int      @default(0)
-  updated_at        Int
+  id            String  @id @default(cuid())
+  companyId     String
+  storeId       String
+  supplierId    String
+  status        String  @default("draft")
+  expected_date Int?
+  notes         String?
+  total_cents   Int     @default(0)
+  created_by    String
+  created_at    Int     @default(0)
+  updated_at    Int
 
-  company           Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  store             Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  supplier          Contact        @relation("order_supplier", fields: [supplierId], references: [id])
-  creator           User           @relation("created_orders", fields: [created_by], references: [id])
-  items             PurchaseOrderItem[]
-  receipts          PurchaseReceipt[]
-  cost_histories    CostHistory[]
+  company        Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  store          Store               @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  supplier       Contact             @relation("order_supplier", fields: [supplierId], references: [id])
+  creator        User                @relation("created_orders", fields: [created_by], references: [id])
+  items          PurchaseOrderItem[]
+  receipts       PurchaseReceipt[]
+  cost_histories CostHistory[]
 
   @@index([companyId, storeId])
   @@index([status])
@@ -325,93 +327,93 @@ model PurchaseOrder {
 }
 
 model PurchaseOrderItem {
-  id                String   @id @default(cuid())
+  id                String  @id @default(cuid())
   orderId           String
   productId         String
   variantId         String?
   quantity_ordered  Int
-  quantity_received Int      @default(0)
-  unit_cost_cents   Int      @default(0)
-  total_cents       Int      @default(0)
+  quantity_received Int     @default(0)
+  unit_cost_cents   Int     @default(0)
+  total_cents       Int     @default(0)
 
-  order             PurchaseOrder     @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product           Product           @relation(fields: [productId], references: [id])
-  variant           ProductVariant?   @relation(fields: [variantId], references: [id], onDelete: SetNull)
-  cost_histories    CostHistory[]
+  order          PurchaseOrder   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product        Product         @relation(fields: [productId], references: [id])
+  variant        ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  cost_histories CostHistory[]
 
   @@map("purchase_order_items")
 }
 
 model PurchaseReceipt {
-  id                String   @id @default(cuid())
-  companyId         String
-  storeId           String
-  orderId           String?
-  supplierId        String
-  receipt_number    String?
-  notes             String?
-  created_by        String
-  created_at        Int      @default(0)
+  id             String  @id @default(cuid())
+  companyId      String
+  storeId        String
+  orderId        String?
+  supplierId     String
+  receipt_number String?
+  notes          String?
+  created_by     String
+  created_at     Int     @default(0)
 
-  company           Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  store             Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  order             PurchaseOrder? @relation(fields: [orderId], references: [id], onDelete: SetNull)
-  supplier          Contact        @relation("receipt_supplier", fields: [supplierId], references: [id])
-  creator           User           @relation("created_receipts", fields: [created_by], references: [id])
+  company  Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  store    Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  order    PurchaseOrder? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  supplier Contact        @relation("receipt_supplier", fields: [supplierId], references: [id])
+  creator  User           @relation("created_receipts", fields: [created_by], references: [id])
 
   @@index([companyId, storeId])
   @@map("purchase_receipts")
 }
 
 model CashRegister {
-  id                String   @id @default(cuid())
-  companyId         String
-  storeId           String
-  name              String
-  status            String   @default("closed")
-  opening_amount    Int      @default(0)
-  closing_amount    Int?
-  opened_at         Int?
-  closed_at         Int?
-  created_at        Int      @default(0)
-  updated_at        Int
+  id             String @id @default(cuid())
+  companyId      String
+  storeId        String
+  name           String
+  status         String @default("closed")
+  opening_amount Int    @default(0)
+  closing_amount Int?
+  opened_at      Int?
+  closed_at      Int?
+  created_at     Int    @default(0)
+  updated_at     Int
 
-  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  store             Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  movements         CashMovement[]
+  company   Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  store     Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  movements CashMovement[]
 
   @@map("cash_registers")
 }
 
 model CashMovement {
-  id                String   @id @default(cuid())
-  cashRegisterId    String
-  companyId         String
-  storeId           String
-  type              String
-  amount_cents      Int
-  description       String
-  created_at        Int      @default(0)
+  id             String @id @default(cuid())
+  cashRegisterId String
+  companyId      String
+  storeId        String
+  type           String
+  amount_cents   Int
+  description    String
+  created_at     Int    @default(0)
 
-  cashRegister      CashRegister @relation(fields: [cashRegisterId], references: [id], onDelete: Cascade)
-  company           Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  store             Store        @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  cashRegister CashRegister @relation(fields: [cashRegisterId], references: [id], onDelete: Cascade)
+  company      Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  store        Store        @relation(fields: [storeId], references: [id], onDelete: Cascade)
 
   @@map("cash_movements")
 }
 
 model SyncQueue {
-  id                String   @id @default(cuid())
-  companyId         String
-  storeId           String
-  action            String
-  entity            String
-  entityId          String
-  payload           String
-  status            String   @default("pending")
-  error_message     String?
-  synced_at         Int?
-  created_at        Int      @default(0)
+  id            String  @id @default(cuid())
+  companyId     String
+  storeId       String
+  action        String
+  entity        String
+  entityId      String
+  payload       String
+  status        String  @default("pending")
+  error_message String?
+  synced_at     Int?
+  created_at    Int     @default(0)
 
   @@index([status])
   @@index([companyId, storeId, status])
@@ -419,20 +421,20 @@ model SyncQueue {
 }
 
 model Task {
-  id           String   @id @default(cuid())
+  id           String  @id @default(cuid())
   companyId    String
   storeId      String
   title        String
   description  String?
-  priority     String   @default("medium")
-  status       String   @default("pending")
+  priority     String  @default("medium")
+  status       String  @default("pending")
   due_at       Int?
   created_by   String
   assigned_to  String?
   completed_by String?
   completed_at Int?
   deleted_at   Int?
-  created_at   Int      @default(0)
+  created_at   Int     @default(0)
   updated_at   Int
 
   company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
@@ -458,11 +460,11 @@ model Transfer {
   created_at  Int     @default(0)
   updated_at  Int
 
-  storeFrom Store @relation("transfer_from", fields: [storeFromId], references: [id], onDelete: Cascade)
-  storeTo   Store @relation("transfer_to", fields: [storeToId], references: [id], onDelete: Cascade)
-  creator   User  @relation("created_transfers", fields: [created_by], references: [id])
-  receiver  User? @relation("received_transfers", fields: [received_by], references: [id])
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  storeFrom Store          @relation("transfer_from", fields: [storeFromId], references: [id], onDelete: Cascade)
+  storeTo   Store          @relation("transfer_to", fields: [storeToId], references: [id], onDelete: Cascade)
+  creator   User           @relation("created_transfers", fields: [created_by], references: [id])
+  receiver  User?          @relation("received_transfers", fields: [received_by], references: [id])
+  company   Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
   items     TransferItem[]
 
   @@index([companyId, status])
@@ -471,7 +473,7 @@ model Transfer {
 }
 
 model TransferItem {
-  id                String  @id @default(cuid())
+  id                String @id @default(cuid())
   transferId        String
   variantId         String
   quantity_sent     Int
@@ -485,27 +487,43 @@ model TransferItem {
 }
 
 model Invoice {
-  id               String  @id @default(cuid())
-  companyId        String
-  saleId           String  @unique
-  type             String
-  number           String?
-  customer_name    String
-  customer_tax_id  String
-  customer_address String?
-  customer_email   String?
-  total_cents      Int
-  net_amount_cents Int
-  tax_amount_cents Int
-  cae              String?
-  cae_expiration   Int?
-  created_at       Int     @default(0)
+  id                   String  @id @default(cuid())
+  companyId            String
+  saleId               String  @unique
+  arcaConfigId         String?
+  type                 String
+  document_type        String  @default("B")
+  number               String?
+  point_of_sale        Int?
+  status               String  @default("pending")
+  customer_name        String
+  customer_tax_id      String
+  customer_address     String?
+  customer_email       String?
+  total_cents          Int
+  net_amount_cents     Int
+  tax_amount_cents     Int
+  cae                  String?
+  cae_expiration       String?
+  qr_data              String?
+  arca_response        String?
+  error_message        String?
+  retry_count          Int     @default(0)
+  issued_at            Int?
+  created_at           Int     @default(0)
+  reference_invoice_id String?
+  reference_type       String?
+  reason               String?
 
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  sale    Sale    @relation(fields: [saleId], references: [id])
+  company    Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  sale       Sale        @relation(fields: [saleId], references: [id])
+  arcaConfig ArcaConfig? @relation(fields: [arcaConfigId], references: [id], onDelete: SetNull)
 
+  @@unique([companyId, document_type, point_of_sale, number])
   @@index([companyId, created_at])
   @@index([companyId, number])
+  @@index([companyId, status])
+  @@index([companyId, reference_invoice_id])
   @@map("invoices")
 }
 
@@ -521,12 +539,12 @@ model CostHistory {
   quantity         Int
   purchased_at     Int
 
-  company        Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  store          Store              @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  variant        ProductVariant     @relation(fields: [variantId], references: [id])
-  supplier       Contact?           @relation("supplier_cost_history", fields: [supplier_id], references: [id])
-  purchase       PurchaseOrder?     @relation(fields: [purchase_id], references: [id])
-  purchase_item  PurchaseOrderItem? @relation(fields: [purchase_item_id], references: [id])
+  company       Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  store         Store              @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  variant       ProductVariant     @relation(fields: [variantId], references: [id])
+  supplier      Contact?           @relation("supplier_cost_history", fields: [supplier_id], references: [id])
+  purchase      PurchaseOrder?     @relation(fields: [purchase_id], references: [id])
+  purchase_item PurchaseOrderItem? @relation(fields: [purchase_item_id], references: [id])
 
   @@index([companyId, storeId, variantId, purchased_at])
   @@map("cost_history")
@@ -550,14 +568,36 @@ model InventoryCost {
 }
 
 model StoreConfig {
-  id                   String @id @default(cuid())
-  storeId              String @unique
+  id                   String  @id @default(cuid())
+  storeId              String  @unique
   receipt_header       String?
   receipt_footer       String?
-  tax_rate_bps         Int    @default(2100)
-  credit_surcharge_bps Int    @default(0)
+  tax_rate_bps         Int     @default(2100)
+  credit_surcharge_bps Int     @default(0)
 
   store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
 
   @@map("store_configs")
+}
+
+model ArcaConfig {
+  id                  String  @id @default(cuid())
+  companyId           String
+  storeId             String? @unique
+  cuit                Int
+  certificate         String
+  privateKey          String
+  point_of_sale       Int     @default(1)
+  environment         String  @default("homologacion")
+  responsabilidad_iva String  @default("RI")
+  active              Boolean @default(true)
+  created_at          Int     @default(0)
+  updated_at          Int
+
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  store    Store?    @relation("StoreArcaConfig", fields: [storeId], references: [id], onDelete: SetNull)
+  invoices Invoice[]
+
+  @@index([companyId])
+  @@map("arca_configs")
 }
