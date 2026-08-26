@@ -37,12 +37,12 @@ async function main() {
 
   // Plans for POS product
   await prisma.plan.upsert({
-    where: { productId_slug: { productId: pos.id, slug: 'emprendedor' } },
+    where: { productId_slug: { productId: pos.id, slug: 'free' } },
     update: {},
     create: {
       productId: pos.id,
       name: 'Emprendedor',
-      slug: 'emprendedor',
+      slug: 'free',
       maxStoresDefault: 1,
       priceDefaultCents: 0,
       currency: 'ARS',
@@ -52,12 +52,12 @@ async function main() {
   });
 
   await prisma.plan.upsert({
-    where: { productId_slug: { productId: pos.id, slug: 'profesional' } },
+    where: { productId_slug: { productId: pos.id, slug: 'pro' } },
     update: {},
     create: {
       productId: pos.id,
       name: 'Profesional',
-      slug: 'profesional',
+      slug: 'pro',
       maxStoresDefault: 3,
       priceDefaultCents: 499900,
       currency: 'ARS',

@@ -4,8 +4,6 @@ import { useState } from "react";
 import { api } from "@/trpc/react";
 import { Heading, Table, Badge, Flex, Text, Select, Button } from "@radix-ui/themes";
 
-const STATUS_OPTIONS = ["", "open", "in_progress", "resolved", "closed"] as const;
-const PRIORITY_OPTIONS = ["", "low", "medium", "high", "urgent"] as const;
 
 function badgeColor(status: string, priority: string) {
   if (status === "resolved" || status === "closed") return "green";

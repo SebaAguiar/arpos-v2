@@ -8,7 +8,6 @@ import {
   BarChartIcon,
   RocketIcon,
   QuestionMarkCircledIcon,
-  FileIcon,
 } from "@radix-ui/react-icons";
 
 function formatCents(cents: number): string {

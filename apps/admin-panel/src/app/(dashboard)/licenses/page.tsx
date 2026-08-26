@@ -5,7 +5,6 @@ import { api } from "@/trpc/react";
 import { Heading, Table, Badge, Flex, Text, Select, Button, TextField } from "@radix-ui/themes";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 
-const STATUS_OPTIONS = ["", "active", "trialing", "past_due", "canceled"] as const;
 
 function badgeColor(s: string) {
   if (s === "active") return "green";

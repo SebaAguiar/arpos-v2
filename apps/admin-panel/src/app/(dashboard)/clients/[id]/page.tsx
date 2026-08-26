@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/trpc/react";
-import { Heading, Card, Badge, Flex, Text, Table, Button, Box, Separator } from "@radix-ui/themes";
+import { Heading, Card, Badge, Flex, Text, Table, Button } from "@radix-ui/themes";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 
 function formatCents(cents: number): string {

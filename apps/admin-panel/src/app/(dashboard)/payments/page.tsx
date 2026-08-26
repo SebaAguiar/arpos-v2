@@ -4,7 +4,6 @@ import { useState } from "react";
 import { api } from "@/trpc/react";
 import { Heading, Table, Badge, Flex, Text, Select, Button } from "@radix-ui/themes";
 
-const STATUS_OPTIONS = ["", "completed", "pending", "failed", "refunded"] as const;
 
 function formatCents(cents: number): string {
   return new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" }).format(cents / 100);

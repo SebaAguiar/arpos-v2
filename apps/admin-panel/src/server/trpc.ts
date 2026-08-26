@@ -1,8 +1,8 @@
 import { initTRPC, TRPCError } from '@trpc/server';
 import superjson from 'superjson';
 import { type NextRequest } from 'next/server';
-import jwt from 'jsonwebtoken';
 import { db } from './db';
+import { verifyAuthToken } from './token';
 
 export interface Context {
   db: typeof db;
@@ -18,13 +18,9 @@ export async function createContext({ req }: { req: NextRequest }): Promise<Cont
     req.headers.get('authorization')?.replace('Bearer ', '');
 
   if (token) {
-    try {
-      const JWT_SECRET = process.env.JWT_SECRET;
-      if (!JWT_SECRET) throw new Error('JWT_SECRET not configured');
-      const decoded = jwt.verify(token, JWT_SECRET) as { id: string; email: string; role: string };
+    const decoded = verifyAuthToken(token);
+    if (decoded) {
       user = { id: decoded.id, email: decoded.email, role: decoded.role };
-    } catch {
-      user = null;
     }
   }
 
