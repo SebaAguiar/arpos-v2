@@ -29,7 +29,8 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    const checkoutUrl = `${MP_CHECKOUT_BASE}?preapproval_plan_id=${mpPlanId}`;
+    const externalReference = `${payerEmail.trim().toLowerCase()}:${planId}`;
+    const checkoutUrl = `${MP_CHECKOUT_BASE}?preapproval_plan_id=${mpPlanId}&external_reference=${encodeURIComponent(externalReference)}`;
 
     return new Response(
       JSON.stringify({ initPoint: checkoutUrl }),

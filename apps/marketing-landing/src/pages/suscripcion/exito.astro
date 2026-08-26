@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Suscripcion activada - Arcom"
+  description="Tu suscripcion de Arcom ha sido activada correctamente."
+>
+  <div class="pt-24 min-h-screen flex items-center justify-center px-4">
+    <div class="max-w-md w-full text-center">
+      <div class="w-16 h-16 bg-[#10B981] rounded-full flex items-center justify-center mx-auto mb-6">
+        <span class="material-symbols-outlined text-white text-3xl">check_circle</span>
+      </div>
+      <h1 class="text-2xl font-bold text-[#0b2545] mb-4">
+        Suscripcion activada
+      </h1>
+      <p class="text-slate-600 mb-8">
+        Tu cuenta ha sido creada correctamente. Ahora podes descargar e instalar Arcom POS.
+      </p>
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-6 mb-8">
+        <h2 class="font-semibold text-[#0b2545] mb-3">Siguientes pasos</h2>
+        <ol class="text-left text-sm text-slate-600 space-y-2">
+          <li class="flex items-start gap-2">
+            <span class="text-[#10B981] font-bold mt-0.5">1.</span>
+            <span>Descarga Arcom POS para tu sistema operativo</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-[#10B981] font-bold mt-0.5">2.</span>
+            <span>Instala y abri la aplicacion</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-[#10B981] font-bold mt-0.5">3.</span>
+            <span>Inicia sesion con tu email</span>
+          </li>
+        </ol>
+      </div>
+      <a
+        href="/#download"
+        class="inline-block py-3 px-8 bg-[#0b2545] hover:bg-[#1a3a5c] text-white font-bold text-sm rounded-lg transition-colors"
+      >
+        Descargar Arcom POS
+      </a>
+    </div>
+  </div>
+</BaseLayout>

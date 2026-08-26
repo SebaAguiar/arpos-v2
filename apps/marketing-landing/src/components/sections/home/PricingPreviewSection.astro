@@ -55,14 +55,14 @@ import { PLANS } from '../../../data/plans';
             </ul>
           </div>
           {plan.price === 0 ? (
-            <a href="#download" class:list={[
-              'w-full py-3 text-center font-bold text-sm rounded-lg transition-colors',
-              plan.highlighted
-                ? 'text-white bg-[#10B981] hover:bg-emerald-600'
-                : 'text-[#0b2545] bg-slate-100 hover:bg-slate-200',
-            ]}>
-              Descargar gratis
-            </a>
+            <button
+              type="button"
+              data-plan={plan.id}
+              data-free="true"
+              class="checkout-btn w-full py-3 text-center font-bold text-sm rounded-lg transition-colors text-[#0b2545] bg-slate-100 hover:bg-slate-200 cursor-pointer"
+            >
+              Registrate gratis
+            </button>
           ) : (
             <button
               type="button"
@@ -102,7 +102,7 @@ import { PLANS } from '../../../data/plans';
           type="submit"
           class="w-full py-3 bg-[#10B981] hover:bg-emerald-600 text-white font-bold text-sm rounded-lg transition-colors"
         >
-          Ir a MercadoPago
+          Continuar
         </button>
       </form>
     </div>
@@ -143,22 +143,39 @@ import { PLANS } from '../../../data/plans';
       const planId = formData.get('planId') as string;
       const email = formData.get('email') as string;
 
-      try {
-        const res = await fetch('/api/checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            planId,
-            payerEmail: email,
-            backUrl: window.location.origin + '/suscripcion/exito',
-          }),
-        });
+      const isFree = document.querySelector(`[data-plan="${planId}"]`)?.getAttribute('data-free') === 'true';
 
-        const data = await res.json();
-        if (data.initPoint) {
-          window.location.href = data.initPoint;
+      try {
+        if (isFree) {
+          const res = await fetch('/api/signup-free', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
+          });
+
+          const data = await res.json();
+          if (data.success) {
+            window.location.href = '/suscripcion/exito?plan=free';
+          } else {
+            alert(data.error || 'Error al registrar. Intentá de nuevo.');
+          }
         } else {
-          alert('Error al crear la suscripción. Intentá de nuevo.');
+          const res = await fetch('/api/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              planId,
+              payerEmail: email,
+              backUrl: window.location.origin + '/suscripcion/exito',
+            }),
+          });
+
+          const data = await res.json();
+          if (data.initPoint) {
+            window.location.href = data.initPoint;
+          } else {
+            alert('Error al crear la suscripción. Intentá de nuevo.');
+          }
         }
       } catch {
         alert('Error de conexión. Intentá de nuevo.');

@@ -1,0 +1,205 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ADMIN USERS ───
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String
+  role         String   @default("admin")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @map("updated_at")
+
+  @@map("admin_users")
+}
+
+// ─── CLIENTS ───
+
+model Client {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String?  @map("password_hash")
+  type         String   @default("persona")
+  source       String   @default("saas_signup")
+  phone        String?
+  company      String?
+  taxId        String?  @map("tax_id")
+  country      String?  @default("AR")
+  notes        String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @map("updated_at")
+
+  products       Product[]
+  subscriptions  Subscription[]
+  projects       Project[]
+  payments       Payment[]
+  supportTickets SupportTicket[]
+
+  @@map("clients")
+}
+
+// ─── PRODUCTS ───
+
+model Product {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   @default("saas")
+  clientId  String?  @map("client_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  client        Client?        @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  plans         Plan[]
+  subscriptions Subscription[]
+
+  @@map("products")
+}
+
+// ─── PLANS ───
+
+model Plan {
+  id                 String   @id @default(cuid())
+  productId          String   @map("product_id")
+  name               String
+  slug               String
+  maxStoresDefault   Int      @default(1) @map("max_stores_default")
+  priceDefaultCents  Int      @default(0) @map("price_default_cents")
+  currency           String?  @default("ARS")
+  features           Json     @default("{}")
+  sortOrder          Int      @default(0) @map("sort_order")
+  isActive           Boolean  @default(true) @map("is_active")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @default(now()) @map("updated_at")
+
+  product       Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  subscriptions Subscription[]
+
+  @@unique([productId, slug])
+  @@map("plans")
+}
+
+// ─── SUBSCRIPTIONS ───
+
+model Subscription {
+  id                   String    @id @default(cuid())
+  clientId             String    @map("client_id")
+  productId            String    @map("product_id")
+  planId               String    @map("plan_id")
+  status               String    @default("active")
+  maxStoresOverride    Int?      @map("max_stores_override")
+  priceOverrideCents   Int?      @map("price_override_cents")
+  managedManually      Boolean   @default(false) @map("managed_manually")
+  internalNotes        String?   @map("internal_notes")
+  startDate            DateTime  @default(now()) @map("start_date")
+  renewalDate          DateTime? @map("renewal_date")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @default(now()) @map("updated_at")
+
+  client    Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  product   Product   @relation(fields: [productId], references: [id])
+  plan      Plan      @relation(fields: [planId], references: [id])
+  instances Instance[]
+  payments  Payment[]
+
+  @@index([clientId])
+  @@index([productId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+// ─── INSTANCES (multi-local POS) ───
+
+model Instance {
+  id                 String   @id @default(cuid())
+  subscriptionId     String   @map("subscription_id")
+  localIdentifier    String   @unique @map("local_identifier")
+  lastSyncAt         DateTime? @map("last_sync_at")
+  connectionStatus   String   @default("offline") @map("connection_status")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @default(now()) @map("updated_at")
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
+  @@map("instances")
+}
+
+// ─── PROJECTS (custom work) ───
+
+model Project {
+  id                String    @id @default(cuid())
+  clientId          String    @map("client_id")
+  name              String
+  type              String    @default("dev_custom")
+  status            String    @default("backlog")
+  startDate         DateTime? @map("start_date")
+  estimatedEndDate  DateTime? @map("estimated_end_date")
+  budgetCents       Int?      @map("budget_cents")
+  repoUrl           String?   @map("repo_url")
+  notes             String?
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @default(now()) @map("updated_at")
+
+  client  Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  payments Payment[]
+
+  @@index([clientId])
+  @@index([status])
+  @@map("projects")
+}
+
+// ─── PAYMENTS ───
+
+model Payment {
+  id              String    @id @default(cuid())
+  clientId        String    @map("client_id")
+  subscriptionId  String?   @map("subscription_id")
+  projectId       String?   @map("project_id")
+  amountCents     Int       @map("amount_cents")
+  currency        String    @default("ARS")
+  status          String    @default("pending")
+  method          String?
+  externalRef     String?   @map("external_ref")
+  paidAt          DateTime? @map("paid_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  client       Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  project      Project?      @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([clientId])
+  @@index([subscriptionId])
+  @@index([projectId])
+  @@index([status])
+  @@map("payments")
+}
+
+// ─── SUPPORT TICKETS ───
+
+model SupportTicket {
+  id          String    @id @default(cuid())
+  clientId    String    @map("client_id")
+  subject     String
+  description String?
+  status      String    @default("open")
+  priority    String    @default("medium")
+  resolvedAt  DateTime? @map("resolved_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @default(now()) @map("updated_at")
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([status])
+  @@map("support_tickets")
+}
