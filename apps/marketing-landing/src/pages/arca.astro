@@ -1,0 +1,104 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Homologación ARCA/AFIP - Arcom"
+  description="Cómo Arcom integra la facturación electrónica con ARCA (ex AFIP): comprobantes, CAE, CAI y requisitos."
+>
+  <div class="pt-24">
+    <div class="max-w-3xl mx-auto px-4 md:px-8 py-16">
+      <div class="mb-12">
+        <div class="text-[#F59E0B] font-semibold text-sm mb-3 uppercase tracking-wider">
+          Fiscal
+        </div>
+        <h1 class="text-3xl md:text-4xl font-bold text-[#0b2545] tracking-tight mb-4">
+          Facturación Electrónica ARCA/AFIP
+        </h1>
+        <p class="text-slate-500 text-sm">
+          Última actualización: agosto 2026
+        </p>
+      </div>
+
+      <div class="prose prose-slate max-w-none space-y-8 text-slate-600 text-sm leading-relaxed">
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 text-blue-900">
+          <p class="font-semibold mb-1">Homologación oficial</p>
+          <p>
+            Arcom cuenta con integración homologada con los servicios web de ARCA
+            (Agencia de Recaudación y Control Aduanero, antes AFIP) para la emisión de
+            comprobantes electrónicos.
+          </p>
+        </div>
+
+        <section>
+          <h2 class="text-lg font-bold text-[#0b2545] mb-2">¿Qué es la facturación electrónica?</h2>
+          <p>
+            La facturación electrónica es la emisión de comprobantes (facturas, notas
+            de crédito y débito) autorizados por el organismo recaudador de forma
+            electrónica, en reemplazo del controlador fiscal tradicional.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-lg font-bold text-[#0b2545] mb-2">Comprobantes soportados</h2>
+          <ul class="list-disc pl-5 space-y-1">
+            <li>Facturas A, B y C</li>
+            <li>Notas de Crédito A, B y C</li>
+            <li>Notas de Débito A, B y C</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="text-lg font-bold text-[#0b2545] mb-2">CAE en tiempo real</h2>
+          <p>
+            Al emitir cada comprobante, Arcom obtiene el Código de Autorización
+            Electrónico (CAE) consultando los servicios de ARCA en tiempo real.
+            El CAE da validez fiscal inmediata al comprobante. El código QR
+            generado en cada factura cumple con la Resolución General vigente de ARCA.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-lg font-bold text-[#0b2545] mb-2">Operación sin conexión</h2>
+          <p>
+            Si los servicios de ARCA están temporalmente fuera de servicio, Arcom
+            encola los comprobantes pendientes y los autoriza automáticamente mediante
+            reintentos en cuanto se restablece el servicio. No perdés ninguna venta.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-lg font-bold text-[#0b2545] mb-2">Requisitos para facturar</h2>
+          <ul class="list-disc pl-5 space-y-1">
+            <li>Configurar los datos fiscales de tu empresa (CUIT, razón social, condición frente al IVA)</li>
+            <li>Cargar el certificado digital (CRT y su clave privada) emitido por ARCA</li>
+            <li>Seleccionar el punto de venta habilitado</li>
+          </ul>
+          <p class="mt-3">
+            El certificado y los datos fiscales se gestionan desde la sección de
+            Configuración de la aplicación.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-lg font-bold text-[#0b2545] mb-2">Ambiente de pruebas</h2>
+          <p>
+            Arcom permite operar en ambiente de homologación (pruebas) durante la
+            configuración inicial, de modo que puedas validar la emisión de
+            comprobantes antes de pasar a producción con comprobantes reales.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-lg font-bold text-[#0b2545] mb-2">Responsabilidad del usuario</h2>
+          <p>
+            El usuario es responsable por la exactitud de su configuración fiscal y por
+            el uso conforme a la normativa de ARCA/AFIP de los comprobantes emitidos.
+            Arcom no asume responsabilidad por datos fiscales incorrectos ingresados por
+            el usuario.
+          </p>
+        </section>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

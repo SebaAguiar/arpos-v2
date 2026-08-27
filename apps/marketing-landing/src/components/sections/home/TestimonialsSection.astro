@@ -2,33 +2,64 @@
 import { getCollection } from 'astro:content';
 
 const testimonials = await getCollection('testimonials');
+
+function initials(name: string): string {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0]?.toUpperCase() ?? '')
+    .join('');
+}
 ---
 
-<section class="bg-white py-24 sm:py-32">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mx-auto max-w-xl text-center">
-      <h2 class="text-lg font-semibold leading-8 tracking-tight text-primary-600">Testimonios</h2>
-      <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+<section id="testimonios" class="py-24 px-4 md:px-12 bg-[#0d1b2a] text-white border-t border-slate-800">
+  <div class="max-w-[1280px] mx-auto">
+    <div class="text-center mb-16">
+      <div class="text-[#F59E0B] font-semibold text-sm mb-4 uppercase tracking-wider flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-base">star</span>
+        TESTIMONIOS
+      </div>
+      <h2 class="text-3xl md:text-5xl font-bold mb-4 tracking-tight leading-tight">
         Comercios que crecen con Arcom
+      </h2>
+      <p class="text-slate-300 text-lg max-w-2xl mx-auto leading-relaxed">
+        Conocé cómo otros negocios ya operan sin caídas, sin perder ventas y con
+        la tranquilidad de un sistema que no depende de internet.
       </p>
     </div>
-    <div class="mx-auto mt-16 flow-root max-w-2xl sm:mt-20 lg:mx-0 lg:max-w-none">
-      <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {testimonials.map((testimonial) => (
-          <div class="rounded-2xl bg-gray-50 p-6 leading-6 ring-1 ring-gray-900/5">
-             <blockquote class="text-gray-900">
-              <p>"{testimonial.data.body}"</p>
-            </blockquote>
-            <div class="mt-6 flex items-center gap-x-4">
-              <div class="h-10 w-10 rounded-full bg-gray-200"></div> <!-- Avatar placeholder -->
-              <div>
-                <div class="font-semibold">{testimonial.data.author.name}</div>
-                <div class="text-gray-600 text-sm">{testimonial.data.author.role}</div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {testimonials.map((testimonial) => (
+        <div class="bg-white/5 border border-white/10 rounded-xl p-6 flex flex-col">
+          <div class="flex gap-1 text-[#F59E0B] mb-4" aria-label="5 de 5 estrellas">
+            <span class="material-symbols-outlined text-base">star</span>
+            <span class="material-symbols-outlined text-base">star</span>
+            <span class="material-symbols-outlined text-base">star</span>
+            <span class="material-symbols-outlined text-base">star</span>
+            <span class="material-symbols-outlined text-base">star</span>
+          </div>
+          <blockquote class="text-slate-200 text-sm leading-relaxed flex-1">
+            "{testimonial.data.body}"
+          </blockquote>
+          <div class="mt-6 flex items-center gap-3">
+            <div
+              class="w-10 h-10 rounded-full bg-[#10B981] text-white flex items-center justify-center font-bold text-sm shrink-0"
+              aria-hidden="true"
+            >
+              {initials(testimonial.data.author.name)}
+            </div>
+            <div>
+              <div class="font-semibold text-white text-sm">
+                {testimonial.data.author.name}
+              </div>
+              <div class="text-slate-400 text-xs">
+                {testimonial.data.author.role}
               </div>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   </div>
 </section>
