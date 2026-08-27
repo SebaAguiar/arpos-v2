@@ -6,6 +6,9 @@ import { TenantContextService } from '../../core/tenant/tenant-context.service';
 import { ArcaConfig } from '@prisma/client';
 import type { IVoucher } from '@arcasdk/core/lib/domain/types/voucher.types';
 
+const DEFAULT_CF_TAX_ID = '0';
+const DEFAULT_CF_ADDRESS = '';
+
 export interface InvoiceFilters {
   status?: string;
   document_type?: string;
@@ -108,8 +111,6 @@ export class InvoiceService {
       );
     }
 
-    const { taxId, address } = this.mapResponsabilidadIVA(arcaConfig.responsabilidad_iva);
-
     const netAmountCents = Math.round(sale.total_cents / 1.21);
     const taxAmountCents = sale.total_cents - netAmountCents;
 
@@ -120,8 +121,8 @@ export class InvoiceService {
       document_type: this.getDocumentType(arcaConfig.responsabilidad_iva),
       point_of_sale: arcaConfig.point_of_sale,
       customer_name: contact?.name ?? 'Consumidor Final',
-      customer_tax_id: contact?.tax_id ?? taxId,
-      customer_address: contact?.address ?? address,
+      customer_tax_id: contact?.tax_id ?? DEFAULT_CF_TAX_ID,
+      customer_address: contact?.address ?? DEFAULT_CF_ADDRESS,
       customer_email: contact?.email ?? undefined,
       total_cents: sale.total_cents,
       net_amount_cents: netAmountCents,
@@ -587,9 +588,9 @@ export class InvoiceService {
       `ver:1`,
       `fecha:${dateStr}`,
       `cuit:${cuit}`,
-      `ptoVta:${pointOfSale}`,
-      `tipoCmp:${cbteTipo}`,
-      `nroCmp:${cbteNumber}`,
+      `ptoVta:${String(pointOfSale).padStart(4, '0')}`,
+      `tipoCmp:${String(cbteTipo).padStart(3, '0')}`,
+      `nroCmp:${String(cbteNumber).padStart(8, '0')}`,
       `importe:${total}`,
       `moneda:PES`,
       `ctz:1`,
@@ -670,17 +671,6 @@ export class InvoiceService {
         return 5;
       default:
         return 5;
-    }
-  }
-
-  private mapResponsabilidadIVA(responsabilidadIVA: string) {
-    switch (responsabilidadIVA) {
-      case 'RI':
-        return { taxId: '0', address: '' };
-      case 'CF':
-        return { taxId: '0', address: '' };
-      default:
-        return { taxId: '0', address: '' };
     }
   }
 }
