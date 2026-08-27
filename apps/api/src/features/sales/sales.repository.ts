@@ -108,6 +108,15 @@ export class SalesRepository {
         },
       });
 
+      const stockProductIds = input.items
+        .map((item) => item.productId)
+        .filter((id): id is string => !!id);
+      const stockProducts = await tx.product.findMany({
+        where: { id: { in: stockProductIds } },
+        select: { id: true, stock_quantity: true, name: true },
+      });
+      const stockProductMap = new Map(stockProducts.map((p) => [p.id, p]));
+
       for (const item of input.items) {
         const itemTotalCents = item.unit_price_cents * item.quantity;
 
@@ -125,10 +134,7 @@ export class SalesRepository {
           continue;
         }
 
-        const product = await tx.product.findUnique({
-          where: { id: item.productId },
-          select: { stock_quantity: true, name: true },
-        });
+        const product = stockProductMap.get(item.productId);
 
         if (!product) {
           throw new BadRequestException(`Product ${item.productId} not found`);

@@ -611,6 +611,15 @@ export class CloudRelayService implements OnModuleInit, OnModuleDestroy {
         where: { saleId: change.entityId },
       });
       if (itemCount === 0) {
+        const stockProductIds = rawItems
+          .map((raw) => (raw as Record<string, unknown>).productId as string | null)
+          .filter((id): id is string => !!id);
+        const stockProducts = await tx.product.findMany({
+          where: { id: { in: stockProductIds } },
+          select: { id: true, stock_quantity: true },
+        });
+        const stockProductMap = new Map(stockProducts.map((p) => [p.id, p]));
+
         for (const raw of rawItems) {
           const item = raw as Record<string, unknown>;
           const productId = item.productId as string | null;
@@ -634,10 +643,7 @@ export class CloudRelayService implements OnModuleInit, OnModuleDestroy {
             continue;
           }
 
-          const product = await tx.product.findUnique({
-            where: { id: productId },
-            select: { stock_quantity: true },
-          });
+          const product = stockProductMap.get(productId);
           if (product) {
             await tx.product.update({
               where: { id: productId },
