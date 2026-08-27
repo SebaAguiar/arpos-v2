@@ -148,7 +148,44 @@ El módulo de Caja registra el dinero físico de cada turno.
 
 ---
 
-## 12. Configuración
+## 12. Facturación Electrónica (ARCA/AFIP)
+
+Arcom emite **comprobantes electrónicos** autorizados por ARCA (ex AFIP) en tiempo real. Esto habilita facturar legalmente sin controlador fiscal: cada comprobante obtiene su **CAE** (Código de Autorización Electrónico) y lleva el **código QR** oficial.
+
+### Configuración inicial
+
+En **Configuración → Facturación**:
+
+1. **Datos fiscales:** CUIT, razón social y condición frente al IVA (monotributista, responsable inscripto, etc.).
+2. **Certificado digital:** cargar el certificado (CRT) y su clave privada emitidos por ARCA/AFIP.
+3. **Punto de venta:** seleccionar el punto de venta habilitado para facturar.
+4. **Ambiente:** operar en **homologación** (pruebas, sin validez fiscal) o **producción** (comprobantes reales). Usá homologación para validar la configuración antes de facturar en serio.
+
+### Emitir comprobantes
+
+Al **cobrar** desde el punto de venta, si la facturación está configurada podés elegir el **tipo de comprobante** a emitir:
+
+- **Factura A** (para clientes responsables inscriptos / exportación) o **B** (consumidor final / monotributista) según la condición del cliente.
+- **Ticket** (no fiscal) si no querés emitir comprobante fiscal en esa operación.
+
+### Notas de crédito y débito
+
+Si una venta facturada debe corregirse:
+
+- **Nota de crédito:** anula o reduce el importe de una factura (devolución de mercadería, error de facturación).
+- **Nota de débito:** aumenta el importe de una factura (recargo posterior, diferencias).
+
+Ambas se generan desde el **historial de facturas** del producto o de la venta original, y se emiten con su propio CAE ante ARCA.
+
+### ¿Qué pasa si ARCA no responde?
+
+Arcom **encola** los comprobantes pendientes y los reintenta automáticamente mientras el servicio esté disponible. Ninguna venta se pierde ni deja de registrarse por una caída temporal de ARCA. Desde el **dashboard fiscal** (Configuración → Facturación) podés ver el estado de cada comprobante y reintentar los fallidos manualmente.
+
+> **Nota:** el envío de comprobantes a ARCA es obligatorio por ley para dar validez fiscal. Asegurate de mantener el certificado vigente y los datos fiscales correctos.
+
+---
+
+## 13. Configuración
 
 Disponible para usuarios administradores.
 
@@ -158,6 +195,7 @@ Disponible para usuarios administradores.
 - **Medios de pago:** activar/desactivar cada método y renombrarlo. El recargo por crédito se configura aparte.
 - **Ticket:** impresión automática, tamaño de papel (80mm, 58mm, A4, A5), encabezado y pie de ticket.
 - **Impuestos:** tasa de IVA por defecto.
+- **Facturación (ARCA/AFIP):** datos fiscales, certificado digital, punto de venta y estado de los comprobantes emitidos.
 - **Sincronización:** conexión a la nube (opcional). Muestra el estado de la cola de sincronización y la suscripción.
 
 ### Sincronización en la nube (Sync Cloud)
@@ -179,7 +217,7 @@ La sincronización es **opcional**: Arcom funciona completo sin conexión, y los
 
 ---
 
-## 13. Copias de seguridad
+## 14. Copias de seguridad
 
 El módulo de Respaldo permite proteger la información:
 
@@ -190,7 +228,7 @@ El módulo de Respaldo permite proteger la información:
 
 ---
 
-## 14. Conceptos útiles
+## 15. Conceptos útiles
 
 | Término | Significado |
 |---|---|
@@ -202,10 +240,13 @@ El módulo de Respaldo permite proteger la información:
 | **Arqueo de caja** | Conteo del efectivo físico al abrir y cerrar el turno. |
 | **Sync** | Sincronización de los datos locales con la nube. |
 | **Billetera (wallet)** | Saldo a favor de un cliente, acreditado o debitado manualmente. |
+| **CAE** | Código de Autorización Electrónico: el código que ARCA entrega y que valida a cada comprobante fiscal. |
+| **Comprobante (factura)** | Documento fiscal emitido ante ARCA (Factura A/B, nota de crédito o débito). |
+| **Homologación** | Ambiente de pruebas de ARCA: permite validar la emisión sin validez fiscal. |
 
 ---
 
-## 15. Solución de problemas comunes
+## 16. Solución de problemas comunes
 
 | Problema | Solución |
 |---|---|
@@ -214,3 +255,5 @@ El módulo de Respaldo permite proteger la información:
 | El stock no cuadra | Revisar Movimientos de stock y ajustar con un Ajuste de stock (con motivo). |
 | Hay ventas sin sincronizar | Revisar Configuración → Sincronización. Mientras haya conexión, la cola se vacía sola. |
 | No llega una actualización | Configuración → Actualizaciones → Buscar actualizaciones. |
+| No se emite el comprobante fiscal | Revisar Configuración → Facturación: datos fiscales, certificado y punto de venta. Los comprobantes pendientes se reintentan solos; también se pueden enviar desde el dashboard fiscal. |
+| El ticket sale sin factura | El ticket es no fiscal por diseño. Para emitir comprobante legal, configurá ARCA y elegí Factura al cobrar. |

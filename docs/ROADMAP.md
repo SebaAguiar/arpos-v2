@@ -180,9 +180,11 @@ Este documento recopila las fases de migración, features propuestas y roadmap d
 **Landing page de Arcom** (v1 existe en repo `arpos` con Astro — migrar a v2 + rebrandear a Arcom):
 
 - [x] Migrar `apps/marketing-landing` de v1 (Astro) al monorepo v2 y rebrandear a Arcom
-- [ ] Botones de descarga por SO (deb/rpm/AppImage/dmg/msi/exe) apuntando a los assets de `SebaAguiar/arcom-releases`; resolver `releases/latest` en build-time
-- [ ] Pasarela de pagos con **MercadoPago subscriptions** (requiere backend externo para checkout + webhooks; NO usar `apps/api` — es sidecar local offline-first)
-- [ ] Apartado de **issues/reportes**: GitHub Issues del repo público `arcom-releases` con issue templates; enlaces desde la landing y la app
+- [x] Botones de descarga por SO (deb/rpm/AppImage/dmg/msi/exe) apuntando a los assets de `SebaAguiar/arcom-releases`; resolver `releases/latest` en build-time
+- [x] Pasarela de pagos con **MercadoPago subscriptions** (requiere backend externo para checkout + webhooks; NO usar `apps/api` — es sidecar local offline-first)
+- [x] Apartado de **issues/reportes**: GitHub Issues del repo público `arcom-releases` con issue templates; enlaces desde la landing y la app
+
+> **Nota (2026-08-27):** Landing completada y auditada. Descargas dinámicas (resuelve `releases/latest` en build-time vía `scripts/fetch-releases.mjs`, regex agnóstico `Ar(con|com)` para el próximo release), pasarela MercadoPago (free signup + checkout + webhooks), sección de soporte/reportes con issue templates en `arcom-releases`, páginas legales `/terms`, `/privacy`, `/arca`, y sección de testimonios. Se eliminaron colecciones de contenido muertas (`content/plans/faqs/features`) — una sola fuente de verdad de precios en `data/plans.ts`. Build fixeado: `@astrojs/vercel@^9.0.5` (compat con Astro 5). `astro check` 0 errores, `astro build` OK.
 
 **Bloqueadores:** Fase 5 completada
 **Dependencias:** Beta testers, infraestructura de updates
