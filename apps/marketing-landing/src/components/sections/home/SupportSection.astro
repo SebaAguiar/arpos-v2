@@ -1,0 +1,109 @@
+---
+const issuesUrl = 'https://github.com/SebaAguiar/arcom-releases/issues/new/choose';
+const releasesUrl = 'https://github.com/SebaAguiar/arcom-releases/releases/latest';
+---
+
+<section id="soporte" class="py-24 px-4 md:px-12 bg-[#0d1b2a] text-white border-t border-slate-800">
+  <div class="max-w-[1000px] mx-auto">
+    <div class="text-center mb-12">
+      <div
+        class="text-[#F59E0B] font-semibold text-sm mb-4 uppercase tracking-wider flex items-center justify-center gap-2"
+      >
+        <span class="material-symbols-outlined text-base">support_agent</span>
+        SOPORTE Y REPORTES
+      </div>
+      <h2 class="text-3xl md:text-5xl font-bold mb-4 tracking-tight leading-tight">
+        ¿Encontraste un problema o tenés una idea?
+      </h2>
+      <p class="text-slate-300 text-lg max-w-2xl mx-auto leading-relaxed">
+        Arcom es un producto en constante evolución. Reportá un bug o proponé una
+        mejora directamente en nuestro repositorio público. Nos ayuda a mejorar
+        el POS para todos.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Reportar un bug */}
+      <a
+        href={`${issuesUrl}?template=bug_report.yml`}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="bg-white/5 border border-white/10 rounded-xl p-6 text-center flex flex-col items-center hover:bg-white/10 transition-all duration-200 hover:scale-[1.02]"
+      >
+        <span
+          class="material-symbols-outlined text-5xl text-[#EF4444] mb-4"
+        >bug_report</span>
+        <h3 class="text-lg font-bold mb-2">Reportar un bug</h3>
+        <p class="text-sm text-slate-400 leading-relaxed">
+          Algo no funciona como debería. Contanos qué pasó, tu versión y sistema
+          operativo y lo corregimos.
+        </p>
+        <span
+          class="mt-auto pt-4 text-[#10B981] hover:text-emerald-400 text-sm font-semibold inline-flex items-center gap-1"
+        >
+          Crear reporte
+          <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </span>
+      </a>
+
+      {/* Pedir una función */}
+      <a
+        href={`${issuesUrl}?template=feature_request.yml`}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="bg-white/5 border border-white/10 rounded-xl p-6 text-center flex flex-col items-center hover:bg-white/10 transition-all duration-200 hover:scale-[1.02]"
+      >
+        <span
+          class="material-symbols-outlined text-5xl text-[#8B5CF6] mb-4"
+        >lightbulb</span>
+        <h3 class="text-lg font-bold mb-2">Proponer una función</h3>
+        <p class="text-sm text-slate-400 leading-relaxed">
+          ¿Te falta una herramienta o una mejora? Sugerila y sumala al roadmap
+          de Arcom.
+        </p>
+        <span
+          class="mt-auto pt-4 text-[#10B981] hover:text-emerald-400 text-sm font-semibold inline-flex items-center gap-1"
+        >
+          Enviar sugerencia
+          <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </span>
+      </a>
+
+      {/* Ver novedades */}
+      <a
+        href={releasesUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="bg-white/5 border border-white/10 rounded-xl p-6 text-center flex flex-col items-center hover:bg-white/10 transition-all duration-200 hover:scale-[1.02]"
+      >
+        <span
+          class="material-symbols-outlined text-5xl text-[#10B981] mb-4"
+        >new_releases</span>
+        <h3 class="text-lg font-bold mb-2">Ver últimas versiones</h3>
+        <p class="text-sm text-slate-400 leading-relaxed">
+          Consultá el changelog y verificá que tengas la última actualización de
+          Arcom instalada.
+        </p>
+        <span
+          class="mt-auto pt-4 text-[#10B981] hover:text-emerald-400 text-sm font-semibold inline-flex items-center gap-1"
+        >
+          Ver releases
+          <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </span>
+      </a>
+    </div>
+
+    <p class="text-slate-500 text-sm text-center mt-10">
+      Todos los reportes y sugerencias se gestionan de forma pública y transparente en
+      <a
+        href="https://github.com/SebaAguiar/arcom-releases"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-[#10B981] hover:text-emerald-400 underline"
+      >
+        github.com/SebaAguiar/arcom-releases
+      </a>
+      . No compartas datos sensibles (CUIT, comprobantes) en los reportes.
+    </p>
+  </div>
+</section>
