@@ -1,5 +1,5 @@
 export const CLOUD_API_BASE =
-  import.meta.env.VITE_CLOUD_API_BASE ?? "http://localhost:3000";
+  import.meta.env.VITE_CLOUD_API_BASE ?? "http://localhost:3001";
 
 export class CloudApiError extends Error {
   constructor(

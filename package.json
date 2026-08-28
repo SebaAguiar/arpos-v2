@@ -12,6 +12,7 @@
     "dev:launcher": "nx dev arcom-launcher",
     "dev:landing": "nx dev marketing-landing",
     "dev:landing:direct": "cd apps/marketing-landing && npx astro dev",
+    "dev:all": "nx run-many -t dev --projects=marketing-landing,admin-panel,arcom-launcher --parallel=3",
     "build": "nx build api && nx build admin-panel && nx build pos-react && nx build arcom-launcher",
     "build:api": "nx build api",
     "build:pos": "nx build pos-react",
