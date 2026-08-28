@@ -51,10 +51,24 @@ pnpm dev:api         # run the NestJS sidecar (local API)
 pnpm dev:admin       # run the admin panel
 pnpm dev:launcher    # run the Tauri desktop shell
 pnpm dev:landing     # run the marketing landing (Astro)
+pnpm dev:all         # run landing + admin-panel + Tauri together (no port conflicts)
 pnpm dev             # run everything concurrently
 ```
 
 > The desktop app expects the NestJS sidecar to be running. In real usage the Tauri launcher spawns it automatically; during development start it with `pnpm dev:api`.
+
+### Port map
+
+Each app binds its own port so they can all run simultaneously:
+
+| Service | Port | Notes |
+|---|---|---|
+| NestJS local API (`apps/api`) | **3000** | Sidecar the Tauri launcher spawns; POS reads local data here. Fixed by the launcher (Rust) and CSP, do not change. |
+| Admin panel (`apps/admin-panel`) | **3001** | Cloud/backend (license verify). Pointer from `apps/pos-react/src/services/cloud-client.ts`. |
+| React POS (Vite, `apps/pos-react`) | **1420** | Tauri dev server (`devUrl`) and Playwright base URL. |
+| Landing (`apps/marketing-landing`) | **4321** | Astro dev server. |
+
+Change these overrides with the respective env vars: `VITE_API_BASE` (local API), `VITE_CLOUD_API_BASE` (cloud/admin panel).
 
 ---
 
