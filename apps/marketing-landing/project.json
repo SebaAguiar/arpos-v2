@@ -42,6 +42,13 @@
         "cwd": "apps/marketing-landing"
       }
     },
+    "prisma:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx prisma generate --schema ../../packages/prisma-schema/prisma/schema.prisma",
+        "cwd": "apps/marketing-landing"
+      }
+    },
     "lint": {
       "executor": "nx:run-commands",
       "options": {

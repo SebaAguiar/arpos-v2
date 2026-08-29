@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../generated';
 import bcrypt from 'bcryptjs';
 
 const BCRYPT_ROUNDS = 12;
@@ -53,12 +53,19 @@ async function main() {
 
   await prisma.plan.upsert({
     where: { productId_slug: { productId: pos.id, slug: 'pro' } },
-    update: {},
+    update: {
+      name: 'Profesional',
+      maxStoresDefault: 2,
+      priceDefaultCents: 499900,
+      currency: 'ARS',
+      features: { cloudSync: true, multiStore: true, reports: true },
+      sortOrder: 1,
+    },
     create: {
       productId: pos.id,
       name: 'Profesional',
       slug: 'pro',
-      maxStoresDefault: 3,
+      maxStoresDefault: 2,
       priceDefaultCents: 499900,
       currency: 'ARS',
       features: { cloudSync: true, multiStore: true, reports: true },
@@ -68,16 +75,45 @@ async function main() {
 
   await prisma.plan.upsert({
     where: { productId_slug: { productId: pos.id, slug: 'enterprise' } },
-    update: {},
-    create: {
-      productId: pos.id,
+    update: {
       name: 'Enterprise',
-      slug: 'enterprise',
-      maxStoresDefault: 999,
+      maxStoresDefault: 4,
       priceDefaultCents: 999900,
       currency: 'ARS',
       features: { cloudSync: true, multiStore: true, reports: true, priority: true },
       sortOrder: 2,
+    },
+    create: {
+      productId: pos.id,
+      name: 'Enterprise',
+      slug: 'enterprise',
+      maxStoresDefault: 4,
+      priceDefaultCents: 999900,
+      currency: 'ARS',
+      features: { cloudSync: true, multiStore: true, reports: true, priority: true },
+      sortOrder: 2,
+    },
+  });
+
+  await prisma.plan.upsert({
+    where: { productId_slug: { productId: pos.id, slug: 'custom' } },
+    update: {
+      name: 'Custom',
+      maxStoresDefault: 999,
+      priceDefaultCents: 1,
+      currency: 'ARS',
+      features: { cloudSync: true, multiStore: true, reports: true, priority: true },
+      sortOrder: 3,
+    },
+    create: {
+      productId: pos.id,
+      name: 'Custom',
+      slug: 'custom',
+      maxStoresDefault: 999,
+      priceDefaultCents: 1,
+      currency: 'ARS',
+      features: { cloudSync: true, multiStore: true, reports: true, priority: true },
+      sortOrder: 3,
     },
   });
 

@@ -33,28 +33,28 @@
     "prisma:generate": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npx prisma generate",
+        "command": "npx prisma generate --schema ../../packages/prisma-schema/prisma/schema.prisma",
         "cwd": "apps/admin-panel"
       }
     },
     "prisma:push": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npx prisma db push",
+        "command": "npx prisma db push --schema ../../packages/prisma-schema/prisma/schema.prisma",
         "cwd": "apps/admin-panel"
       }
     },
     "prisma:studio": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npx prisma studio",
+        "command": "npx prisma studio --schema ../../packages/prisma-schema/prisma/schema.prisma",
         "cwd": "apps/admin-panel"
       }
     },
     "prisma:seed": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npx tsx prisma/seed.ts",
+        "command": "npx tsx ../../packages/prisma-schema/prisma/seed.ts",
         "cwd": "apps/admin-panel"
       }
     }

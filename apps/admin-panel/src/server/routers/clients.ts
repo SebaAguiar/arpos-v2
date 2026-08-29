@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { router, protectedProcedure } from '../trpc';
 import { TRPCError } from '@trpc/server';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@arcom/prisma-schema';
 
 const PHONE_REGEX = /^[0-9+()\s-]*$/;
 const TAX_ID_REGEX = /^[0-9-]*$/;

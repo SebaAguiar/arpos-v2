@@ -1,0 +1,30 @@
+{
+  "name": "@arcom/prisma-schema",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "description": "Single source of truth for the Arcom cloud (PostgreSQL) Prisma schema and generated Prisma client. Shared by admin-panel and marketing-landing.",
+  "main": "generated/index.js",
+  "types": "generated/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./index.mjs",
+      "require": "./generated/index.js",
+      "types": "./generated/index.d.ts",
+      "default": "./generated/index.js"
+    }
+  },
+  "scripts": {
+    "generate": "prisma generate --schema prisma/schema.prisma",
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.14.0",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "prisma": "^6.14.0",
+    "tsx": "^4.19.0"
+  }
+}
