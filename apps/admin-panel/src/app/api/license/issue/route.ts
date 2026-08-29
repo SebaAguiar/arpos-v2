@@ -48,6 +48,7 @@ export async function POST(request: Request) {
             features: true,
             maxStoresDefault: true,
             priceDefaultCents: true,
+            termDaysDefault: true,
           },
         },
       },
@@ -64,7 +65,8 @@ export async function POST(request: Request) {
     const isPaidPlan = subscription.plan.priceDefaultCents > 0;
     const validFrom = client.createdAt;
     const validUntil = isPaidPlan
-      ? (subscription.renewalDate ?? addDays(subscription.startDate, 30))
+      ? (subscription.renewalDate ??
+          addDays(subscription.startDate, subscription.plan.termDaysDefault))
       : addDays(validFrom, FREE_TERM_DAYS);
 
     const maxStores =

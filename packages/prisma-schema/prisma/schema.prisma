@@ -75,6 +75,7 @@ model Plan {
   slug               String
   maxStoresDefault   Int      @default(1) @map("max_stores_default")
   priceDefaultCents  Int      @default(0) @map("price_default_cents")
+  termDaysDefault    Int      @default(30) @map("term_days_default")
   currency           String?  @default("ARS")
   features           Json     @default("{}")
   sortOrder          Int      @default(0) @map("sort_order")
