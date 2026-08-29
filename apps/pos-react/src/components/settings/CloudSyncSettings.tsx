@@ -7,8 +7,10 @@ import {
   DownloadIcon,
   GearIcon,
   QuestionMarkCircledIcon,
+  LockClosedIcon,
 } from "@radix-ui/react-icons";
 import { useSyncStore } from "@/stores/sync.store";
+import { useLicense } from "@/hooks/useLicense";
 
 export function CloudSyncSettings() {
   const {
@@ -24,6 +26,8 @@ export function CloudSyncSettings() {
     processPending,
     pullFromCloud,
   } = useSyncStore();
+
+  const gate = useLicense();
 
   const [cloudUrl, setCloudUrl] = useState("");
   const [cloudJwt, setCloudJwt] = useState("");
@@ -199,7 +203,32 @@ export function CloudSyncSettings() {
             Sincronizá tus datos con la nube para acceder desde múltiples dispositivos.
           </Text>
 
-          <Button size="1" onClick={() => setShowSetup((v) => !v)}>
+          {!gate.enabled && (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "8px",
+                padding: "10px 12px",
+                backgroundColor: "var(--bg-surface-hover)",
+                borderRadius: "6px",
+                marginBottom: "12px",
+              }}
+            >
+              <Text size="2" color="amber" style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                <LockClosedIcon width={14} height={14} />
+                Cloud sync es una función de pago.
+              </Text>
+              <Text size="2" color="gray">{gate.blockMessage}</Text>
+            </div>
+          )}
+
+          <Button
+            size="1"
+            onClick={() => setShowSetup((v) => !v)}
+            disabled={!gate.enabled}
+            title={gate.enabled ? undefined : "Requiere licencia de pago para sincronizar en la nube"}
+          >
             {showSetup ? "Ocultar configuración" : "Activar sincronización"}
           </Button>
 

@@ -18,6 +18,7 @@ import { useSyncStore } from "@/stores/sync.store";
 import { useDialogStore } from "@/stores/dialog.store";
 import { useCashRegisterStore } from "@/stores/cash-register.store";
 import { NetworkIndicator } from "./NetworkIndicator";
+import { LicenseBadge } from "./LicenseBadge";
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -27,7 +28,7 @@ interface HeaderProps {
 export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
   const theme = useThemeStore((s) => s.theme);
   const toggleTheme = useThemeStore((s) => s.toggleTheme);
-  const { user, logout } = useAuth();
+  const { user, logout, licenseStatus } = useAuth();
   const isOnline = useNetworkStatus();
   const pendingCount = useSyncStore((s) => s.pendingCount);
   const isProcessing = useSyncStore((s) => s.isProcessing);
@@ -134,6 +135,8 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
         pendingCount={pendingCount}
         isProcessing={isProcessing}
       />
+
+      <LicenseBadge status={licenseStatus} />
 
       <Tooltip content={theme === "dark" ? "Modo claro" : "Modo oscuro"}>
         <IconButton

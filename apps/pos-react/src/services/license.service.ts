@@ -28,8 +28,28 @@ export interface LicenseResponse {
   error?: string;
 }
 
+export interface LicenseIssueResponse {
+  valid: boolean;
+  token: string;
+  license: {
+    sub: string;
+    email: string;
+    name: string;
+    planSlug: string;
+    planName: string;
+    maxStores: number;
+    features: Record<string, boolean>;
+    validFrom: string;
+    validUntil: string;
+  };
+}
+
 export const LicenseService = {
   async verify(email: string): Promise<LicenseResponse> {
     return cloudClient.post<LicenseResponse>("/api/license/verify", { email });
+  },
+
+  async issue(email: string): Promise<LicenseIssueResponse> {
+    return cloudClient.post<LicenseIssueResponse>("/api/license/issue", { email });
   },
 };

@@ -4,10 +4,13 @@ import { LicenseRepository, type LicenseData } from "@/repositories/license.repo
 import { SetupRepository } from "@/repositories/setup.repository";
 import { setAuthToken, clearAuthToken } from "@/services/api-client";
 import { ApiError } from "@/services/api-client";
+import type { LicensePayload, LicenseStatus } from "@/lib/license";
 
 interface AuthState {
   user: AuthUser | null;
   license: LicenseData | null;
+  licenseStatus: LicenseStatus | null;
+  licensePayload: LicensePayload | null;
   loading: boolean;
   initialized: boolean;
   isInitialized: boolean;
@@ -15,6 +18,7 @@ interface AuthState {
 
   login: (email: string, password: string) => Promise<boolean>;
   loginWithLicense: (email: string) => Promise<boolean>;
+  refreshLicenseOnline: (email: string) => Promise<void>;
   logout: () => void;
   initialize: () => Promise<void>;
   checkSetup: () => Promise<void>;
@@ -49,9 +53,32 @@ function clearCachedLicense(): void {
   }
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+function buildLicenseData(
+  payload: LicensePayload,
+  status: LicenseStatus,
+): LicenseData {
+  return {
+    client: { id: payload.sub, name: payload.name, email: payload.email },
+    plan: {
+      name: payload.planName,
+      slug: payload.planSlug,
+      features: payload.features,
+      maxStores: payload.maxStores,
+    },
+    subscription: {
+      id: payload.sub,
+      status: status.status === "invalid" ? "inactive" : "active",
+      renewalDate: null,
+      startDate: payload.validFrom,
+    },
+  };
+}
+
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   license: loadCachedLicense(),
+  licenseStatus: null,
+  licensePayload: null,
   loading: false,
   initialized: false,
   isInitialized: true,
@@ -76,41 +103,103 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   loginWithLicense: async (email) => {
     set({ loading: true, error: null });
-    try {
-      const result = await LicenseRepository.verify(email);
-      if (!result.valid || !result.license) {
-        set({ loading: false, error: result.error || "Licencia no valida" });
-        return false;
-      }
+    // Local-first login: the POS always operates, even fully offline. The
+    // license only gates cloud/paid features, never the core POS.
+    const { known, result } = await LicenseRepository.issueAndStore(email);
 
-      cacheLicense(result.license);
-
-      set({
-        user: {
-          id: result.license.client.id,
-          email: result.license.client.email,
-          name: result.license.client.name,
-          role: "client",
-        },
-        license: result.license,
-        loading: false,
-      });
-      return true;
-    } catch {
-      set({ loading: false, error: "Error al verificar licencia" });
+    if (!known) {
+      set({ loading: false, error: result.ok ? undefined : result.error });
       return false;
     }
+
+    const status: LicenseStatus =
+      result.ok ? result.status : { status: "invalid", payload: null, daysLeft: 0 };
+    const payload = result.ok ? result.payload : null;
+    const licenseData: LicenseData | null = payload
+      ? buildLicenseData(payload, status)
+      : null;
+
+    if (licenseData) cacheLicense(licenseData);
+
+    set({
+      user: {
+        id: payload?.sub ?? email,
+        email: payload?.email ?? email,
+        name: payload?.name ?? email.split("@")[0],
+        role: "client",
+      },
+      license: licenseData,
+      licenseStatus: status,
+      licensePayload: payload,
+      loading: false,
+      error: null,
+    });
+    return true;
   },
 
   logout: () => {
     clearAuthToken();
     clearCachedLicense();
-    set({ user: null, license: null, error: null });
+    LicenseRepository.logoutLocal();
+    set({ user: null, license: null, licenseStatus: null, licensePayload: null, error: null });
+  },
+
+  refreshLicenseOnline: async (email) => {
+    // Best-effort online renewal. Never throws nor blocks: on transient
+    // network failure it silently keeps the existing local status, and on a
+    // hard identity rejection (plan revoked / account gone) it flags the
+    // license as invalid so the paid gates close.
+    try {
+      const { known, result } = await LicenseRepository.issueAndStore(email);
+      const status: LicenseStatus =
+        result.ok ? result.status : { status: "invalid", payload: null, daysLeft: 0 };
+      const payload = result.ok ? result.payload : null;
+
+      if (!known) {
+        // License revoked or account removed: drop the signed token and mark
+        // the license invalid (identity gate stays closed to cloud/paid).
+        LicenseRepository.logoutLocal();
+        clearCachedLicense();
+        set({ licenseStatus: status, licensePayload: payload, license: null, error: null });
+        return;
+      }
+
+      const licenseData = payload ? buildLicenseData(payload, status) : get().license;
+      if (licenseData) cacheLicense(licenseData);
+      set({
+        license: licenseData,
+        licenseStatus: status,
+        licensePayload: payload,
+        error: null,
+      });
+    } catch {
+      // keep existing local status on network failure
+    }
   },
 
   initialize: async () => {
-    const token = localStorage.getItem("auth_token");
     const cachedLicense = loadCachedLicense();
+    const local = await LicenseRepository.loadLocal();
+
+    // Restore identity from the local signed license token (works offline).
+    if (local.ok && local.status.payload) {
+      const p = local.status.payload;
+      set({
+        user: {
+          id: p.sub,
+          email: p.email,
+          name: p.name,
+          role: "client",
+        },
+        licenseStatus: local.status,
+        licensePayload: p,
+        license: cachedLicense,
+        initialized: true,
+      });
+      // Revalidate online in the background; never blocks startup.
+      void get().refreshLicenseOnline(p.email);
+      return;
+    }
 
     if (cachedLicense) {
       set({
@@ -126,7 +215,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       return;
     }
 
-    if (!token) {
+    if (!localStorage.getItem("auth_token")) {
       set({ initialized: true });
       return;
     }

@@ -4,6 +4,8 @@ import { useAuthStore } from "@/stores/auth.store";
 export function useAuth() {
   const user = useAuthStore((s) => s.user);
   const license = useAuthStore((s) => s.license);
+  const licenseStatus = useAuthStore((s) => s.licenseStatus);
+  const licensePayload = useAuthStore((s) => s.licensePayload);
   const loading = useAuthStore((s) => s.loading);
   const initialized = useAuthStore((s) => s.initialized);
   const isInitialized = useAuthStore((s) => s.isInitialized);
@@ -24,6 +26,8 @@ export function useAuth() {
   return {
     user,
     license,
+    licenseStatus,
+    licensePayload,
     loading,
     initialized,
     isInitialized,
