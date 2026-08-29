@@ -5,6 +5,7 @@ mod utils;
 use managers::backup::BackupManager;
 use managers::database::DatabaseManager;
 use managers::export::ExportManager;
+use managers::license::LicenseManager;
 use managers::process::ProcessManager;
 use managers::system::SystemManager;
 use managers::updater::UpdaterManager;
@@ -20,6 +21,7 @@ pub fn run() {
         .manage(BackupManager::new())
         .manage(ExportManager::new())
         .manage(UpdaterManager::new())
+        .manage(LicenseManager::new())
         .invoke_handler(tauri::generate_handler![
             // Process commands
             commands::process::start_backend,
@@ -51,6 +53,10 @@ pub fn run() {
             // Updater commands
             commands::updater::check_for_updates,
             commands::updater::download_update,
+            // License commands
+            commands::license::get_license_token,
+            commands::license::save_license_token,
+            commands::license::clear_license_token,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
