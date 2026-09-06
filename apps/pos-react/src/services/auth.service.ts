@@ -17,6 +17,12 @@ export const AuthService = {
     return apiClient.post<ApiLoginResponse>("/auth/login", { email, password });
   },
 
+  // License bridge: the POS no longer signs in with credentials. It presents
+  // the EdDSA license token and the local API mints the auth_token session.
+  async loginWithLicense(licenseToken: string): Promise<ApiLoginResponse> {
+    return apiClient.post<ApiLoginResponse>("/auth/license", { licenseToken });
+  },
+
   async getProfile(): Promise<ApiAuthUser> {
     return apiClient.get<ApiAuthUser>("/auth/me");
   },

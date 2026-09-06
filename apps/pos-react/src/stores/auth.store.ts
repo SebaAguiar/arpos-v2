@@ -4,7 +4,7 @@ import { LicenseRepository, type LicenseData } from "@/repositories/license.repo
 import { SetupRepository } from "@/repositories/setup.repository";
 import { setAuthToken, clearAuthToken } from "@/services/api-client";
 import { ApiError } from "@/services/api-client";
-import type { LicensePayload, LicenseStatus } from "@/lib/license";
+import { readTokenLocal, type LicensePayload, type LicenseStatus } from "@/lib/license";
 
 interface AuthState {
   user: AuthUser | null;
@@ -50,6 +50,22 @@ function clearCachedLicense(): void {
     localStorage.removeItem(LICENSE_CACHE_KEY);
   } catch {
     // localStorage unavailable
+  }
+}
+
+// Best-effort: exchange the locally-signed license token for the API session
+// (auth_token) that the local sidecar requires on every data endpoint. Never
+// throws — on any failure the POS keeps the license-derived identity and runs
+// fully offline; the api-client retries the exchange on a 401.
+async function mintApiAccessToken(): Promise<AuthUser | null> {
+  const licenseToken = await readTokenLocal();
+  if (!licenseToken) return null;
+  try {
+    const { token, user } = await AuthRepository.loginWithLicense(licenseToken);
+    setAuthToken(token);
+    return user;
+  } catch {
+    return null;
   }
 }
 
@@ -121,13 +137,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     if (licenseData) cacheLicense(licenseData);
 
+    // Bridge the license into an API session so data endpoints stop returning
+    // 401. Best-effort: if the sidecar is unreachable the POS still enters.
+    const apiUser = await mintApiAccessToken();
+    const fallbackUser: AuthUser = {
+      id: payload?.sub ?? email,
+      email: payload?.email ?? email,
+      name: payload?.name ?? email.split("@")[0],
+      role: "client",
+    };
+
     set({
-      user: {
-        id: payload?.sub ?? email,
-        email: payload?.email ?? email,
-        name: payload?.name ?? email.split("@")[0],
-        role: "client",
-      },
+      user: apiUser ?? fallbackUser,
       license: licenseData,
       licenseStatus: status,
       licensePayload: payload,
@@ -198,6 +219,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
       // Revalidate online in the background; never blocks startup.
       void get().refreshLicenseOnline(p.email);
+      // Mint/refresh the API session from the license; the api-client retries
+      // on the first 401 if this ever races the initial data calls.
+      void mintApiAccessToken().then((apiUser) => {
+        if (apiUser) set({ user: apiUser });
+      });
       return;
     }
 

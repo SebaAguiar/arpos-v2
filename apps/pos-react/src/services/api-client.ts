@@ -1,4 +1,5 @@
 import { apiBaseUrl } from "@/config";
+import { readTokenLocal } from "@/lib/license";
 
 const API_BASE = apiBaseUrl;
 
@@ -38,7 +39,44 @@ export function clearAuthToken(): void {
   }
 }
 
-async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+// Single-flight exchange of the license token for a fresh auth_token on 401.
+// Self-heals expired sessions and the cold-boot race where data calls fire
+// before initialize() has minted the session.
+let mintInFlight: Promise<boolean> | null = null;
+
+async function tryMintLicenseSession(): Promise<boolean> {
+  if (!mintInFlight) {
+    mintInFlight = (async () => {
+      try {
+        const licenseToken = await readTokenLocal();
+        if (!licenseToken) return false;
+        const res = await fetch(`${API_BASE}/auth/license`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ licenseToken }),
+          cache: "no-store",
+        });
+        if (!res.ok) return false;
+        const json = (await res.json()) as { access_token?: string };
+        if (!json.access_token) return false;
+        setAuthToken(json.access_token);
+        return true;
+      } catch {
+        return false;
+      } finally {
+        mintInFlight = null;
+      }
+    })();
+  }
+  return mintInFlight;
+}
+
+async function request<T>(
+  method: string,
+  path: string,
+  body?: unknown,
+  retried = false,
+): Promise<T> {
   const url = `${API_BASE}${path}`;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -55,6 +93,15 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     body: body ? JSON.stringify(body) : undefined,
     cache: "no-store",
   });
+
+  // A license holder with a stale/missing session gets one transparent retry:
+  // mint a fresh auth_token and re-issue the request once.
+  if (res.status === 401 && !retried && path !== "/auth/license") {
+    const minted = await tryMintLicenseSession();
+    if (minted) {
+      return request<T>(method, path, body, true);
+    }
+  }
 
   if (res.status === 401) {
     clearAuthToken();

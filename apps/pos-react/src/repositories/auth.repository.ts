@@ -30,6 +30,14 @@ export const AuthRepository = {
     };
   },
 
+  async loginWithLicense(licenseToken: string): Promise<LoginResult> {
+    const response = await AuthService.loginWithLicense(licenseToken);
+    return {
+      token: response.access_token,
+      user: mapUser(response.user),
+    };
+  },
+
   async getProfile(): Promise<AuthUser> {
     const user = await AuthService.getProfile();
     return mapUser(user);
