@@ -40,7 +40,7 @@ export class InvoiceWorkerService {
         if (invoice.retry_count > 0) {
           const lastAttempt = invoice.created_at + (invoice.retry_count * 60);
           const now = Math.floor(Date.now() / 1000);
-          if (now - lastAttempt * 1000 < delayMs) {
+          if ((now - lastAttempt) * 1000 < delayMs) {
             this.logger.debug(
               `Skipping invoice ${invoice.id}: backoff delay not elapsed (retry ${invoice.retry_count})`,
             );

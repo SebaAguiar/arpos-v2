@@ -49,7 +49,8 @@ export class PurchasesService {
     await this.findOne(id);
 
     if (input.items) {
-      const items = input.items.map((item) => ({
+      const { items: inputItems, ...rest } = input;
+      const items = inputItems.map((item) => ({
         productId: item.productId,
         variantId: item.variantId ?? null,
         quantity_ordered: item.quantity_ordered,
@@ -60,10 +61,10 @@ export class PurchasesService {
 
       await this.purchasesRepo.replaceItems(id, items);
       return this.purchasesRepo.update(id, {
-        ...input,
+        ...rest,
         total_cents,
-        expected_date: input.expected_date ?? null,
-        notes: input.notes ?? null,
+        expected_date: rest.expected_date ?? null,
+        notes: rest.notes ?? null,
       });
     }
 
