@@ -1,26 +1,16 @@
 import { test as setup, expect } from "@playwright/test";
 import { readFileSync, existsSync } from "node:fs";
-import { createRequire } from "node:module";
 import { SignJWT, importPKCS8 } from "jose";
 
 // The POS authenticates via a locally-signed license token (EdDSA), not via
-// username/password. To make the e2e suite deterministic and offline-first,
-// we mint a valid license token using the same private key the admin uses
-// (apps/admin-panel/.env -> LICENSE_PRIVATE_KEY) and inject it into the POS
-// localStorage before the app boots. initialize() then restores the identity
-// from the local token and the POS loads authenticated.
+// username/password. We mint a valid license token using the same private key
+// the admin uses (apps/admin-panel/.env -> LICENSE_PRIVATE_KEY) and inject it
+// into the POS localStorage before the app boots. initialize() then restores
+// the identity from the local token and the POS boots authenticated — and the
+// license bridge (POST /api/auth/license) mints the sidecar auth_token itself,
+// so the whole suite exercises the real production auth path.
 
 const POS = "http://localhost:1420";
-const API_LOGIN = "http://localhost:3000/api/auth/login";
-
-// Dev credentials known from the API seed (apps/api/prisma/seed.ts uses the
-// universal "admin123" for admins). The DB may have been seeded either with
-// the current seed (admin@arcom.com) or an earlier one (admin@arpos.com), so
-// we try both — the first successful login wins.
-const API_ADMIN_CREDENTIALS = [
-  { email: "admin@arcom.com", password: "admin123" },
-  { email: "admin@arpos.com", password: "admin123" },
-];
 
 function resolveEnvPath(): string {
   const candidates = [
@@ -70,46 +60,21 @@ async function mintLicenseToken(privateKeyPem: string): Promise<string> {
     .sign(privateKey);
 }
 
-// The data endpoints of the local API (apps/api) are behind their own JWT
-// (auth_token, HS256) which the POS now does not mint anymore since auth moved
-// to the license flow. Without it every data call returns 401 and the POS
-// falls back to "Sin conexión al servidor". Mint it via the real login so the
-// whole suite runs against the seeded dev database.
-async function getApiAccessToken(): Promise<string> {
-  for (const cred of API_ADMIN_CREDENTIALS) {
-    try {
-      const res = await fetch(API_LOGIN, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(cred),
-      });
-      if (!res.ok) continue;
-      const json = (await res.json()) as { access_token?: string };
-      if (json.access_token) return json.access_token;
-    } catch {
-      // API still booting; try next candidate
-    }
-  }
-  throw new Error("Could not obtain an API access_token for the e2e run");
-}
-
 setup("authenticate via injected license token and save storage state", async ({
   page,
   context,
 }) => {
   const privateKey = readEnv("LICENSE_PRIVATE_KEY");
   const licenseToken = await mintLicenseToken(privateKey);
-  const apiToken = await getApiAccessToken();
 
   // Boot once so the origin exists and origin-scoped localStorage is writable.
   await page.goto(POS);
   await page.waitForTimeout(500);
 
-  // Inject the signed license token AND the API access token before the app
-  // re-initializes, then reload so initialize() restores the identity from the
-  // local license token (offline) while data calls use the API token (401-free).
+  // Inject only the signed license token before the app re-initializes, then
+  // reload so initialize() restores the identity from the local license token
+  // (offline) and the bridge mints the API session on its own.
   await page.evaluate((t) => localStorage.setItem("arcom_license_token", t), licenseToken);
-  await page.evaluate((t) => localStorage.setItem("auth_token", t), apiToken);
   await page.reload();
 
   // The POS (authenticated) shows the "Carrito" panel once loaded; if auth
@@ -119,7 +84,8 @@ setup("authenticate via injected license token and save storage state", async ({
   });
 
 // The products grid must be populated and reach the API — otherwise the
-  // sale-flow specs start from an empty, offline grid.
+  // sale-flow specs start from an empty, offline grid. This also proves the
+  // license bridge minted a working API session (no manual auth_token).
   await expect
     .poll(
       async () => {
