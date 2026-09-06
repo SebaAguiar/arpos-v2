@@ -72,4 +72,58 @@ test.describe("POS — Ventas", () => {
 
     await expect(page.getByText("Total a pagar")).toBeVisible();
   });
+
+  test("completes a full sale: add item, pay exact, confirm, see success", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    // Wait for products to load and add the first one with stock.
+    const addButtons = page.locator('[aria-label^="Agregar"]:not([aria-label*="Agotado"])');
+    await addButtons.first().waitFor({ timeout: 15000 });
+    await addButtons.first().click();
+    await expect(page.getByText("Cobrar")).toBeVisible({ timeout: 5000 });
+
+    // Open the payment dialog and pay the exact amount.
+    await page.getByRole("button", { name: "Cobrar" }).click();
+    await expect(page.getByText("Total a pagar")).toBeVisible({ timeout: 5000 });
+
+    await page.getByRole("button", { name: "Exacto" }).click();
+    await expect(page.getByRole("button", { name: "Confirmar venta" })).toBeEnabled({
+      timeout: 5000,
+    });
+
+    // Confirm the sale -> should hit POST /api/sales and show success dialog.
+    await page.getByRole("button", { name: "Confirmar venta" }).click();
+    await expect(page.getByText("Venta Procesada")).toBeVisible({ timeout: 10000 });
+
+    // Closing the dialog should leave the cart empty again.
+    await page.keyboard.press("Escape");
+    await expect(page.getByText("Carrito vacío")).toBeVisible({ timeout: 5000 });
+  });
+
+  test("cannot confirm payment when the paid amount is insufficient", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    const addButtons = page.locator('[aria-label^="Agregar"][aria-disabled="false"]');
+    await addButtons.first().waitFor({ timeout: 15000 });
+    await expect(page.getByText(/\d+ productos/)).not.toHaveText(/^0 productos/, {
+      timeout: 15000,
+    });
+    await addButtons.first().click();
+
+    await page.getByRole("button", { name: "Cobrar" }).click();
+    await expect(page.getByText("Total a pagar")).toBeVisible({ timeout: 5000 });
+
+    const confirmBtn = page.getByRole("button", { name: "Confirmar venta" });
+    await expect(confirmBtn).toBeDisabled();
+
+    // Pay a partial amount (simulate a small cash entry) — Confirm stays disabled.
+    const amountInput = page.getByPlaceholder("Monto");
+    await amountInput.fill("1");
+    await page.getByRole("button", { name: "Agregar", exact: true }).click();
+    await expect(confirmBtn).toBeDisabled();
+  });
 });

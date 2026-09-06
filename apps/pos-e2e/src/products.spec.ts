@@ -1,22 +1,22 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Gestión de Productos", () => {
-  test("navigates to products page and shows product list", async ({ page }) => {
-    await page.goto("/products-management");
-    await page.waitForTimeout(2000);
+  test("navigates to products page and shows the product list", async ({ page }) => {
+    await page.goto("/products");
 
-    await expect(page.getByText("Gestión de Productos")).toBeVisible();
+    await expect(page.getByText("Inventario y Productos")).toBeVisible({
+      timeout: 10000,
+    });
+    // Radix themes renders the table lazily once products land.
+    await expect(page.getByRole("table").first()).toBeVisible({ timeout: 15000 });
   });
 
-  test("can open add product dialog", async ({ page }) => {
-    await page.goto("/products-management");
+  test("can open the new product dialog", async ({ page }) => {
+    await page.goto("/products");
 
-    const addBtn = page.getByRole("button", { name: /agregar|nuevo|crear/i }).first();
-    if (await addBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await addBtn.click();
-      await page.waitForTimeout(500);
-      const dialog = page.locator('[role="dialog"]');
-      await expect(dialog).toBeVisible({ timeout: 3000 });
-    }
+    await page.getByRole("button", { name: "Nuevo producto" }).click();
+
+    const dialog = page.locator('[role="dialog"]');
+    await expect(dialog).toBeVisible({ timeout: 10000 });
   });
 });

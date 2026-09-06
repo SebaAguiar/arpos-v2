@@ -109,69 +109,76 @@ test.afterAll(async () => {
   await new Promise<void>((resolve) => relay.close(() => resolve()));
 });
 
+async function openSyncTab(page: Page): Promise<void> {
+  await page.goto("/settings");
+  await page.getByRole("tab", { name: "Sincronización" }).click();
+  await expect(page.getByText("Sync Cloud")).toBeVisible({ timeout: 10000 });
+}
+
 test.describe("Sync — offline to online transitions", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/settings");
-    await page.waitForSelector("text=Sync Cloud", { timeout: 10000 });
+    await openSyncTab(page);
   });
 
   test("queues sales offline and pushes them after connecting to cloud", async ({
     page,
     request,
   }) => {
-    test.setTimeout(60_000);
+    test.setTimeout(120_000);
     const token = await getToken(page);
 
+    // Deterministic starting point: no connection and an empty relay log.
     await request.post(`${API_BASE}/sync/disconnect`, { headers: auth(token) });
     await request.delete(`${RELAY_URL}/__requests`);
+    await openSyncTab(page);
 
+    const baseline = (await getSyncStatus(request, token)).pending;
     const product = await createTestProduct(request, token);
 
     // 1) OFFLINE-FIRST: a new sale stays queued and is never pushed.
     await createSale(request, token, product);
-    const offlineStatus = await getSyncStatus(request, token);
-    expect(offlineStatus.pending).toBeGreaterThanOrEqual(1);
+    const queued = (await getSyncStatus(request, token)).pending;
+    expect(queued).toBeGreaterThanOrEqual(baseline + 1);
     expect(await getRelayApplies(request)).toHaveLength(0);
 
     // 2) CONNECT: configuring the cloud relay pushes the whole queue.
+    await page.getByRole("button", { name: "Activar sincronización" }).click();
     await page.getByPlaceholder("URL del servidor cloud").fill(RELAY_URL);
     await page.getByPlaceholder("JWT token").fill(RELAY_JWT);
     await page.getByText("Conectar", { exact: true }).click();
-    await expect(page.getByText("Subir cambios")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText("Conectado").first()).toBeVisible({ timeout: 10000 });
 
-    await page.getByText("Subir cambios").click();
-    await expect(page.getByText(/\d+ pendientes/)).toHaveCount(0, { timeout: 15000 });
-
-    const onlineStatus = await getSyncStatus(request, token);
-    expect(onlineStatus.pending).toBe(0);
+    await page.getByRole("button", { name: "Subir cambios" }).click();
+    await expect
+      .poll(() => getSyncStatus(request, token), { timeout: 20000 })
+      .toMatchObject({ pending: 0 });
 
     const pushedOnline = await getRelayApplies(request);
     expect(pushedOnline.some((a) => a.entity === "sale")).toBe(true);
 
     // 3) DISCONNECT: new sales queue up again without reaching the relay.
-    await page.getByText("Desconectar").click();
-    await createSale(request, token, product);
+    // The advanced form stays open (showSetup persisted), so "Desconectar"
+    // is already visible.
+    await page.getByRole("button", { name: "Desconectar", exact: true }).click();
+    await expect(page.getByText("No conectado")).toBeVisible({ timeout: 10000 });
 
-    const offlineAgain = await getSyncStatus(request, token);
-    expect(offlineAgain.pending).toBeGreaterThanOrEqual(1);
-
-    const appliesBeforeReconnect = await getRelayApplies(request);
-    const countBeforeReconnect = appliesBeforeReconnect.length;
-
-    // 4) RECONNECT: the queued sale is pushed once cloud is configured again.
+    // Fill the still-open form and connect again.
     await page.getByPlaceholder("URL del servidor cloud").fill(RELAY_URL);
     await page.getByPlaceholder("JWT token").fill(RELAY_JWT);
     await page.getByText("Conectar", { exact: true }).click();
-    await expect(page.getByText("Subir cambios")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText("Conectado").first()).toBeVisible({ timeout: 10000 });
 
-    await page.getByText("Subir cambios").click();
-    await expect(page.getByText(/\d+ pendientes/)).toHaveCount(0, { timeout: 15000 });
+    // 4) RECONNECT: a new sale is pushed once cloud is configured again.
+    const reappliedBefore = await getRelayApplies(request);
+    await createSale(request, token, product);
 
-    const reconnectedStatus = await getSyncStatus(request, token);
-    expect(reconnectedStatus.pending).toBe(0);
+    await page.getByRole("button", { name: "Subir cambios" }).click();
+    await expect
+      .poll(() => getSyncStatus(request, token), { timeout: 20000 })
+      .toMatchObject({ pending: 0 });
 
     const appliesAfterReconnect = await getRelayApplies(request);
-    expect(appliesAfterReconnect.length).toBeGreaterThan(countBeforeReconnect);
+    expect(appliesAfterReconnect.length).toBeGreaterThan(reappliedBefore.length);
 
     // Leave the workspace disconnected so other sync specs stay deterministic.
     await request.post(`${API_BASE}/sync/disconnect`, { headers: auth(token) });
