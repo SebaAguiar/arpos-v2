@@ -177,6 +177,8 @@ Este documento recopila las fases de migración, features propuestas y roadmap d
 - [ ] Completar documentación
 - [ ] Launch público
 
+> **Nota (2026-09-05):** Deuda técnica de tests saldada. API: 49 suites / 419 tests de unit en `apps/api` verdes (nuevos specs: `arca`, `invoice`, `invoice-worker`, `wallet`, `purchases`, `variants`) + `tsc --noEmit` limpio. Se corrigió un bug de unidades en el backoff del invoice worker (`(now - lastAttempt) * 1000 < delayMs` — antes multiplicaba mal por 1000 y los reintentos por error de red se saltaban para siempre) y un leak de `items` sin tipar en `purchases.service.update`. E2E Playwright: 32 tests verdes + 1 skip (emisión ARCA requiere config activa en dev.db); nuevos specs `inventory` (KPIs, filtro por estado, alta de movimiento de entrada) e `invoices` (dashboard fiscal, filtración por estado, cierre → POS).
+
 **Landing page de Arcom** (v1 existe en repo `arpos` con Astro — migrar a v2 + rebrandear a Arcom):
 
 - [x] Migrar `apps/marketing-landing` de v1 (Astro) al monorepo v2 y rebrandear a Arcom
