@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { Public } from './guards/public.decorator';
 import { ZodBody } from '../../core/validation/zod-body.decorator';
 import { LoginSchema, LoginInput } from './dto/login.schema';
+import { LicenseLoginSchema, LicenseLoginInput } from './dto/license-login.schema';
 
 @Controller('auth')
 export class AuthController {
@@ -18,6 +19,12 @@ export class AuthController {
     }
 
     return this.authService.login(user);
+  }
+
+  @Public()
+  @Post('license')
+  async loginWithLicense(@ZodBody(LicenseLoginSchema) input: LicenseLoginInput) {
+    return this.authService.loginWithLicense(input.licenseToken);
   }
 
   @Get('me')

@@ -1,111 +1,125 @@
 import { UnauthorizedException } from '@nestjs/common';
+import { SignJWT, generateKeyPair, exportSPKI, type KeyLike } from 'jose';
 import { AuthService } from './auth.service';
-import * as bcrypt from 'bcryptjs';
 
-jest.mock('bcryptjs');
+const ISSUER = 'arcom-admin';
+const AUDIENCE = 'arcom-pos';
+
+async function signLicense(overrides: {
+  issuer?: string;
+  audience?: string;
+  email?: string;
+  name?: string;
+  privateKey: KeyLike;
+}): Promise<string> {
+  const validFrom = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const validUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+
+  return new SignJWT({
+    email: overrides.email ?? 'license@acme.test',
+    name: overrides.name ?? 'ACME Licensee',
+    planSlug: 'pro',
+    planName: 'Profesional',
+    maxStores: 1,
+    features: {},
+    validFrom: validFrom.toISOString(),
+    validUntil: validUntil.toISOString(),
+  })
+    .setProtectedHeader({ alg: 'EdDSA' })
+    .setIssuer(overrides.issuer ?? ISSUER)
+    .setAudience(overrides.audience ?? AUDIENCE)
+    .setSubject('cli-001')
+    .setIssuedAt()
+    .setExpirationTime(validUntil)
+    .sign(overrides.privateKey);
+}
 
 describe('AuthService', () => {
   let service: AuthService;
-  let mockRepo: {
-    findActiveByEmail: jest.Mock;
-    findById: jest.Mock;
-  };
-  let mockJwt: {
-    sign: jest.Mock;
-  };
+  let mockRepo: { findOrCreateFromLicense: jest.Mock };
+  let mockJwt: { sign: jest.Mock };
+  let mockConfig: { get: jest.Mock };
+  let mockTenant: { getCompanyId: jest.Mock };
+  let privateKey: KeyLike;
+  let publicKeyPem: string;
+
+  beforeAll(async () => {
+    const { privateKey: keyPair, publicKey } = await generateKeyPair('EdDSA');
+    publicKeyPem = await exportSPKI(publicKey);
+    privateKey = keyPair;
+  });
 
   beforeEach(() => {
-    mockRepo = {
-      findActiveByEmail: jest.fn(),
-      findById: jest.fn(),
-    };
-    mockJwt = {
-      sign: jest.fn().mockReturnValue('mock-jwt-token'),
-    };
-    service = new AuthService(mockRepo as never, mockJwt as never);
-    jest.clearAllMocks();
+    mockRepo = { findOrCreateFromLicense: jest.fn() };
+    mockJwt = { sign: jest.fn().mockReturnValue('minted-session-token') };
+    mockConfig = { get: jest.fn().mockImplementation((key: string) => (key === 'LICENSE_PUBLIC_KEY' ? publicKeyPem : undefined)) };
+    mockTenant = { getCompanyId: jest.fn().mockReturnValue('company-1') };
+    service = new AuthService(
+      mockRepo as never,
+      mockJwt as never,
+      mockConfig as never,
+      mockTenant as never,
+    );
   });
 
-  describe('validateUser', () => {
-    it('should return user payload when credentials are valid', async () => {
-      const user = {
-        id: 'u1',
-        email: 'admin@arcom.com',
-        name: 'Admin',
-        role: 'admin',
-        companyId: 'c1',
-        password: '$2a$10$hashedpassword',
-        is_active: true,
-      };
-      mockRepo.findActiveByEmail.mockResolvedValue(user);
-      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+  it('mints a local session for a valid license token', async () => {
+    const token = await signLicense({ privateKey });
 
-      const result = await service.validateUser('admin@arcom.com', 'password123');
-      expect(result).toEqual({
-        id: 'u1',
-        email: 'admin@arcom.com',
-        name: 'Admin',
-        role: 'admin',
-        companyId: 'c1',
-      });
+    mockRepo.findOrCreateFromLicense.mockResolvedValue({
+      id: 'user-1',
+      email: 'license@acme.test',
+      name: 'ACME Licensee',
+      role: 'cashier',
+      companyId: 'company-1',
     });
 
-    it('should return null when user not found', async () => {
-      mockRepo.findActiveByEmail.mockResolvedValue(null);
+    const result = await service.loginWithLicense(token);
 
-      const result = await service.validateUser('nobody@arcom.com', 'pass');
-      expect(result).toBeNull();
-    });
-
-    it('should return null when password is invalid', async () => {
-      const user = {
-        id: 'u1',
-        email: 'admin@arcom.com',
-        password: '$2a$10$hashedpassword',
-        is_active: true,
-      };
-      mockRepo.findActiveByEmail.mockResolvedValue(user);
-      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
-
-      const result = await service.validateUser('admin@arcom.com', 'wrongpassword');
-      expect(result).toBeNull();
+    expect(mockRepo.findOrCreateFromLicense).toHaveBeenCalledWith(
+      'license@acme.test',
+      'ACME Licensee',
+      'company-1',
+    );
+    expect(mockJwt.sign).toHaveBeenCalledWith({ sub: 'user-1', companyId: 'company-1' });
+    expect(result).toEqual({
+      access_token: 'minted-session-token',
+      user: {
+        id: 'user-1',
+        email: 'license@acme.test',
+        name: 'ACME Licensee',
+        role: 'cashier',
+      },
     });
   });
 
-  describe('login', () => {
-    it('should return access token and user info', async () => {
-      const user = {
-        id: 'u1',
-        email: 'admin@arcom.com',
-        name: 'Admin',
-        role: 'admin',
-        companyId: 'c1',
-      };
+  it('rejects a license token addressed to a different audience', async () => {
+    const token = await signLicense({ privateKey, audience: 'another-app' });
 
-      const result = await service.login(user);
-      expect(result.access_token).toBe('mock-jwt-token');
-      expect(result.user).toEqual({
-        id: 'u1',
-        email: 'admin@arcom.com',
-        name: 'Admin',
-        role: 'admin',
-      });
-      expect(mockJwt.sign).toHaveBeenCalledWith({ sub: 'u1', companyId: 'c1' });
-    });
+    await expect(service.loginWithLicense(token)).rejects.toBeInstanceOf(
+      UnauthorizedException,
+    );
+    expect(mockRepo.findOrCreateFromLicense).not.toHaveBeenCalled();
   });
 
-  describe('getProfile', () => {
-    it('should return user profile', async () => {
-      const user = { id: 'u1', email: 'admin@arcom.com', name: 'Admin', role: 'admin', companyId: 'c1' };
-      mockRepo.findById.mockResolvedValue(user);
+  it('rejects a tampered license token', async () => {
+    const token = await signLicense({ privateKey });
+    // Flip a payload byte so the signature no longer matches.
+    const [header, payload, signature] = token.split('.');
+    const brokenPayload = Buffer.from(
+      Buffer.from(payload, 'base64url').toString().replace('acme', 'ACME'),
+    ).toString('base64url');
 
-      const result = await service.getProfile('u1');
-      expect(result).toEqual(user);
-    });
+    await expect(
+      service.loginWithLicense([header, brokenPayload, signature].join('.')),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
+  });
 
-    it('should throw UnauthorizedException when user not found', async () => {
-      mockRepo.findById.mockResolvedValue(null);
-      await expect(service.getProfile('nonexistent')).rejects.toThrow(UnauthorizedException);
-    });
+  it('rejects when the local workspace has no company yet', async () => {
+    const token = await signLicense({ privateKey });
+    mockTenant.getCompanyId.mockReturnValue('');
+
+    await expect(service.loginWithLicense(token)).rejects.toBeInstanceOf(
+      UnauthorizedException,
+    );
   });
 });

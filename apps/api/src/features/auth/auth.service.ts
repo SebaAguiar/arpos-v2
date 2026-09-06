@@ -1,7 +1,10 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
+import { jwtVerify, importSPKI } from 'jose';
 import { AuthRepository } from './auth.repository';
+import { TenantContextService } from '../../core/tenant/tenant-context.service';
 
 export interface UserPayload {
   id: string;
@@ -11,11 +14,24 @@ export interface UserPayload {
   companyId: string;
 }
 
+// Protocol claims shared with the admin signer (apps/admin-panel) and the POS
+// verifier (apps/pos-react/src/lib/license.ts).
+const LICENSE_ISSUER = 'arcom-admin';
+const LICENSE_AUDIENCE = 'arcom-pos';
+
+// DEV key pair matching apps/admin-panel/.env. For production the API must be
+// given LICENSE_PUBLIC_KEY (SPKI PEM) and the POS VITE_LICENSE_PUBLIC_KEY with
+// the same value — a mismatch rejects otherwise valid licenses.
+const DEV_LICENSE_PUBLIC_KEY =
+  '-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAUkhabgK5W7rjvxuR3e1sa67XSieFUKXfFTPSgYzTBqQ=\n-----END PUBLIC KEY-----\n';
+
 @Injectable()
 export class AuthService {
   constructor(
     private readonly authRepo: AuthRepository,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+    private readonly tenantContext: TenantContextService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<UserPayload | null> {
@@ -50,6 +66,61 @@ export class AuthService {
         role: user.role,
       },
     };
+  }
+
+  // License bridge: verify the EdDSA license token the POS already trusts,
+  // provision/resolve the local user, and mint the standard HS256 session.
+  // Mirroring the POS (lib/license.ts), expiry is ignored here — the license
+  // status gates paid features, never local identity (offline-first).
+  async loginWithLicense(licenseToken: string) {
+    const payload = await this.verifyLicenseToken(licenseToken);
+    if (!payload?.email) {
+      throw new UnauthorizedException('Invalid license token');
+    }
+
+    const companyId = this.tenantContext.getCompanyId();
+    if (!companyId) {
+      throw new UnauthorizedException('Local workspace not configured');
+    }
+
+    const user = await this.authRepo.findOrCreateFromLicense(
+      payload.email,
+      payload.name,
+      companyId,
+    );
+
+    return this.login({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      companyId: user.companyId,
+    });
+  }
+
+  private async verifyLicenseToken(
+    token: string,
+  ): Promise<{ email: string; name: string } | null> {
+    try {
+      const publicKeyPem = this.configService.get<string>(
+        'LICENSE_PUBLIC_KEY',
+        DEV_LICENSE_PUBLIC_KEY,
+      );
+      const publicKey = await importSPKI(publicKeyPem, 'EdDSA');
+      const { payload } = await jwtVerify(token, publicKey, {
+        issuer: LICENSE_ISSUER,
+        audience: LICENSE_AUDIENCE,
+        // Ignore `exp` so grace/expired licenses still resolve identity — the
+        // POS gates paid features, this endpoint only bridges identity.
+        currentDate: new Date(0),
+      });
+      return {
+        email: (payload.email as string) ?? '',
+        name: (payload.name as string) ?? '',
+      };
+    } catch {
+      return null;
+    }
   }
 
   async getProfile(userId: string) {
