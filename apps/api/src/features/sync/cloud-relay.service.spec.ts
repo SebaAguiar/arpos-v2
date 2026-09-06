@@ -19,8 +19,9 @@ const companyWithConfig = (config: string | null) => {
 
 const mockProduct = {
   findUnique: jest.fn().mockResolvedValue(null),
-  create: jest.fn().mockResolvedValue({}),
-  update: jest.fn().mockResolvedValue({}),
+  findMany: jest.fn().mockResolvedValue([]),
+  create: jest.fn().mockResolvedValue(null),
+  update: jest.fn().mockResolvedValue(null),
 };
 
 const mockContact = {
@@ -282,7 +283,9 @@ describe('CloudRelayService', () => {
         (cb: (tx: typeof mockPrisma) => Promise<boolean>) => cb(mockPrisma),
       );
       mockPrisma.user.findUnique.mockResolvedValue({ id: 'u-1' });
-      mockPrisma.product.findUnique.mockResolvedValue({ stock_quantity: 10 });
+      mockPrisma.product.findMany.mockResolvedValue([
+        { id: 'p-1', stock_quantity: 10 },
+      ]);
       mockPrisma.saleItem.count.mockResolvedValue(0);
 
       const fetchMock = jest.fn().mockResolvedValue({
@@ -334,6 +337,7 @@ describe('CloudRelayService', () => {
         (cb: (tx: typeof mockPrisma) => Promise<boolean>) => cb(mockPrisma),
       );
       mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.product.findMany.mockResolvedValue([]);
       mockPrisma.saleItem.count.mockResolvedValue(0);
 
       const fetchMock = jest.fn().mockResolvedValue({
