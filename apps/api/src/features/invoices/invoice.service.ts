@@ -1,10 +1,14 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InvoiceRepository } from './invoice.repository';
 import { ArcaService, ArcaConfigData, EmitVoucherResult } from '../arca/arca.service';
+import { translateArcaError } from '../arca/arca-errors';
 import { PrismaService } from '../../data-access/prisma/prisma.service';
 import { TenantContextService } from '../../core/tenant/tenant-context.service';
 import { ArcaConfig } from '@prisma/client';
 import type { IVoucher } from '@arcasdk/core/lib/domain/types/voucher.types';
+import * as QRCode from 'qrcode';
+
+const ARCA_QR_BASE_URL = 'https://www.afip.gob.ar/fe/qr/';
 
 const DEFAULT_CF_TAX_ID = '0';
 const DEFAULT_CF_ADDRESS = '';
@@ -18,6 +22,12 @@ export interface InvoiceFilters {
 
 export interface CreateInvoiceFromSaleInput {
   saleId: string;
+  arcaConfigId?: string;
+}
+
+export interface CreateGlobalDailyInvoiceInput {
+  from?: number;
+  to?: number;
   arcaConfigId?: string;
 }
 
@@ -130,6 +140,69 @@ export class InvoiceService {
     });
   }
 
+  async createGlobalDaily(input: CreateGlobalDailyInvoiceInput) {
+    const companyId = this.tenantContext.getCompanyId();
+
+    const arcaConfig: ArcaConfig | null = input.arcaConfigId
+      ? await this.prisma.arcaConfig.findFirst({
+          where: { id: input.arcaConfigId, companyId, active: true },
+        })
+      : await this.prisma.arcaConfig.findFirst({
+          where: { companyId, active: true },
+        });
+
+    if (!arcaConfig) {
+      throw new BadRequestException(
+        'No active ARCA configuration found. Please configure ARCA settings first.',
+      );
+    }
+
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const from = input.from ?? Math.floor(todayStart.getTime() / 1000);
+    const to = input.to ?? Math.floor(now.getTime() / 1000);
+
+    const existingGlobal = await this.invoiceRepo.findGlobalDaily(from, to);
+    if (existingGlobal) {
+      throw new BadRequestException(
+        `A daily global invoice already exists for this period (id ${existingGlobal.id}, status ${existingGlobal.status})`,
+      );
+    }
+
+    const unbilledSales = await this.prisma.sale.findMany({
+      where: {
+        companyId,
+        status: 'completed',
+        created_at: { gte: from, lte: to },
+        invoice: { is: null },
+      },
+      select: { total_cents: true },
+    });
+
+    if (unbilledSales.length === 0) {
+      throw new BadRequestException(
+        'No unbilled sales found for the selected period',
+      );
+    }
+
+    const totalCents = unbilledSales.reduce((sum, sale) => sum + sale.total_cents, 0);
+    const netAmountCents = Math.round(totalCents / 1.21);
+    const taxAmountCents = totalCents - netAmountCents;
+
+    return this.invoiceRepo.create({
+      arcaConfigId: arcaConfig.id,
+      type: 'global',
+      document_type: this.getDocumentType(arcaConfig.responsabilidad_iva),
+      point_of_sale: arcaConfig.point_of_sale,
+      customer_name: 'Consumidor Final',
+      customer_tax_id: DEFAULT_CF_TAX_ID,
+      customer_address: DEFAULT_CF_ADDRESS,
+      total_cents: totalCents,
+      net_amount_cents: netAmountCents,
+      tax_amount_cents: taxAmountCents,
+    });
+  }
+
   async createCreditNote(input: CreateCreditNoteInput) {
     const originalInvoice = await this.invoiceRepo.findById(input.invoiceId);
     if (!originalInvoice) {
@@ -171,7 +244,7 @@ export class InvoiceService {
     const taxAmountCents = amountCents - netAmountCents;
 
     return this.invoiceRepo.create({
-      saleId: originalInvoice.saleId,
+      saleId: originalInvoice.saleId ?? undefined,
       arcaConfigId: arcaConfig.id,
       type: 'credit_note',
       document_type: ncDocType,
@@ -222,7 +295,7 @@ export class InvoiceService {
     const taxAmountCents = input.amountCents - netAmountCents;
 
     return this.invoiceRepo.create({
-      saleId: originalInvoice.saleId,
+      saleId: originalInvoice.saleId ?? undefined,
       arcaConfigId: arcaConfig.id,
       type: 'debit_note',
       document_type: ndDocType,
@@ -263,7 +336,7 @@ export class InvoiceService {
     }
 
     const configData: ArcaConfigData = {
-      cuit: arcaConfig.cuit,
+      cuit: Number(arcaConfig.cuit),
       certificate: arcaConfig.certificate,
       privateKey: arcaConfig.privateKey,
       point_of_sale: arcaConfig.point_of_sale,
@@ -271,11 +344,34 @@ export class InvoiceService {
     };
 
     const cbteTipo = this.getCbteTipo(arcaConfig.responsabilidad_iva, invoice.type);
-    const nextNumber = await this.arcaService.getLastVoucherNumber(
-      configData,
-      arcaConfig.id,
-      cbteTipo,
-    );
+
+    let nextNumber: number;
+    try {
+      nextNumber = await this.arcaService.getLastVoucherNumber(
+        configData,
+        arcaConfig.id,
+        cbteTipo,
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown ARCA error';
+      const userMessage = translateArcaError(message, false);
+
+      this.logger.error(`ARCA getLastVoucher error for invoice ${id}: ${message}`);
+
+      await this.invoiceRepo.updateStatus(id, {
+        status: 'pending',
+        error_message: userMessage,
+        arca_response: JSON.stringify({ error: message }),
+        retry_count: invoice.retry_count + 1,
+      });
+
+      return {
+        invoiceId: id,
+        success: false,
+        error: userMessage,
+        isBusinessError: false,
+      };
+    }
 
     const number = nextNumber + 1;
 
@@ -283,6 +379,17 @@ export class InvoiceService {
     const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
 
     const docTipo = this.getDocTipo(arcaConfig.responsabilidad_iva, invoice.customer_tax_id);
+
+    const ivaDetail =
+      invoice.tax_amount_cents > 0
+        ? [
+            {
+              Id: 5,
+              BaseImp: invoice.net_amount_cents,
+              Importe: invoice.tax_amount_cents,
+            },
+          ]
+        : [];
 
     const voucher: IVoucher = {
       CantReg: 1,
@@ -303,6 +410,7 @@ export class InvoiceService {
       MonId: 'PES',
       MonCotiz: 1,
       CondicionIVAReceptorId: this.getCondicionIVAReceptorId(arcaConfig.responsabilidad_iva),
+      Iva: ivaDetail,
     };
 
     const result: EmitVoucherResult = await this.arcaService.emitVoucher(
@@ -311,14 +419,17 @@ export class InvoiceService {
       voucher,
     );
 
-    if (result.success) {
+    if (result.success && result.cae) {
+      const isoDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
       const qrData = this.buildQrData(
-        arcaConfig.cuit,
+        Number(arcaConfig.cuit),
         invoice.point_of_sale ?? arcaConfig.point_of_sale,
         cbteTipo,
         number,
         invoice.total_cents,
         invoice.customer_tax_id,
+        result.cae,
+        isoDate,
       );
 
       await this.invoiceRepo.updateStatus(id, {
@@ -328,6 +439,7 @@ export class InvoiceService {
         number: String(number),
         qr_data: qrData,
         arca_response: JSON.stringify(result.rawResponse),
+        error_message: null,
       });
 
       return {
@@ -339,14 +451,17 @@ export class InvoiceService {
     } else {
       await this.invoiceRepo.updateStatus(id, {
         status: result.isBusinessError ? 'error' : 'pending',
-        error_message: result.error,
+        error_message: translateArcaError(result.error, result.isBusinessError === true),
+        arca_response: result.rawResponse
+          ? JSON.stringify(result.rawResponse)
+          : JSON.stringify({ error: result.error ?? null }),
         retry_count: invoice.retry_count + 1,
       });
 
       return {
         invoiceId: id,
         success: false,
-        error: result.error,
+        error: translateArcaError(result.error, result.isBusinessError === true),
         isBusinessError: result.isBusinessError,
       };
     }
@@ -409,7 +524,19 @@ export class InvoiceService {
     return this.invoiceRepo.getMonthlyReport(year);
   }
 
-  generateFiscalPdfHtml(invoice: {
+  async getQrDataUrl(invoice: { qr_data: string | null }): Promise<string | null> {
+    if (!invoice.qr_data) {
+      return null;
+    }
+    const qrContent = `${ARCA_QR_BASE_URL}?p=${invoice.qr_data}`;
+    return QRCode.toDataURL(qrContent, {
+      errorCorrectionLevel: 'M',
+      margin: 1,
+      width: 300,
+    });
+  }
+
+  async generateFiscalPdfHtml(invoice: {
     document_type: string;
     number: string | null;
     point_of_sale: number | null;
@@ -425,7 +552,7 @@ export class InvoiceService {
     issued_at: number | null;
     type: string;
     reason?: string | null;
-  }): string {
+  }): Promise<string> {
     const total = (invoice.total_cents / 100).toFixed(2);
     const net = (invoice.net_amount_cents / 100).toFixed(2);
     const tax = (invoice.tax_amount_cents / 100).toFixed(2);
@@ -442,7 +569,7 @@ export class InvoiceService {
     const title = `${typeLabel} ${invoice.document_type}`;
 
     const qrImg = invoice.qr_data
-      ? `<img src="https://qr.afip.gob.ar/?qr=${invoice.qr_data}" alt="QR ARCA" style="width:120px;height:120px;" />`
+      ? `<img src="${await this.getQrDataUrl(invoice)}" alt="QR ARCA" style="width:120px;height:120px;" />`
       : '';
 
     return `<!DOCTYPE html>
@@ -579,26 +706,26 @@ export class InvoiceService {
     cbteNumber: number,
     totalCents: number,
     docNro: string,
+    cae: string,
+    fecha: string,
   ): string {
-    const now = new Date();
-    const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
-    const total = (totalCents / 100).toFixed(2);
+    const payload = {
+      ver: 1,
+      fecha,
+      cuit,
+      ptoVta: pointOfSale,
+      tipoCmp: cbteTipo,
+      nroCmp: cbteNumber,
+      importe: totalCents,
+      moneda: 'PES',
+      ctz: 1,
+      tipoDocRec: docNro.length === 11 ? 80 : 0,
+      nroDocRec: docNro.length === 11 ? parseInt(docNro, 10) : 0,
+      tipoCodAut: 'E',
+      codAut: parseInt(cae, 10),
+    };
 
-    const data = [
-      `ver:1`,
-      `fecha:${dateStr}`,
-      `cuit:${cuit}`,
-      `ptoVta:${String(pointOfSale).padStart(4, '0')}`,
-      `tipoCmp:${String(cbteTipo).padStart(3, '0')}`,
-      `nroCmp:${String(cbteNumber).padStart(8, '0')}`,
-      `importe:${total}`,
-      `moneda:PES`,
-      `ctz:1`,
-      `tipoDocRec:${docNro.length === 11 ? 80 : 99}`,
-      `nroDocRec:${docNro}`,
-    ];
-
-    return Buffer.from(data.join('&')).toString('base64');
+    return Buffer.from(JSON.stringify(payload)).toString('base64');
   }
 
   private getDocumentType(responsabilidadIVA: string, invoiceType: string = 'invoice'): string {

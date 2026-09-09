@@ -43,52 +43,66 @@ export class InvoiceRepository {
       where.reference_invoice_id = filters.reference_invoice_id;
     }
 
-    return this.prisma.invoice.findMany({
-      where,
-      include: {
-        sale: {
-          select: {
-            id: true,
-            ticket_number: true,
-            total_cents: true,
-            payment_method: true,
-            created_at: true,
+    return this.prisma.invoice
+      .findMany({
+        where,
+        include: {
+          sale: {
+            select: {
+              id: true,
+              ticket_number: true,
+              total_cents: true,
+              payment_method: true,
+              created_at: true,
+            },
+          },
+          arcaConfig: {
+            select: {
+              id: true,
+              cuit: true,
+              point_of_sale: true,
+              environment: true,
+            },
           },
         },
-        arcaConfig: {
-          select: {
-            id: true,
-            cuit: true,
-            point_of_sale: true,
-            environment: true,
-          },
-        },
-      },
-      orderBy: { created_at: 'desc' },
-    });
+        orderBy: { created_at: 'desc' },
+      })
+      .then((rows) =>
+        rows.map((row) =>
+          row.arcaConfig
+            ? { ...row, arcaConfig: { ...row.arcaConfig, cuit: Number(row.arcaConfig.cuit) } }
+            : row,
+        ),
+      );
   }
 
   async findById(id: string): Promise<Invoice | null> {
-    return this.prisma.invoice.findFirst({
-      where: { id, companyId: this.getCompanyId() },
-      include: {
-        sale: {
-          include: {
-            items: true,
-            user: { select: { id: true, name: true } },
+    return this.prisma.invoice
+      .findFirst({
+        where: { id, companyId: this.getCompanyId() },
+        include: {
+          sale: {
+            include: {
+              items: true,
+              user: { select: { id: true, name: true } },
+            },
+          },
+          arcaConfig: {
+            select: {
+              id: true,
+              cuit: true,
+              point_of_sale: true,
+              environment: true,
+              responsabilidad_iva: true,
+            },
           },
         },
-        arcaConfig: {
-          select: {
-            id: true,
-            cuit: true,
-            point_of_sale: true,
-            environment: true,
-            responsabilidad_iva: true,
-          },
-        },
-      },
-    });
+      })
+      .then((row) =>
+        row && row.arcaConfig
+          ? { ...row, arcaConfig: { ...row.arcaConfig, cuit: Number(row.arcaConfig.cuit) } }
+          : row,
+      );
   }
 
   async findBySaleId(saleId: string): Promise<Invoice | null> {
@@ -130,7 +144,7 @@ export class InvoiceRepository {
   }
 
   async create(data: {
-    saleId: string;
+    saleId?: string;
     arcaConfigId?: string;
     type: string;
     document_type: string;
@@ -173,6 +187,17 @@ export class InvoiceRepository {
     });
   }
 
+  async findGlobalDaily(from: number, to: number): Promise<Invoice | null> {
+    return this.prisma.invoice.findFirst({
+      where: {
+        companyId: this.getCompanyId(),
+        type: 'global',
+        created_at: { gte: from, lte: to },
+      },
+      orderBy: { created_at: 'desc' },
+    });
+  }
+
   async updateStatus(
     id: string,
     data: {
@@ -182,7 +207,7 @@ export class InvoiceRepository {
       number?: string;
       qr_data?: string;
       arca_response?: string;
-      error_message?: string;
+      error_message?: string | null;
       retry_count?: number;
       issued_at?: number;
     },

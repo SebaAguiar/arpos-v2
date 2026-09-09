@@ -30,6 +30,20 @@ const SaveArcaConfigSchema = z.object({
 });
 
 type SaveArcaConfigInput = z.infer<typeof SaveArcaConfigSchema>;
+type ConfigRow = {
+  id: string;
+  cuit: bigint;
+  point_of_sale: number;
+  environment: string;
+  responsabilidad_iva: string;
+  active: boolean;
+  created_at: number;
+  updated_at: number;
+};
+
+function serializeConfig(row: ConfigRow) {
+  return { ...row, cuit: Number(row.cuit) };
+}
 
 @Controller('arca')
 export class ArcaController {
@@ -56,7 +70,7 @@ export class ArcaController {
         updated_at: true,
       },
     });
-    return config;
+    return config ? serializeConfig(config) : null;
   }
 
   @Post('config')
@@ -94,7 +108,7 @@ export class ArcaController {
       });
 
       this.arcaService.invalidateClient(existing.id);
-      return updated;
+      return serializeConfig(updated);
     }
 
     const created = await this.prisma.arcaConfig.create({
@@ -122,7 +136,7 @@ export class ArcaController {
       },
     });
 
-    return created;
+    return serializeConfig(created);
   }
 
   @Delete('config')
@@ -189,7 +203,7 @@ export class ArcaController {
     return {
       id: arcaConfig.id,
       data: {
-        cuit: arcaConfig.cuit,
+        cuit: Number(arcaConfig.cuit),
         certificate: arcaConfig.certificate,
         privateKey: arcaConfig.privateKey,
         point_of_sale: arcaConfig.point_of_sale,

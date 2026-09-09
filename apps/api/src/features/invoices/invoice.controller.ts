@@ -6,12 +6,14 @@ import {
   HttpCode,
   HttpStatus,
   Header,
+  NotFoundException,
 } from '@nestjs/common';
 import { InvoiceService } from './invoice.service';
 import { InvoiceWorkerService } from './invoice-worker.service';
 import { ZodBody } from '../../core/validation/zod-body.decorator';
 import { ZodQuery } from '../../core/validation/zod-query.decorator';
 import { CreateInvoiceSchema } from './dto/create-invoice.schema';
+import { CreateGlobalDailySchema } from './dto/create-global-daily.schema';
 import { CreateCreditNoteSchema } from './dto/create-credit-note.schema';
 import { CreateDebitNoteSchema } from './dto/create-debit-note.schema';
 import { InvoiceFiltersSchema } from './dto/invoice-filters.schema';
@@ -85,10 +87,31 @@ export class InvoiceController {
     return this.invoiceService.generateFiscalPdfHtml(invoice);
   }
 
+  @Get(':id/qr')
+  @HttpCode(HttpStatus.OK)
+  @Header('Content-Type', 'text/plain')
+  async getQr(@Param('id') id: string) {
+    const invoice = await this.invoiceService.findOne(id);
+    const qr = await this.invoiceService.getQrDataUrl(invoice);
+    if (!qr) {
+      throw new NotFoundException('QR not available for this invoice');
+    }
+    return qr;
+  }
+
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@ZodBody(CreateInvoiceSchema) body: { saleId: string; arcaConfigId?: string }) {
     return this.invoiceService.createFromSale(body);
+  }
+
+  @Post('global-daily')
+  @HttpCode(HttpStatus.CREATED)
+  async createGlobalDaily(
+    @ZodBody(CreateGlobalDailySchema)
+    body: { from?: number; to?: number; arcaConfigId?: string },
+  ) {
+    return this.invoiceService.createGlobalDaily(body);
   }
 
   @Post('credit-note')

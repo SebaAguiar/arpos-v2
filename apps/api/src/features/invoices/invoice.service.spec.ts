@@ -64,6 +64,7 @@ describe('InvoiceService', () => {
       findAll: jest.fn(),
       findById: jest.fn(),
       findBySaleId: jest.fn(),
+      findGlobalDaily: jest.fn(),
       findCreditNotesForInvoice: jest.fn(),
       create: jest.fn(),
       updateStatus: jest.fn(),
@@ -77,7 +78,7 @@ describe('InvoiceService', () => {
       emitVoucher: jest.fn(),
     };
     mockPrisma = {
-      sale: { findUnique: jest.fn() },
+      sale: { findUnique: jest.fn(), findMany: jest.fn() },
       contact: { findUnique: jest.fn() },
       arcaConfig: { findUnique: jest.fn(), findFirst: jest.fn() },
     };
@@ -226,6 +227,80 @@ describe('InvoiceService', () => {
 
       expect(mockInvoiceRepo.create).toHaveBeenCalledWith(
         expect.objectContaining({ document_type: 'B' }),
+      );
+    });
+  });
+
+  describe('createGlobalDaily', () => {
+    it('rejects when there is no active ARCA configuration', async () => {
+      mockPrisma.arcaConfig.findFirst.mockResolvedValue(null);
+
+      await expect(service.createGlobalDaily({})).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+    });
+
+    it('rejects when a global invoice already exists for the period', async () => {
+      mockPrisma.arcaConfig.findFirst.mockResolvedValue(arcaConfig);
+      mockInvoiceRepo.findGlobalDaily.mockResolvedValue(buildInvoice());
+
+      await expect(service.createGlobalDaily({})).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+    });
+
+    it('rejects when there are no unbilled sales in the period', async () => {
+      mockPrisma.arcaConfig.findFirst.mockResolvedValue(arcaConfig);
+      mockInvoiceRepo.findGlobalDaily.mockResolvedValue(null);
+      mockPrisma.sale.findMany.mockResolvedValue([]);
+
+      await expect(service.createGlobalDaily({})).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+    });
+
+    it('creates a single global invoice that sums the unbilled sales', async () => {
+      mockPrisma.arcaConfig.findFirst.mockResolvedValue({
+        ...arcaConfig,
+        responsabilidad_iva: 'CF',
+      });
+      mockInvoiceRepo.findGlobalDaily.mockResolvedValue(null);
+      mockPrisma.sale.findMany.mockResolvedValue([
+        { total_cents: 12100 },
+        { total_cents: 6050 },
+      ]);
+      mockInvoiceRepo.create.mockResolvedValue(buildInvoice({ type: 'global' }));
+
+      await service.createGlobalDaily({});
+
+      expect(mockInvoiceRepo.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'global',
+          document_type: 'B',
+          customer_name: 'Consumidor Final',
+          customer_tax_id: '0',
+          total_cents: 18150,
+          net_amount_cents: 15000,
+          tax_amount_cents: 3150,
+        }),
+      );
+    });
+
+    it('passes explicit from/to when provided', async () => {
+      mockPrisma.arcaConfig.findFirst.mockResolvedValue(arcaConfig);
+      mockInvoiceRepo.findGlobalDaily.mockResolvedValue(null);
+      mockPrisma.sale.findMany.mockResolvedValue([{ total_cents: 1000 }]);
+
+      await service.createGlobalDaily({ from: 100, to: 200 });
+
+      expect(mockInvoiceRepo.findGlobalDaily).toHaveBeenCalledWith(100, 200);
+      expect(mockPrisma.sale.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            created_at: { gte: 100, lte: 200 },
+            invoice: { is: null },
+          }),
+        }),
       );
     });
   });
@@ -446,7 +521,7 @@ describe('InvoiceService', () => {
 
       const voucher = mockArcaService.emitVoucher.mock.calls[0]![2] as Record<
         string,
-        number | string
+        number | string | Array<Record<string, number>>
       >;
       expect(voucher).toMatchObject({
         CbteTipo: 1,
@@ -462,6 +537,9 @@ describe('InvoiceService', () => {
         MonId: 'PES',
         MonCotiz: 1,
       });
+      expect(voucher.Iva).toEqual([
+        { Id: 5, BaseImp: 10000, Importe: 2100 },
+      ]);
 
       expect(mockInvoiceRepo.updateStatus).toHaveBeenCalledWith(
         'inv-1',
@@ -471,7 +549,27 @@ describe('InvoiceService', () => {
           cae_expiration: '20260920',
           number: '45',
           qr_data: expect.any(String),
+          error_message: null,
         }),
+      );
+    });
+
+    it('clears a previous error_message when the retry succeeds', async () => {
+      mockInvoiceRepo.findById.mockResolvedValue(
+        buildInvoice({ error_message: 'ARCA rechazó el comprobante: Verifique importe' }),
+      );
+      mockArcaService.emitVoucher.mockResolvedValue({
+        success: true,
+        cae: '12345678901234',
+        caeExpiration: '20260920',
+        rawResponse: { Resultado: 'A' },
+      });
+
+      await service.emit('inv-1');
+
+      expect(mockInvoiceRepo.updateStatus).toHaveBeenCalledWith(
+        'inv-1',
+        expect.objectContaining({ status: 'issued', error_message: null }),
       );
     });
 
@@ -488,12 +586,17 @@ describe('InvoiceService', () => {
       expect(result).toEqual({
         invoiceId: 'inv-1',
         success: false,
-        error: '10014: Verifique importe',
+        error: 'ARCA rechazó el comprobante: Verifique importe',
         isBusinessError: true,
       });
       expect(mockInvoiceRepo.updateStatus).toHaveBeenCalledWith(
         'inv-1',
-        expect.objectContaining({ status: 'error', retry_count: 1 }),
+        expect.objectContaining({
+          status: 'error',
+          retry_count: 1,
+          error_message: 'ARCA rechazó el comprobante: Verifique importe',
+          arca_response: JSON.stringify({ error: '10014: Verifique importe' }),
+        }),
       );
     });
 
@@ -509,17 +612,22 @@ describe('InvoiceService', () => {
 
       expect(result.success).toBe(false);
       expect(result.isBusinessError).toBe(false);
+      expect(result.error).toBe(
+        'No se pudo conectar con ARCA. Verificá la conexión a internet e intentá de nuevo.',
+      );
       expect(mockInvoiceRepo.updateStatus).toHaveBeenCalledWith(
         'inv-1',
         expect.objectContaining({
           status: 'pending',
           retry_count: 1,
-          error_message: 'connect ETIMEDOUT',
+          error_message:
+            'No se pudo conectar con ARCA. Verificá la conexión a internet e intentá de nuevo.',
+          arca_response: JSON.stringify({ error: 'connect ETIMEDOUT' }),
         }),
       );
     });
 
-    it('builds the ARCA QR payload with padded ptoVta/tipoCmp/nroCmp', async () => {
+    it('builds the ARCA QR payload as a URL-safe base64 JSON with codAut', async () => {
       mockInvoiceRepo.findById.mockResolvedValue(buildInvoice());
       mockArcaService.emitVoucher.mockResolvedValue({
         success: true,
@@ -534,13 +642,31 @@ describe('InvoiceService', () => {
         qr_data?: string;
       };
       const decoded = Buffer.from(update.qr_data ?? '', 'base64').toString('utf8');
-      expect(decoded).toContain('cuit:30112223334');
-      expect(decoded).toContain('ptoVta:0001');
-      expect(decoded).toContain('tipoCmp:001');
-      expect(decoded).toContain('nroCmp:00000045');
-      expect(decoded).toContain('importe:121.00');
-      expect(decoded).toContain('moneda:PES');
-      expect(decoded).toContain('tipoDocRec:80');
+      const payload = JSON.parse(decoded) as {
+        ver: number;
+        cuit: number;
+        ptoVta: number;
+        tipoCmp: number;
+        nroCmp: number;
+        importe: number;
+        moneda: string;
+        ctz: number;
+        tipoDocRec: number;
+        nroDocRec: number;
+        tipoCodAut: string;
+        codAut: number;
+      };
+      expect(payload.ver).toBe(1);
+      expect(payload.cuit).toBe(30112223334);
+      expect(payload.ptoVta).toBe(1);
+      expect(payload.tipoCmp).toBe(1);
+      expect(payload.nroCmp).toBe(45);
+      expect(payload.importe).toBe(12100);
+      expect(payload.moneda).toBe('PES');
+      expect(payload.ctz).toBe(1);
+      expect(payload.tipoDocRec).toBe(80);
+      expect(payload.tipoCodAut).toBe('E');
+      expect(payload.codAut).toBe(12345678901234);
     });
   });
 
@@ -587,7 +713,7 @@ describe('InvoiceService', () => {
       expect(result.results[1]).toEqual({
         invoiceId: 'inv-b',
         success: false,
-        error: 'timeout',
+        error: 'No se pudo conectar con ARCA. Verificá la conexión a internet e intentá de nuevo.',
         isBusinessError: false,
       });
     });
@@ -605,7 +731,8 @@ describe('InvoiceService', () => {
       expect(result.results[0]).toEqual({
         invoiceId: 'inv-a',
         success: false,
-        error: 'boom',
+        error: 'Ocurrió un error al comunicarse con ARCA. Intentá nuevamente en unos minutos.',
+        isBusinessError: false,
       });
     });
   });
@@ -620,8 +747,8 @@ describe('InvoiceService', () => {
       issued_at: 1750000000,
     });
 
-    it('renders the fiscal header, totals, CAE and QR block', () => {
-      const html = service.generateFiscalPdfHtml({
+    it('renders the fiscal header, totals, CAE and QR block', async () => {
+      const html = await service.generateFiscalPdfHtml({
         document_type: issued.document_type,
         number: issued.number,
         point_of_sale: issued.point_of_sale,
@@ -633,7 +760,7 @@ describe('InvoiceService', () => {
         tax_amount_cents: issued.tax_amount_cents,
         cae: issued.cae,
         cae_expiration: issued.cae_expiration,
-        qr_data: issued.qr_data,
+        qr_data: 'dGVzdA==',
         issued_at: issued.issued_at,
         type: issued.type,
       });
@@ -642,14 +769,14 @@ describe('InvoiceService', () => {
       expect(html).toContain('N° 0001-45');
       expect(html).toContain('CAE:');
       expect(html).toContain('12345678901234');
-      expect(html).toContain('qr.afip.gob.ar');
+      expect(html).toContain('data:image/png;base64,');
       expect(html).toContain('121.00');
       expect(html).toContain('100.00');
       expect(html).toContain('Documento No Válido como Factura');
     });
 
-    it('marks credit notes with their reason and skips the QR block', () => {
-      const html = service.generateFiscalPdfHtml({
+    it('marks credit notes with their reason and skips the QR block', async () => {
+      const html = await service.generateFiscalPdfHtml({
         document_type: 'NC-A',
         number: null,
         point_of_sale: 1,
@@ -669,7 +796,7 @@ describe('InvoiceService', () => {
 
       expect(html).toContain('NOTA DE CREDITO');
       expect(html).toContain('Devolución por mercadería defectuosa');
-      expect(html).not.toContain('qr.afip.gob.ar');
+      expect(html).not.toContain('data:image/png;base64,');
     });
   });
 });
