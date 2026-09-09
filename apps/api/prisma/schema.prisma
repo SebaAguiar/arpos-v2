@@ -487,9 +487,9 @@ model TransferItem {
 }
 
 model Invoice {
-  id                   String  @id @default(cuid())
+  id                   String   @id @default(cuid())
   companyId            String
-  saleId               String  @unique
+  saleId               String?  @unique
   arcaConfigId         String?
   type                 String
   document_type        String  @default("B")
@@ -516,7 +516,7 @@ model Invoice {
   reason               String?
 
   company    Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  sale       Sale        @relation(fields: [saleId], references: [id])
+  sale       Sale?       @relation(fields: [saleId], references: [id])
   arcaConfig ArcaConfig? @relation(fields: [arcaConfigId], references: [id], onDelete: SetNull)
 
   @@unique([companyId, document_type, point_of_sale, number])
@@ -584,7 +584,7 @@ model ArcaConfig {
   id                  String  @id @default(cuid())
   companyId           String
   storeId             String? @unique
-  cuit                Int
+  cuit                BigInt
   certificate         String
   privateKey          String
   point_of_sale       Int     @default(1)
