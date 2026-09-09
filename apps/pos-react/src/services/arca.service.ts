@@ -23,7 +23,7 @@ export interface SaveArcaConfigInput {
 export interface ApiInvoice {
   id: string;
   companyId: string;
-  saleId: string;
+  saleId: string | null;
   arcaConfigId: string | null;
   type: string;
   document_type: string;
@@ -152,6 +152,14 @@ export const ArcaService = {
     arcaConfigId?: string;
   }): Promise<ApiInvoice> {
     return apiClient.post<ApiInvoice>("/invoices", input);
+  },
+
+  async createGlobalDaily(input?: {
+    from?: number;
+    to?: number;
+    arcaConfigId?: string;
+  }): Promise<ApiInvoice> {
+    return apiClient.post<ApiInvoice>("/invoices/global-daily", input ?? {});
   },
 
   async createCreditNote(input: CreateCreditNoteInput): Promise<ApiInvoice> {

@@ -5,8 +5,10 @@ import {
   DownloadIcon,
   CheckCircledIcon,
   CrossCircledIcon,
+  LockClosedIcon,
 } from "@radix-ui/react-icons";
 import { useUpdaterStore } from "@/stores/updater.store";
+import { useAuthStore } from "@/stores/auth.store";
 import { getAppVersion } from "@/lib/tauri";
 
 export function UpdateManager() {
@@ -21,6 +23,7 @@ export function UpdateManager() {
     clearError,
   } = useUpdaterStore();
 
+  const licensePayload = useAuthStore((s) => s.licensePayload);
   const [currentVersion, setCurrentVersion] = useState<string | null>(null);
 
   useEffect(() => {
@@ -63,7 +66,7 @@ export function UpdateManager() {
             size="1"
             variant="soft"
             disabled={checking || !currentVersion}
-            onClick={() => checkForUpdates(currentVersion ?? "")}
+            onClick={() => checkForUpdates(currentVersion ?? "", licensePayload?.planSlug)}
           >
             <ReloadIcon width={12} height={12} />
             {checking ? "Buscando..." : "Buscar actualizaciones"}
@@ -72,7 +75,23 @@ export function UpdateManager() {
 
         {updateInfo && (
           <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "8px" }}>
-            {updateInfo.available ? (
+            {updateInfo.requires_license ? (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "10px 12px",
+                  backgroundColor: "var(--bg-surface-hover)",
+                  borderRadius: "6px",
+                }}
+              >
+                <LockClosedIcon width={14} height={14} color="var(--amber-9)" />
+                <Text size="2" color="amber" style={{ flex: 1 }}>
+                  Necesitás una licencia activa para recibir actualizaciones.
+                </Text>
+              </div>
+            ) : updateInfo.available ? (
               <>
                 <Badge color="green" variant="soft" size="1">
                   <DownloadIcon width={12} height={12} />

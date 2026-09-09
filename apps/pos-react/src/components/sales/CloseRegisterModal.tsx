@@ -5,9 +5,11 @@ import {
   LockClosedIcon,
   PlusCircledIcon,
   MinusCircledIcon,
+  FileTextIcon,
 } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
 import { useCashRegisterStore } from "@/stores/cash-register.store";
+import { useArcaStore } from "@/stores/arca.store";
 
 export function CloseRegisterModal() {
   const close = useDialogStore((s) => s.closeCashControl);
@@ -17,11 +19,14 @@ export function CloseRegisterModal() {
   const addMovement = useCashRegisterStore((s) => s.addMovement);
   const error = useCashRegisterStore((s) => s.error);
   const clearError = useCashRegisterStore((s) => s.clearError);
+  const createGlobalDaily = useArcaStore((s) => s.createGlobalDaily);
 
   const [closingAmount, setClosingAmount] = useState("");
   const [movementType, setMovementType] = useState<"INCOME" | "EXPENSE">("INCOME");
   const [movementAmount, setMovementAmount] = useState("");
   const [movementDesc, setMovementDesc] = useState("");
+  const [isFacturing, setIsFacturing] = useState(false);
+  const [factureMsg, setFactureMsg] = useState<string | null>(null);
 
   if (!currentShift) {
     close();
@@ -50,6 +55,24 @@ export function CloseRegisterModal() {
     await addMovement(movementType, value, movementDesc.trim());
     setMovementAmount("");
     setMovementDesc("");
+  };
+
+  const handleFactureDay = async () => {
+    setIsFacturing(true);
+    setFactureMsg(null);
+    try {
+      const invoice = await createGlobalDaily();
+      setFactureMsg(
+        `Factura global creada por ${(invoice.total_cents / 100).toLocaleString("es-AR", {
+          minimumFractionDigits: 2,
+        })} (${invoice.document_type}) — queda pendiente de emisión.`,
+      );
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "No se pudo facturar el día";
+      setFactureMsg(message);
+    } finally {
+      setIsFacturing(false);
+    }
   };
 
   const diffColor = diff === null ? "gray" : diff === 0 ? "green" : diff > 0 ? "blue" : "red";
@@ -226,6 +249,45 @@ export function CloseRegisterModal() {
             <LockClosedIcon width={16} height={16} />
             {loading ? "Cerrando..." : "Cerrar caja"}
           </button>
+
+          <div
+            style={{
+              padding: "10px 12px",
+              backgroundColor: "var(--bg-surface-hover)",
+              borderRadius: "6px",
+              marginBottom: "16px",
+            }}
+          >
+            <Text size="2" weight="bold" style={{ display: "block", marginBottom: "6px" }}>
+              Facturación del día
+            </Text>
+            <button
+              onClick={handleFactureDay}
+              disabled={isFacturing || currentShift.status === "CLOSED"}
+              style={{
+                width: "100%",
+                padding: "10px",
+                backgroundColor: "transparent",
+                color: "var(--accent)",
+                border: "1.5px solid var(--accent)",
+                borderRadius: "6px",
+                cursor: isFacturing || currentShift.status === "CLOSED" ? "not-allowed" : "pointer",
+                opacity: isFacturing || currentShift.status === "CLOSED" ? 0.6 : 1,
+                fontWeight: 600,
+                fontSize: "13px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "6px",
+              }}
+            >
+              <FileTextIcon width={15} height={15} />
+              {isFacturing ? "Facturando..." : "Facturar ventas del día sin facturar"}
+            </button>
+            {factureMsg && (
+              <Text size="2" style={{ display: "block", marginTop: "8px" }}>{factureMsg}</Text>
+            )}
+          </div>
 
           <div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px" }}>
             <Text size="3" weight="bold" style={{ display: "block", marginBottom: "8px" }}>

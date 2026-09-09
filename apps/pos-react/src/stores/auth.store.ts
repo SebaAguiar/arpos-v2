@@ -69,6 +69,22 @@ async function mintApiAccessToken(): Promise<AuthUser | null> {
   }
 }
 
+// Offline-first session resolution: prefer the license bridge when a signed
+// license token exists, otherwise fall back to a local identity session (free
+// plan) so the core POS always loads data. The license only gates launcher
+// updates and paid features — it never blocks the core.
+async function resolveApiSession(email: string): Promise<AuthUser | null> {
+  const licenseApiUser = await mintApiAccessToken();
+  if (licenseApiUser) return licenseApiUser;
+  try {
+    const { token, user } = await AuthRepository.loginLocal(email);
+    setAuthToken(token);
+    return user;
+  } catch {
+    return null;
+  }
+}
+
 function buildLicenseData(
   payload: LicensePayload,
   status: LicenseStatus,
@@ -138,8 +154,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (licenseData) cacheLicense(licenseData);
 
     // Bridge the license into an API session so data endpoints stop returning
-    // 401. Best-effort: if the sidecar is unreachable the POS still enters.
-    const apiUser = await mintApiAccessToken();
+    // 401, falling back to a local free-tier identity when no license exists.
+    // Best-effort: if the sidecar is unreachable the POS still enters.
+    const apiUser = await resolveApiSession(email);
     const fallbackUser: AuthUser = {
       id: payload?.sub ?? email,
       email: payload?.email ?? email,

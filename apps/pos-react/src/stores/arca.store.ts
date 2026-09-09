@@ -40,6 +40,11 @@ interface ArcaState {
     document_type?: string;
   }) => Promise<void>;
   createInvoice: (saleId: string) => Promise<ApiInvoice>;
+  createGlobalDaily: (input?: {
+    from?: number;
+    to?: number;
+    arcaConfigId?: string;
+  }) => Promise<ApiInvoice>;
   createCreditNote: (input: {
     invoiceId: string;
     reason: string;
@@ -134,6 +139,20 @@ export const useArcaStore = create<ArcaState>((set, get) => ({
       return invoice;
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to create invoice";
+      set({ error: message });
+      throw error;
+    }
+  },
+
+  createGlobalDaily: async (input) => {
+    set({ error: null });
+    try {
+      const invoice = await ArcaService.createGlobalDaily(input);
+      const { invoices } = get();
+      set({ invoices: [invoice, ...invoices] });
+      return invoice;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to create daily global invoice";
       set({ error: message });
       throw error;
     }

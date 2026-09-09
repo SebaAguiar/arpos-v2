@@ -1,10 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import { Text, TextField, Card, Select, Badge, Button } from "@radix-ui/themes";
 import {
   CheckIcon,
   ExclamationTriangleIcon,
   Cross2Icon,
   ReloadIcon,
+  InfoCircledIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
 } from "@radix-ui/react-icons";
 import { useArcaStore } from "@/stores/arca.store";
 
@@ -32,6 +35,231 @@ const RESPONSABILIDADES_IVA = [
   { value: "EX", label: "Exento" },
 ];
 
+type HelpTab = "clave" | "cert";
+
+function HelpStep({
+  index,
+  title,
+  children,
+}: {
+  index: number;
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <div style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
+      <div
+        style={{
+          flexShrink: 0,
+          width: "24px",
+          height: "24px",
+          borderRadius: "50%",
+          backgroundColor: "var(--accent)",
+          color: "#fff",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "12px",
+          fontWeight: 700,
+          marginTop: "2px",
+        }}
+      >
+        {index}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div
+          style={{
+            fontWeight: 600,
+            color: "var(--text-primary)",
+            marginBottom: "2px",
+            fontSize: "13px",
+          }}
+        >
+          {title}
+        </div>
+        <div>{children}</div>
+      </div>
+    </div>
+  );
+}
+
+function Code({ children }: { children: ReactNode }) {
+  return (
+    <code
+      style={{
+        background: "var(--gray-a3)",
+        padding: "1px 5px",
+        borderRadius: "4px",
+        whiteSpace: "nowrap",
+        fontFamily: "monospace",
+        fontSize: "12px",
+      }}
+    >
+      {children}
+    </code>
+  );
+}
+
+function HelpPanel({ tab, onTabChange }: { tab: HelpTab; onTabChange: (t: HelpTab) => void }) {
+  const tabButtonStyle = (active: boolean): React.CSSProperties => ({
+    flex: 1,
+    padding: "10px 12px",
+    background: active ? "var(--accent-subtle)" : "transparent",
+    border: "none",
+    borderBottom: active ? "2px solid var(--accent)" : "2px solid transparent",
+    cursor: "pointer",
+    color: active ? "var(--accent)" : "var(--text-muted)",
+    fontSize: "13px",
+    fontWeight: 600,
+  });
+
+  const stepListStyle: React.CSSProperties = {
+    display: "flex",
+    flexDirection: "column",
+    gap: "14px",
+    listStyle: "none",
+    margin: 0,
+    padding: 0,
+  };
+
+  return (
+    <div
+      style={{
+        marginTop: "10px",
+        borderRadius: "8px",
+        border: "1px solid rgba(229, 77, 46, 0.25)",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          backgroundColor: "rgba(229, 77, 46, 0.05)",
+        }}
+      >
+        <button
+          onClick={() => onTabChange("clave")}
+          style={tabButtonStyle(tab === "clave")}
+        >
+          1. Clave Fiscal
+        </button>
+        <button
+          onClick={() => onTabChange("cert")}
+          style={tabButtonStyle(tab === "cert")}
+        >
+          2. Certificado (WSASS)
+        </button>
+      </div>
+
+      <div
+        style={{
+          padding: "16px",
+          fontSize: "13px",
+          lineHeight: 1.6,
+          color: "var(--text-secondary)",
+          maxHeight: "400px",
+          overflowY: "auto",
+        }}
+      >
+        {tab === "clave" ? (
+          <div style={stepListStyle}>
+            <HelpStep index={1} title="Entrá al portal de ARCA">
+              Andá a{" "}
+              <a
+                href="https://auth.afip.gob.ar/"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "var(--accent)", textDecoration: "underline" }}
+              >
+                auth.afip.gob.ar
+              </a>{" "}
+              y elegí <strong>Crear cuenta</strong>.
+            </HelpStep>
+            <HelpStep index={2} title="Validá tu identidad">
+              Ingresá tu <strong>CUIT</strong> y completá tus datos personales (DNI, correo
+              electrónico, teléfono). ARCA te envía códigos de validación por correo y SMS.
+            </HelpStep>
+            <HelpStep index={3} title="Creá tu clave">
+              Mínimo 8 caracteres, con mayúsculas, minúsculas y números.
+            </HelpStep>
+            <HelpStep index={4} title="Subí el nivel de seguridad">
+              Para adherir servicios (WSASS, Facturación Electrónica) el nivel suele tener que ser{" "}
+              <strong>3 o superior</strong>: validá tu identidad con la <strong>cámara web</strong>{" "}
+              (biometría) o desde el <strong>homebanking</strong> de tu banco.
+            </HelpStep>
+            <HelpStep index={5} title="Adherí el servicio de Facturación Electrónica">
+              Desde <em>Administrar mis servicios</em> habilitá{" "}
+              <strong>"Facturación Electrónica"</strong> (ex "Comprobantes en línea"). Sin ese alta,
+              ARCA rechaza el certificado.
+            </HelpStep>
+            <HelpStep index={6} title="Importante">
+              Arcom <strong>nunca almacena tu Clave Fiscal</strong> ni tu clave privada: ambas las usás
+              vos en el portal de ARCA como parte del trámite, y quedan solo en tu PC.
+            </HelpStep>
+          </div>
+        ) : (
+          <div style={stepListStyle}>
+            <HelpStep index={1} title="CUIT de prueba">
+              Usá{" "}
+              <Code>20-11111111-2</Code>{" "}
+              (el CUIT de referencia que ARCA habilita para testing). En producción va el CUIT real del
+              comercio.
+            </HelpStep>
+            <HelpStep index={2} title="Generá la clave privada y el CSR">
+              Con OpenSSL en tu PC. En <Code>serialNumber</Code> poné{" "}
+              <strong>tu CUIT de persona física</strong> (ARCA emite el certificado de testing siempre a
+              tu nombre):
+              <pre
+                style={{
+                  background: "var(--gray-a3)",
+                  padding: "8px 10px",
+                  borderRadius: "6px",
+                  overflowX: "auto",
+                  fontFamily: "monospace",
+                  fontSize: "12px",
+                  margin: "6px 0 0",
+                  lineHeight: 1.5,
+                }}
+              >
+{`openssl req -new -newkey rsa:2048 -nodes \\
+  -keyout private.key -out cert.csr \\
+  -subj "/C=AR/O=MiEmpresa/CN=ArcomPOS/serialNumber=CUIT 20XXXXXXXXX"`}
+              </pre>
+            </HelpStep>
+            <HelpStep index={3} title="Adherite al WSASS">
+              Entrá a ARCA con tu <strong>Clave Fiscal de persona física</strong> y adherite a la
+              aplicación <strong>WSASS</strong> (Autogestión de Certificados Homologación) desde el
+              Administrador de Relaciones.
+            </HelpStep>
+            <HelpStep index={4} title="Creá el certificado">
+              En WSASS: <em>Nuevo Certificado</em> → pegá el contenido de <Code>cert.csr</Code>{" "}
+              (formato PKCS#10) → <em>Crear DN y obtener certificado</em>. ARCA te devuelve el
+              certificado <Code>.pem</Code> (empieza con <code>-----BEGIN CERTIFICATE-----</code>).
+            </HelpStep>
+            <HelpStep index={5} title="Autorizá el certificado (paso que más se olvida)">
+              En WSASS autorizá el certificado para el servicio <Code>wsfe</Code> indicando como{" "}
+              <strong>CUIT representada</strong> la <Code>20-11111111-2</Code>. Sin esto ARCA responde{" "}
+              <em>"Computador no autorizado a acceder al servicio"</em>.
+            </HelpStep>
+            <HelpStep index={6} title="Cargá los archivos en Arcom">
+              El certificado va en el campo <strong>Certificado (.cert)</strong> — su contenido empieza
+              con <Code>-----BEGIN CERTIFICATE-----</Code> — y la key en <strong>Clave Privada (.key)</strong>{" "}
+              (<Code>-----BEGIN PRIVATE KEY-----</Code>).
+            </HelpStep>
+            <HelpStep index={7} title="Punto de venta y ambiente">
+              En homologación usá <Code>1</Code> y el ambiente <em>Homologación</em>. En producción el
+              punto de venta debe estar habilitado en ARCA y el certificado debe ser el real.
+            </HelpStep>
+            <HelpStep index={8} title="Condición IVA">
+              Elegí la condición fiscal del comercio (ej. <em>Responsable Inscripto</em>).
+            </HelpStep>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function ArcaConfigForm() {
   const {
     config,
@@ -55,6 +283,8 @@ export function ArcaConfigForm() {
   const [touched, setTouched] = useState<Partial<Record<string, boolean>>>({});
   const [justSaved, setJustSaved] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [helpTab, setHelpTab] = useState<HelpTab>("clave");
   const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -169,17 +399,47 @@ export function ArcaConfigForm() {
         <Text size="3" weight="bold">
           Facturación Electrónica — ARCA
         </Text>
-        {config ? (
-          <Badge color="green" variant="soft" size="2">
-            <CheckIcon width={12} height={12} />
-            &nbsp;Configurado
-          </Badge>
-        ) : (
-          <Badge color="orange" variant="soft" size="2">
-            <ExclamationTriangleIcon width={12} height={12} />
-            &nbsp;Sin configurar
-          </Badge>
-        )}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {config ? (
+            <Badge color="green" variant="soft" size="2">
+              <CheckIcon width={12} height={12} />
+              &nbsp;Configurado
+            </Badge>
+          ) : (
+            <Badge color="orange" variant="soft" size="2">
+              <ExclamationTriangleIcon width={12} height={12} />
+              &nbsp;Sin configurar
+            </Badge>
+          )}
+        </div>
+      </div>
+
+      <div style={{ marginBottom: "16px" }}>
+        <button
+          onClick={() => setShowHelp((v) => !v)}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            color: "var(--text-muted)",
+            fontSize: "13px",
+            fontWeight: 600,
+            padding: "4px 0",
+          }}
+        >
+          <InfoCircledIcon width={14} height={14} />
+          ¿Cómo obtengo el certificado y la clave?
+          {showHelp ? (
+            <ChevronUpIcon width={14} height={14} />
+          ) : (
+            <ChevronDownIcon width={14} height={14} />
+          )}
+        </button>
+
+        {showHelp && <HelpPanel tab={helpTab} onTabChange={setHelpTab} />}
       </div>
 
       {error && (
@@ -231,7 +491,7 @@ export function ArcaConfigForm() {
               const raw = e.target.value.replace(/[^\d]/g, "").slice(0, 11);
               const formatted = raw
                 .replace(/^(\d{2})(\d)/, "$1-$2")
-                .replace(/-(\d{4})(\d)/, "-$1-$2");
+                .replace(/-(\d{8})(\d)/, "-$1-$2");
               setField("cuit", formatted);
             }}
             onBlur={() => markTouched("cuit")}

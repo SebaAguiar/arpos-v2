@@ -38,6 +38,14 @@ export const AuthRepository = {
     };
   },
 
+  async loginLocal(email?: string, name?: string): Promise<LoginResult> {
+    const response = await AuthService.loginLocal(email, name);
+    return {
+      token: response.access_token,
+      user: mapUser(response.user),
+    };
+  },
+
   async getProfile(): Promise<AuthUser> {
     const user = await AuthService.getProfile();
     return mapUser(user);

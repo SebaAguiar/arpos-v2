@@ -127,9 +127,44 @@ async function request<T>(
   return JSON.parse(text) as T;
 }
 
+async function requestText(path: string, retried = false): Promise<string> {
+  const url = `${API_BASE}${path}`;
+  const headers: Record<string, string> = {};
+
+  const token = getAuthToken();
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const res = await fetch(url, {
+    headers,
+    cache: "no-store",
+  });
+
+  if (res.status === 401 && !retried && path !== "/auth/license") {
+    const minted = await tryMintLicenseSession();
+    if (minted) {
+      return requestText(path, true);
+    }
+  }
+
+  if (res.status === 401) {
+    clearAuthToken();
+    throw new ApiError(401, "Sesión expirada");
+  }
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => res.statusText);
+    throw new ApiError(res.status, text);
+  }
+
+  return res.text();
+}
+
 export const apiClient = {
   get: <T>(path: string) => request<T>("GET", path),
   post: <T>(path: string, body?: unknown) => request<T>("POST", path, body),
   patch: <T>(path: string, body?: unknown) => request<T>("PATCH", path, body),
   delete: <T>(path: string) => request<T>("DELETE", path),
+  getText: (path: string) => requestText(path),
 };

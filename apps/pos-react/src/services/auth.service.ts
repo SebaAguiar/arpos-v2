@@ -23,6 +23,15 @@ export const AuthService = {
     return apiClient.post<ApiLoginResponse>("/auth/license", { licenseToken });
   },
 
+  // Offline-first local session (free plan): resolve the device identity
+  // against the local sidecar without any dependency on the license panel.
+  async loginLocal(email?: string, name?: string): Promise<ApiLoginResponse> {
+    return apiClient.post<ApiLoginResponse>("/auth/local", {
+      ...(email ? { email } : {}),
+      ...(name ? { name } : {}),
+    });
+  },
+
   async getProfile(): Promise<ApiAuthUser> {
     return apiClient.get<ApiAuthUser>("/auth/me");
   },

@@ -9,7 +9,7 @@ interface UpdaterState {
   downloadedTo: string | null;
   error: string | null;
 
-  checkForUpdates: (currentVersion: string) => Promise<void>;
+  checkForUpdates: (currentVersion: string, planSlug?: string | null) => Promise<void>;
   downloadUpdate: () => Promise<void>;
   clearError: () => void;
 }
@@ -21,10 +21,10 @@ export const useUpdaterStore = create<UpdaterState>()((set, get) => ({
   downloadedTo: null,
   error: null,
 
-  checkForUpdates: async (currentVersion: string) => {
+  checkForUpdates: async (currentVersion: string, planSlug?: string | null) => {
     set({ checking: true, error: null, downloadedTo: null });
     try {
-      const updateInfo = await UpdaterRepository.checkForUpdates(currentVersion);
+      const updateInfo = await UpdaterRepository.checkForUpdates(currentVersion, planSlug);
       set({ updateInfo, checking: false });
     } catch (e) {
       set({ error: String(e), checking: false });
