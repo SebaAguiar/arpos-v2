@@ -98,6 +98,39 @@ export class AuthService {
     });
   }
 
+  // Offline-first local session: resolve a device user bound to the local
+  // company without any dependency on the admin license panel. The provided
+  // email is best-effort display identity; when absent we fall back to the
+  // local company's default device identity. Grants a free-tier session that
+  // serves the full core POS; the license only gates launcher updates and paid
+  // features downstream.
+  async loginWithLocalIdentity(
+    email?: string,
+    name?: string,
+  ): Promise<ReturnType<AuthService['login']>> {
+    const companyId = this.tenantContext.getCompanyId();
+    if (!companyId) {
+      throw new UnauthorizedException('Local workspace not configured');
+    }
+
+    const resolvedEmail = email ?? 'device@local';
+    const resolvedName = name ?? 'Dispositivo local';
+
+    const user = await this.authRepo.findOrCreateFromLicense(
+      resolvedEmail,
+      resolvedName,
+      companyId,
+    );
+
+    return this.login({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      companyId: user.companyId,
+    });
+  }
+
   private async verifyLicenseToken(
     token: string,
   ): Promise<{ email: string; name: string } | null> {

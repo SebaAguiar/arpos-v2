@@ -122,4 +122,62 @@ describe('AuthService', () => {
       UnauthorizedException,
     );
   });
+
+  it('mints a free local session without any license', async () => {
+    mockRepo.findOrCreateFromLicense.mockResolvedValue({
+      id: 'device-1',
+      email: 'admin@local.test',
+      name: 'Device Admin',
+      role: 'admin',
+      companyId: 'company-1',
+    });
+
+    const result = await service.loginWithLocalIdentity(
+      'admin@local.test',
+      'Device Admin',
+    );
+
+    expect(mockRepo.findOrCreateFromLicense).toHaveBeenCalledWith(
+      'admin@local.test',
+      'Device Admin',
+      'company-1',
+    );
+    expect(mockJwt.sign).toHaveBeenCalledWith({ sub: 'device-1', companyId: 'company-1' });
+    expect(result).toEqual({
+      access_token: 'minted-session-token',
+      user: {
+        id: 'device-1',
+        email: 'admin@local.test',
+        name: 'Device Admin',
+        role: 'admin',
+      },
+    });
+  });
+
+  it('falls back to the default device identity when no email is given', async () => {
+    mockRepo.findOrCreateFromLicense.mockResolvedValue({
+      id: 'device-1',
+      email: 'device@local',
+      name: 'Dispositivo local',
+      role: 'cashier',
+      companyId: 'company-1',
+    });
+
+    const result = await service.loginWithLocalIdentity();
+
+    expect(mockRepo.findOrCreateFromLicense).toHaveBeenCalledWith(
+      'device@local',
+      'Dispositivo local',
+      'company-1',
+    );
+    expect(result.access_token).toBe('minted-session-token');
+  });
+
+  it('rejects a local session when the workspace has no company yet', async () => {
+    mockTenant.getCompanyId.mockReturnValue('');
+
+    await expect(service.loginWithLocalIdentity()).rejects.toBeInstanceOf(
+      UnauthorizedException,
+    );
+  });
 });

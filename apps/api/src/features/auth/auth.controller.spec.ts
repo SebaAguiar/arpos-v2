@@ -9,6 +9,8 @@ describe('AuthController', () => {
   const mockService = {
     validateUser: jest.fn(),
     login: jest.fn(),
+    loginWithLicense: jest.fn(),
+    loginWithLocalIdentity: jest.fn(),
     getProfile: jest.fn(),
   };
 
@@ -43,6 +45,18 @@ describe('AuthController', () => {
 
       const result = await controller.login({ email: 'wrong@arcom.com', password: 'wrong' });
       expect(result).toEqual({ message: 'Invalid credentials', statusCode: 401 });
+    });
+  });
+
+  describe('loginWithLocal', () => {
+    it('should mint a free local session via the offline identity bridge', async () => {
+      const user = { id: 'u1', email: 'admin@arcom.com', name: 'Admin', role: 'cashier', companyId: 'c1' };
+      mockService.loginWithLocalIdentity.mockResolvedValue({ access_token: 'token-local', user });
+
+      const result = await controller.loginWithLocal({ email: 'admin@arcom.com', name: 'Admin' });
+      expect(result).toHaveProperty('access_token');
+      expect(result).toHaveProperty('user');
+      expect(service.loginWithLocalIdentity).toHaveBeenCalledWith('admin@arcom.com', 'Admin');
     });
   });
 

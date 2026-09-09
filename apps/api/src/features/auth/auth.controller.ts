@@ -4,6 +4,7 @@ import { Public } from './guards/public.decorator';
 import { ZodBody } from '../../core/validation/zod-body.decorator';
 import { LoginSchema, LoginInput } from './dto/login.schema';
 import { LicenseLoginSchema, LicenseLoginInput } from './dto/license-login.schema';
+import { LocalSessionSchema, LocalSessionInput } from './dto/local-session.schema';
 
 @Controller('auth')
 export class AuthController {
@@ -25,6 +26,14 @@ export class AuthController {
   @Post('license')
   async loginWithLicense(@ZodBody(LicenseLoginSchema) input: LicenseLoginInput) {
     return this.authService.loginWithLicense(input.licenseToken);
+  }
+
+  // Offline-first identical session: the POS resolves its device identity
+  // locally (free plan) without any dependency on the admin license panel.
+  @Public()
+  @Post('local')
+  async loginWithLocal(@ZodBody(LocalSessionSchema) input: LocalSessionInput) {
+    return this.authService.loginWithLocalIdentity(input.email, input.name);
   }
 
   @Get('me')
