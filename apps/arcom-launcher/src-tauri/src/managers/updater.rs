@@ -7,6 +7,7 @@ pub struct UpdateInfo {
     pub notes: Option<String>,
     pub published_at: Option<String>,
     pub download_url: Option<String>,
+    pub requires_license: bool,
 }
 
 pub struct UpdaterManager {
@@ -23,7 +24,28 @@ impl UpdaterManager {
         Self { client }
     }
 
-    pub async fn check_for_updates(&self, current_version: &str) -> Result<UpdateInfo, String> {
+    pub async fn check_for_updates(
+        &self,
+        current_version: &str,
+        plan_slug: Option<&str>,
+    ) -> Result<UpdateInfo, String> {
+        // Free-tier and unknown licenses never receive updates; the launcher
+        // reports the license gate so the UI can surface the upgrade CTA.
+        let license_gated = match plan_slug {
+            Some(slug) => slug == "free" || slug.is_empty(),
+            None => true,
+        };
+        if license_gated {
+            return Ok(UpdateInfo {
+                available: false,
+                version: current_version.to_string(),
+                notes: None,
+                published_at: None,
+                download_url: None,
+                requires_license: true,
+            });
+        }
+
         let url = format!(
             "https://api.github.com/repos/{}/releases/latest",
             get_repo_owner_name()
@@ -44,6 +66,7 @@ impl UpdaterManager {
                 notes: None,
                 published_at: None,
                 download_url: None,
+                requires_license: false,
             });
         }
 
@@ -72,6 +95,7 @@ impl UpdaterManager {
             notes: release.body,
             published_at: release.published_at,
             download_url,
+            requires_license: false,
         })
     }
 

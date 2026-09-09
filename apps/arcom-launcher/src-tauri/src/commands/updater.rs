@@ -6,8 +6,11 @@ use crate::managers::updater::{UpdateInfo, UpdaterManager};
 pub async fn check_for_updates(
     state: State<'_, UpdaterManager>,
     current_version: String,
+    plan_slug: Option<String>,
 ) -> Result<UpdateInfo, String> {
-    state.check_for_updates(&current_version).await
+    state
+        .check_for_updates(&current_version, plan_slug.as_deref())
+        .await
 }
 
 #[tauri::command]
