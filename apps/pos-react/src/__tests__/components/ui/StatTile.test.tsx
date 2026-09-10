@@ -36,4 +36,12 @@ describe("StatTile", () => {
     renderWithTheme(<StatTile label="Egresos" value={-5} size="3" />);
     expect(screen.getByText("-5")).toHaveStyle("margin-top: 2px");
   });
+
+  it("uses the large padding and radius for size 5", () => {
+    renderWithTheme(<StatTile label="Ventas" value="$120" size="5" variant="hover" />);
+    const value = screen.getByText("$120");
+    const container = value.parentElement;
+    expect(container).toHaveAttribute("style", expect.stringContaining("14px"));
+    expect(container).toHaveAttribute("style", expect.stringContaining("8px"));
+  });
 });

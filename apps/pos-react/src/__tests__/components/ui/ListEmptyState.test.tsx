@@ -19,6 +19,14 @@ describe("ListEmptyState", () => {
     expect(document.querySelector("svg")).toBeInTheDocument();
   });
 
+  it("renders the optional title with the message", () => {
+    renderWithTheme(
+      <ListEmptyState title="No hay turnos cerrados" message="Los turnos cerrados aparecerán aquí" />,
+    );
+    expect(screen.getByText("No hay turnos cerrados")).toBeInTheDocument();
+    expect(screen.getByText("Los turnos cerrados aparecerán aquí")).toBeInTheDocument();
+  });
+
   it("centers and pads the container", () => {
     renderWithTheme(<ListEmptyState message="No hay sucursales registradas" />);
     const message = screen.getByText("No hay sucursales registradas");
