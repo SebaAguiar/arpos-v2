@@ -12,6 +12,7 @@ import {
 import { useBackupStore } from "@/stores/backup.store";
 import { MigrationWizard } from "@/components/auth/MigrationWizard";
 import { isTauri } from "@/lib/tauri";
+import { ListEmptyState } from "@/components/ui/ListEmptyState";
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -182,7 +183,7 @@ export function BackupPage() {
             {loading ? (
               <Text size="2" color="gray">Cargando...</Text>
             ) : backups.length === 0 ? (
-              <Text size="2" color="gray">No hay copias de seguridad todavía</Text>
+              <ListEmptyState message="No hay copias de seguridad todavía" icon={ArchiveIcon} />
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                 {backups.map((backup) => (

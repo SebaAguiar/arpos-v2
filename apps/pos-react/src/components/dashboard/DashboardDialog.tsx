@@ -5,6 +5,7 @@ import { useDialogStore } from "@/stores/dialog.store";
 import { SalesRepository } from "@/repositories/sales.repository";
 import type { ApiSaleStats, ApiPaymentMethodBreakdown } from "@/services/sales.service";
 import { DialogHeader } from "@/components/ui/DialogHeader";
+import { StatTile } from "@/components/ui/StatTile";
 
 type Period = "today" | "7d" | "30d" | "90d";
 
@@ -212,30 +213,22 @@ export function DashboardDialog() {
           ) : (
             <>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px", marginBottom: "20px" }}>
-                <div style={{ padding: "14px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "8px" }}>
-                  <Text size="1" color="gray">Ventas</Text>
-                  <Text size="5" weight="bold" color="green" style={{ display: "block", marginTop: "4px" }}>
-                    ${totalRevenue.toLocaleString("es-AR")}
-                  </Text>
-                </div>
-                <div style={{ padding: "14px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "8px" }}>
-                  <Text size="1" color="gray">Transacciones</Text>
-                  <Text size="5" weight="bold" style={{ display: "block", marginTop: "4px" }}>
-                    {totalTransactions}
-                  </Text>
-                </div>
-                <div style={{ padding: "14px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "8px" }}>
-                  <Text size="1" color="gray">Ticket promedio</Text>
-                  <Text size="5" weight="bold" color="orange" style={{ display: "block", marginTop: "4px" }}>
-                    ${averageTicket.toLocaleString("es-AR")}
-                  </Text>
-                </div>
-                <div style={{ padding: "14px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "8px" }}>
-                  <Text size="1" color="gray">Métodos de pago</Text>
-                  <Text size="5" weight="bold" style={{ display: "block", marginTop: "4px" }}>
-                    {paymentBreakdown.length}
-                  </Text>
-                </div>
+                <StatTile
+                  label="Ventas"
+                  value={`$${totalRevenue.toLocaleString("es-AR")}`}
+                  color="green"
+                  size="5"
+                  variant="hover"
+                />
+                <StatTile label="Transacciones" value={totalTransactions} size="5" variant="hover" />
+                <StatTile
+                  label="Ticket promedio"
+                  value={`$${averageTicket.toLocaleString("es-AR")}`}
+                  color="orange"
+                  size="5"
+                  variant="hover"
+                />
+                <StatTile label="Métodos de pago" value={paymentBreakdown.length} size="5" variant="hover" />
               </div>
 
               <Tabs.Root defaultValue="hourly">

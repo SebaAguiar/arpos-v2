@@ -3,6 +3,7 @@ import { Text, Badge } from "@radix-ui/themes";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { useCashRegisterStore } from "@/stores/cash-register.store";
 import { calcExpectedBalance } from "@/lib/cash-register";
+import { ListEmptyState } from "@/components/ui/ListEmptyState";
 
 export function CashRegisterPage() {
   const shifts = useCashRegisterStore((s) => s.shifts);
@@ -21,13 +22,11 @@ export function CashRegisterPage() {
       </div>
 
       {shifts.length === 0 ? (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "60px 0" }}>
-          <CalendarIcon width={40} height={40} style={{ color: "var(--text-muted)", marginBottom: "12px" }} />
-          <Text size="3" color="gray">No hay turnos cerrados</Text>
-          <Text size="2" color="gray" style={{ marginTop: "4px" }}>
-            Los turnos cerrados aparecerán aquí
-          </Text>
-        </div>
+        <ListEmptyState
+          title="No hay turnos cerrados"
+          message="Los turnos cerrados aparecerán aquí"
+          icon={CalendarIcon}
+        />
       ) : (
         shifts.map((shift) => {
           const expected = calcExpectedBalance(
