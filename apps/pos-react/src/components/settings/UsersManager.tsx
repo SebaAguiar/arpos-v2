@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
-import { Text, TextField, Select, Badge } from "@radix-ui/themes";
-import { PersonIcon, PlusIcon, Pencil2Icon, TrashIcon, Cross1Icon, LockClosedIcon, EyeOpenIcon, EyeNoneIcon } from "@radix-ui/react-icons";
+import { Text, TextField, Select, Badge, Button } from "@radix-ui/themes";
+import { PersonIcon, PlusIcon, Pencil2Icon, TrashIcon, LockClosedIcon, EyeOpenIcon, EyeNoneIcon } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
 import { useUsersStore } from "@/stores/users.store";
 import { StaleIndicator } from "@/components/ui/StaleIndicator";
+import { InlineNotice } from "@/components/ui/InlineNotice";
+import { DialogHeader } from "@/components/ui/DialogHeader";
+import { FormActions } from "@/components/ui/FormActions";
+import { ListEmptyState } from "@/components/ui/ListEmptyState";
 import { validatePasswordMatch } from "@/lib/validators";
 import type { User } from "@/lib/types";
 
@@ -120,22 +124,12 @@ export function UsersManager() {
         }}
       >
         {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "16px 20px",
-            borderBottom: "1px solid var(--border)",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <PersonIcon width={20} height={20} />
-            <Text size="4" weight="bold">Usuarios</Text>
-            <StaleIndicator isStale={isStale} />
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            {!showForm && (
+        <DialogHeader
+          icon={<PersonIcon width={20} height={20} />}
+          title="Usuarios"
+          badge={<StaleIndicator isStale={isStale} />}
+          right={
+            !showForm && (
               <button
                 onClick={() => setShowForm(true)}
                 style={{
@@ -154,15 +148,10 @@ export function UsersManager() {
               >
                 <PlusIcon width={14} height={14} /> Nuevo
               </button>
-            )}
-            <button
-              onClick={() => useDialogStore.getState().closeUsers()}
-              style={{ background: "none", border: "none", color: "var(--text-secondary)", cursor: "pointer" }}
-            >
-              <Cross1Icon width={18} height={18} />
-            </button>
-          </div>
-        </div>
+            )
+          }
+          onClose={() => useDialogStore.getState().closeUsers()}
+        />
 
         <div style={{ flex: 1, overflow: "auto", padding: "20px" }}>
           {/* Form */}
@@ -211,46 +200,25 @@ export function UsersManager() {
                   <Select.Item value="cashier">Cajero</Select.Item>
                 </Select.Content>
               </Select.Root>
-              <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", marginTop: "4px" }}>
-                <button
-                  onClick={handleCancel}
-                  style={{
-                    padding: "6px 14px",
-                    backgroundColor: "var(--bg-surface)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    color: "var(--text-primary)",
-                    fontSize: "13px",
-                  }}
-                >
+              <FormActions marginTop="4px">
+                <Button size="2" variant="soft" onClick={handleCancel}>
                   Cancelar
-                </button>
-                <button
+                </Button>
+                <Button
+                  size="2"
                   onClick={handleSubmit}
                   disabled={saving || !form.name || !form.email || (!editing && !form.password)}
-                  style={{
-                    padding: "6px 14px",
-                    backgroundColor: "var(--accent)",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: saving ? "not-allowed" : "pointer",
-                    opacity: saving || !form.name || !form.email || (!editing && !form.password) ? 0.5 : 1,
-                    fontSize: "13px",
-                    fontWeight: 500,
-                  }}
                 >
                   {saving ? "Guardando..." : editing ? "Actualizar" : "Crear"}
-                </button>
-              </div>
+                </Button>
+              </FormActions>
             </div>
           )}
 
           {error && (
-            <div style={{ padding: "10px 14px", backgroundColor: "var(--color-danger-subtle)", borderRadius: "6px", marginBottom: "12px" }}>
-              <Text size="2" color="red">{error}</Text>
-            </div>
+            <InlineNotice bordered={false} icon={false} style={{ marginBottom: "12px" }}>
+              {error}
+            </InlineNotice>
           )}
 
           {/* User list */}
@@ -259,9 +227,7 @@ export function UsersManager() {
               <Text size="2" color="gray">Cargando usuarios...</Text>
             </div>
           ) : users.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "40px 0" }}>
-              <Text size="2" color="gray">No hay usuarios registrados</Text>
-            </div>
+            <ListEmptyState message="No hay usuarios registrados" />
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
               {users.map((user) => (
@@ -391,39 +357,18 @@ export function UsersManager() {
               {newPassword && confirmPassword && !validatePasswordMatch(newPassword, confirmPassword) && (
                 <Text size="1" color="red">Las contraseñas no coinciden</Text>
               )}
-              <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", marginTop: "4px" }}>
-                <button
-                  onClick={handleCancelPassword}
-                  style={{
-                    padding: "6px 14px",
-                    backgroundColor: "var(--bg-surface)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    color: "var(--text-primary)",
-                    fontSize: "13px",
-                  }}
-                >
+              <FormActions marginTop="4px">
+                <Button size="2" variant="soft" onClick={handleCancelPassword}>
                   Cancelar
-                </button>
-                <button
+                </Button>
+                <Button
+                  size="2"
                   onClick={handleChangePassword}
                   disabled={savingPassword || !newPassword || newPassword !== confirmPassword}
-                  style={{
-                    padding: "6px 14px",
-                    backgroundColor: "var(--accent)",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: savingPassword ? "not-allowed" : "pointer",
-                    opacity: savingPassword || !newPassword || newPassword !== confirmPassword ? 0.5 : 1,
-                    fontSize: "13px",
-                    fontWeight: 500,
-                  }}
                 >
                   {savingPassword ? "Guardando..." : "Cambiar contraseña"}
-                </button>
-              </div>
+                </Button>
+              </FormActions>
             </div>
           )}
         </div>

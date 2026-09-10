@@ -3,13 +3,14 @@ import {
   Dialog,
   Button,
   TextField,
-  Text,
   Flex,
   Select,
 } from "@radix-ui/themes";
-import { ExclamationTriangleIcon, PlusIcon, MinusIcon, UpdateIcon } from "@radix-ui/react-icons";
+import { PlusIcon, MinusIcon, UpdateIcon } from "@radix-ui/react-icons";
 import { InventoryService } from "@/services/inventory.service";
 import type { Product } from "@/lib/types";
+import { FieldLabel } from "@/components/ui/FieldLabel";
+import { InlineNotice } from "@/components/ui/InlineNotice";
 
 interface StockAdjustmentDialogProps {
   open: boolean;
@@ -100,27 +101,13 @@ export function StockAdjustmentDialog({
         <form onSubmit={handleSubmit}>
           <Flex direction="column" gap="3">
             {error && (
-              <Flex
-                align="center"
-                gap="2"
-                style={{
-                  padding: "10px 12px",
-                  backgroundColor: "var(--color-danger-subtle)",
-                  border: "1px solid var(--color-danger)",
-                  borderRadius: "6px",
-                }}
-              >
-                <ExclamationTriangleIcon color="var(--color-danger)" />
-                <Text size="2" color="red">
-                  {error}
-                </Text>
-              </Flex>
+              <InlineNotice>{error}</InlineNotice>
             )}
 
             <div>
-              <Text size="1" weight="bold" style={{ marginBottom: "4px", display: "block" }}>
+              <FieldLabel size="1" marginBottom="4px">
                 Tipo de movimiento *
-              </Text>
+              </FieldLabel>
               <Select.Root value={movType} onValueChange={(v) => setMovType(v as MovementType)}>
                 <Select.Trigger style={{ width: "100%" }} aria-label="Tipo de movimiento de stock" />
                 <Select.Content position="popper">
@@ -147,9 +134,9 @@ export function StockAdjustmentDialog({
             </div>
 
             <div>
-              <Text size="1" weight="bold" style={{ marginBottom: "4px", display: "block" }}>
+              <FieldLabel size="1" marginBottom="4px">
                 Cantidad *
-              </Text>
+              </FieldLabel>
               <TextField.Root
                 type="number"
                 min="1"
@@ -161,9 +148,9 @@ export function StockAdjustmentDialog({
             </div>
 
             <div>
-              <Text size="1" weight="bold" style={{ marginBottom: "4px", display: "block" }}>
+              <FieldLabel size="1" marginBottom="4px">
                 Motivo / Notas *
-              </Text>
+              </FieldLabel>
               <TextField.Root
                 placeholder="Ej. Factura A 0001-00045, Rotura de stock..."
                 value={reason}

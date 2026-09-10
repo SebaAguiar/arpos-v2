@@ -14,6 +14,7 @@ import { useSyncStore } from "@/stores/sync.store";
 import { useTauri } from "@/hooks/useTauri";
 import { UsersManager } from "@/components/settings/UsersManager";
 import { StoreManager } from "@/components/settings/StoreManager";
+import { FieldLabel } from "@/components/ui/FieldLabel";
 import { CompanyForm } from "@/components/settings/CompanyForm";
 import { PaymentMethodsEditor } from "@/components/settings/PaymentMethodsEditor";
 import { GeneralSettingsEditor } from "@/components/settings/GeneralSettingsEditor";
@@ -114,9 +115,9 @@ export function SettingsPage() {
                 </Select.Root>
               </div>
               <div>
-                <Text size="2" weight="medium" style={{ display: "block", marginBottom: "6px" }}>
+                <FieldLabel weight="medium">
                   Encabezado del ticket
-                </Text>
+                </FieldLabel>
                 <TextField.Root
                   placeholder="Ej: Gracias por elegirnos..."
                   value={receiptHeader}
@@ -125,9 +126,9 @@ export function SettingsPage() {
                 />
               </div>
               <div>
-                <Text size="2" weight="medium" style={{ display: "block", marginBottom: "6px" }}>
+                <FieldLabel weight="medium">
                   Pie del ticket
-                </Text>
+                </FieldLabel>
                 <TextField.Root
                   placeholder="Ej: ¡Vuelva pronto!"
                   value={receiptFooter}

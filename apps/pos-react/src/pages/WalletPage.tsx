@@ -10,6 +10,7 @@ import {
   Tooltip,
   Dialog,
 } from "@radix-ui/themes";
+import { FieldLabel } from "@/components/ui/FieldLabel";
 import {
   PlusIcon,
   MinusIcon,
@@ -89,9 +90,7 @@ function WalletOperationDialog({
 
         <Flex direction="column" gap="3">
           <label>
-            <Text size="2" weight="bold" style={{ marginBottom: "4px", display: "block" }}>
-              Monto
-            </Text>
+            <FieldLabel marginBottom="4px">Monto</FieldLabel>
             <TextField.Root
               type="number"
               step="0.01"
@@ -106,9 +105,7 @@ function WalletOperationDialog({
           </label>
 
           <label>
-            <Text size="2" weight="bold" style={{ marginBottom: "4px", display: "block" }}>
-              Notas (opcional)
-            </Text>
+            <FieldLabel marginBottom="4px">Notas (opcional)</FieldLabel>
             <TextField.Root
               placeholder="Motivo de la operación..."
               value={notes}

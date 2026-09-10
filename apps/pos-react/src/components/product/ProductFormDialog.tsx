@@ -9,13 +9,16 @@ import {
   Select,
   Badge,
 } from "@radix-ui/themes";
-import { ExclamationTriangleIcon, PlusCircledIcon, TrashIcon } from "@radix-ui/react-icons";
+import { PlusCircledIcon, TrashIcon } from "@radix-ui/react-icons";
 import { ProductsRepository } from "@/repositories/products.repository";
 import { VariantsService } from "@/services/products.service";
 import { PricingFields, type PricingValues } from "@/components/product/PricingFields";
 import { CurrencyField } from "@/components/product/CurrencyField";
 import { parseNumericInput } from "@/lib/pricing";
 import type { Product } from "@/lib/types";
+import { FieldLabel } from "@/components/ui/FieldLabel";
+import { FieldError } from "@/components/ui/FieldError";
+import { InlineNotice } from "@/components/ui/InlineNotice";
 
 interface ProductFormDialogProps {
   open: boolean;
@@ -360,28 +363,14 @@ export function ProductFormDialog({
         <form onSubmit={handleSubmit}>
           <Flex direction="column" gap="3">
             {error && (
-              <Flex
-                align="center"
-                gap="2"
-                style={{
-                  padding: "10px 12px",
-                  backgroundColor: "var(--color-danger-subtle)",
-                  border: "1px solid var(--color-danger)",
-                  borderRadius: "6px",
-                }}
-              >
-                <ExclamationTriangleIcon color="var(--color-danger)" />
-                <Text size="2" color="red">
-                  {error}
-                </Text>
-              </Flex>
+              <InlineNotice>{error}</InlineNotice>
             )}
 
             <Grid columns="2" gap="3">
               <div>
-                <Text size="1" weight="bold" style={{ marginBottom: "4px", display: "block" }}>
+                <FieldLabel size="1" marginBottom="4px">
                   Código Barcode / Interno *
-                </Text>
+                </FieldLabel>
                 <TextField.Root
                   placeholder="Ej. 779123456789"
                   value={code}
@@ -391,9 +380,9 @@ export function ProductFormDialog({
                 />
               </div>
               <div>
-                <Text size="1" weight="bold" style={{ marginBottom: "4px", display: "block" }}>
+                <FieldLabel size="1" marginBottom="4px">
                   Categoría (Opcional)
-                </Text>
+                </FieldLabel>
                 {categoryIsNew ? (
                   <Flex gap="2" align="center">
                     <TextField.Root
@@ -443,9 +432,9 @@ export function ProductFormDialog({
             </Grid>
 
             <div>
-              <Text size="1" weight="bold" style={{ marginBottom: "4px", display: "block" }}>
+              <FieldLabel size="1" marginBottom="4px">
                 Nombre del producto *
-              </Text>
+              </FieldLabel>
               <TextField.Root
                 placeholder="Ej. Remera de Algodón Negra M"
                 value={name}
@@ -455,9 +444,9 @@ export function ProductFormDialog({
             </div>
 
             <div>
-              <Text size="1" weight="bold" style={{ marginBottom: "4px", display: "block" }}>
+              <FieldLabel size="1" marginBottom="4px">
                 Descripción (Opcional)
-              </Text>
+              </FieldLabel>
               <TextField.Root
                 placeholder="Detalle del producto, talle, color..."
                 value={description}
@@ -472,9 +461,9 @@ export function ProductFormDialog({
                 onChange={(vals) => markDirty(() => setPricingValues(vals))}
               />
               {priceBelowCost && (
-                <Text size="1" color="red" style={{ display: "block", marginTop: "4px" }}>
+                <FieldError>
                   El precio de venta es menor al costo (margen negativo).
-                </Text>
+                </FieldError>
               )}
             </div>
 
@@ -601,9 +590,9 @@ export function ProductFormDialog({
                           )}
                         </Grid>
                         {variantLoss && (
-                          <Text size="1" color="red" style={{ display: "block", marginBottom: "4px" }}>
+                          <FieldError style={{ marginTop: 0, marginBottom: "4px" }}>
                             Precio menor al costo de esta variante.
-                          </Text>
+                          </FieldError>
                         )}
                         <Flex justify="end">
                           <Button

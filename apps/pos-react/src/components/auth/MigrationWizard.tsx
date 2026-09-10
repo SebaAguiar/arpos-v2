@@ -10,6 +10,8 @@ import {
 } from "@radix-ui/react-icons";
 import { MigrationRepository } from "@/repositories/migration.repository";
 import type { MigrationProgressEvent, MigrationSummary } from "@/services/migration.service";
+import { FieldLabel } from "@/components/ui/FieldLabel";
+import { InlineNotice } from "@/components/ui/InlineNotice";
 
 type WizardStep = "select" | "credentials" | "progress" | "complete";
 
@@ -140,9 +142,9 @@ export function MigrationWizard({ open, onClose, onComplete }: MigrationWizardPr
                 Ingresá la connection string de tu base de datos v1 (lectura).
               </Text>
               <div>
-                <Text size="2" weight="bold" style={{ display: "block", marginBottom: "6px" }}>
+                <FieldLabel>
                   Connection string
-                </Text>
+                </FieldLabel>
                 <TextField.Root
                   type="password"
                   placeholder="postgresql://usuario:clave@host:5432/basededatos"
@@ -152,9 +154,9 @@ export function MigrationWizard({ open, onClose, onComplete }: MigrationWizardPr
                 />
               </div>
               <div>
-                <Text size="2" weight="bold" style={{ display: "block", marginBottom: "6px" }}>
+                <FieldLabel>
                   Sucursal principal (opcional)
-                </Text>
+                </FieldLabel>
                 <TextField.Root
                   placeholder="ID de la sucursal a usar como local"
                   value={primaryStoreId}
@@ -163,16 +165,7 @@ export function MigrationWizard({ open, onClose, onComplete }: MigrationWizardPr
               </div>
 
               {error && (
-                <div
-                  style={{
-                    padding: "10px 12px",
-                    backgroundColor: "#e5484d15",
-                    border: "1px solid #e5484d50",
-                    borderRadius: "6px",
-                  }}
-                >
-                  <Text size="2" color="red">{error}</Text>
-                </div>
+                <InlineNotice>{error}</InlineNotice>
               )}
 
               <div style={{ display: "flex", gap: "12px" }}>

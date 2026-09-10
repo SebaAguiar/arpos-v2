@@ -4,6 +4,9 @@ import { Cross2Icon, ReloadIcon } from "@radix-ui/react-icons";
 import { useArcaStore } from "@/stores/arca.store";
 import type { ApiInvoice } from "@/services/arca.service";
 import { formatCents } from "@/lib/currency";
+import { FieldLabel } from "@/components/ui/FieldLabel";
+import { InlineNotice } from "@/components/ui/InlineNotice";
+import { FormActions } from "@/components/ui/FormActions";
 
 interface CreditNoteDialogProps {
   open: boolean;
@@ -113,9 +116,9 @@ export function CreditNoteDialog({ open, invoice, onClose, onCreated }: CreditNo
 
         {/* Motivo */}
         <div style={{ marginBottom: "12px" }}>
-          <Text size="2" weight="medium" style={{ display: "block", marginBottom: "6px" }}>
+          <FieldLabel weight="medium">
             Motivo de la nota de crédito *
-          </Text>
+          </FieldLabel>
           <TextField.Root
             placeholder="Ej: Devolución de mercadería, Descuento otorgado..."
             value={reason}
@@ -125,9 +128,9 @@ export function CreditNoteDialog({ open, invoice, onClose, onCreated }: CreditNo
 
         {/* Monto */}
         <div style={{ marginBottom: "16px" }}>
-          <Text size="2" weight="medium" style={{ display: "block", marginBottom: "6px" }}>
+          <FieldLabel weight="medium">
             Monto (en pesos)
-          </Text>
+          </FieldLabel>
           <TextField.Root
             placeholder={`${defaultAmount} (monto total)`}
             value={amountCents}
@@ -142,12 +145,10 @@ export function CreditNoteDialog({ open, invoice, onClose, onCreated }: CreditNo
         </div>
 
         {error && (
-          <div style={{ padding: "8px 12px", backgroundColor: "rgba(239, 68, 68, 0.08)", border: "1px solid rgba(239, 68, 68, 0.15)", borderRadius: "6px", marginBottom: "12px" }}>
-            <Text size="2" color="red">{error}</Text>
-          </div>
+          <InlineNotice style={{ marginBottom: "12px" }}>{error}</InlineNotice>
         )}
 
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+        <FormActions>
           <Button size="2" variant="soft" onClick={handleClose} disabled={isSubmitting}>
             Cancelar
           </Button>
@@ -158,7 +159,7 @@ export function CreditNoteDialog({ open, invoice, onClose, onCreated }: CreditNo
               "Crear Nota de Crédito"
             )}
           </Button>
-        </div>
+        </FormActions>
       </div>
     </div>
   );

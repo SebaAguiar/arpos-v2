@@ -1,7 +1,8 @@
 import { useCallback } from "react";
-import { TextField, Text } from "@radix-ui/themes";
+import { TextField } from "@radix-ui/themes";
 import { calcMarginFromPrice, parseNumericInput } from "@/lib/pricing";
 import { CurrencyField } from "@/components/product/CurrencyField";
+import { FieldLabel } from "@/components/ui/FieldLabel";
 
 export interface PricingValues {
   cost: string;
@@ -57,9 +58,7 @@ export function PricingFields({
       }}
     >
       <div>
-        <Text size="1" weight="bold" style={{ marginBottom: "4px", display: "block" }}>
-          {costLabel}
-        </Text>
+        <FieldLabel size="1" marginBottom="4px">{costLabel}</FieldLabel>
         <CurrencyField
           value={values.cost}
           onChange={handleCostChange}
@@ -67,9 +66,7 @@ export function PricingFields({
         />
       </div>
       <div>
-        <Text size="1" weight="bold" style={{ marginBottom: "4px", display: "block" }}>
-          {marginLabel}
-        </Text>
+        <FieldLabel size="1" marginBottom="4px">{marginLabel}</FieldLabel>
         <TextField.Root
           value={values.margin ? `${values.margin}%` : ""}
           placeholder="—"
@@ -79,9 +76,7 @@ export function PricingFields({
         />
       </div>
       <div>
-        <Text size="1" weight="bold" style={{ marginBottom: "4px", display: "block" }}>
-          {priceLabel} *
-        </Text>
+        <FieldLabel size="1" marginBottom="4px">{priceLabel} *</FieldLabel>
         <CurrencyField
           value={values.price}
           onChange={handlePriceChange}

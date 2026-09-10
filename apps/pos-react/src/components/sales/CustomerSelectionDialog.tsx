@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { Text, TextField } from "@radix-ui/themes";
-import { Cross1Icon, MagnifyingGlassIcon, PlusIcon } from "@radix-ui/react-icons";
+import { MagnifyingGlassIcon, PlusIcon } from "@radix-ui/react-icons";
 import { useCartStore } from "@/stores/cart.store";
 import { useDialogStore } from "@/stores/dialog.store";
 import { ContactsRepository } from "@/repositories/contacts.repository";
 import type { Customer } from "@/lib/types";
+import { DialogHeader } from "@/components/ui/DialogHeader";
+import { DialogFooter } from "@/components/ui/DialogFooter";
 
 export function CustomerSelectionDialog() {
   const [search, setSearch] = useState("");
@@ -99,30 +101,7 @@ export function CustomerSelectionDialog() {
           overflow: "hidden",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "16px 20px",
-            borderBottom: "1px solid var(--border)",
-          }}
-        >
-          <Text size="4" weight="bold">
-            Seleccionar cliente
-          </Text>
-          <button
-            onClick={closeCustomerSelection}
-            style={{
-              background: "none",
-              border: "none",
-              color: "var(--text-secondary)",
-              cursor: "pointer",
-            }}
-          >
-            <Cross1Icon width={18} height={18} />
-          </button>
-        </div>
+<DialogHeader title="Seleccionar cliente" onClose={closeCustomerSelection} />
 
         <div style={{ padding: "12px 20px" }}>
           <TextField.Root
@@ -210,7 +189,7 @@ export function CustomerSelectionDialog() {
           )}
         </div>
 
-        <div style={{ padding: "12px 20px", borderTop: "1px solid var(--border)" }}>
+        <DialogFooter>
           {showCreateForm ? (
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               <TextField.Root
@@ -291,7 +270,7 @@ export function CustomerSelectionDialog() {
               Crear nuevo cliente
             </button>
           )}
-        </div>
+        </DialogFooter>
       </div>
     </div>
   );

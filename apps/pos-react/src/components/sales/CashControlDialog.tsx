@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Text, TextField, Badge, Separator, Tabs, Select } from "@radix-ui/themes";
 import {
-  Cross1Icon,
   LockOpen1Icon,
   LockClosedIcon,
   PlusIcon,
@@ -10,6 +9,8 @@ import {
   CardStackIcon,
 } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
+import { DialogHeader } from "@/components/ui/DialogHeader";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 import { useCashRegisterStore } from "@/stores/cash-register.store";
 import { calcExpectedBalance } from "@/lib/cash-register";
 
@@ -101,30 +102,17 @@ export function CashControlDialog() {
         }}
       >
         {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "16px 20px",
-            borderBottom: "1px solid var(--border)",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <Text size="4" weight="bold">Control de Caja</Text>
-            {currentShift ? (
+        <DialogHeader
+          title="Control de Caja"
+          badge={
+            currentShift ? (
               <Badge color="green" variant="soft">Turno abierto</Badge>
             ) : (
               <Badge color="red" variant="soft">Sin turno</Badge>
-            )}
-          </div>
-          <button
-            onClick={closeCashControl}
-            style={{ backgroundColor: "transparent", border: "none", color: "var(--text-secondary)", cursor: "pointer" }}
-          >
-            <Cross1Icon width={18} height={18} />
-          </button>
-        </div>
+            )
+          }
+          onClose={closeCashControl}
+        />
 
         {/* Content */}
         <div style={{ flex: 1, overflow: "auto" }}>
@@ -279,9 +267,9 @@ export function CashControlDialog() {
                               border: "1px solid var(--border)",
                             }}
                           >
-                            <Text size="1" color="gray" style={{ display: "block", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                            <SectionHeader>
                               {entry.payment_method}
-                            </Text>
+                            </SectionHeader>
                             <Text size="3" weight="bold" style={{ display: "block", marginTop: "4px" }}>
                               ${(entry.total_cents / 100).toLocaleString("es-AR")}
                             </Text>

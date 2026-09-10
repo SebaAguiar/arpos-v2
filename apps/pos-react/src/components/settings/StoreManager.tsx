@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
-import { Text, TextField, Badge } from "@radix-ui/themes";
-import { HomeIcon, PlusIcon, Pencil2Icon, TrashIcon, Cross1Icon } from "@radix-ui/react-icons";
+import { Text, TextField, Badge, Button } from "@radix-ui/themes";
+import { HomeIcon, PlusIcon, Pencil2Icon, TrashIcon } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
 import { useStoresStore } from "@/stores/stores.store";
 import { StaleIndicator } from "@/components/ui/StaleIndicator";
+import { InlineNotice } from "@/components/ui/InlineNotice";
+import { DialogHeader } from "@/components/ui/DialogHeader";
+import { FormActions } from "@/components/ui/FormActions";
+import { ListEmptyState } from "@/components/ui/ListEmptyState";
 import type { Store } from "@/lib/types";
 
 export function StoreManager() {
@@ -78,22 +82,12 @@ export function StoreManager() {
         }}
       >
         {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "16px 20px",
-            borderBottom: "1px solid var(--border)",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <HomeIcon width={20} height={20} />
-            <Text size="4" weight="bold">Sucursales</Text>
-            <StaleIndicator isStale={isStale} />
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            {!showForm && canAddStore && (
+        <DialogHeader
+          icon={<HomeIcon width={20} height={20} />}
+          title="Sucursales"
+          badge={<StaleIndicator isStale={isStale} />}
+          right={
+            !showForm && canAddStore && (
               <button
                 onClick={() => setShowForm(true)}
                 style={{
@@ -112,30 +106,16 @@ export function StoreManager() {
               >
                 <PlusIcon width={14} height={14} /> Nueva
               </button>
-            )}
-            <button
-              onClick={closeStores}
-              style={{ background: "none", border: "none", color: "var(--text-secondary)", cursor: "pointer" }}
-            >
-              <Cross1Icon width={18} height={18} />
-            </button>
-          </div>
-        </div>
+            )
+          }
+          onClose={closeStores}
+        />
 
         <div style={{ flex: 1, overflow: "auto", padding: "20px" }}>
           {!canAddStore && storeCount >= 1 && (
-            <div
-              style={{
-                padding: "10px 14px",
-                backgroundColor: "var(--color-warning-subtle)",
-                borderRadius: "6px",
-                marginBottom: "16px",
-              }}
-            >
-              <Text size="2" color="orange">
-                Modo local: solo 1 sucursal permitida. Suscribite al plan multi-sucursal para agregar más.
-              </Text>
-            </div>
+            <InlineNotice tone="warning" bordered={false} icon={false} style={{ marginBottom: "16px" }}>
+              Modo local: solo 1 sucursal permitida. Suscribite al plan multi-sucursal para agregar más.
+            </InlineNotice>
           )}
 
           {/* Form */}
@@ -169,46 +149,25 @@ export function StoreManager() {
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
               />
-              <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", marginTop: "4px" }}>
-                <button
-                  onClick={handleCancel}
-                  style={{
-                    padding: "6px 14px",
-                    backgroundColor: "var(--bg-surface)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    color: "var(--text-primary)",
-                    fontSize: "13px",
-                  }}
-                >
+              <FormActions marginTop="4px">
+                <Button size="2" variant="soft" onClick={handleCancel}>
                   Cancelar
-                </button>
-                <button
+                </Button>
+                <Button
+                  size="2"
                   onClick={handleSubmit}
                   disabled={saving || !form.name}
-                  style={{
-                    padding: "6px 14px",
-                    backgroundColor: "var(--accent)",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: saving ? "not-allowed" : "pointer",
-                    opacity: saving || !form.name ? 0.5 : 1,
-                    fontSize: "13px",
-                    fontWeight: 500,
-                  }}
                 >
                   {saving ? "Guardando..." : editing ? "Actualizar" : "Crear"}
-                </button>
-              </div>
+                </Button>
+              </FormActions>
             </div>
           )}
 
           {error && (
-            <div style={{ padding: "10px 14px", backgroundColor: "var(--color-danger-subtle)", borderRadius: "6px", marginBottom: "12px" }}>
-              <Text size="2" color="red">{error}</Text>
-            </div>
+            <InlineNotice bordered={false} icon={false} style={{ marginBottom: "12px" }}>
+              {error}
+            </InlineNotice>
           )}
 
           {/* Store list */}
@@ -217,9 +176,7 @@ export function StoreManager() {
               <Text size="2" color="gray">Cargando sucursales...</Text>
             </div>
           ) : stores.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "40px 0" }}>
-              <Text size="2" color="gray">No hay sucursales registradas</Text>
-            </div>
+            <ListEmptyState message="No hay sucursales registradas" />
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
               {stores.map((store) => (

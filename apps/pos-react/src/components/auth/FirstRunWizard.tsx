@@ -11,6 +11,9 @@ import { useAuthStore } from "@/stores/auth.store";
 import { SetupRepository } from "@/repositories/setup.repository";
 import { MigrationWizard } from "@/components/auth/MigrationWizard";
 import { EMAIL_RE, validatePasswordMatch } from "@/lib/validators";
+import { FieldLabel } from "@/components/ui/FieldLabel";
+import { FieldError } from "@/components/ui/FieldError";
+import { InlineNotice } from "@/components/ui/InlineNotice";
 
 type WizardStep = "welcome" | "company" | "admin" | "success";
 
@@ -234,9 +237,9 @@ export function FirstRunWizard() {
               style={{ display: "flex", flexDirection: "column", gap: "16px" }}
             >
               <div>
-                <Text size="2" weight="bold" style={{ display: "block", marginBottom: "6px" }}>
+                <FieldLabel>
                   Nombre del negocio
-                </Text>
+                </FieldLabel>
                 <TextField.Root
                   placeholder="Mi Negocio"
                   value={company.companyName}
@@ -246,16 +249,16 @@ export function FirstRunWizard() {
                   autoFocus
                 />
                 {errors.companyName && (
-                  <Text size="1" color="red" style={{ display: "block", marginTop: "4px" }}>
+                  <FieldError>
                     {errors.companyName}
-                  </Text>
+                  </FieldError>
                 )}
               </div>
 
               <div>
-                <Text size="2" weight="bold" style={{ display: "block", marginBottom: "6px" }}>
+                <FieldLabel>
                   CUIT / RUT
-                </Text>
+                </FieldLabel>
                 <TextField.Root
                   placeholder="20-12345678-9"
                   value={company.taxId}
@@ -264,9 +267,9 @@ export function FirstRunWizard() {
                   }
                 />
                 {errors.taxId && (
-                  <Text size="1" color="red" style={{ display: "block", marginTop: "4px" }}>
+                  <FieldError>
                     {errors.taxId}
-                  </Text>
+                  </FieldError>
                 )}
               </div>
             </div>
@@ -334,9 +337,9 @@ export function FirstRunWizard() {
               style={{ display: "flex", flexDirection: "column", gap: "16px" }}
             >
               <div>
-                <Text size="2" weight="bold" style={{ display: "block", marginBottom: "6px" }}>
+                <FieldLabel>
                   Email
-                </Text>
+                </FieldLabel>
                 <TextField.Root
                   type="email"
                   placeholder="admin@negocio.com"
@@ -347,16 +350,16 @@ export function FirstRunWizard() {
                   autoFocus
                 />
                 {errors.email && (
-                  <Text size="1" color="red" style={{ display: "block", marginTop: "4px" }}>
+                  <FieldError>
                     {errors.email}
-                  </Text>
+                  </FieldError>
                 )}
               </div>
 
               <div>
-                <Text size="2" weight="bold" style={{ display: "block", marginBottom: "6px" }}>
+                <FieldLabel>
                   Contraseña
-                </Text>
+                </FieldLabel>
                 <TextField.Root
                   type="password"
                   placeholder="••••••••"
@@ -366,16 +369,16 @@ export function FirstRunWizard() {
                   }
                 />
                 {errors.password && (
-                  <Text size="1" color="red" style={{ display: "block", marginTop: "4px" }}>
+                  <FieldError>
                     {errors.password}
-                  </Text>
+                  </FieldError>
                 )}
               </div>
 
               <div>
-                <Text size="2" weight="bold" style={{ display: "block", marginBottom: "6px" }}>
+                <FieldLabel>
                   Confirmar contraseña
-                </Text>
+                </FieldLabel>
                 <TextField.Root
                   type="password"
                   placeholder="••••••••"
@@ -385,26 +388,15 @@ export function FirstRunWizard() {
                   }
                 />
                 {errors.confirmPassword && (
-                  <Text size="1" color="red" style={{ display: "block", marginTop: "4px" }}>
+                  <FieldError>
                     {errors.confirmPassword}
-                  </Text>
+                  </FieldError>
                 )}
               </div>
             </div>
 
             {globalError && (
-              <div
-                style={{
-                  padding: "10px 12px",
-                  backgroundColor: "#e5484d15",
-                  border: "1px solid #e5484d50",
-                  borderRadius: "6px",
-                }}
-              >
-                <Text size="2" color="red">
-                  {globalError}
-                </Text>
-              </div>
+              <InlineNotice>{globalError}</InlineNotice>
             )}
 
             <div style={{ display: "flex", gap: "12px" }}>

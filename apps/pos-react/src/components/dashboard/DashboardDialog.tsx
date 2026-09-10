@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { Text, Tabs, Select } from "@radix-ui/themes";
-import { Cross1Icon, BarChartIcon } from "@radix-ui/react-icons";
+import { BarChartIcon } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
 import { SalesRepository } from "@/repositories/sales.repository";
 import type { ApiSaleStats, ApiPaymentMethodBreakdown } from "@/services/sales.service";
+import { DialogHeader } from "@/components/ui/DialogHeader";
 
 type Period = "today" | "7d" | "30d" | "90d";
 
@@ -187,20 +188,10 @@ export function DashboardDialog() {
           overflow: "hidden",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "16px 20px",
-            borderBottom: "1px solid var(--border)",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <BarChartIcon width={20} height={20} />
-            <Text size="4" weight="bold">Dashboard</Text>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <DialogHeader
+          icon={<BarChartIcon width={20} height={20} />}
+          title="Dashboard"
+          right={
             <Select.Root value={period} onValueChange={handlePeriodChange}>
               <Select.Trigger className="select-compact" style={{ width: "160px" }} />
               <Select.Content position="popper">
@@ -209,14 +200,9 @@ export function DashboardDialog() {
                 ))}
               </Select.Content>
             </Select.Root>
-            <button
-              onClick={closeDashboard}
-              style={{ background: "none", border: "none", color: "var(--text-secondary)", cursor: "pointer" }}
-            >
-              <Cross1Icon width={18} height={18} />
-            </button>
-          </div>
-        </div>
+          }
+          onClose={closeDashboard}
+        />
 
         <div style={{ flex: 1, overflow: "auto", padding: "20px" }}>
           {loading ? (

@@ -1,6 +1,7 @@
 import { Text, TextField, Card } from "@radix-ui/themes";
 import { useSettingsStore } from "@/stores/settings.store";
 import { AutosaveBadge } from "./AutosaveBadge";
+import { FieldLabel } from "@/components/ui/FieldLabel";
 
 export function GeneralSettingsEditor() {
   const taxRate = useSettingsStore((s) => s.taxRate);
@@ -17,9 +18,9 @@ export function GeneralSettingsEditor() {
 
       <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
         <div>
-          <Text size="2" weight="medium" style={{ display: "block", marginBottom: "6px" }}>
+          <FieldLabel weight="medium">
             IVA (%)
-          </Text>
+          </FieldLabel>
           <TextField.Root
             type="number"
             value={taxRate * 100}
@@ -28,9 +29,9 @@ export function GeneralSettingsEditor() {
           />
         </div>
         <div>
-          <Text size="2" weight="medium" style={{ display: "block", marginBottom: "6px" }}>
+          <FieldLabel weight="medium">
             Recargo crédito (%)
-          </Text>
+          </FieldLabel>
           <TextField.Root
             type="number"
             value={creditSurcharge}

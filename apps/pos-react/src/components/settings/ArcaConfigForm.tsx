@@ -11,6 +11,9 @@ import {
 } from "@radix-ui/react-icons";
 import { useArcaStore } from "@/stores/arca.store";
 import { isValidCuit } from "@/lib/validators";
+import { FieldLabel } from "@/components/ui/FieldLabel";
+import { FieldError } from "@/components/ui/FieldError";
+import { InlineNotice } from "@/components/ui/InlineNotice";
 
 const RESPONSABILIDADES_IVA = [
   { value: "RI", label: "Responsable Inscripto" },
@@ -428,47 +431,35 @@ export function ArcaConfigForm() {
       </div>
 
       {error && (
-        <div
-          style={{
-            padding: "10px 14px",
-            marginBottom: "12px",
-            backgroundColor: "rgba(239, 68, 68, 0.08)",
-            border: "1px solid rgba(239, 68, 68, 0.2)",
-            borderRadius: "8px",
-            color: "#ef4444",
-            fontSize: "13px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}
+        <InlineNotice
+          style={{ marginBottom: "12px" }}
+          action={
+            <button
+              onClick={clearError}
+              style={{
+                marginLeft: "auto",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "var(--color-danger)",
+                display: "inline-flex",
+                alignItems: "center",
+              }}
+            >
+              <Cross2Icon width={12} height={12} />
+            </button>
+          }
         >
-          <Cross2Icon width={14} height={14} />
           {error}
-          <button
-            onClick={clearError}
-            style={{
-              marginLeft: "auto",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: "#ef4444",
-            }}
-          >
-            <Cross2Icon width={12} height={12} />
-          </button>
-        </div>
+        </InlineNotice>
       )}
 
       <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
         {/* CUIT */}
         <div>
-          <Text
-            size="2"
-            weight="medium"
-            style={{ display: "block", marginBottom: "6px" }}
-          >
+          <FieldLabel weight="medium">
             CUIT
-          </Text>
+          </FieldLabel>
           <TextField.Root
             placeholder="20-12345678-9"
             value={form.cuit}
@@ -483,21 +474,17 @@ export function ArcaConfigForm() {
             aria-label="CUIT"
           />
           {touched.cuit && cuitError && (
-            <Text size="1" color="red" style={{ marginTop: "4px", display: "block" }}>
+            <FieldError>
               CUIT inválido — debe tener 11 dígitos con verificador correcto
-            </Text>
+            </FieldError>
           )}
         </div>
 
         {/* Certificado */}
         <div>
-          <Text
-            size="2"
-            weight="medium"
-            style={{ display: "block", marginBottom: "6px" }}
-          >
+          <FieldLabel weight="medium">
             Certificado (.cert)
-          </Text>
+          </FieldLabel>
           <textarea
             placeholder={
               config
@@ -522,21 +509,17 @@ export function ArcaConfigForm() {
             aria-label="Certificado ARCA"
           />
           {touched.certificate && certRequired && (
-            <Text size="1" color="red" style={{ marginTop: "4px", display: "block" }}>
+            <FieldError>
               El certificado es requerido en la primera configuración
-            </Text>
+            </FieldError>
           )}
         </div>
 
         {/* Private Key */}
         <div>
-          <Text
-            size="2"
-            weight="medium"
-            style={{ display: "block", marginBottom: "6px" }}
-          >
+          <FieldLabel weight="medium">
             Clave Privada (.key)
-          </Text>
+          </FieldLabel>
           <textarea
             placeholder={
               config
@@ -561,22 +544,18 @@ export function ArcaConfigForm() {
             aria-label="Clave privada ARCA"
           />
           {touched.privateKey && keyRequired && (
-            <Text size="1" color="red" style={{ marginTop: "4px", display: "block" }}>
+            <FieldError>
               La clave privada es requerida en la primera configuración
-            </Text>
+            </FieldError>
           )}
         </div>
 
         {/* Punto de Venta + Environment + Responsabilidad IVA */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
           <div>
-            <Text
-              size="2"
-              weight="medium"
-              style={{ display: "block", marginBottom: "6px" }}
-            >
+            <FieldLabel weight="medium">
               Punto de Venta
-            </Text>
+            </FieldLabel>
             <TextField.Root
               placeholder="1"
               value={form.point_of_sale}
@@ -588,13 +567,9 @@ export function ArcaConfigForm() {
           </div>
 
           <div>
-            <Text
-              size="2"
-              weight="medium"
-              style={{ display: "block", marginBottom: "6px" }}
-            >
+            <FieldLabel weight="medium">
               Ambiente
-            </Text>
+            </FieldLabel>
             <Select.Root
               value={form.environment}
               onValueChange={(v) => setField("environment", v)}
@@ -608,13 +583,9 @@ export function ArcaConfigForm() {
           </div>
 
           <div>
-            <Text
-              size="2"
-              weight="medium"
-              style={{ display: "block", marginBottom: "6px" }}
-            >
+            <FieldLabel weight="medium">
               Condición IVA
-            </Text>
+            </FieldLabel>
             <Select.Root
               value={form.responsabilidad_iva}
               onValueChange={(v) => setField("responsabilidad_iva", v)}

@@ -8,6 +8,7 @@ import {
 } from "@radix-ui/react-icons";
 import { useArcaStore } from "@/stores/arca.store";
 import { formatCents } from "@/lib/currency";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 
 function StatCard({
   label,
@@ -49,9 +50,7 @@ function StatCard({
         {icon}
       </div>
       <div>
-        <Text size="1" color="gray" style={{ display: "block", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-          {label}
-        </Text>
+        <SectionHeader>{label}</SectionHeader>
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
           <Text size="3" weight="bold" style={{ display: "block" }}>
             {value}

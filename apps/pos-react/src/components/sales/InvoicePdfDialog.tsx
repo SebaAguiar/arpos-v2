@@ -3,6 +3,9 @@ import { Text, Button, ScrollArea } from "@radix-ui/themes";
 import { Cross2Icon, ExternalLinkIcon, DownloadIcon } from "@radix-ui/react-icons";
 import type { ApiInvoice } from "@/services/arca.service";
 import { apiClient } from "@/services/api-client";
+import { InlineNotice } from "@/components/ui/InlineNotice";
+import { DialogFooter } from "@/components/ui/DialogFooter";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 import { formatCents } from "@/lib/currency";
 import { formatDate } from "@/lib/date";
 
@@ -177,9 +180,7 @@ export function InvoicePdfDialog({ open, invoice, onClose }: InvoicePdfDialogPro
         <ScrollArea style={{ flex: 1, padding: "20px" }}>
           {/* Cliente */}
           <div style={{ marginBottom: "16px" }}>
-            <Text size="1" color="gray" style={{ textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px", display: "block" }}>
-              Cliente
-            </Text>
+            <SectionHeader style={{ marginBottom: "4px" }}>Cliente</SectionHeader>
             <div style={{ display: "grid", gap: "4px" }}>
               <Text size="2"><strong>Nombre:</strong> {invoice.customer_name}</Text>
               <Text size="2"><strong>CUIT/DNI:</strong> {invoice.customer_tax_id}</Text>
@@ -194,9 +195,7 @@ export function InvoicePdfDialog({ open, invoice, onClose }: InvoicePdfDialogPro
 
           {/* Montos */}
           <div style={{ marginBottom: "16px" }}>
-            <Text size="1" color="gray" style={{ textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px", display: "block" }}>
-              Montos
-            </Text>
+            <SectionHeader style={{ marginBottom: "4px" }}>Montos</SectionHeader>
             <div style={{ display: "grid", gap: "4px" }}>
               <Text size="2"><strong>Neto:</strong> {formatCents(invoice.net_amount_cents)}</Text>
               <Text size="2"><strong>IVA (21%):</strong> {formatCents(invoice.tax_amount_cents)}</Text>
@@ -209,9 +208,7 @@ export function InvoicePdfDialog({ open, invoice, onClose }: InvoicePdfDialogPro
           {/* CAE + QR */}
           {invoice.cae && (
             <div style={{ marginBottom: "16px", padding: "12px", backgroundColor: "rgba(45, 180, 100, 0.06)", border: "1px solid rgba(45, 180, 100, 0.15)", borderRadius: "8px" }}>
-              <Text size="1" color="gray" style={{ textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px", display: "block" }}>
-                Comprobante Autorizado
-              </Text>
+              <SectionHeader style={{ marginBottom: "4px" }}>Comprobante Autorizado</SectionHeader>
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "16px" }}>
                 <div style={{ display: "grid", gap: "4px" }}>
                   <Text size="2"><strong>CAE:</strong> {invoice.cae}</Text>
@@ -258,9 +255,7 @@ export function InvoicePdfDialog({ open, invoice, onClose }: InvoicePdfDialogPro
 
           {/* Fechas */}
           <div style={{ marginBottom: "16px" }}>
-            <Text size="1" color="gray" style={{ textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px", display: "block" }}>
-              Fechas
-            </Text>
+            <SectionHeader style={{ marginBottom: "4px" }}>Fechas</SectionHeader>
             <div style={{ display: "grid", gap: "4px" }}>
               <Text size="2"><strong>Creado:</strong> {formatDate(invoice.created_at)}</Text>
               {invoice.issued_at && (
@@ -270,20 +265,16 @@ export function InvoicePdfDialog({ open, invoice, onClose }: InvoicePdfDialogPro
           </div>
 
           {invoice.error_message && (
-            <div style={{ padding: "12px", backgroundColor: "rgba(239, 68, 68, 0.06)", border: "1px solid rgba(239, 68, 68, 0.15)", borderRadius: "8px" }}>
-              <Text size="2" color="red">{invoice.error_message}</Text>
-            </div>
+            <InlineNotice>{invoice.error_message}</InlineNotice>
           )}
 
           {pdfError && (
-            <div style={{ marginTop: "12px", padding: "12px", backgroundColor: "rgba(239, 68, 68, 0.06)", border: "1px solid rgba(239, 68, 68, 0.15)", borderRadius: "8px" }}>
-              <Text size="2" color="red">{pdfError}</Text>
-            </div>
+            <InlineNotice style={{ marginTop: "12px" }}>{pdfError}</InlineNotice>
           )}
         </ScrollArea>
 
         {/* Footer actions */}
-        <div style={{ padding: "12px 20px", borderTop: "1px solid var(--gray-a3)", display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+        <DialogFooter borderColor="var(--gray-a3)">
           <Button size="2" variant="soft" onClick={onClose}>
             Cerrar
           </Button>
@@ -310,7 +301,7 @@ export function InvoicePdfDialog({ open, invoice, onClose }: InvoicePdfDialogPro
               </Button>
             </>
           )}
-        </div>
+        </DialogFooter>
           </>
         )}
       </div>

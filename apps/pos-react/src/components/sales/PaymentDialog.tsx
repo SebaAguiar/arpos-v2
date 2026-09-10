@@ -9,8 +9,9 @@ import {
   FileTextIcon,
   ReaderIcon,
   TokensIcon,
-  ExclamationTriangleIcon,
 } from "@radix-ui/react-icons";
+import { InlineNotice } from "@/components/ui/InlineNotice";
+import { DialogHeader } from "@/components/ui/DialogHeader";
 import { useCartStore } from "@/stores/cart.store";
 import { useDialogStore } from "@/stores/dialog.store";
 import { useCashRegisterStore } from "@/stores/cash-register.store";
@@ -166,30 +167,7 @@ export function PaymentDialog({ creditSurcharge, onSaleComplete }: PaymentDialog
         }}
       >
         {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "16px 20px",
-            borderBottom: "1px solid var(--border)",
-          }}
-        >
-          <Text size="4" weight="bold">
-            Cobrar
-          </Text>
-          <button
-            onClick={closePayment}
-            style={{
-              background: "none",
-              border: "none",
-              color: "var(--text-secondary)",
-              cursor: "pointer",
-            }}
-          >
-            <Cross1Icon width={18} height={18} />
-          </button>
-        </div>
+        <DialogHeader title="Cobrar" onClose={closePayment} />
 
         <div style={{ padding: "20px", overflow: "auto", flex: 1 }}>
           {/* Total a pagar */}
@@ -412,34 +390,26 @@ export function PaymentDialog({ creditSurcharge, onSaleComplete }: PaymentDialog
           )}
 
           {error && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "10px 12px",
-                backgroundColor: "#e5484d15",
-                border: "1px solid #e5484d50",
-                borderRadius: "6px",
-              }}
+            <InlineNotice
+              action={
+                <button
+                  onClick={() => setError(null)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "var(--color-danger)",
+                    cursor: "pointer",
+                    padding: "2px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <Cross1Icon width={12} height={12} />
+                </button>
+              }
             >
-              <ExclamationTriangleIcon width={16} height={16} color="#e5484d" />
-              <Text size="2" color="red" style={{ flex: 1 }}>
-                {error}
-              </Text>
-              <button
-                onClick={() => setError(null)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#e5484d",
-                  cursor: "pointer",
-                  padding: "2px",
-                }}
-              >
-                <Cross1Icon width={12} height={12} />
-              </button>
-            </div>
+              {error}
+            </InlineNotice>
           )}
 
           <button

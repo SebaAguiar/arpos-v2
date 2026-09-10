@@ -1,16 +1,13 @@
 import { useState } from "react";
 import { Text, TextField, Badge } from "@radix-ui/themes";
-import {
-  Cross1Icon,
-  LockClosedIcon,
-  PlusCircledIcon,
-  MinusCircledIcon,
-  FileTextIcon,
-} from "@radix-ui/react-icons";
+import { LockClosedIcon, PlusCircledIcon, MinusCircledIcon, FileTextIcon } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
 import { useCashRegisterStore } from "@/stores/cash-register.store";
 import { useArcaStore } from "@/stores/arca.store";
+import { DialogHeader } from "@/components/ui/DialogHeader";
 import { calcExpectedBalance } from "@/lib/cash-register";
+import { FieldLabel } from "@/components/ui/FieldLabel";
+import { StatTile } from "@/components/ui/StatTile";
 
 export function CloseRegisterModal() {
   const close = useDialogStore((s) => s.closeCashControl);
@@ -106,36 +103,16 @@ export function CloseRegisterModal() {
           overflow: "hidden",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "16px 20px",
-            borderBottom: "1px solid var(--border)",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <LockClosedIcon width={18} height={18} color="var(--accent)" />
-            <Text size="4" weight="bold">Cerrar caja</Text>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <DialogHeader
+          icon={<LockClosedIcon width={18} height={18} color="var(--accent)" />}
+          title="Cerrar caja"
+          right={
             <Badge color="green" variant="soft" size="1">
               {currentShift.status === "OPEN" ? "Turno abierto" : "Cerrado"}
             </Badge>
-            <button
-              onClick={close}
-              style={{
-                background: "none",
-                border: "none",
-                color: "var(--text-secondary)",
-                cursor: "pointer",
-              }}
-            >
-              <Cross1Icon width={18} height={18} />
-            </button>
-          </div>
-        </div>
+          }
+          onClose={close}
+        />
 
         <div style={{ padding: "20px", overflow: "auto", flex: 1 }}>
           {error && (
@@ -162,30 +139,33 @@ export function CloseRegisterModal() {
               marginBottom: "16px",
             }}
           >
-            <div style={{ padding: "10px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "6px" }}>
-              <Text size="1" color="gray">Monto inicial</Text>
-              <Text size="3" weight="bold" style={{ display: "block", marginTop: "2px" }}>
-                ${currentShift.initialAmount.toLocaleString("es-AR")}
-              </Text>
-            </div>
-            <div style={{ padding: "10px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "6px" }}>
-              <Text size="1" color="gray">Ventas</Text>
-              <Text size="3" weight="bold" color="green" style={{ display: "block", marginTop: "2px" }}>
-                ${currentShift.totalSales.toLocaleString("es-AR")}
-              </Text>
-            </div>
-            <div style={{ padding: "10px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "6px" }}>
-              <Text size="1" color="gray">Ingresos extra</Text>
-              <Text size="3" weight="bold" color="green" style={{ display: "block", marginTop: "2px" }}>
-                +${currentShift.totalIncome.toLocaleString("es-AR")}
-              </Text>
-            </div>
-            <div style={{ padding: "10px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "6px" }}>
-              <Text size="1" color="gray">Egresos</Text>
-              <Text size="3" weight="bold" color="red" style={{ display: "block", marginTop: "2px" }}>
-                -${currentShift.totalExpenses.toLocaleString("es-AR")}
-              </Text>
-            </div>
+            <StatTile
+              variant="hover"
+              size="3"
+              label="Monto inicial"
+              value={`$${currentShift.initialAmount.toLocaleString("es-AR")}`}
+            />
+            <StatTile
+              variant="hover"
+              size="3"
+              label="Ventas"
+              value={`$${currentShift.totalSales.toLocaleString("es-AR")}`}
+              color="green"
+            />
+            <StatTile
+              variant="hover"
+              size="3"
+              label="Ingresos extra"
+              value={`+$${currentShift.totalIncome.toLocaleString("es-AR")}`}
+              color="green"
+            />
+            <StatTile
+              variant="hover"
+              size="3"
+              label="Egresos"
+              value={`-$${currentShift.totalExpenses.toLocaleString("es-AR")}`}
+              color="red"
+            />
           </div>
 
           <div
@@ -203,9 +183,9 @@ export function CloseRegisterModal() {
           </div>
 
           <div style={{ marginBottom: "16px" }}>
-            <Text size="2" weight="bold" style={{ display: "block", marginBottom: "6px" }}>
+            <FieldLabel>
               Monto final en caja
-            </Text>
+            </FieldLabel>
             <TextField.Root
               type="number"
               placeholder="0.00"
@@ -260,9 +240,9 @@ export function CloseRegisterModal() {
               marginBottom: "16px",
             }}
           >
-            <Text size="2" weight="bold" style={{ display: "block", marginBottom: "6px" }}>
+            <FieldLabel>
               Facturación del día
-            </Text>
+            </FieldLabel>
             <button
               onClick={handleFactureDay}
               disabled={isFacturing || currentShift.status === "CLOSED"}

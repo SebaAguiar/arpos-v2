@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { Text, TextField, Select } from "@radix-ui/themes";
+import { Text, TextField, Select, Button } from "@radix-ui/themes";
 import { Cross1Icon, PlusIcon, MinusIcon } from "@radix-ui/react-icons";
 import { useInventoryStore } from "@/stores/inventory.store";
+import { FormActions } from "@/components/ui/FormActions";
 
 interface StockAdjustmentDialogProps {
   preselectedProductId?: string | null;
@@ -145,36 +146,19 @@ export function StockAdjustmentDialog({ preselectedProductId, onClose }: StockAd
             />
           </div>
 
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "8px" }}>
-            <button
-              onClick={onClose}
-              style={{
-                padding: "8px 16px",
-                backgroundColor: "var(--bg-surface-hover)",
-                color: "var(--text-primary)",
-                border: "1px solid var(--border)",
-                borderRadius: "6px",
-                cursor: "pointer",
-              }}
-            >
+          <FormActions marginTop="8px">
+            <Button size="2" variant="soft" onClick={onClose}>
               Cancelar
-            </button>
-            <button
+            </Button>
+            <Button
+              size="2"
+              color="green"
               onClick={handleSubmit}
               disabled={loading || !productId || !quantity || !reason.trim()}
-              style={{
-                padding: "8px 16px",
-                backgroundColor: !loading && productId && quantity && reason.trim() ? "var(--accent)" : "var(--bg-surface)",
-                color: !loading && productId && quantity && reason.trim() ? "#fff" : "var(--text-secondary)",
-                border: "none",
-                borderRadius: "6px",
-                cursor: loading || !productId || !quantity || !reason.trim() ? "not-allowed" : "pointer",
-                fontWeight: 600,
-              }}
             >
               {loading ? "Guardando..." : "Registrar"}
-            </button>
-          </div>
+            </Button>
+          </FormActions>
         </div>
       </div>
     </div>

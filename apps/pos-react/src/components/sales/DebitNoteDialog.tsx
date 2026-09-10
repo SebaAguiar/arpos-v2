@@ -4,6 +4,9 @@ import { Cross2Icon, ReloadIcon } from "@radix-ui/react-icons";
 import { useArcaStore } from "@/stores/arca.store";
 import type { ApiInvoice } from "@/services/arca.service";
 import { formatCents } from "@/lib/currency";
+import { FieldLabel } from "@/components/ui/FieldLabel";
+import { InlineNotice } from "@/components/ui/InlineNotice";
+import { FormActions } from "@/components/ui/FormActions";
 
 interface DebitNoteDialogProps {
   open: boolean;
@@ -110,9 +113,9 @@ export function DebitNoteDialog({ open, invoice, onClose, onCreated }: DebitNote
 
         {/* Motivo */}
         <div style={{ marginBottom: "12px" }}>
-          <Text size="2" weight="medium" style={{ display: "block", marginBottom: "6px" }}>
+          <FieldLabel weight="medium">
             Motivo de la nota de débito *
-          </Text>
+          </FieldLabel>
           <TextField.Root
             placeholder="Ej: Ajuste de precio, Intereses por mora..."
             value={reason}
@@ -122,9 +125,9 @@ export function DebitNoteDialog({ open, invoice, onClose, onCreated }: DebitNote
 
         {/* Monto */}
         <div style={{ marginBottom: "16px" }}>
-          <Text size="2" weight="medium" style={{ display: "block", marginBottom: "6px" }}>
+          <FieldLabel weight="medium">
             Monto (en pesos) *
-          </Text>
+          </FieldLabel>
           <TextField.Root
             placeholder="Ej: 1500.00"
             value={amountCents}
@@ -139,12 +142,10 @@ export function DebitNoteDialog({ open, invoice, onClose, onCreated }: DebitNote
         </div>
 
         {error && (
-          <div style={{ padding: "8px 12px", backgroundColor: "rgba(239, 68, 68, 0.08)", border: "1px solid rgba(239, 68, 68, 0.15)", borderRadius: "6px", marginBottom: "12px" }}>
-            <Text size="2" color="red">{error}</Text>
-          </div>
+          <InlineNotice style={{ marginBottom: "12px" }}>{error}</InlineNotice>
         )}
 
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+        <FormActions>
           <Button size="2" variant="soft" onClick={handleClose} disabled={isSubmitting}>
             Cancelar
           </Button>
@@ -155,7 +156,7 @@ export function DebitNoteDialog({ open, invoice, onClose, onCreated }: DebitNote
               "Crear Nota de Débito"
             )}
           </Button>
-        </div>
+        </FormActions>
       </div>
     </div>
   );

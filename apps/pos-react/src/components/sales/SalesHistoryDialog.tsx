@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Text, Badge } from "@radix-ui/themes";
-import { Cross1Icon, CalendarIcon } from "@radix-ui/react-icons";
+import { CalendarIcon } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
 import { SalesRepository } from "@/repositories/sales.repository";
 import { printReceipt } from "@/services/receipt.service";
@@ -8,6 +8,7 @@ import { useCompanyStore } from "@/stores/company.store";
 import { useSettingsStore } from "@/stores/settings.store";
 import type { Sale, StoreConfig } from "@/lib/types";
 import { getPeriodTimestamps, type Period } from "@/lib/date";
+import { DialogHeader } from "@/components/ui/DialogHeader";
 
 export function SalesHistoryDialog() {
   const [period, setPeriod] = useState<Period>("today");
@@ -87,25 +88,7 @@ export function SalesHistoryDialog() {
           overflow: "hidden",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "16px 20px",
-            borderBottom: "1px solid var(--border)",
-          }}
-        >
-          <Text size="4" weight="bold">
-            Historial de ventas
-          </Text>
-          <button
-            onClick={closeSalesHistory}
-            style={{ background: "none", border: "none", color: "var(--text-secondary)", cursor: "pointer" }}
-          >
-            <Cross1Icon width={18} height={18} />
-          </button>
-        </div>
+<DialogHeader title="Historial de ventas" onClose={closeSalesHistory} />
 
         <div style={{ display: "flex", gap: "4px", padding: "12px 20px" }}>
           {(["today", "week", "month"] as const).map((p) => (

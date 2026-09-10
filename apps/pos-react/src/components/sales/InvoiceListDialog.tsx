@@ -18,6 +18,7 @@ import { formatDate } from "@/lib/date";
 import { InvoicePdfDialog } from "./InvoicePdfDialog";
 import { CreditNoteDialog } from "./CreditNoteDialog";
 import { DebitNoteDialog } from "./DebitNoteDialog";
+import { FilterTabs } from "@/components/ui/FilterTabs";
 
 interface InvoiceListDialogProps {
   open: boolean;
@@ -347,36 +348,17 @@ export function InvoiceListDialog({ open, onClose }: InvoiceListDialogProps) {
             justifyContent: "space-between",
           }}
         >
-          <div style={{ display: "flex", gap: "6px" }}>
-            {(["all", "pending", "issued", "error"] as const).map((f) => {
-              const isActive = statusFilter === f;
-              const labels: Record<string, string> = {
-                all: "Todos",
-                pending: "Pendientes",
-                issued: "Emitidos",
-                error: "Con error",
-              };
-              return (
-                <button
-                  key={f}
-                  onClick={() => setStatusFilter(f)}
-                  style={{
-                    padding: "5px 12px",
-                    borderRadius: "8px",
-                    border: "1px solid",
-                    borderColor: isActive ? "var(--accent)" : "var(--gray-a5)",
-                    backgroundColor: isActive ? "rgba(139, 92, 246, 0.08)" : "transparent",
-                    color: isActive ? "var(--accent)" : "var(--text-secondary)",
-                    fontSize: "12px",
-                    fontWeight: isActive ? 600 : 400,
-                    cursor: "pointer",
-                  }}
-                >
-                  {labels[f]}
-                </button>
-              );
-            })}
-          </div>
+          <FilterTabs
+            variant="accent"
+            value={statusFilter}
+            onChange={setStatusFilter}
+            options={[
+              { value: "all", label: "Todos" },
+              { value: "pending", label: "Pendientes" },
+              { value: "issued", label: "Emitidos" },
+              { value: "error", label: "Con error" },
+            ]}
+          />
 
           {config && pendingCount > 0 && (
             <Button

@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { Text, Select, Badge } from "@radix-ui/themes";
-import { Cross1Icon, CalendarIcon } from "@radix-ui/react-icons";
+import { CalendarIcon } from "@radix-ui/react-icons";
 import { useInventoryStore } from "@/stores/inventory.store";
+import { DialogHeader } from "@/components/ui/DialogHeader";
+import { ListEmptyState } from "@/components/ui/ListEmptyState";
 
 interface StockMovementsDialogProps {
   preselectedProductId?: string | null;
@@ -63,15 +65,7 @@ export function StockMovementsDialog({ preselectedProductId, onClose }: StockMov
           overflow: "hidden",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
-          <Text size="4" weight="bold">Historial de movimientos</Text>
-          <button
-            onClick={onClose}
-            style={{ backgroundColor: "transparent", border: "none", color: "var(--text-secondary)", cursor: "pointer" }}
-          >
-            <Cross1Icon width={18} height={18} />
-          </button>
-        </div>
+        <DialogHeader title="Historial de movimientos" onClose={onClose} />
 
         <div style={{ padding: "12px 20px", display: "flex", gap: "8px" }}>
           <Select.Root value={typeFilter} onValueChange={setTypeFilter}>
@@ -108,10 +102,7 @@ export function StockMovementsDialog({ preselectedProductId, onClose }: StockMov
               Cargando...
             </Text>
           ) : movements.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "40px 0" }}>
-              <CalendarIcon width={32} height={32} style={{ color: "var(--text-muted)", marginBottom: "8px" }} />
-              <Text size="2" color="gray">No hay movimientos registrados</Text>
-            </div>
+            <ListEmptyState icon={CalendarIcon} message="No hay movimientos registrados" />
           ) : (
             movements.map((mov) => (
               <div

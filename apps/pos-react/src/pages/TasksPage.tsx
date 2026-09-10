@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Text, TextField, Badge, Select } from "@radix-ui/themes";
+import { Text, TextField, Badge, Select, Button } from "@radix-ui/themes";
 import {
   PlusIcon,
   CheckCircledIcon,
@@ -9,19 +9,9 @@ import {
 } from "@radix-ui/react-icons";
 import { useTasksStore } from "@/stores/tasks.store";
 import type { TaskPriority, TaskStatus } from "@/stores/tasks.store";
-
-const PRIORITY_CONFIG: Record<TaskPriority, { label: string; color: string }> = {
-  URGENT: { label: "Urgente", color: "red" },
-  HIGH: { label: "Alta", color: "orange" },
-  MEDIUM: { label: "Media", color: "yellow" },
-  LOW: { label: "Baja", color: "gray" },
-};
-
-const STATUS_CONFIG: Record<TaskStatus, { label: string; color: string }> = {
-  PENDING: { label: "Pendiente", color: "gray" },
-  IN_PROGRESS: { label: "En progreso", color: "blue" },
-  DONE: { label: "Completada", color: "green" },
-};
+import { PRIORITY_CONFIG, STATUS_CONFIG, TASK_FILTER_OPTIONS } from "@/lib/tasks";
+import { FormActions } from "@/components/ui/FormActions";
+import { FilterTabs } from "@/components/ui/FilterTabs";
 
 export function TasksPage() {
   const tasks = useTasksStore((s) => s.tasks);
@@ -132,62 +122,24 @@ export function TasksPage() {
                 style={{ flex: 1 }}
               />
             </div>
-            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-              <button
-                onClick={() => setShowForm(false)}
-                style={{
-                  padding: "6px 14px",
-                  backgroundColor: "transparent",
-                  color: "var(--text-secondary)",
-                  border: "1px solid var(--border)",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  fontSize: "13px",
-                }}
-              >
+            <FormActions>
+              <Button size="2" variant="soft" onClick={() => setShowForm(false)}>
                 Cancelar
-              </button>
-              <button
-                onClick={handleAddTask}
-                disabled={!title.trim()}
-                style={{
-                  padding: "6px 14px",
-                  backgroundColor: title.trim() ? "var(--accent)" : "var(--bg-surface)",
-                  color: title.trim() ? "#fff" : "var(--text-secondary)",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: title.trim() ? "pointer" : "not-allowed",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                }}
-              >
+              </Button>
+              <Button size="2" onClick={handleAddTask} disabled={!title.trim()}>
                 Crear tarea
-              </button>
-            </div>
+              </Button>
+            </FormActions>
           </div>
         </div>
       )}
 
-      <div style={{ display: "flex", gap: "4px", marginBottom: "12px" }}>
-        {(["ALL", "PENDING", "IN_PROGRESS", "DONE"] as const).map((status) => (
-          <button
-            key={status}
-            onClick={() => setFilterStatus(status)}
-            style={{
-              padding: "4px 10px",
-              border: "1px solid var(--border)",
-              borderRadius: "4px",
-              backgroundColor: filterStatus === status ? "var(--bg-surface-hover)" : "transparent",
-              color: filterStatus === status ? "var(--text-primary)" : "var(--text-secondary)",
-              cursor: "pointer",
-              fontSize: "12px",
-              fontWeight: filterStatus === status ? 600 : 400,
-            }}
-          >
-            {status === "ALL" ? "Todas" : STATUS_CONFIG[status].label}
-          </button>
-        ))}
-      </div>
+      <FilterTabs
+        options={TASK_FILTER_OPTIONS}
+        value={filterStatus}
+        onChange={setFilterStatus}
+        style={{ marginBottom: "12px" }}
+      />
 
       {filteredTasks.length === 0 ? (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "40px 0" }}>
@@ -243,10 +195,10 @@ export function TasksPage() {
                 >
                   {task.title}
                 </Text>
-                <Badge color={PRIORITY_CONFIG[task.priority].color as "red" | "orange" | "yellow" | "gray"} variant="soft" size="1">
+                <Badge color={PRIORITY_CONFIG[task.priority].color} variant="soft" size="1">
                   {PRIORITY_CONFIG[task.priority].label}
                 </Badge>
-                <Badge color={STATUS_CONFIG[task.status].color as "gray" | "blue" | "green"} variant="soft" size="1">
+                <Badge color={STATUS_CONFIG[task.status].color} variant="soft" size="1">
                   {STATUS_CONFIG[task.status].label}
                 </Badge>
               </div>

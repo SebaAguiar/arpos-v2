@@ -1,7 +1,6 @@
-import { useState, type ComponentProps } from "react";
-import { Text, TextField, Badge, Select } from "@radix-ui/themes";
+import { useState } from "react";
+import { Text, TextField, Badge, Select, Button } from "@radix-ui/themes";
 import {
-  Cross1Icon,
   PlusIcon,
   CheckCircledIcon,
   CircleIcon,
@@ -11,21 +10,10 @@ import {
 import { useDialogStore } from "@/stores/dialog.store";
 import { useTasksStore } from "@/stores/tasks.store";
 import type { TaskPriority, TaskStatus } from "@/stores/tasks.store";
-
-type BadgeColor = ComponentProps<typeof Badge>["color"];
-
-const PRIORITY_CONFIG: Record<TaskPriority, { label: string; color: BadgeColor }> = {
-  URGENT: { label: "Urgente", color: "red" },
-  HIGH: { label: "Alta", color: "orange" },
-  MEDIUM: { label: "Media", color: "yellow" },
-  LOW: { label: "Baja", color: "gray" },
-};
-
-const STATUS_CONFIG: Record<TaskStatus, { label: string; color: BadgeColor }> = {
-  PENDING: { label: "Pendiente", color: "gray" },
-  IN_PROGRESS: { label: "En progreso", color: "blue" },
-  DONE: { label: "Completada", color: "green" },
-};
+import { PRIORITY_CONFIG, STATUS_CONFIG, TASK_FILTER_OPTIONS } from "@/lib/tasks";
+import { DialogHeader } from "@/components/ui/DialogHeader";
+import { FormActions } from "@/components/ui/FormActions";
+import { FilterTabs } from "@/components/ui/FilterTabs";
 
 export function TasksDialog() {
   const closeTasks = useDialogStore((s) => s.closeTasks);
@@ -89,24 +77,16 @@ export function TasksDialog() {
         }}
       >
         {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "16px 20px",
-            borderBottom: "1px solid var(--border)",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <Text size="4" weight="bold">Tareas</Text>
-            {pendingCount > 0 && (
+        <DialogHeader
+          title="Tareas"
+          badge={
+            pendingCount > 0 && (
               <Badge color="orange" variant="soft" size="1">
                 {pendingCount} pendientes
               </Badge>
-            )}
-          </div>
-          <div style={{ display: "flex", gap: "8px" }}>
+            )
+          }
+          right={
             <button
               onClick={() => setShowForm(!showForm)}
               style={{
@@ -126,14 +106,9 @@ export function TasksDialog() {
               <PlusIcon width={14} height={14} />
               Nueva tarea
             </button>
-            <button
-              onClick={closeTasks}
-              style={{ background: "none", border: "none", color: "var(--text-secondary)", cursor: "pointer" }}
-            >
-              <Cross1Icon width={18} height={18} />
-            </button>
-          </div>
-        </div>
+          }
+          onClose={closeTasks}
+        />
 
         <div style={{ flex: 1, overflow: "auto", padding: "16px 20px" }}>
           {/* New task form */}
@@ -178,63 +153,25 @@ export function TasksDialog() {
                     style={{ flex: 1 }}
                   />
                 </div>
-                <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-                  <button
-                    onClick={() => setShowForm(false)}
-                    style={{
-                      padding: "6px 14px",
-                      backgroundColor: "transparent",
-                      color: "var(--text-secondary)",
-                      border: "1px solid var(--border)",
-                      borderRadius: "6px",
-                      cursor: "pointer",
-                      fontSize: "13px",
-                    }}
-                  >
+                <FormActions>
+                  <Button size="2" variant="soft" onClick={() => setShowForm(false)}>
                     Cancelar
-                  </button>
-                  <button
-                    onClick={handleAddTask}
-                    disabled={!title.trim()}
-                    style={{
-                      padding: "6px 14px",
-                      backgroundColor: title.trim() ? "var(--accent)" : "var(--bg-surface)",
-                      color: title.trim() ? "#fff" : "var(--text-secondary)",
-                      border: "none",
-                      borderRadius: "6px",
-                      cursor: title.trim() ? "pointer" : "not-allowed",
-                      fontSize: "13px",
-                      fontWeight: 600,
-                    }}
-                  >
+                  </Button>
+                  <Button size="2" onClick={handleAddTask} disabled={!title.trim()}>
                     Crear tarea
-                  </button>
-                </div>
+                  </Button>
+                </FormActions>
               </div>
             </div>
           )}
 
           {/* Filter */}
-          <div style={{ display: "flex", gap: "4px", marginBottom: "12px" }}>
-            {(["ALL", "PENDING", "IN_PROGRESS", "DONE"] as const).map((status) => (
-              <button
-                key={status}
-                onClick={() => setFilterStatus(status)}
-                style={{
-                  padding: "4px 10px",
-                  border: "1px solid var(--border)",
-                  borderRadius: "4px",
-                  backgroundColor: filterStatus === status ? "var(--bg-surface-hover)" : "transparent",
-                  color: filterStatus === status ? "var(--text-primary)" : "var(--text-secondary)",
-                  cursor: "pointer",
-                  fontSize: "12px",
-                  fontWeight: filterStatus === status ? 600 : 400,
-                }}
-              >
-                {status === "ALL" ? "Todas" : STATUS_CONFIG[status].label}
-              </button>
-            ))}
-          </div>
+          <FilterTabs
+            options={TASK_FILTER_OPTIONS}
+            value={filterStatus}
+            onChange={setFilterStatus}
+            style={{ marginBottom: "12px" }}
+          />
 
           {/* Tasks list */}
           {filteredTasks.length === 0 ? (

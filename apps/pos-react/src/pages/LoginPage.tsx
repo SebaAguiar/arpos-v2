@@ -1,7 +1,8 @@
 import { useState, useCallback } from "react";
 import { Text, TextField } from "@radix-ui/themes";
-import { ExclamationTriangleIcon, LightningBoltIcon } from "@radix-ui/react-icons";
+import { LightningBoltIcon } from "@radix-ui/react-icons";
 import { useAuth } from "@/hooks/useAuth";
+import { InlineNotice } from "@/components/ui/InlineNotice";
 
 export function LoginPage() {
   const { loginWithLicense, loading, error, clearError } = useAuth();
@@ -81,22 +82,7 @@ export function LoginPage() {
           </div>
 
           {error && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "10px 12px",
-                backgroundColor: "#e5484d15",
-                border: "1px solid #e5484d50",
-                borderRadius: "6px",
-              }}
-            >
-              <ExclamationTriangleIcon width={16} height={16} color="#e5484d" />
-              <Text size="2" color="red" style={{ flex: 1 }}>
-                {error}
-              </Text>
-            </div>
+            <InlineNotice style={{ marginBottom: "12px" }}>{error}</InlineNotice>
           )}
 
           <button

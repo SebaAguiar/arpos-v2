@@ -1,11 +1,7 @@
 import { Text } from "@radix-ui/themes";
-import {
-  Cross1Icon,
-  GearIcon,
-  PersonIcon,
-  HomeIcon,
-} from "@radix-ui/react-icons";
+import { PersonIcon, HomeIcon, GearIcon } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
+import { DialogHeader } from "@/components/ui/DialogHeader";
 import { UsersManager } from "./UsersManager";
 import { StoreManager } from "./StoreManager";
 import { PaymentMethodsEditor } from "./PaymentMethodsEditor";
@@ -43,34 +39,11 @@ export function SettingsDialog() {
         }}
       >
         {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "16px 20px",
-            borderBottom: "1px solid var(--border)",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <GearIcon width={18} height={18} color="var(--text-secondary)" />
-            <Text size="4" weight="bold">
-              Configuración
-            </Text>
-          </div>
-          <button
-            onClick={closeSettings}
-            style={{
-              background: "none",
-              border: "none",
-              color: "var(--text-secondary)",
-              cursor: "pointer",
-            }}
-            aria-label="Cerrar configuración"
-          >
-            <Cross1Icon width={18} height={18} />
-          </button>
-        </div>
+        <DialogHeader
+          icon={<GearIcon width={18} height={18} color="var(--text-secondary)" />}
+          title="Configuración"
+          onClose={closeSettings}
+        />
 
         <div style={{ padding: "20px", overflow: "auto", flex: 1, display: "flex", flexDirection: "column", gap: "16px" }}>
           <PaymentMethodsEditor />

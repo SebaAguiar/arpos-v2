@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { TextField, Text } from "@radix-ui/themes";
 import { PlusIcon } from "@radix-ui/react-icons";
+import { DialogFooter } from "@/components/ui/DialogFooter";
 
 interface CustomItemDialogProps {
   onAdd: (name: string, price: number, quantity: number) => void;
@@ -157,14 +158,7 @@ export function CustomItemDialog({ onAdd, onClose }: CustomItemDialogProps) {
           </div>
 
           {/* Footer */}
-          <div
-            style={{
-              padding: "16px",
-              borderTop: "1px solid var(--border)",
-              display: "flex",
-              gap: "8px",
-            }}
-          >
+          <DialogFooter style={{ padding: "16px" }}>
             <button
               type="button"
               onClick={onClose}
@@ -203,7 +197,7 @@ export function CustomItemDialog({ onAdd, onClose }: CustomItemDialogProps) {
               <PlusIcon width={14} height={14} />
               Agregar
             </button>
-          </div>
+          </DialogFooter>
         </form>
       </div>
     </div>

@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Text, TextField } from "@radix-ui/themes";
-import { Cross1Icon, LockOpen1Icon } from "@radix-ui/react-icons";
+import { LockOpen1Icon } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
 import { useCashRegisterStore } from "@/stores/cash-register.store";
+import { FieldLabel } from "@/components/ui/FieldLabel";
+import { DialogHeader } from "@/components/ui/DialogHeader";
 
 export function OpenRegisterModal() {
   const close = useDialogStore((s) => s.closeCashControl);
@@ -44,31 +46,11 @@ export function OpenRegisterModal() {
           overflow: "hidden",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "16px 20px",
-            borderBottom: "1px solid var(--border)",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <LockOpen1Icon width={18} height={18} color="#30a46c" />
-            <Text size="4" weight="bold">Abrir caja</Text>
-          </div>
-          <button
-            onClick={close}
-            style={{
-              background: "none",
-              border: "none",
-              color: "var(--text-secondary)",
-              cursor: "pointer",
-            }}
-          >
-            <Cross1Icon width={18} height={18} />
-          </button>
-        </div>
+        <DialogHeader
+          icon={<LockOpen1Icon width={18} height={18} color="#30a46c" />}
+          title="Abrir caja"
+          onClose={close}
+        />
 
         <div style={{ padding: "20px" }}>
           {error && (
@@ -93,9 +75,9 @@ export function OpenRegisterModal() {
 
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <div>
-              <Text size="2" weight="bold" style={{ display: "block", marginBottom: "6px" }}>
+              <FieldLabel>
                 Monto inicial
-              </Text>
+              </FieldLabel>
               <TextField.Root
                 type="number"
                 placeholder="0.00"

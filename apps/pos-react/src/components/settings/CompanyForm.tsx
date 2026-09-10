@@ -3,6 +3,9 @@ import { Text, TextField, Card, Button } from "@radix-ui/themes";
 import { CheckIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { useCompanyStore } from "@/stores/company.store";
 import { EMAIL_RE, isValidCuit } from "@/lib/validators";
+import { FieldLabel } from "@/components/ui/FieldLabel";
+import { FieldError } from "@/components/ui/FieldError";
+import { InlineNotice } from "@/components/ui/InlineNotice";
 
 type FormField = "name" | "taxId" | "address" | "email" | "phone";
 
@@ -107,9 +110,9 @@ export function CompanyForm() {
   }
 
   const fieldLabel = (label: string) => (
-    <Text size="2" weight="medium" style={{ display: "block", marginBottom: "6px" }}>
+    <FieldLabel weight="medium">
       {label}
-    </Text>
+    </FieldLabel>
   );
 
   return (
@@ -129,9 +132,9 @@ export function CompanyForm() {
             aria-invalid={touched.name && nameError}
           />
           {touched.name && nameError && (
-            <Text size="1" color="red" style={{ display: "block", marginTop: "4px" }}>
+            <FieldError>
               El nombre es obligatorio
-            </Text>
+            </FieldError>
           )}
         </div>
 
@@ -145,9 +148,9 @@ export function CompanyForm() {
             aria-invalid={touched.taxId && cuitError}
           />
           {touched.taxId && cuitError && (
-            <Text size="1" color="red" style={{ display: "block", marginTop: "4px" }}>
+            <FieldError>
               Formato de CUIT inválido (11 dígitos)
-            </Text>
+            </FieldError>
           )}
         </div>
 
@@ -171,9 +174,9 @@ export function CompanyForm() {
             aria-invalid={touched.email && emailError}
           />
           {touched.email && emailError && (
-            <Text size="1" color="red" style={{ display: "block", marginTop: "4px" }}>
+            <FieldError>
               Ingresá un email válido
-            </Text>
+            </FieldError>
           )}
         </div>
 
@@ -188,16 +191,9 @@ export function CompanyForm() {
       </div>
 
       {error && (
-        <div
-          style={{
-            padding: "8px 12px",
-            backgroundColor: "var(--color-danger-subtle)",
-            borderRadius: "6px",
-            marginTop: "12px",
-          }}
-        >
-          <Text size="2" color="red">{error}</Text>
-        </div>
+        <InlineNotice bordered={false} icon={false} style={{ marginTop: "12px" }}>
+          {error}
+        </InlineNotice>
       )}
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "12px" }}>
