@@ -7,23 +7,7 @@ import { printReceipt } from "@/services/receipt.service";
 import { useCompanyStore } from "@/stores/company.store";
 import { useSettingsStore } from "@/stores/settings.store";
 import type { Sale, StoreConfig } from "@/lib/types";
-
-type Period = "today" | "week" | "month";
-
-function getPeriodTimestamps(period: Period): { from?: number; to?: number } {
-  const now = Math.floor(Date.now() / 1000);
-  switch (period) {
-    case "today": {
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
-      return { from: Math.floor(todayStart.getTime() / 1000), to: now };
-    }
-    case "week":
-      return { from: now - 7 * 86400, to: now };
-    case "month":
-      return { from: now - 30 * 86400, to: now };
-  }
-}
+import { getPeriodTimestamps, type Period } from "@/lib/date";
 
 export function SalesHistoryDialog() {
   const [period, setPeriod] = useState<Period>("today");

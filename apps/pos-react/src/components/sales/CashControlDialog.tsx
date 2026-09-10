@@ -11,6 +11,7 @@ import {
 } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
 import { useCashRegisterStore } from "@/stores/cash-register.store";
+import { calcExpectedBalance } from "@/lib/cash-register";
 
 export function CashControlDialog() {
   const closeCashControl = useDialogStore((s) => s.closeCashControl);
@@ -38,8 +39,12 @@ export function CashControlDialog() {
 
   const summary = useMemo(() => {
     if (!currentShift) return null;
-    const expectedCash =
-      currentShift.initialAmount + currentShift.totalSales + currentShift.totalIncome - currentShift.totalExpenses;
+    const expectedCash = calcExpectedBalance(
+      currentShift.initialAmount,
+      currentShift.totalSales,
+      currentShift.totalIncome,
+      currentShift.totalExpenses,
+    );
     return {
       ...currentShift,
       expectedCash,

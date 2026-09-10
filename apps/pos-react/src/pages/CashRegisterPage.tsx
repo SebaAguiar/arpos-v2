@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Text, Badge } from "@radix-ui/themes";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { useCashRegisterStore } from "@/stores/cash-register.store";
+import { calcExpectedBalance } from "@/lib/cash-register";
 
 export function CashRegisterPage() {
   const shifts = useCashRegisterStore((s) => s.shifts);
@@ -29,8 +30,12 @@ export function CashRegisterPage() {
         </div>
       ) : (
         shifts.map((shift) => {
-          const expected =
-            shift.initialAmount + shift.totalSales + shift.totalIncome - shift.totalExpenses;
+          const expected = calcExpectedBalance(
+            shift.initialAmount,
+            shift.totalSales,
+            shift.totalIncome,
+            shift.totalExpenses,
+          );
           const diff = shift.finalAmount !== null ? shift.finalAmount - expected : null;
           return (
             <div

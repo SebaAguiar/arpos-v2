@@ -5,19 +5,13 @@ import {
   Table,
   Badge,
   IconButton,
-  TextField,
   Flex,
   Select,
   Tooltip,
-  Dialog,
 } from "@radix-ui/themes";
 import {
-  PlusIcon,
   Pencil2Icon,
   TrashIcon,
-  MagnifyingGlassIcon,
-  Cross2Icon,
-  ArchiveIcon,
   ExclamationTriangleIcon,
   UpdateIcon,
 } from "@radix-ui/react-icons";
@@ -32,6 +26,12 @@ import { StockBadge } from "@/components/product/StockBadge";
 import { ProductFormDialog } from "@/components/product/ProductFormDialog";
 import { StockAdjustmentDialog } from "@/components/product/StockAdjustmentDialog";
 import { StaleIndicator } from "@/components/ui/StaleIndicator";
+import { TableSkeleton } from "@/components/ui/TableSkeleton";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { PageSearchInput } from "@/components/ui/PageSearchInput";
+import { AddButton } from "@/components/ui/AddButton";
+import { ConfirmDeleteDialog } from "@/components/ui/ConfirmDeleteDialog";
+import { useHotkeys } from "@/hooks/useHotkeys";
 import type { Product, ProductSortField, ProductSortDirection } from "@/lib/types";
 
 export function ProductsPage() {
@@ -67,28 +67,16 @@ export function ProductsPage() {
     fetchProducts();
   }, [fetchProducts]);
 
-  // Global Keyboard Shortcuts ( / to focus search, N for new product)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const activeEl = document.activeElement;
-      const isInput =
-        activeEl?.tagName === "INPUT" ||
-        activeEl?.tagName === "TEXTAREA" ||
-        (activeEl instanceof HTMLElement && activeEl.isContentEditable);
-
-      if (e.key === "/" && !isInput) {
-        e.preventDefault();
-        searchInputRef.current?.focus();
-      } else if ((e.key === "n" || e.key === "N") && !isInput && !e.ctrlKey && !e.metaKey) {
-        e.preventDefault();
+  useHotkeys([
+    { keys: "/", handler: () => searchInputRef.current?.focus() },
+    {
+      keys: "n",
+      handler: () => {
         setEditingProduct(null);
         setFormOpen(true);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+      },
+    },
+  ]);
 
   // Compute stats
   const totalProducts = products.length;
@@ -179,11 +167,7 @@ export function ProductsPage() {
           </Text>
         </div>
 
-        <Button size="3" onClick={handleOpenCreate} aria-label="Crear nuevo producto (Presioná N)">
-          <PlusIcon width={18} height={18} />
-          Nuevo producto
-          <KbdShortcut label="N" />
-        </Button>
+        <AddButton label="Nuevo producto" size="3" shortcut="n" onClick={handleOpenCreate} />
       </Flex>
 
       {/* Toolbar / Filters */}
@@ -200,31 +184,13 @@ export function ProductsPage() {
         }}
       >
         <Flex align="center" gap="3" style={{ flex: 1 }}>
-          <TextField.Root
-            ref={searchInputRef}
+          <PageSearchInput
             placeholder="Buscar por nombre, código barcode, SKU..."
+            ariaLabel="Buscar productos"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ width: "320px" }}
-            aria-label="Buscar productos"
-          >
-            <TextField.Slot>
-              <MagnifyingGlassIcon width={16} height={16} color="gray" />
-            </TextField.Slot>
-            {search && (
-              <TextField.Slot>
-                <IconButton
-                  size="1"
-                  variant="ghost"
-                  color="gray"
-                  onClick={() => setSearch("")}
-                  aria-label="Limpiar búsqueda"
-                >
-                  <Cross2Icon width={14} height={14} />
-                </IconButton>
-              </TextField.Slot>
-            )}
-          </TextField.Root>
+            onChange={setSearch}
+            inputRef={searchInputRef}
+          />
 
           {/* Category Filter */}
           {categories.length > 0 && (
@@ -314,35 +280,31 @@ export function ProductsPage() {
 
           <Table.Body>
             {loading ? (
-              <SkeletonRows />
+              <TableSkeleton
+                columns={[
+                  { width: 80 },
+                  { width: 160 },
+                  { width: 70, align: "right" },
+                  { width: 60, align: "right" },
+                  { width: 90, align: "center", height: 20, radius: 10 },
+                  { width: 80, align: "right", height: 24 },
+                ]}
+              />
             ) : displayedProducts.length === 0 ? (
-              <Table.Row>
-                <Table.Cell colSpan={6}>
-                  <Flex
-                    direction="column"
-                    align="center"
-                    justify="center"
-                    gap="3"
-                    style={{ padding: "48px 16px", textAlign: "center" }}
-                  >
-                    <ArchiveIcon width={36} height={36} color="var(--text-muted)" />
-                    <Text size="3" weight="bold" color="gray">
-                      No se encontraron productos
-                    </Text>
-                    <Text size="2" color="gray" style={{ maxWidth: 400 }}>
-                      {search || category || lowStockOnly
-                        ? "Probá cambiando los filtros o el término de búsqueda."
-                        : "Comenzá creando tu primer producto con el botón 'Nuevo producto'."}
-                    </Text>
-                    {!search && !category && !lowStockOnly && (
-                      <Button size="2" onClick={handleOpenCreate}>
-                        <PlusIcon width={16} height={16} />
-                        Crear primer producto
-                      </Button>
-                    )}
-                  </Flex>
-                </Table.Cell>
-              </Table.Row>
+              <EmptyState
+                colSpan={6}
+                title="No se encontraron productos"
+                description={
+                  search || category || lowStockOnly
+                    ? "Probá cambiando los filtros o el término de búsqueda."
+                    : "Comenzá creando tu primer producto con el botón 'Nuevo producto'."
+                }
+                action={
+                  !search && !category && !lowStockOnly
+                    ? { label: "Crear primer producto", onClick: handleOpenCreate }
+                    : undefined
+                }
+              />
             ) : (
               displayedProducts.map((product) => {
                 const stockQty =
@@ -486,86 +448,20 @@ export function ProductsPage() {
       />
 
       {/* Delete Confirmation Dialog */}
-      <Dialog.Root
+      <ConfirmDeleteDialog
         open={!!deletingProduct}
         onOpenChange={(open) => !open && setDeletingProduct(null)}
-      >
-        <Dialog.Content style={{ maxWidth: 400, padding: "24px" }}>
-          <Dialog.Title style={{ marginBottom: "8px" }}>
-            ¿Eliminar producto?
-          </Dialog.Title>
-          <Dialog.Description size="2" color="gray" style={{ marginBottom: "20px" }}>
+        title="¿Eliminar producto?"
+        description={
+          <>
             ¿Estás seguro de que querés eliminar{" "}
-            <strong>"{deletingProduct?.name}"</strong>? Esta acción ocultará el producto del catálogo de ventas.
-          </Dialog.Description>
-
-          <Flex justify="end" gap="3">
-            <Dialog.Close>
-              <Button type="button" variant="soft" color="gray">
-                Cancelar
-              </Button>
-            </Dialog.Close>
-            <Button
-              color="red"
-              disabled={deleting}
-              onClick={handleDeleteConfirm}
-            >
-              {deleting ? "Eliminando..." : "Sí, eliminar"}
-            </Button>
-          </Flex>
-        </Dialog.Content>
-      </Dialog.Root>
+            <strong>"{deletingProduct?.name}"</strong>? Esta acción ocultará el producto del
+            catálogo de ventas.
+          </>
+        }
+        onConfirm={handleDeleteConfirm}
+        loading={deleting}
+      />
     </div>
-  );
-}
-
-function KbdShortcut({ label }: { label: string }) {
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "2px 6px",
-        fontSize: "11px",
-        fontWeight: "bold",
-        backgroundColor: "var(--accent-subtle)",
-        color: "var(--accent)",
-        borderRadius: "4px",
-        marginLeft: "6px",
-        border: "1px solid var(--accent)",
-      }}
-    >
-      {label}
-    </span>
-  );
-}
-
-function SkeletonRows() {
-  return (
-    <>
-      {[1, 2, 3, 4, 5].map((i) => (
-        <Table.Row key={i}>
-          <Table.Cell>
-            <div style={{ height: "16px", width: "80px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "4px" }} />
-          </Table.Cell>
-          <Table.Cell>
-            <div style={{ height: "16px", width: "160px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "4px" }} />
-          </Table.Cell>
-          <Table.Cell style={{ textAlign: "right" }}>
-            <div style={{ height: "16px", width: "70px", marginLeft: "auto", backgroundColor: "var(--bg-surface-hover)", borderRadius: "4px" }} />
-          </Table.Cell>
-          <Table.Cell style={{ textAlign: "right" }}>
-            <div style={{ height: "16px", width: "60px", marginLeft: "auto", backgroundColor: "var(--bg-surface-hover)", borderRadius: "4px" }} />
-          </Table.Cell>
-          <Table.Cell style={{ textAlign: "center" }}>
-            <div style={{ height: "20px", width: "90px", margin: "0 auto", backgroundColor: "var(--bg-surface-hover)", borderRadius: "10px" }} />
-          </Table.Cell>
-          <Table.Cell style={{ textAlign: "right" }}>
-            <div style={{ height: "24px", width: "80px", marginLeft: "auto", backgroundColor: "var(--bg-surface-hover)", borderRadius: "4px" }} />
-          </Table.Cell>
-        </Table.Row>
-      ))}
-    </>
   );
 }

@@ -3,16 +3,13 @@ import { Text, TextField, Button } from "@radix-ui/themes";
 import { Cross2Icon, ReloadIcon } from "@radix-ui/react-icons";
 import { useArcaStore } from "@/stores/arca.store";
 import type { ApiInvoice } from "@/services/arca.service";
+import { formatCents } from "@/lib/currency";
 
 interface DebitNoteDialogProps {
   open: boolean;
   invoice: ApiInvoice | null;
   onClose: () => void;
   onCreated: (invoice: ApiInvoice) => void;
-}
-
-function formatCents(cents: number): string {
-  return `$${(cents / 100).toLocaleString("es-AR", { minimumFractionDigits: 2 })}`;
 }
 
 export function DebitNoteDialog({ open, invoice, onClose, onCreated }: DebitNoteDialogProps) {

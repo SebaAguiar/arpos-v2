@@ -1,29 +1,28 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import {
   Text,
-  Button,
   Table,
   Badge,
   IconButton,
-  TextField,
   Flex,
   Tooltip,
-  Dialog,
 } from "@radix-ui/themes";
 import {
-  PlusIcon,
   Pencil2Icon,
   TrashIcon,
-  MagnifyingGlassIcon,
-  Cross2Icon,
   PersonIcon,
-  ArchiveIcon,
   CardStackIcon,
 } from "@radix-ui/react-icons";
 import { useCustomersStore } from "@/stores/customers.store";
 import { ContactsRepository } from "@/repositories/contacts.repository";
 import { CustomerFormDialog } from "@/components/customers/CustomerFormDialog";
 import { StaleIndicator } from "@/components/ui/StaleIndicator";
+import { TableSkeleton } from "@/components/ui/TableSkeleton";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { PageSearchInput } from "@/components/ui/PageSearchInput";
+import { AddButton } from "@/components/ui/AddButton";
+import { ConfirmDeleteDialog } from "@/components/ui/ConfirmDeleteDialog";
+import { useHotkeys } from "@/hooks/useHotkeys";
 import type { Customer } from "@/lib/types";
 
 export function CustomersPage() {
@@ -69,27 +68,16 @@ export function CustomersPage() {
     fetchCustomers();
   }, [fetchCustomers]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const activeEl = document.activeElement;
-      const isInput =
-        activeEl?.tagName === "INPUT" ||
-        activeEl?.tagName === "TEXTAREA" ||
-        (activeEl instanceof HTMLElement && activeEl.isContentEditable);
-
-      if (e.key === "/" && !isInput) {
-        e.preventDefault();
-        searchInputRef.current?.focus();
-      } else if ((e.key === "n" || e.key === "N") && !isInput && !e.ctrlKey && !e.metaKey) {
-        e.preventDefault();
+  useHotkeys([
+    { keys: "/", handler: () => searchInputRef.current?.focus() },
+    {
+      keys: "n",
+      handler: () => {
         setEditingCustomer(null);
         setFormOpen(true);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+      },
+    },
+  ]);
 
   const totalCustomers = customers.length;
 
@@ -138,11 +126,7 @@ export function CustomersPage() {
             </Text>
           </Flex>
 
-          <Button size="2" onClick={handleOpenCreate} aria-label="Crear nuevo cliente (Presioná N)">
-            <PlusIcon width={16} height={16} />
-            Nuevo cliente
-            <KbdShortcut label="N" />
-          </Button>
+          <AddButton label="Nuevo cliente" size="2" shortcut="n" onClick={handleOpenCreate} />
         </Flex>
 
         <Flex
@@ -157,31 +141,13 @@ export function CustomersPage() {
           }}
         >
         <Flex align="center" gap="3" style={{ flex: 1 }}>
-          <TextField.Root
-            ref={searchInputRef}
+          <PageSearchInput
             placeholder="Buscar por nombre, email o teléfono..."
+            ariaLabel="Buscar clientes"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ width: "320px" }}
-            aria-label="Buscar clientes"
-          >
-            <TextField.Slot>
-              <MagnifyingGlassIcon width={16} height={16} color="gray" />
-            </TextField.Slot>
-            {search && (
-              <TextField.Slot>
-                <IconButton
-                  size="1"
-                  variant="ghost"
-                  color="gray"
-                  onClick={() => setSearch("")}
-                  aria-label="Limpiar búsqueda"
-                >
-                  <Cross2Icon width={14} height={14} />
-                </IconButton>
-              </TextField.Slot>
-            )}
-          </TextField.Root>
+            onChange={setSearch}
+            inputRef={searchInputRef}
+          />
         </Flex>
       </Flex>
 
@@ -214,35 +180,29 @@ export function CustomersPage() {
 
           <Table.Body>
             {loading ? (
-              <SkeletonRows />
+              <TableSkeleton
+                columns={[
+                  { width: 140 },
+                  { width: 180 },
+                  { width: 100 },
+                  { width: 80, align: "right", height: 24 },
+                ]}
+              />
             ) : displayedCustomers.length === 0 ? (
-              <Table.Row>
-                <Table.Cell colSpan={6}>
-                  <Flex
-                    direction="column"
-                    align="center"
-                    justify="center"
-                    gap="3"
-                    style={{ padding: "48px 16px", textAlign: "center" }}
-                  >
-                    <ArchiveIcon width={36} height={36} color="var(--text-muted)" />
-                    <Text size="3" weight="bold" color="gray">
-                      No se encontraron clientes
-                    </Text>
-                    <Text size="2" color="gray" style={{ maxWidth: 400 }}>
-                      {search
-                        ? "Probá cambiando el término de búsqueda."
-                        : "Comenzá registrando tu primer cliente con el botón 'Nuevo cliente'."}
-                    </Text>
-                    {!search && (
-                      <Button size="2" onClick={handleOpenCreate}>
-                        <PlusIcon width={16} height={16} />
-                        Crear primer cliente
-                      </Button>
-                    )}
-                  </Flex>
-                </Table.Cell>
-              </Table.Row>
+              <EmptyState
+                colSpan={6}
+                title="No se encontraron clientes"
+                description={
+                  search
+                    ? "Probá cambiando el término de búsqueda."
+                    : "Comenzá registrando tu primer cliente con el botón 'Nuevo cliente'."
+                }
+                action={
+                  !search
+                    ? { label: "Crear primer cliente", onClick: handleOpenCreate }
+                    : undefined
+                }
+              />
             ) : (
               displayedCustomers.map((customer) => (
                 <Table.Row
@@ -332,80 +292,19 @@ export function CustomersPage() {
         onSuccess={fetchCustomers}
       />
 
-      <Dialog.Root
+      <ConfirmDeleteDialog
         open={!!deletingCustomer}
         onOpenChange={(open) => !open && setDeletingCustomer(null)}
-      >
-        <Dialog.Content style={{ maxWidth: 400, padding: "24px" }}>
-          <Dialog.Title style={{ marginBottom: "8px" }}>
-            ¿Eliminar cliente?
-          </Dialog.Title>
-          <Dialog.Description size="2" color="gray" style={{ marginBottom: "20px" }}>
+        title="¿Eliminar cliente?"
+        description={
+          <>
             ¿Estás seguro de que querés eliminar a{" "}
             <strong>"{deletingCustomer?.name}"</strong>? Esta acción ocultará el cliente del sistema.
-          </Dialog.Description>
-
-          <Flex justify="end" gap="3">
-            <Dialog.Close>
-              <Button type="button" variant="soft" color="gray">
-                Cancelar
-              </Button>
-            </Dialog.Close>
-            <Button
-              color="red"
-              disabled={deleting}
-              onClick={handleDeleteConfirm}
-            >
-              {deleting ? "Eliminando..." : "Sí, eliminar"}
-            </Button>
-          </Flex>
-        </Dialog.Content>
-      </Dialog.Root>
+          </>
+        }
+        onConfirm={handleDeleteConfirm}
+        loading={deleting}
+      />
     </div>
-  );
-}
-
-function KbdShortcut({ label }: { label: string }) {
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "2px 6px",
-        fontSize: "11px",
-        fontWeight: "bold",
-        backgroundColor: "var(--accent-subtle)",
-        color: "var(--accent)",
-        borderRadius: "4px",
-        marginLeft: "6px",
-        border: "1px solid var(--accent)",
-      }}
-    >
-      {label}
-    </span>
-  );
-}
-
-function SkeletonRows() {
-  return (
-    <>
-      {[1, 2, 3, 4, 5].map((i) => (
-        <Table.Row key={i}>
-          <Table.Cell>
-            <div style={{ height: "16px", width: "140px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "4px" }} />
-          </Table.Cell>
-          <Table.Cell>
-            <div style={{ height: "16px", width: "180px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "4px" }} />
-          </Table.Cell>
-          <Table.Cell>
-            <div style={{ height: "16px", width: "100px", backgroundColor: "var(--bg-surface-hover)", borderRadius: "4px" }} />
-          </Table.Cell>
-          <Table.Cell style={{ textAlign: "right" }}>
-            <div style={{ height: "24px", width: "80px", marginLeft: "auto", backgroundColor: "var(--bg-surface-hover)", borderRadius: "4px" }} />
-          </Table.Cell>
-        </Table.Row>
-      ))}
-    </>
   );
 }

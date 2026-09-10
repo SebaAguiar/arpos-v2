@@ -21,7 +21,7 @@ export function CategoryTabs({ categories, active, onChange }: CategoryTabsProps
         display: "flex",
         gap: "6px",
         flexWrap: "wrap",
-        padding: "0 16px 12px",
+        padding: "8px 12px",
         borderBottom: "1px solid var(--border)",
       }}
     >

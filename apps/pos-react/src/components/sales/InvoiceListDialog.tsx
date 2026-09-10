@@ -13,6 +13,8 @@ import {
 } from "@radix-ui/react-icons";
 import { useArcaStore } from "@/stores/arca.store";
 import type { ApiInvoice } from "@/services/arca.service";
+import { formatCents } from "@/lib/currency";
+import { formatDate } from "@/lib/date";
 import { InvoicePdfDialog } from "./InvoicePdfDialog";
 import { CreditNoteDialog } from "./CreditNoteDialog";
 import { DebitNoteDialog } from "./DebitNoteDialog";
@@ -51,20 +53,6 @@ const STATUS_CONFIG: Record<
     border: "rgba(107, 114, 128, 0.2)",
   },
 };
-
-function formatCents(cents: number): string {
-  return `$${(cents / 100).toLocaleString("es-AR", { minimumFractionDigits: 2 })}`;
-}
-
-function formatDate(timestamp: number): string {
-  return new Date(timestamp * 1000).toLocaleDateString("es-AR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 function InvoiceRow({
   invoice,

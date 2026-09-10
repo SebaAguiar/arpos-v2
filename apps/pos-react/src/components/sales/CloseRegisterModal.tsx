@@ -10,6 +10,7 @@ import {
 import { useDialogStore } from "@/stores/dialog.store";
 import { useCashRegisterStore } from "@/stores/cash-register.store";
 import { useArcaStore } from "@/stores/arca.store";
+import { calcExpectedBalance } from "@/lib/cash-register";
 
 export function CloseRegisterModal() {
   const close = useDialogStore((s) => s.closeCashControl);
@@ -33,11 +34,12 @@ export function CloseRegisterModal() {
     return null;
   }
 
-  const expected =
-    currentShift.initialAmount +
-    currentShift.totalSales +
-    currentShift.totalIncome -
-    currentShift.totalExpenses;
+  const expected = calcExpectedBalance(
+    currentShift.initialAmount,
+    currentShift.totalSales,
+    currentShift.totalIncome,
+    currentShift.totalExpenses,
+  );
 
   const parsedClosing = parseFloat(closingAmount);
   const diff = !isNaN(parsedClosing) ? parsedClosing - expected : null;

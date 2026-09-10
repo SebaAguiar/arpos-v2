@@ -13,30 +13,19 @@ import {
 import {
   PlusIcon,
   MinusIcon,
-  MagnifyingGlassIcon,
-  Cross2Icon,
   PersonIcon,
-  ArchiveIcon,
   ReloadIcon,
 } from "@radix-ui/react-icons";
 import { useCustomersStore } from "@/stores/customers.store";
 import { useWalletStore } from "@/stores/wallet.store";
 import { StaleIndicator } from "@/components/ui/StaleIndicator";
+import { TableSkeleton } from "@/components/ui/TableSkeleton";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { PageSearchInput } from "@/components/ui/PageSearchInput";
+import { useHotkeys } from "@/hooks/useHotkeys";
+import { formatCents } from "@/lib/currency";
+import { formatDate } from "@/lib/date";
 import type { Customer } from "@/lib/types";
-
-function formatBalance(cents: number): string {
-  return `$${(cents / 100).toFixed(2)}`;
-}
-
-function formatDate(ts: number): string {
-  return new Date(ts * 1000).toLocaleDateString("es-AR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 function WalletOperationDialog({
   open,
@@ -201,7 +190,7 @@ function CustomerWalletDialog({
 
           <Flex align="center" gap="3" style={{ marginBottom: "20px" }}>
             <Badge color={balanceCents >= 0 ? "green" : "red"} size="3">
-              Saldo: {formatBalance(balanceCents)}
+              Saldo: {formatCents(balanceCents)}
             </Badge>
             <Button size="1" variant="soft" color="green" onClick={() => setOperation("credit")}>
               <PlusIcon width={14} height={14} />
@@ -265,11 +254,11 @@ function CustomerWalletDialog({
                     <Table.Cell>
                       <Text size="2" weight="bold" color={tx.type === "credit" ? "green" : "red"}>
                         {tx.type === "credit" ? "+" : "-"}
-                        {formatBalance(tx.amount_cents)}
+                        {formatCents(tx.amount_cents)}
                       </Text>
                     </Table.Cell>
                     <Table.Cell>
-                      <Text size="2">{formatBalance(tx.balance_after)}</Text>
+                      <Text size="2">{formatCents(tx.balance_after)}</Text>
                     </Table.Cell>
                     <Table.Cell>
                       <Text size="2">{tx.reference ?? "—"}</Text>
@@ -312,23 +301,7 @@ export function WalletPage() {
     fetchCustomers();
   }, [fetchCustomers]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const activeEl = document.activeElement;
-      const isInput =
-        activeEl?.tagName === "INPUT" ||
-        activeEl?.tagName === "TEXTAREA" ||
-        (activeEl instanceof HTMLElement && activeEl.isContentEditable);
-
-      if (e.key === "/" && !isInput) {
-        e.preventDefault();
-        searchInputRef.current?.focus();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  useHotkeys([{ keys: "/", handler: () => searchInputRef.current?.focus() }]);
 
   const filteredCustomers = useMemo(() => {
     let result = customers;
@@ -364,7 +337,7 @@ export function WalletPage() {
                 {customers.length} clientes
               </Badge>
               <Badge color="green" variant="soft" size="2">
-                Saldo total: {formatBalance(Math.round(totalBalance * 100))}
+                Saldo total: {formatCents(Math.round(totalBalance * 100))}
               </Badge>
               <StaleIndicator isStale={isStale} />
             </Flex>
@@ -386,31 +359,13 @@ export function WalletPage() {
           }}
         >
         <Flex align="center" gap="3" style={{ flex: 1 }}>
-          <TextField.Root
-            ref={searchInputRef}
+          <PageSearchInput
             placeholder="Buscar cliente por nombre, email o teléfono..."
+            ariaLabel="Buscar cliente"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ width: "320px" }}
-            aria-label="Buscar cliente"
-          >
-            <TextField.Slot>
-              <MagnifyingGlassIcon width={16} height={16} color="gray" />
-            </TextField.Slot>
-            {search && (
-              <TextField.Slot>
-                <IconButton
-                  size="1"
-                  variant="ghost"
-                  color="gray"
-                  onClick={() => setSearch("")}
-                  aria-label="Limpiar búsqueda"
-                >
-                  <Cross2Icon width={14} height={14} />
-                </IconButton>
-              </TextField.Slot>
-            )}
-          </TextField.Root>
+            onChange={setSearch}
+            inputRef={searchInputRef}
+          />
         </Flex>
       </Flex>
 
@@ -436,29 +391,24 @@ export function WalletPage() {
 
           <Table.Body>
             {loading ? (
-              <SkeletonRows />
+              <TableSkeleton
+                columns={[
+                  { width: 140 },
+                  { width: 180 },
+                  { width: 80, align: "right" },
+                  { width: 40, align: "right", height: 24 },
+                ]}
+              />
             ) : filteredCustomers.length === 0 ? (
-              <Table.Row>
-                <Table.Cell colSpan={4}>
-                  <Flex
-                    direction="column"
-                    align="center"
-                    justify="center"
-                    gap="3"
-                    style={{ padding: "48px 16px", textAlign: "center" }}
-                  >
-                    <ArchiveIcon width={36} height={36} color="var(--text-muted)" />
-                    <Text size="3" weight="bold" color="gray">
-                      No se encontraron clientes
-                    </Text>
-                    <Text size="2" color="gray" style={{ maxWidth: 400 }}>
-                      {search
-                        ? "Probá cambiando el término de búsqueda."
-                        : "No hay clientes registrados. Creá clientes desde la sección Clientes."}
-                    </Text>
-                  </Flex>
-                </Table.Cell>
-              </Table.Row>
+              <EmptyState
+                colSpan={4}
+                title="No se encontraron clientes"
+                description={
+                  search
+                    ? "Probá cambiando el término de búsqueda."
+                    : "No hay clientes registrados. Creá clientes desde la sección Clientes."
+                }
+              />
             ) : (
               filteredCustomers.map((customer) => (
                 <Table.Row key={customer.id}>
@@ -478,7 +428,7 @@ export function WalletPage() {
                       color={(customer.balance ?? 0) > 0 ? "green" : "gray"}
                       size="2"
                     >
-                      {formatBalance(Math.round((customer.balance ?? 0) * 100))}
+                      {formatCents(Math.round((customer.balance ?? 0) * 100))}
                     </Badge>
                   </Table.Cell>
                   <Table.Cell style={{ textAlign: "right" }}>
@@ -508,57 +458,5 @@ export function WalletPage() {
         customer={selectedCustomer}
       />
     </div>
-  );
-}
-
-function SkeletonRows() {
-  return (
-    <>
-      {[1, 2, 3, 4, 5].map((i) => (
-        <Table.Row key={i}>
-          <Table.Cell>
-            <div
-              style={{
-                height: "16px",
-                width: "140px",
-                backgroundColor: "var(--bg-surface-hover)",
-                borderRadius: "4px",
-              }}
-            />
-          </Table.Cell>
-          <Table.Cell>
-            <div
-              style={{
-                height: "16px",
-                width: "180px",
-                backgroundColor: "var(--bg-surface-hover)",
-                borderRadius: "4px",
-              }}
-            />
-          </Table.Cell>
-          <Table.Cell>
-            <div
-              style={{
-                height: "16px",
-                width: "80px",
-                backgroundColor: "var(--bg-surface-hover)",
-                borderRadius: "4px",
-              }}
-            />
-          </Table.Cell>
-          <Table.Cell style={{ textAlign: "right" }}>
-            <div
-              style={{
-                height: "24px",
-                width: "40px",
-                marginLeft: "auto",
-                backgroundColor: "var(--bg-surface-hover)",
-                borderRadius: "4px",
-              }}
-            />
-          </Table.Cell>
-        </Table.Row>
-      ))}
-    </>
   );
 }

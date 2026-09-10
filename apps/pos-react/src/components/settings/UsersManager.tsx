@@ -4,6 +4,7 @@ import { PersonIcon, PlusIcon, Pencil2Icon, TrashIcon, Cross1Icon, LockClosedIco
 import { useDialogStore } from "@/stores/dialog.store";
 import { useUsersStore } from "@/stores/users.store";
 import { StaleIndicator } from "@/components/ui/StaleIndicator";
+import { validatePasswordMatch } from "@/lib/validators";
 import type { User } from "@/lib/types";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -387,7 +388,7 @@ export function UsersManager() {
                   {showPassword ? <EyeNoneIcon width={14} height={14} /> : <EyeOpenIcon width={14} height={14} />}
                 </button>
               </div>
-              {newPassword && confirmPassword && newPassword !== confirmPassword && (
+              {newPassword && confirmPassword && !validatePasswordMatch(newPassword, confirmPassword) && (
                 <Text size="1" color="red">Las contraseñas no coinciden</Text>
               )}
               <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", marginTop: "4px" }}>

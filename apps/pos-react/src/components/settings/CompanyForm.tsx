@@ -2,22 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Text, TextField, Card, Button } from "@radix-ui/themes";
 import { CheckIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { useCompanyStore } from "@/stores/company.store";
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-const CUIT_WEIGHTS = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
-
-function isValidCuit(raw: string): boolean {
-  const digits = raw.replace(/[^\d]/g, "");
-  if (digits.length !== 11) return false;
-
-  const sum = CUIT_WEIGHTS.reduce((acc, weight, i) => acc + Number(digits[i]) * weight, 0);
-  const remainder = sum % 11;
-  const expected =
-    remainder === 0 ? 0 : remainder === 1 ? -1 : 11 - remainder;
-
-  return expected === Number(digits[10]);
-}
+import { EMAIL_RE, isValidCuit } from "@/lib/validators";
 
 type FormField = "name" | "taxId" | "address" | "email" | "phone";
 

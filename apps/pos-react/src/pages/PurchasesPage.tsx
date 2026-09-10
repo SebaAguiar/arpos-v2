@@ -5,17 +5,15 @@ import {
   Table,
   Badge,
   Tooltip,
-  TextField,
   Flex,
-  Dialog,
   Select,
+  Dialog,
+  TextField,
   IconButton,
 } from "@radix-ui/themes";
 import {
   PlusIcon,
-  MagnifyingGlassIcon,
   Cross2Icon,
-  ArchiveIcon,
   UploadIcon,
   EyeOpenIcon,
 } from "@radix-ui/react-icons";
@@ -24,6 +22,10 @@ import { PurchasesRepository } from "@/repositories/purchases.repository";
 import { ProductsRepository } from "@/repositories/products.repository";
 import { ContactsRepository } from "@/repositories/contacts.repository";
 import { StaleIndicator } from "@/components/ui/StaleIndicator";
+import { TableSkeleton } from "@/components/ui/TableSkeleton";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { PageSearchInput } from "@/components/ui/PageSearchInput";
+import { AddButton } from "@/components/ui/AddButton";
 import type { PurchaseOrder, Customer, Product } from "@/lib/types";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -91,10 +93,7 @@ export function PurchasesPage() {
             </Text>
           </Flex>
 
-          <Button size="2" onClick={() => setCreateOpen(true)}>
-            <PlusIcon width={16} height={16} />
-            Nueva orden
-          </Button>
+          <AddButton label="Nueva orden" size="2" onClick={() => setCreateOpen(true)} />
         </Flex>
 
         <Flex
@@ -109,30 +108,12 @@ export function PurchasesPage() {
           }}
         >
         <Flex align="center" gap="3" style={{ flex: 1 }}>
-          <TextField.Root
+          <PageSearchInput
             placeholder="Buscar por proveedor o ID..."
+            ariaLabel="Buscar órdenes de compra"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ width: "320px" }}
-            aria-label="Buscar órdenes de compra"
-          >
-            <TextField.Slot>
-              <MagnifyingGlassIcon width={16} height={16} color="gray" />
-            </TextField.Slot>
-            {search && (
-              <TextField.Slot>
-                <IconButton
-                  size="1"
-                  variant="ghost"
-                  color="gray"
-                  onClick={() => setSearch("")}
-                  aria-label="Limpiar búsqueda"
-                >
-                  <Cross2Icon width={14} height={14} />
-                </IconButton>
-              </TextField.Slot>
-            )}
-          </TextField.Root>
+            onChange={setSearch}
+          />
         </Flex>
 
         <Select.Root
@@ -179,35 +160,31 @@ export function PurchasesPage() {
 
           <Table.Body>
             {loading ? (
-              <SkeletonRows />
+              <TableSkeleton
+                columns={[
+                  { width: 120 },
+                  { width: 80 },
+                  { width: 60 },
+                  { width: 40 },
+                  { width: 80 },
+                  { width: 80, align: "right", height: 24 },
+                ]}
+              />
             ) : filteredOrders.length === 0 ? (
-              <Table.Row>
-                <Table.Cell colSpan={6}>
-                  <Flex
-                    direction="column"
-                    align="center"
-                    justify="center"
-                    gap="3"
-                    style={{ padding: "48px 16px", textAlign: "center" }}
-                  >
-                    <ArchiveIcon width={36} height={36} color="var(--text-muted)" />
-                    <Text size="3" weight="bold" color="gray">
-                      No se encontraron órdenes
-                    </Text>
-                    <Text size="2" color="gray" style={{ maxWidth: 400 }}>
-                      {search || statusFilter !== "all"
-                        ? "Probá cambiando el filtro o la búsqueda."
-                        : "Comenzá creando tu primera orden de compra."}
-                    </Text>
-                    {!search && statusFilter === "all" && (
-                      <Button size="2" onClick={() => setCreateOpen(true)}>
-                        <PlusIcon width={16} height={16} />
-                        Crear orden
-                      </Button>
-                    )}
-                  </Flex>
-                </Table.Cell>
-              </Table.Row>
+              <EmptyState
+                colSpan={6}
+                title="No se encontraron órdenes"
+                description={
+                  search || statusFilter !== "all"
+                    ? "Probá cambiando el filtro o la búsqueda."
+                    : "Comenzá creando tu primera orden de compra."
+                }
+                action={
+                  !search && statusFilter === "all"
+                    ? { label: "Crear orden", onClick: () => setCreateOpen(true) }
+                    : undefined
+                }
+              />
             ) : (
               filteredOrders.map((order) => (
                 <Table.Row key={order.id}>
@@ -754,77 +731,5 @@ function OrderDetailDialog({
         </Flex>
       </Dialog.Content>
     </Dialog.Root>
-  );
-}
-
-function SkeletonRows() {
-  return (
-    <>
-      {[1, 2, 3, 4, 5].map((i) => (
-        <Table.Row key={i}>
-          <Table.Cell>
-            <div
-              style={{
-                height: "16px",
-                width: "120px",
-                backgroundColor: "var(--bg-surface-hover)",
-                borderRadius: "4px",
-              }}
-            />
-          </Table.Cell>
-          <Table.Cell>
-            <div
-              style={{
-                height: "16px",
-                width: "80px",
-                backgroundColor: "var(--bg-surface-hover)",
-                borderRadius: "4px",
-              }}
-            />
-          </Table.Cell>
-          <Table.Cell>
-            <div
-              style={{
-                height: "16px",
-                width: "60px",
-                backgroundColor: "var(--bg-surface-hover)",
-                borderRadius: "4px",
-              }}
-            />
-          </Table.Cell>
-          <Table.Cell>
-            <div
-              style={{
-                height: "16px",
-                width: "40px",
-                backgroundColor: "var(--bg-surface-hover)",
-                borderRadius: "4px",
-              }}
-            />
-          </Table.Cell>
-          <Table.Cell>
-            <div
-              style={{
-                height: "16px",
-                width: "80px",
-                backgroundColor: "var(--bg-surface-hover)",
-                borderRadius: "4px",
-              }}
-            />
-          </Table.Cell>
-          <Table.Cell>
-            <div
-              style={{
-                height: "24px",
-                width: "80px",
-                marginLeft: "auto",
-                backgroundColor: "var(--bg-surface-hover)",
-                borderRadius: "4px",
-              }}
-            />
-          </Table.Cell>
-        </Table.Row>
-      ))}
-    </>
   );
 }

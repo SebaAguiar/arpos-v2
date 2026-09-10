@@ -3,6 +3,8 @@ import { Text, Button, ScrollArea } from "@radix-ui/themes";
 import { Cross2Icon, ExternalLinkIcon, DownloadIcon } from "@radix-ui/react-icons";
 import type { ApiInvoice } from "@/services/arca.service";
 import { apiClient } from "@/services/api-client";
+import { formatCents } from "@/lib/currency";
+import { formatDate } from "@/lib/date";
 
 interface InvoicePdfDialogProps {
   open: boolean;
@@ -10,19 +12,7 @@ interface InvoicePdfDialogProps {
   onClose: () => void;
 }
 
-function formatCents(cents: number): string {
-  return `$${(cents / 100).toLocaleString("es-AR", { minimumFractionDigits: 2 })}`;
-}
 
-function formatDate(timestamp: number): string {
-  return new Date(timestamp * 1000).toLocaleDateString("es-AR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 export function InvoicePdfDialog({ open, invoice, onClose }: InvoicePdfDialogProps) {
   const [pdfHtml, setPdfHtml] = useState<string | null>(null);

@@ -7,10 +7,7 @@ import {
   ReloadIcon,
 } from "@radix-ui/react-icons";
 import { useArcaStore } from "@/stores/arca.store";
-
-function formatCents(cents: number): string {
-  return `$${(cents / 100).toLocaleString("es-AR", { minimumFractionDigits: 2 })}`;
-}
+import { formatCents } from "@/lib/currency";
 
 function StatCard({
   label,

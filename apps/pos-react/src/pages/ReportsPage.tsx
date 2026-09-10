@@ -6,6 +6,7 @@ import { InventoryRepository, type InventoryReportData } from "@/repositories/in
 import { CashRegisterRepository, type CashShiftData } from "@/repositories/cash-register.repository";
 import type { ApiSaleStats, ApiPaymentMethodBreakdown, ApiTopProduct } from "@/services/sales.service";
 import { useSettingsStore } from "@/stores/settings.store";
+import { getPeriodTimestamps, type Period } from "@/lib/date";
 import { SalesBarChart, type ChartPoint } from "@/components/reports/SalesBarChart";
 import { TopProductsList } from "@/components/reports/TopProductsList";
 import {
@@ -15,40 +16,12 @@ import {
 import { CashSummaryWidget } from "@/components/reports/CashSummaryWidget";
 import { InventorySummaryWidget } from "@/components/reports/InventorySummaryWidget";
 
-type Period = "today" | "week" | "month" | "custom";
-
 const PERIOD_LABELS: Record<Period, string> = {
   today: "Hoy",
   week: "Últimos 7 días",
   month: "Últimos 30 días",
   custom: "Día específico",
 };
-
-const DAY_SECONDS = 86400;
-
-function getPeriodTimestamps(period: Period, customDate?: string): { from?: number; to?: number } {
-  const now = Math.floor(Date.now() / 1000);
-  switch (period) {
-    case "today": {
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
-      return { from: Math.floor(todayStart.getTime() / 1000), to: now };
-    }
-    case "week":
-      return { from: now - 7 * DAY_SECONDS, to: now };
-    case "month":
-      return { from: now - 30 * DAY_SECONDS, to: now };
-    case "custom": {
-      if (!customDate) return { from: now - 7 * DAY_SECONDS, to: now };
-      const [year, month, day] = customDate.split("-").map(Number);
-      const start = new Date(year, month - 1, day, 0, 0, 0, 0);
-      return {
-        from: Math.floor(start.getTime() / 1000),
-        to: Math.floor(start.getTime() / 1000) + DAY_SECONDS,
-      };
-    }
-  }
-}
 
 function formatCustomDate(customDate?: string): string {
   if (!customDate) return "Hoy";

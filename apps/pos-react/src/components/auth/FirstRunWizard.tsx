@@ -10,6 +10,7 @@ import {
 import { useAuthStore } from "@/stores/auth.store";
 import { SetupRepository } from "@/repositories/setup.repository";
 import { MigrationWizard } from "@/components/auth/MigrationWizard";
+import { EMAIL_RE, validatePasswordMatch } from "@/lib/validators";
 
 type WizardStep = "welcome" | "company" | "admin" | "success";
 
@@ -67,13 +68,13 @@ export function FirstRunWizard() {
     const newErrors: FormErrors = {};
     if (!admin.email.trim()) {
       newErrors.email = "Email requerido";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(admin.email)) {
+    } else if (!EMAIL_RE.test(admin.email)) {
       newErrors.email = "Email inválido";
     }
     if (admin.password.length < 6) {
       newErrors.password = "Mínimo 6 caracteres";
     }
-    if (admin.password !== admin.confirmPassword) {
+    if (!validatePasswordMatch(admin.password, admin.confirmPassword)) {
       newErrors.confirmPassword = "Las contraseñas no coinciden";
     }
     setErrors(newErrors);
