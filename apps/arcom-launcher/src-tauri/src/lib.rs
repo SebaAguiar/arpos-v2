@@ -8,19 +8,18 @@ use managers::export::ExportManager;
 use managers::license::LicenseManager;
 use managers::process::ProcessManager;
 use managers::system::SystemManager;
-use managers::updater::UpdaterManager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(ProcessManager::new())
         .manage(DatabaseManager::new())
         .manage(SystemManager::new())
         .manage(BackupManager::new())
         .manage(ExportManager::new())
-        .manage(UpdaterManager::new())
         .manage(LicenseManager::new())
         .invoke_handler(tauri::generate_handler![
             // Process commands
@@ -50,9 +49,6 @@ pub fn run() {
             // Export commands
             commands::export::export_to_sql,
             commands::export::export_to_json,
-            // Updater commands
-            commands::updater::check_for_updates,
-            commands::updater::download_update,
             // License commands
             commands::license::get_license_token,
             commands::license::save_license_token,
