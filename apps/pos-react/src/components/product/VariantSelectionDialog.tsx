@@ -1,3 +1,5 @@
+import { Dialog, Text } from "@radix-ui/themes";
+import { Cross2Icon } from "@radix-ui/react-icons";
 import type { Product, ProductVariant } from "@/lib/types";
 import { getProductStock } from "@/lib/stock";
 
@@ -20,39 +22,8 @@ export function VariantSelectionDialog({
   const hasStock = totalStock > 0;
 
   return (
-    <div
-      onClick={onClose}
-      onKeyDown={(e) => e.key === "Escape" && onClose()}
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 50,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "rgba(0,0,0,0.5)",
-        backdropFilter: "blur(4px)",
-        padding: "16px",
-      }}
-      role="dialog"
-      aria-modal="true"
-      tabIndex={-1}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          backgroundColor: "var(--bg-surface)",
-          borderRadius: "12px",
-          boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)",
-          width: "100%",
-          maxWidth: "420px",
-          maxHeight: "80vh",
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-        }}
-      >
-        {/* Header */}
+    <Dialog.Root open onOpenChange={(open) => { if (!open) onClose(); }}>
+      <Dialog.Content style={{ maxWidth: 420, maxHeight: "80vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
         <div
           style={{
             padding: "16px",
@@ -63,29 +34,30 @@ export function VariantSelectionDialog({
           }}
         >
           <div>
-            <div style={{ fontWeight: 700, fontSize: "16px", color: "var(--text-primary)" }}>
+            <Dialog.Title style={{ margin: 0, fontSize: "16px", fontWeight: 700 }}>
               Seleccionar Variante
-            </div>
-            <div style={{ fontSize: "13px", color: "var(--text-secondary)", marginTop: "2px" }}>
+            </Dialog.Title>
+            <Text size="2" color="gray" style={{ marginTop: "2px" }}>
               {product.name}
-            </div>
+            </Text>
           </div>
-          <button
-            onClick={onClose}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              fontSize: "18px",
-              color: "var(--text-secondary)",
-              padding: "4px",
-            }}
-          >
-            ✕
-          </button>
+          <Dialog.Close>
+            <button
+              aria-label="Cerrar"
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "18px",
+                color: "var(--text-secondary)",
+                padding: "4px",
+              }}
+            >
+              <Cross2Icon width={18} height={18} />
+            </button>
+          </Dialog.Close>
         </div>
 
-        {/* Variants list */}
         <div style={{ flex: 1, overflowY: "auto", padding: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
           {product.variants.map((variant) => {
             const stock = getStock(variant);
@@ -159,7 +131,7 @@ export function VariantSelectionDialog({
             );
           })}
         </div>
-      </div>
-    </div>
+      </Dialog.Content>
+    </Dialog.Root>
   );
 }
