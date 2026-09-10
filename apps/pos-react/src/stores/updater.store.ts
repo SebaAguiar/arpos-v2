@@ -6,11 +6,10 @@ interface UpdaterState {
   updateInfo: UpdateInfo | null;
   checking: boolean;
   downloading: boolean;
-  downloadedTo: string | null;
   error: string | null;
 
-  checkForUpdates: (currentVersion: string, planSlug?: string | null) => Promise<void>;
-  downloadUpdate: () => Promise<void>;
+  checkForUpdates: (licenseValid: boolean) => Promise<void>;
+  downloadAndInstall: () => Promise<void>;
   clearError: () => void;
 }
 
@@ -18,33 +17,43 @@ export const useUpdaterStore = create<UpdaterState>()((set, get) => ({
   updateInfo: null,
   checking: false,
   downloading: false,
-  downloadedTo: null,
   error: null,
 
-  checkForUpdates: async (currentVersion: string, planSlug?: string | null) => {
-    set({ checking: true, error: null, downloadedTo: null });
+  checkForUpdates: async (licenseValid: boolean) => {
+    set({ checking: true, error: null, updateInfo: null });
+    if (!licenseValid) {
+      set({
+        checking: false,
+        updateInfo: {
+          available: false,
+          version: "",
+          notes: null,
+          published_at: null,
+          requires_license: true,
+        },
+      });
+      return;
+    }
     try {
-      const updateInfo = await UpdaterRepository.checkForUpdates(currentVersion, planSlug);
+      const updateInfo = await UpdaterRepository.checkForUpdates();
       set({ updateInfo, checking: false });
     } catch (e) {
       set({ error: String(e), checking: false });
     }
   },
 
-  downloadUpdate: async () => {
+  downloadAndInstall: async () => {
     const { updateInfo } = get();
-    if (!updateInfo?.available || !updateInfo.download_url) return;
+    if (!updateInfo?.available) return;
 
     set({ downloading: true, error: null });
     try {
-      const { appDataDir, join } = await import("@tauri-apps/api/path");
-      const dir = await appDataDir();
-      const filename = updateInfo.download_url.split("/").pop() ?? "Arcom-update.zip";
-      const destPath = await join(dir, filename);
-      const downloadedTo = await UpdaterRepository.download(updateInfo.download_url, destPath);
-      set({ downloadedTo, downloading: false });
+      await UpdaterRepository.downloadAndInstall();
+      // Windows exits the process during install; macOS/Linux relaunch here.
+      // If we reach this line without relaunching, stop the spinner.
+      set({ downloading: false });
     } catch (e) {
-      set({ error: String(e), downloading: false });
+      set({ downloading: false, error: String(e) });
     }
   },
 

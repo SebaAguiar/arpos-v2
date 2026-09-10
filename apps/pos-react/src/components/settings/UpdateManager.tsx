@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Text, Card, Button, Badge } from "@radix-ui/themes";
+import { Text, Card, Button, Badge, Progress } from "@radix-ui/themes";
 import {
   ReloadIcon,
   DownloadIcon,
@@ -8,23 +8,27 @@ import {
   LockClosedIcon,
 } from "@radix-ui/react-icons";
 import { useUpdaterStore } from "@/stores/updater.store";
-import { useAuthStore } from "@/stores/auth.store";
+import { useAuth } from "@/hooks/useAuth";
 import { getAppVersion } from "@/lib/tauri";
+
+function isLicenseValid(status: { status: string } | null | undefined): boolean {
+  return status?.status === "valid" || status?.status === "grace";
+}
 
 export function UpdateManager() {
   const {
     updateInfo,
     checking,
     downloading,
-    downloadedTo,
     error,
     checkForUpdates,
-    downloadUpdate,
+    downloadAndInstall,
     clearError,
   } = useUpdaterStore();
 
-  const licensePayload = useAuthStore((s) => s.licensePayload);
+  const { licenseStatus } = useAuth();
   const [currentVersion, setCurrentVersion] = useState<string | null>(null);
+  const licenseValid = isLicenseValid(licenseStatus);
 
   useEffect(() => {
     getAppVersion()
@@ -65,72 +69,72 @@ export function UpdateManager() {
           <Button
             size="1"
             variant="soft"
-            disabled={checking || !currentVersion}
-            onClick={() => checkForUpdates(currentVersion ?? "", licensePayload?.planSlug)}
+            disabled={checking || downloading || !currentVersion}
+            onClick={() => checkForUpdates(licenseValid)}
           >
             <ReloadIcon width={12} height={12} />
             {checking ? "Buscando..." : "Buscar actualizaciones"}
           </Button>
         </div>
 
-        {updateInfo && (
+        {updateInfo?.requires_license && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "10px 12px",
+              backgroundColor: "var(--bg-surface-hover)",
+              borderRadius: "6px",
+            }}
+          >
+            <LockClosedIcon width={14} height={14} color="var(--amber-9)" />
+            <Text size="2" color="amber" style={{ flex: 1 }}>
+              Necesitás una licencia activa para recibir actualizaciones.
+            </Text>
+          </div>
+        )}
+
+        {updateInfo?.available && !updateInfo.requires_license && (
           <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "8px" }}>
-            {updateInfo.requires_license ? (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "10px 12px",
-                  backgroundColor: "var(--bg-surface-hover)",
-                  borderRadius: "6px",
-                }}
-              >
-                <LockClosedIcon width={14} height={14} color="var(--amber-9)" />
-                <Text size="2" color="amber" style={{ flex: 1 }}>
-                  Necesitás una licencia activa para recibir actualizaciones.
-                </Text>
-              </div>
-            ) : updateInfo.available ? (
-              <>
-                <Badge color="green" variant="soft" size="1">
-                  <DownloadIcon width={12} height={12} />
-                  &nbsp;Nueva versión disponible: {updateInfo.version}
-                </Badge>
-                {updateInfo.published_at && (
-                  <Text size="2" color="gray">
-                    Publicada el {new Date(updateInfo.published_at).toLocaleDateString("es-AR")}
-                  </Text>
-                )}
-                {updateInfo.notes && (
-                  <Text size="2" color="gray">{updateInfo.notes}</Text>
-                )}
-                {updateInfo.download_url && (
-                  <Button
-                    size="1"
-                    variant="soft"
-                    disabled={downloading}
-                    onClick={downloadUpdate}
-                    style={{ alignSelf: "flex-start" }}
-                  >
-                    <DownloadIcon width={12} height={12} />
-                    {downloading ? "Descargando..." : "Descargar actualización"}
-                  </Button>
-                )}
-                {downloadedTo && (
-                  <Text size="2" color="green" style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                    <CheckCircledIcon width={12} height={12} />
-                    Descargada en: {downloadedTo}
-                  </Text>
-                )}
-              </>
-            ) : (
-              <Text size="2" color="gray" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <CheckCircledIcon width={12} height={12} />
-                Estás usando la versión más reciente
+            <Badge color="green" variant="soft" size="1">
+              <DownloadIcon width={12} height={12} />
+              &nbsp;Nueva versión disponible: {updateInfo.version}
+            </Badge>
+            {updateInfo.published_at && (
+              <Text size="2" color="gray">
+                Publicada el {new Date(updateInfo.published_at).toLocaleDateString("es-AR")}
               </Text>
             )}
+            {updateInfo.notes && <Text size="2" color="gray">{updateInfo.notes}</Text>}
+
+            {downloading ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                <Progress size="1" />
+                <Text size="2" color="gray">
+                  Descargando e instalando actualización... la aplicación se reiniciará.
+                </Text>
+              </div>
+            ) : (
+              <Button
+                size="1"
+                variant="soft"
+                disabled={downloading}
+                onClick={downloadAndInstall}
+                style={{ alignSelf: "flex-start" }}
+              >
+                <DownloadIcon width={12} height={12} />
+                Descargar e instalar
+              </Button>
+            )}
           </div>
+        )}
+
+        {updateInfo && !updateInfo.available && !updateInfo.requires_license && !checking && (
+          <Text size="2" color="gray" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <CheckCircledIcon width={12} height={12} />
+            Estás usando la versión más reciente
+          </Text>
         )}
       </div>
     </Card>

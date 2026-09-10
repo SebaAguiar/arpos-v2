@@ -306,7 +306,6 @@ export interface UpdateInfo {
   version: string;
   notes: string | null;
   published_at: string | null;
-  download_url: string | null;
   requires_license: boolean;
 }
 
