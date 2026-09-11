@@ -1339,7 +1339,7 @@ Gotchas documentados:
   del dev; en GitHub Actions no hay bun y `pnpm lint`/`pnpm typecheck` reventaban. Fix: eliminar
   `bun.lock` + fijar `"packageManager": "pnpm@11.11.0"` en el `package.json` raíz.
 - **Secrets y pubkey configurados**: la key original (29-jul) tenía un password que se perdió, así que
-  el 31-jul se **regeneró** `~/.tauri/arcom.key` (password `seba234`), se actualizó la pubkey en
+  el 31-jul se **regeneró** `~/.tauri/arcon.key` (nombre pre-rebrand; password `seba234`), se actualizó la pubkey en
   `tauri.conf.json` y se re-setearon `TAURI_SIGNING_PRIVATE_KEY` + `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`.
   Verificar siempre que pubkey de config y key local coincidan antes de taguear.
 - **`--notes-file CHANGELOG.md`** en `gh release create` (antes `body_path: CHANGELOG.md` con softprops)
@@ -1555,20 +1555,26 @@ Device:
 
 ## Checklist Pre-Lanzamiento
 
-Estado real al 2026-07-31 (release `v0.1.0`):
+Estado real al 2026-09 (v1.0.0, pre-lanzamiento):
 
 - [x] Keys Ed25519 generadas y guardadas en GitHub Secrets (regeneradas 31-jul, pubkey actualizada)
-- [x] tauri.conf.json configurado con endpoints (updater activo, pubkey, GitHub Releases, createUpdaterArtifacts)
-- [x] CI/CD pipeline tested (release `v0.1.0` en curso; CI verde tras fix de `bun.lock`)
-- [x] GitHub Releases o backend listo (repo privado `SebaAguiar/arpos-v2`)
-- [x] App version bumped en tauri.conf.json + package.json (todo en `0.1.0`)
+- [x] tauri.conf.json configurado (updater activo, pubkey, endpoint `latest.json`, createUpdaterArtifacts)
+- [x] CI/CD pipeline actualizado (workflow genera `latest.json` + publica en `arcom-releases` vía PAT)
+- [x] GitHub Releases de distribución listo (repo público `SebaAguiar/arcom-releases`)
+- [x] App version en `1.0.0` (tauri.conf.json + package.json)
 - [x] Release notes escritas (CHANGELOG.md actualizado al feature set real)
 - [ ] Beta testing con 10 users (Fase 6 — pendiente)
 - [x] Rollback plan documentado (GitHub Releases, §8 — forward-fix + `gh release delete`)
 - [ ] Monitoring + alertas configuradas (requiere backend personalizado, Fase 2)
-- [x] Documentación actualizada (GUIDE.md, UPDATES.md, ROADMAP.md — commits `63f306b`, `1110ab9`, `869338e`)
+- [x] Documentación actualizada (GUIDE.md, UPDATES.md, ROADMAP.md; ARCHITECTURE.md §12.3 corregida)
 - [ ] Auto-updater end-to-end probado en device real (instalar bundle + update a versión nueva)
 - [ ] Code-signing Apple/Windows (certificados pagos — follow-up)
+
+Pendientes operativos (previos al primer release público):
+
+- [ ] Secret `ARCOM_RELEASES_TOKEN` creado en arpos-v2 (PAT scope `repo`, acceso a `arcom-releases`)
+- [ ] Release viejo `v1.0.0` de `arcom-releases` eliminado antes de publicar (`gh release delete v1.0.0 --yes --cleanup-tag`)
+- [ ] Verificar en CI real: macOS genera `Arcom.app.tar.gz` + `.sig` y `latest.json` queda como asset
 
 ---
 
