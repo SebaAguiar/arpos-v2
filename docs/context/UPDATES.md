@@ -433,7 +433,7 @@ git push origin v1.0.1
 {
   "updater": {
     "endpoints": [
-      "https://releases.github.com/repos/arcom/launcher/releases/latest"
+      "https://github.com/SebaAguiar/arcom-releases/releases/latest/download/latest.json"
     ]
   }
 }
@@ -965,7 +965,7 @@ export class UpdatesAdminController {
 ### Rollback con GitHub Releases (Opción A — implementado)
 
 Con GitHub Releases **no hay status `broken` en un registro central** (el updater de Tauri consulta
-`releases/latest`). El rollback es **manipular las releases**, no marcar un flag:
+`.../releases/latest/download/latest.json`, que GitHub resuelve al asset del último release). El rollback es **manipular las releases**, no marcar un flag:
 
 ```
 Escenario: v0.1.0 publicada, los usuarios reportan un bug crítico.
@@ -1187,6 +1187,12 @@ export const useUpdateStore = create<UpdateState>((set) => ({
 
 ### GitHub Actions: Build + Sign + Release
 
+> **Nota (2026-09):** el workflow real y actualizado es `.github/workflows/release.yml` (matriz con
+> staging de installers + `.sig` + `*.tar.gz`, generación del manifest `latest.json` vía
+> `.github/scripts/generate-latest-json.mjs`, y publicación en `arcom-releases` con `gh release create`
+> + PAT `ARCOM_RELEASES_TOKEN`). El YAML siguiente es un boceto original simplificado (usa `tauri signer sign`,
+> sube a S3 y registra en un backend que no existe aún, y `softprops` publicaría en este repo privado).
+
 ```yaml
 # .github/workflows/release.yml
 
@@ -1305,9 +1311,16 @@ git push origin v1.0.1
 ### Learnings implementación real (2026-07-31)
 
 > `.github/workflows/release.yml` usa matriz de 3 OS (`ubuntu-latest`, `macos-latest`, `windows-latest`).
-> Con el endpoint GitHub (`https://api.github.com/repos/.../releases/latest`), el plugin de Tauri v2
-> **descubre automáticamente** los assets del release + sus archivos `.sig` — no se necesita manifest JSON
-> manual. `tauri build` genera los `.sig` automáticamente cuando `TAURI_SIGNING_PRIVATE_KEY` está seteado.
+> **Corrección verificada en `tauri-plugin-updater` v2.10.1: el endpoint de GitHub
+> (`https://api.github.com/repos/.../releases/latest`) NO funciona** — el plugin no parsea el JSON de la
+> API de GitHub (`tag_name`/`assets`); `RemoteRelease::deserialize` espera `{version, url, signature}` o
+> `{version, platforms: {"<os>-<arch>": {url, signature}}}` y `name` ("Arcom vX.Y.Z") falla `parse_version`.
+> La forma correcta es un **manifest estático `latest.json`** que el workflow genera
+> (`.github/scripts/generate-latest-json.mjs`) y sube como asset del release; el endpoint apunta a
+> `https://github.com/SebaAguiar/arcom-releases/releases/latest/download/latest.json`.
+> `tauri build` genera los `.sig` automáticamente cuando `TAURI_SIGNING_PRIVATE_KEY` está seteado.
+> La release se publica en `arcom-releases` (repo público de distribución) con `gh release create --repo`
+> + un PAT (`ARCOM_RELEASES_TOKEN`); `softprops/action-gh-release` publicaría en arpos-v2 (privado).
 
 Gotchas documentados:
 - **AppImage local**: requiere `patchelf` + FUSE funcional. Sin FUSE (contenedores) linuxdeploy falla con
@@ -1329,8 +1342,9 @@ Gotchas documentados:
   el 31-jul se **regeneró** `~/.tauri/arcom.key` (password `seba234`), se actualizó la pubkey en
   `tauri.conf.json` y se re-setearon `TAURI_SIGNING_PRIVATE_KEY` + `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`.
   Verificar siempre que pubkey de config y key local coincidan antes de taguear.
-- **`body_path: CHANGELOG.md`** en `softprops/action-gh-release` → el body del release es TODO el changelog.
-  Conviene tener una entrada fresca del changelog ANTES de taguear, no después.
+- **`--notes-file CHANGELOG.md`** en `gh release create` (antes `body_path: CHANGELOG.md` con softprops)
+  → el body del release es TODO el changelog. Conviene tener una entrada fresca del changelog ANTES de
+  taguear, no después.
 - **Versión**: la app y el changelog comparten `0.1.0`. Si el tag apunta al mismo commit que el beta
   anterior, el release "estable" repite el body — verificar el ref del tag antes de publicar.
 - **Primer release**: `v0.1.0-beta` (29-jul) apuntaba a un commit viejo y no incluía features posteriores

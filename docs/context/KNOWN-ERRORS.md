@@ -321,3 +321,24 @@ Este documento lista edge cases conocidos, vulnerabilidades de rendimiento y qui
   ```
 - **Solución:** Tauri cae automáticamente a full binary download. No hay forma de forzar delta desde versiones muy viejas.
 - **Prevención:** Mantener el updater habilitado para que los usuarios se mantengan al día. Las actualizaciones incrementales (v1.0.0 → v1.0.1 → v1.0.2) siempre funcionan con delta.
+
+---
+
+## 21. Updater: Endpoint GitHub API No Deserializa (requiere latest.json)
+
+- **Síntoma:** `check()` del updater no detecta versiones nuevas / falla silenciosamente; el manifest
+  descargado del endpoint nunca se parsea.
+- **Causa:** `tauri-plugin-updater` (verificado en v2.10.1) **no parsea el JSON de la GitHub API**.
+  `RemoteRelease::deserialize` solo acepta `{version, url, signature}` (dinámico) o
+  `{version, platforms: {"<os>-<arch>": {url, signature}}}` (estático). La API de GitHub devuelve
+  `tag_name`/`assets[]`, y `name` ("Arcom vX.Y.Z") falla `parse_version` (solo trimea la `v` inicial).
+- **Nota histórica:** era un mito del repo que el plugin "descubría automáticamente" los assets de
+  GitHub. No existe tal feature en el plugin; el endpoint `api.github.com/.../releases/latest` nunca
+  pudo funcionar con el formato actual.
+- **Solución (implementada 2026-09):** endpoint estático
+  `https://github.com/SebaAguiar/arcom-releases/releases/latest/download/latest.json`. El workflow
+  `.github/workflows/release.yml` genera ese manifest con `.github/scripts/generate-latest-json.mjs`
+  (enlaza cada `os-arch` con su bundle + `.sig`) y lo sube como asset de la misma release.
+- **Prevención:** publicar SIEMPRE `latest.json` como asset del release publicado vía `gh release create`
+  en `arcom-releases` (PAT `ARCOM_RELEASES_TOKEN`), y verificar que macOS incluya `*.app.tar.gz` + `.sig`
+  (`createUpdaterArtifacts: true`); el `*.dmg` sin `.sig` no alcanza para el updater de macOS.

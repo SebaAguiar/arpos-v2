@@ -2049,33 +2049,44 @@ jobs:
 
 ### 12.3 Auto-updater (Tauri Built-in)
 
-El sistema de actualizaciones de Arcom usa el updater built-in de Tauri. **Canal activo: GitHub Releases**
-(implementado y en producción desde v0.1.0). El backend personalizado (`releases.arcom.app`) es la Opción B
-para Fase 2 — cuando se necesite rollout gradual, monitoring y A/B testing.
+El sistema de actualizaciones de Arcom usa el updater built-in de Tauri. **Canal activo: GitHub Releases →
+manifest estático `latest.json`** (implementado y en producción desde v0.1.0). El backend personalizado
+(`releases.arcom.app`) es la Opción B para Fase 2 — cuando se necesite rollout gradual, monitoring y
+A/B testing.
 
-**Configuración real (tauri.conf.json, v0.1.0):**
+**Importante:** `tauri-plugin-updater` (verificado en v2.10.1) **no parsea el JSON de la GitHub API**
+(`releases/latest`). `RemoteRelease::deserialize` solo acepta el formato de manifest estático
+`{ version, platforms: { "<os>-<arch>": { url, signature } } }` (o el dinámico `{ version, url, signature }`).
+La GitHub API devuelve `tag_name`/`assets[]`, y el campo `name` del release ("Arcom vX.Y.Z")
+**no pasa el parseo semver** (`parse_version` solo trimea la `v` inicial). Por eso el endpoint debe
+apuntar a un `latest.json` que el workflow genera y sube como asset del release.
+
+**Configuración real (tauri.conf.json):**
 
 ```json
 {
   "updater": {
     "active": true,
-    "dialog": true,
+    "dialog": false,
     "endpoints": [
-      "https://api.github.com/repos/SebaAguiar/arcom-releases/releases/latest"
+      "https://github.com/SebaAguiar/arcom-releases/releases/latest/download/latest.json"
     ],
     "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDY0OTFEQzFGNTRCQ0IzQjEKUldTeHM3eFVIOXlSWkhkMGNEWXA3R3NEcmF5RHNRUVhwQktjNlBJUUVKaDIvY3dYSjUwa1dZd3MK"
   }
 }
 ```
 
-> El updater consulta la API de GitHub `releases/latest` y descarga el asset firmado del target correcto.
+> El updater consulta el manifest estático `latest.json` (hosteado como asset de la release en
+> `arcom-releases/releases/latest/download/`), que mapea cada `os-arch` a su bundle firmado + `.sig`.
+> El workflow `.github/workflows/release.yml` genera este manifest con
+> `.github/scripts/generate-latest-json.mjs` en el job `create-release`, y publica la release en el
+> repo público de distribución `SebaAguiar/arcom-releases` vía un PAT (`ARCOM_RELEASES_TOKEN`).
 
 **Flujo de actualización:**
 1. Background thread checkea periódicamente (intervalo configurable)
 2. Si hay nueva versión: notificación discreta al usuario
-3. Descarga el bundle firmado para el target (Windows `.msi`/`.nsis`, macOS `.dmg`/`.app`, Linux `.deb`/`.AppImage`)
-4. Verifica firma Ed25519 contra la pubkey embebida
-5. Aplica + reinicia
+3. Descarga el bundle firmado para el target (Windows `.exe` NSIS / `.msi`, macOS `.app.tar.gz`, Linux `.AppImage`) + verifica su `.sig` contra la pubkey embebida
+4. Aplica + reinicia (en Windows el updater cierra el proceso; en macOS/Linux se llama `relaunch()`)
 
 **Rollback (vía GitHub Releases):** No existe un flag `broken` central; el rollback es **forward-fix**.
 Ver `docs/context/UPDATES.md` §8 para el procedimiento completo (`gh release delete --cleanup-tag`,
