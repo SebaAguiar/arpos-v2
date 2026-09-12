@@ -123,16 +123,37 @@ function flattenNodeModules(target) {
 
 // The deployed package has no prisma CLI (it is a devDependency) and `pnpm
 // exec` trips over the workspace deps-status check, so generate directly from
-// the workspace's prisma binary targeting the deployed schema. Prisma resolves
+// the workspace's prisma CLI targeting the deployed schema. Prisma resolves
 // node_modules from the schema location and writes into the target.
+//
+// The prisma CLI lives in different places depending on the pnpm layout: with
+// isolated linking (CI, pnpm 11) it is resolvable from apps/api/node_modules;
+// with shamefully-hoist (local dev) it is hoisted to the repo root. We resolve
+// the JS entry directly and run it via process.execPath so neither a .bin shim
+// nor a broken symlink can break the build.
+function resolvePrismaEntry() {
+  const candidates = [
+    path.join(repoRoot, "apps", "api", "node_modules", "prisma", "build", "index.js"),
+    path.join(repoRoot, "node_modules", "prisma", "build", "index.js"),
+  ];
+  for (const candidate of candidates) {
+    if (statSync(candidate, { throwIfNoEntry: false })) {
+      return candidate;
+    }
+  }
+  throw new Error(
+    "Unable to locate prisma CLI: checked apps/api/node_modules and repo root " +
+      "node_modules. Run 'pnpm install' at the repo root before building.",
+  );
+}
+
 function regenPrismaClient(target) {
   const schema = path.join(target, "prisma", "schema.prisma").replace(/\\/g, "/");
-  const prismaBin = path.join(repoRoot, "node_modules", ".bin", IS_WINDOWS ? "prisma.cmd" : "prisma");
+  const prismaEntry = resolvePrismaEntry();
   console.log(`[build-sidecar] Regenerating Prisma client into hoisted layout (${schema})`);
-  execFileSync(prismaBin, ["generate", `--schema=${schema}`], {
+  execFileSync(process.execPath, [prismaEntry, "generate", `--schema=${schema}`], {
     cwd: repoRoot,
     stdio: "inherit",
-    shell: true,
   });
 }
 
