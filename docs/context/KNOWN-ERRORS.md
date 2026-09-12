@@ -453,3 +453,17 @@ paso prod purga devDeps de admin-panel y degrada el estado hasta que se relinkea
 - **Windows: `spawnSync pnpm ENOENT` en Node:** `pnpm` en Windows es un shim `.cmd`; `child_process`
   sin `shell: true` no lo ejecuta (tampoco `.bat`/`.cmd`). El `execFileSync("pnpm", [...])` del pack de
   sidecar pasa `{ shell: true }` para que cmd resuelva el shim.
+
+## 28. Windows MSI: pre-release de versión no numérica → `failed to bundle project`
+
+- **Síntoma:** al buildear Windows con una versión pre-release (`1.0.0-beta`), `tauri build`
+  falla con `failed to bundle project: optional pre-release identifier in app version must be
+  numeric-only and cannot be greater than 65535 for msi target`.
+- **Causa:** el target MSI (WiX) no admite identificadores pre-release no numéricos; NSIS,
+  AppImage, dmg y tar.gz sí los toleran.
+- **Solución (2026-09):** en `release.yml`, si el tag tiene pre-release (`*-*`) y el runner es
+  Windows, el build pasa `tauri build --bundles nsis`. Los tags estables siguen produciendo
+  `msi + nsis`. El `.msi` simplemente no se incluye en el manifiesto del prerelease
+  (generate-latest-json sólo agrega la entrada si el asset existe).
+- **Prevención:** localmente, al buildear un prerelease en Windows usar `tauri build --bundles
+  nsis`, o versiones numéricas tipo `1.0.0-1`.

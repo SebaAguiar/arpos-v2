@@ -5,7 +5,8 @@ v1.0.0-beta bundles are truly self-contained: the packaged Node portable + NestJ
 sidecar boot, migrate, and the POS works offline-first.
 
 Target: Linux x86_64 (tested on Zorin/Ubuntu). Same flow applies to macOS (DMG) and
-Windows (NSIS/MSI) with OS-appropriate equivalents.
+Windows — note the beta Windows bundle is **NSIS only** (WiX/MSI rejects non-numeric
+prerelease versions; the stable v1.0.0 ships msi + nsis).
 
 Release line: this is the **beta** that must pass before the definitive v1.0.0 is cut.
 Source of truth: release `v1.0.0-beta` at
