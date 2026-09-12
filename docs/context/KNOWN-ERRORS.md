@@ -404,3 +404,21 @@ Este documento lista edge cases conocidos, vulnerabilidades de rendimiento y qui
   mover constantes/funciones puras a `salesChartUtils.ts` e importarlas desde ahí (no re-exportarlas).
 - **Prevención:** los ignores de eslint deben cubrir todo lo gitignored por build (`.vercel`, `.astro`,
   `.next`, `dist`); un archivo de componentes sólo debe exportar componentes y sus prop types.
+
+## 26. nx + pnpm: `../../node_modules/.bin/<cmd>` NO existe (bins no hoisted)
+
+- **Síntoma:** `nx run marketing-landing:build|check|preview` falla con
+  `/bin/sh: ../../node_modules/.bin/astro: No existe el fichero o el directorio`, aunque
+  `pnpm exec astro build` funciona. También `astro build`/`astro check` directos fallan con
+  `Parse failure: Expected ',', got 'ident'` si la config tiene un error de sintaxis.
+- **Causa:** con `cwd: apps/marketing-landing`, la ruta `../../node_modules/.bin/astro` resuelve al
+  `node_modules` de la RAÍZ. pnpm NO hoista los bins de dependencias de un paquete a la raíz de forma
+  fiable: `astro` (dependency de marketing-landing) sólo vive en
+  `apps/marketing-landing/node_modules/.bin`. Los targets `build`/`preview`/`check` de landing NO
+  estaban en CI (`ci.yml`) ni en `root.build`, por eso el bug pasó desapercibido.
+- **Solución (2026-09):** los `command` de los targets de `project.json` usan `npx astro build|preview|check`
+  (mismo patrón que ya usaba `dev`). Además se reparó una coma faltante en
+  `apps/marketing-landing/astro.config.mjs` entre las keys `server` y `vite` que rompía el parse.
+- **Prevención:** nunca hardcodear `../../node_modules/.bin/<cmd>` en `project.json`; usar
+  `npx <cmd>`/`pnpm exec <cmd>`. Validar cambios de un proyecto no cubierto por CI con sus targets
+  explícitos (`pnpm check:landing`, `pnpm exec nx build marketing-landing`).
