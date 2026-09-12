@@ -342,3 +342,65 @@ Este documento lista edge cases conocidos, vulnerabilidades de rendimiento y qui
 - **Prevención:** publicar SIEMPRE `latest.json` como asset del release publicado vía `gh release create`
   en `arcom-releases` (PAT `ARCOM_RELEASES_TOKEN`), y verificar que macOS incluya `*.app.tar.gz` + `.sig`
   (`createUpdaterArtifacts: true`); el `*.dmg` sin `.sig` no alcanza para el updater de macOS.
+
+## 22. Tauri: bundle.targets no acepta mapa por-OS; macOS requiere el target 'app'
+
+- **Síntoma:** config con `"targets": {"linux": [...], "macOS": [...], "windows": [...]}` falla en
+  `tauri build` a los ~2 segundos: `error on bundle > targets ... is not valid under any of the schemas
+  listed in the 'anyOf' keyword`. Y con `createUpdaterArtifacts: true` pero `targets` plano sin `"app"`,
+  el log de macOS avisa `no updater-enabled targets were built. Please enable one of these targets:
+  app, appimage, msi, nsis` y NO genera `.app.tar.gz` ni `.sig` (solo el `.dmg`).
+- **Causa:** el schema de `bundle.targets` es `string | string[]` (array plano). Además el bundler
+  conserva el `.app` (necesario para el bundle updater de macOS) sólo si `"app"` está en la lista; con
+  sólo `"dmg"` el `.app` se empaqueta y se limpia.
+- **Solución (2026-09):** array plano `["deb","rpm","appimage","msi","nsis","dmg","app"]`. El bundler
+  filtra silenciosamente por OS: macOS arma `dmg` + `app` (y con `createUpdaterArtifacts` genera
+  `Arcom.app.tar.gz` + `.sig`), Linux/Windows ignoran los targets ajenos.
+- **Verificación:** descargar el job macOS de GitHub Actions y confirmar `bundle/macos/Arcom.app`,
+  `Arcom.app.tar.gz` y su `.sig`; el `.dmg` nunca lleva `.sig` (no es target updater-enabled).
+
+## 23. CI/Windows: EBUSY por `prisma generate` concurrentes al mismo output dir
+
+- **Síntoma:** job de build en `windows-latest` falla en `pnpm install` con
+  `EBUSY: resource busy or locked, copyfile .../query_engine_bg.<provider>.js ->
+  packages/prisma-schema/generated/query_engine_bg.js`. Intermitente (a veces pasa).
+- **Causa:** dos workspaces hermanos (ej. `admin-panel` y `marketing-landing`) corren `postinstall` de
+  `prisma generate --schema .../schema.prisma` **en paralelo** (pnpm 9) escribiendo al MISMO
+  `packages/prisma-schema/generated`. En Linux/macOS el filesystem tolera la escritura concurrente; en
+  Windows hay file locking → `EBUSY`. Ninguna app debe generar el client Prisma concurrentemente.
+- **Solución (2026-09):** eliminar el `postinstall` redundante de `marketing-landing` (no importa
+  `@prisma/client`); el generate queda en `admin-panel` y en el step explícito "Generate Prisma client"
+  (`pnpm --filter api exec prisma generate`).
+- **Prevención:** un monorepo debe tener UN único `prisma generate` por instalación, nunca dos
+  `postinstall` apuntando al mismo `generated/`. Cuidado también con el mismo patrón en `marketing-landing`
+  y `admin-panel` en cualquier CI.
+
+## 24. GitHub Actions: trampa de `${VAR:+flag}` con booleanos como strings
+
+- **Síntoma:** TODA release publicada salía como prerelease, aunque el tag fuera `v1.0.0`. El endpoint
+  `releases/latest/download/latest.json` del updater devolvía 404 porque GitHub no resuelve `latest`
+  con releases prerelease.
+- **Causa:** `PRERELEASE=${{ contains(github.ref_name, '-beta') || ... }}` siempre produce la string
+  `"false"` o `"true"` (nunca vacía). `${PRERELEASE:+--prerelease}` expande la flag cuando la variable
+  NO está vacía → todas las releases llevaban `--prerelease`.
+- **Solución (2026-09):** comparación explícita
+  `if [ "$PRERELEASE" = "true" ]; then PRERELEASE_FLAG="--prerelease"; fi`. Y recuperar releases ya
+  publicadas con `gh release edit <tag> --repo <repo> --prerelease=false`.
+- **Prevención:** en GitHub Actions los booleans de expression `${{ ... }}` son strings. Nunca usés
+  `${VAR:+flag}` sobre un valor que venga de una expression booleana.
+
+## 25. ESLint: caches de build escaneados + re-exports con react-refresh
+
+- **Síntoma A:** `pnpm lint` local falla con cientos de errores en `apps/marketing-landing/.vercel/` y
+  `.astro/` (`no-explicit-any`, `no-empty-object-type`, `triple-slash-reference`, etc.).
+- **Causa A:** `.vercel/` y `.astro/` son caches de build que ya están en `.gitignore`, pero la flat
+  config `eslint.config.mjs` no los excluía → `eslint .` los escaneaba igual. En CI no aparece porque el
+  checkout es limpio; es un problema de DX local.
+- **Síntoma B:** `pos-react` fallaba el lint con `react-refresh/only-export-components` pese a usar
+  `--max-warnings 0`. Se intentó "re-exportar" helpers (`export { computeLabelStep } from "./utils"`)
+  y la regla SIGUE marcando warning: los re-exports de valores cuentan como exports no-componentes.
+  El patrón correcto es que los consumers importen del módulo donde vive el helper.
+- **Solución (2026-09):** agregar `**/.vercel/**` y `**/.astro/**` a `ignores` de `eslint.config.mjs`;
+  mover constantes/funciones puras a `salesChartUtils.ts` e importarlas desde ahí (no re-exportarlas).
+- **Prevención:** los ignores de eslint deben cubrir todo lo gitignored por build (`.vercel`, `.astro`,
+  `.next`, `dist`); un archivo de componentes sólo debe exportar componentes y sus prop types.
