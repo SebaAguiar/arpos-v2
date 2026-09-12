@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
@@ -17,17 +18,63 @@ pub struct BackendStatus {
     pub uptime_seconds: Option<f64>,
 }
 
+struct BackendRuntime {
+    node_bin: PathBuf,
+    main_script: PathBuf,
+    cwd: PathBuf,
+}
+
 pub struct ProcessManager {
     child: Mutex<Option<Child>>,
     started_at: Mutex<Option<Instant>>,
+    resource_dir: PathBuf,
 }
 
 impl ProcessManager {
-    pub fn new() -> Self {
+    pub fn new(resource_dir: PathBuf) -> Self {
         Self {
             child: Mutex::new(None),
             started_at: Mutex::new(None),
+            resource_dir,
         }
+    }
+
+    fn resolve_runtime(&self) -> Result<BackendRuntime, String> {
+        // Production: runtime bundled into the installer's resource dir.
+        let runtime_dir = self.resource_dir.join("runtime");
+        let prod_node = if cfg!(windows) {
+            runtime_dir.join("node").join("node.exe")
+        } else {
+            runtime_dir.join("node").join("bin").join("node")
+        };
+        let prod_main = runtime_dir.join("api").join("dist").join("main.js");
+
+        if prod_node.exists() && prod_main.exists() {
+            return Ok(BackendRuntime {
+                node_bin: prod_node,
+                main_script: prod_main,
+                cwd: runtime_dir.join("api"),
+            });
+        }
+
+        // Development: repository checkout with a system-installed Node.js.
+        let project_root = paths::get_project_root();
+        let dist_path = project_root.join("apps").join("api").join("dist").join("main.js");
+
+        if !dist_path.exists() {
+            return Err(format!(
+                "Backend not built. Expected {:?}. Run 'pnpm --filter api build' first.",
+                dist_path
+            ));
+        }
+
+        let node_bin = which_node().ok_or("Node.js not found in PATH")?;
+
+        Ok(BackendRuntime {
+            node_bin: PathBuf::from(node_bin),
+            main_script: dist_path,
+            cwd: project_root,
+        })
     }
 
     pub fn is_running(&self) -> bool {
@@ -54,24 +101,14 @@ impl ProcessManager {
             return Ok("Backend already running".to_string());
         }
 
-        let project_root = paths::get_project_root();
-        let dist_path = project_root.join("apps").join("api").join("dist").join("main.js");
-
-        if !dist_path.exists() {
-            return Err(format!(
-                "Backend not built. Expected {:?}. Run 'pnpm --filter pos-api build' first.",
-                dist_path
-            ));
-        }
+        let runtime = self.resolve_runtime()?;
 
         let db_path = paths::get_db_path();
         paths::ensure_data_dir()?;
 
-        let node_bin = which_node().ok_or("Node.js not found in PATH")?;
-
-        let child = Command::new(node_bin)
-            .arg(dist_path.to_str().unwrap())
-            .current_dir(&project_root)
+        let child = Command::new(&runtime.node_bin)
+            .arg(&runtime.main_script)
+            .current_dir(&runtime.cwd)
             .env("NODE_ENV", "production")
             .env("PORT", PORT.to_string())
             .env("DATABASE_URL", format!("file:{}", db_path.display()))

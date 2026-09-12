@@ -8,6 +8,7 @@ use managers::export::ExportManager;
 use managers::license::LicenseManager;
 use managers::process::ProcessManager;
 use managers::system::SystemManager;
+use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -15,7 +16,14 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
-        .manage(ProcessManager::new())
+        .setup(|app| {
+            let resource_dir = app
+                .path()
+                .resource_dir()
+                .map_err(|e| format!("Failed to resolve resource dir: {}", e))?;
+            app.manage(ProcessManager::new(resource_dir));
+            Ok(())
+        })
         .manage(DatabaseManager::new())
         .manage(SystemManager::new())
         .manage(BackupManager::new())

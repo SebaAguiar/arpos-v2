@@ -422,3 +422,27 @@ Este documento lista edge cases conocidos, vulnerabilidades de rendimiento y qui
 - **Prevención:** nunca hardcodear `../../node_modules/.bin/<cmd>` en `project.json`; usar
   `npx <cmd>`/`pnpm exec <cmd>`. Validar cambios de un proyecto no cubierto por CI con sus targets
   explícitos (`pnpm check:landing`, `pnpm exec nx build marketing-landing`).
+
+## 26. pnpm v11: verify-deps flapping con `ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY`
+
+**Síntoma:** comandos recursivos (`pnpm --filter X ...`, `pnpm run`, `pnpm exec`) fallan
+intermitentemente con `[ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY]` y stack interno
+`runDepsStatusCheck ... pnpm install --production`. Incluso `pnpm exec true` falla.
+
+**Causa raíz:** antes de correr un comando recursivo, pnpm 11 ejecuta un `pnpm install --production`
+de reconciliación. En este monorepo el `postinstall` de `apps/admin-panel`
+(`prisma generate --schema ../../packages/prisma-schema/prisma/schema.prisma`) depende del CLI de
+prisma (devDependency): en modo `--production` ese CLI no está, el postinstall falla y el comando
+entrante aborta (o aborta el purge de modules con "no TTY"). El verify además es **auto-dañante**: su
+paso prod purga devDeps de admin-panel y degrada el estado hasta que se relinkea.
+
+**Mitigaciones (validadas):**
+- Antes del build local: `CI=true pnpm install --config.confirm-modules-purge=false`. Esto recarga el
+  marker del workspace y deja el verify como no-op (los builds posteriores pasan). En CI de GitHub no
+  hay problema: frozen install fresco + `CI=true`.
+- Nunca cachear `--production` en el estado local: Si `NODE_ENV` quedó exportado, pnpm fuerza
+  `--production` en installs (usar env por comando, no exportar).
+- Para ejecutar scripts del proyecto con pnpm que no requieren verify (p. ej. el pack del sidecar),
+  invocarlos **directo con `node`** (`node apps/arcom-launcher/scripts/build-sidecar.mjs`), no vía
+  `pnpm run`. El `.mjs` calcula `repoRoot` desde `__dirname` y el `beforeBuildCommand` usa
+  `node "$(git rev-parse --show-toplevel)/..."` para ser agnóstico al CWD.

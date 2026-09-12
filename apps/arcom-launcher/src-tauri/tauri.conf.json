@@ -6,7 +6,7 @@
   "build": {
     "beforeDevCommand": "bash scripts/dev.sh",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "pnpm --filter api build && pnpm --filter pos-react build",
+    "beforeBuildCommand": "pnpm --filter api build && node \"$(git rev-parse --show-toplevel)/apps/arcom-launcher/scripts/build-sidecar.mjs\" && pnpm --filter pos-react build",
     "frontendDist": "../../pos-react/dist"
   },
   "app": {
@@ -30,6 +30,10 @@
   "bundle": {
     "active": true,
     "createUpdaterArtifacts": true,
+    "resources": {
+      "../../../runtime/node": "runtime/node",
+      "../../../runtime/api": "runtime/api"
+    },
     "targets": ["deb", "rpm", "appimage", "msi", "nsis", "dmg", "app"],
     "icon": [
       "icons/32x32.png",

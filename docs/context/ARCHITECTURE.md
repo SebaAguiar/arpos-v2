@@ -2035,17 +2035,30 @@ jobs:
 
 | Plataforma | Formato | Tamaño | Descarga |
 |---|---|---|---|
-| **Windows** | MSI (NSIS) | ~80MB | arcom-setup-1.0.0.msi |
-| **macOS** | DMG + App | ~90MB | arcom-1.0.0.dmg |
-| **Linux** | AppImage / DEB | ~75MB | arcom-1.0.0.AppImage |
+| **Windows** | MSI (NSIS) | ~250-400MB | arcom-setup-1.0.0.msi |
+| **macOS** | DMG + App | ~250-400MB | arcom-1.0.0.dmg |
+| **Linux** | AppImage / DEB | ~170MB | arcom-1.0.0.AppImage |
+
+**Modelo de instalación: self-contained (bundle.resources).** El instalador incluye todo el sidecar:
+Node.js 20 LTS portable + build de la API (dist) + sus `node_modules` de producción. No hay descargas
+post-instalación ni requisito de Node en la máquina destino. El launcher resuelve el runtime en tiempo
+de ejecución via `app.path().resource_dir()` (`usr/lib/Arcom/runtime/` en Linux AppImage, `Contents/Resources/runtime`
+en macOS, junto al EXE en Windows).
 
 **El instalador hace:**
 1. Detectar instalación anterior
 2. Ofrecer migración de datos
-3. Descargar binarios (Node.js, NestJS, Prisma)
+3. Embedidos como `bundle.resources`: `runtime/node` (Node portátil v20.19.0) + `runtime/api` (dist + deps prod)
 4. Crear carpeta ~/.arcom/
 5. Inicializar SQLite
 6. Crear shortcut en menú Inicio / Applications
+
+**Empaquetado del runtime:** `apps/arcom-launcher/scripts/build-sidecar.mjs` (invocado por
+`beforeBuildCommand` como `node scripts/build-sidecar.mjs` — NO via `pnpm run`, evita el verify-deps de pnpm):
+descarga el Node portable por OS, y hace `pnpm --filter api deploy --legacy --prod` hacia
+`<repoRoot>/runtime/api`. El target vive en la raíz del repo (fuera del grafo de pnpm) y se poda de
+`src/`, `test/`, `e2e/`, `scripts/`, `.env`, `dev.db` y configs de build. `runtime/*` está en gitignore
+(`*` + `!.gitignore`). En CI CI=true automatiza el purge de pnpm que el deploy requiere sin TTY.
 
 ### 12.3 Auto-updater (Tauri Built-in)
 
