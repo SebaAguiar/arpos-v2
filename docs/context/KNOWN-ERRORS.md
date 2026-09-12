@@ -450,3 +450,6 @@ paso prod purga devDeps de admin-panel y degrada el estado hasta que se relinkea
   el `$()`/comillas de bash no se expanden en cmd y `node` recibe un path literal
   (`Cannot find module ...\"$(git`). Usar ruta **relativa al CWD del launcher**:
   `node scripts/build-sidecar.mjs`.
+- **Windows: `spawnSync pnpm ENOENT` en Node:** `pnpm` en Windows es un shim `.cmd`; `child_process`
+  sin `shell: true` no lo ejecuta (tampoco `.bat`/`.cmd`). El `execFileSync("pnpm", [...])` del pack de
+  sidecar pasa `{ shell: true }` para que cmd resuelva el shim.

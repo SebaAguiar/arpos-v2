@@ -103,6 +103,7 @@ function packApi() {
     {
       cwd: repoRoot,
       stdio: "inherit",
+      shell: true,
     },
   );
   const main = path.join(target, "dist", "main.js");
