@@ -14,9 +14,6 @@ import {
   type ChartPoint,
 } from "./salesChartUtils";
 
-export type { ChartPoint } from "./salesChartUtils";
-export { computeLabelStep } from "./salesChartUtils";
-
 export interface SalesBarChartProps {
   data: ChartPoint[];
   prevData?: ChartPoint[];

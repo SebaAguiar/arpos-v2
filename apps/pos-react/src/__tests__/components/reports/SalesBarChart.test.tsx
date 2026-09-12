@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { render } from "@testing-library/react";
 import { Theme } from "@radix-ui/themes";
-import { SalesBarChart, type ChartPoint, computeLabelStep } from "@/components/reports/SalesBarChart";
+import { SalesBarChart } from "@/components/reports/SalesBarChart";
+import { computeLabelStep, type ChartPoint } from "@/components/reports/salesChartUtils";
 
 function makePoints(n: number): ChartPoint[] {
   return Array.from({ length: n }, (_, i) => ({

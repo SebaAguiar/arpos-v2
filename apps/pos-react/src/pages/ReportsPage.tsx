@@ -7,7 +7,8 @@ import { CashRegisterRepository, type CashShiftData } from "@/repositories/cash-
 import type { ApiSaleStats, ApiPaymentMethodBreakdown, ApiTopProduct } from "@/services/sales.service";
 import { useSettingsStore } from "@/stores/settings.store";
 import { getPeriodTimestamps, type Period } from "@/lib/date";
-import { SalesBarChart, type ChartPoint } from "@/components/reports/SalesBarChart";
+import { SalesBarChart } from "@/components/reports/SalesBarChart";
+import type { ChartPoint } from "@/components/reports/salesChartUtils";
 import { TopProductsList } from "@/components/reports/TopProductsList";
 import {
   PaymentMethodsWidget,
