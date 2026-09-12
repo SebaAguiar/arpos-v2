@@ -28,29 +28,54 @@ Updater manifest: `latest.json` in the same release.
 
 ## 1. Download + integrity
 
+> **IMPORTANT — solo usá los links con el tag explícito `v1.0.0-beta` de abajo.**
+> NO uses el patrón `.../releases/latest/download/...`: durante la fase beta GitHub no
+> resuelve `/releases/latest` (solo sirve releases **estables**) y da **404** — es el
+> comportamiento esperado y documentado, no un error.
+
+Los nombres de asset varían por formato. Tauri nombra AppImage/deb/exe/dmg con guiones bajos
+(`Arcom_1.0.0-beta_amd64.*`) pero el **rpm con guiones y sufijo `-1.x86_64`** (`Arcom-1.0.0-beta-1.x86_64.rpm`);
+usar el nombre equivocado da 404 aunque la release exista. Mapa exacto (tag `v1.0.0-beta`):
+
 ```bash
-# Choose one installer (AppImage is the simplest for Zorin/Ubuntu):
+# Linux — AppImage (simplest para Zorin/Ubuntu). Download ~142 MB + .sig:
 curl -fLO https://github.com/SebaAguiar/arcom-releases/releases/download/v1.0.0-beta/Arcom_1.0.0-beta_amd64.AppImage
 curl -fLO https://github.com/SebaAguiar/arcom-releases/releases/download/v1.0.0-beta/Arcom_1.0.0-beta_amd64.AppImage.sig
+
+# Linux — deb (Debian/Ubuntu). Download ~97 MB + .sig:
+curl -fLO https://github.com/SebaAguiar/arcom-releases/releases/download/v1.0.0-beta/Arcom_1.0.0-beta_amd64.deb
+curl -fLO https://github.com/SebaAguiar/arcom-releases/releases/download/v1.0.0-beta/Arcom_1.0.0-beta_amd64.deb.sig
+
+# Linux — rpm (Fedora/RHEL). Nombre con GUIONES. Download ~97 MB + .sig:
+curl -fLO https://github.com/SebaAguiar/arcom-releases/releases/download/v1.0.0-beta/Arcom-1.0.0-beta-1.x86_64.rpm
+curl -fLO https://github.com/SebaAguiar/arcom-releases/releases/download/v1.0.0-beta/Arcom-1.0.0-beta-1.x86_64.rpm.sig
+
+# Windows — NSIS installer (beta NO lleva MSI):
+curl -fLO https://github.com/SebaAguiar/arcom-releases/releases/download/v1.0.0-beta/Arcom_1.0.0-beta_x64-setup.exe
+curl -fLO https://github.com/SebaAguiar/arcom-releases/releases/download/v1.0.0-beta/Arcom_1.0.0-beta_x64-setup.exe.sig
+
+# macOS — DMG (Apple Silicon aarch64):
+curl -fLO https://github.com/SebaAguiar/arcom-releases/releases/download/v1.0.0-beta/Arcom_1.0.0-beta_aarch64.dmg
+curl -fLO https://github.com/SebaAguiar/arcom-releases/releases/download/v1.0.0-beta/Arcom_1.0.0-beta_aarch64.dmg.sig
 ```
 
 | # | Check | Expected | Pass |
 |---|-------|----------|------|
-| 1.1 | File size | ≈ 142 MB | ☐ |
-| 1.2 | Signature (optional but recommended) | `minisign -Vm Arcom_1.0.0_amd64.AppImage -P "<pubkey from apps/arcom-launcher/src-tauri/tauri.conf.json>"` → `Signature and comment signature verified` | ☐ |
+| 1.1 | File size | AppImage ≈ 142 MB; deb/rpm ≈ 97 MB | ☐ |
+| 1.2 | Signature (optional but recommended) | `minisign -Vm <asset-name> -P "<pubkey from apps/arcom-launcher/src-tauri/tauri.conf.json>"` → `Signature and comment signature verified` (usá el nombre exacto del asset; p. ej. `Arcom_1.0.0-beta_amd64.AppImage`) | ☐ |
 
 ## 2. Install + first launch
 
 ```bash
-chmod +x Arcom_1.0.0_amd64.AppImage
-./Arcom_1.0.0_amd64.AppImage        # FUSE needed
+chmod +x Arcom_1.0.0-beta_amd64.AppImage
+./Arcom_1.0.0-beta_amd64.AppImage  # FUSE needed
 # Fallback if FUSE unavailable:
-export APPIMAGE_EXTRACT_AND_RUN=1 && ./Arcom_1.0.0_amd64.AppImage
+export APPIMAGE_EXTRACT_AND_RUN=1 && ./Arcom_1.0.0-beta_amd64.AppImage
 ```
 
 | # | Check | Expected | Pass |
 |---|-------|----------|------|
-| 2.1 | Debian installs (`sudo apt install ./Arcom_1.0.0_amd64.deb`) | menu entry `Arcom` appears | ☐ |
+| 2.1 | Package installs (`sudo apt install ./Arcom_1.0.0-beta_amd64.deb` or `sudo dnf install ./Arcom-1.0.0-beta-1.x86_64.rpm`) | menu entry `Arcom` appears | ☐ |
 | 2.2 | First launch opens the Tauri window (no browser tab) | window shows app immediately | ☐ |
 | 2.3 | Sidecar process is the **bundled** node | `ps aux \| grep runtime` shows `<install>/usr/lib/Arcom/runtime/node/bin/node` (or AppDir name); NOT a system node | ☐ |
 | 2.4 | Backend is listening | `curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/health` → responds `5xx` JSON (fresh DB, tables not created yet = **expected**; a refused connection = failure) | ☐ |
