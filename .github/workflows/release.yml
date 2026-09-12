@@ -155,6 +155,8 @@ jobs:
       # format ({ version, platforms: { "<os>-<arch>": { url, signature } } }).
       # This must be uploaded as an asset of the same release so it is
       # reachable at .../releases/latest/download/latest.json.
+      - uses: pnpm/action-setup@v2
+
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
