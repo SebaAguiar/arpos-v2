@@ -109,7 +109,7 @@ jobs:
             -name "*.msi" -o \
             -name "*.exe" -o \
             -name "*.sig" -o \
-            -name "*.tar.gz" \
+            -name "*.tar.gz" ! -name "control.tar.gz" ! -name "data.tar.gz" \
           \) -exec cp {} staging/ \;
 
       - name: Upload bundles as artifacts
