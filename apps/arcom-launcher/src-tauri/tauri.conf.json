@@ -6,7 +6,7 @@
   "build": {
     "beforeDevCommand": "bash scripts/dev.sh",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "pnpm --filter api build && node \"$(git rev-parse --show-toplevel)/apps/arcom-launcher/scripts/build-sidecar.mjs\" && pnpm --filter pos-react build",
+    "beforeBuildCommand": "pnpm --filter api build && node scripts/build-sidecar.mjs && pnpm --filter pos-react build",
     "frontendDist": "../../pos-react/dist"
   },
   "app": {

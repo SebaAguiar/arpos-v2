@@ -423,7 +423,7 @@ Este documento lista edge cases conocidos, vulnerabilidades de rendimiento y qui
   `npx <cmd>`/`pnpm exec <cmd>`. Validar cambios de un proyecto no cubierto por CI con sus targets
   explícitos (`pnpm check:landing`, `pnpm exec nx build marketing-landing`).
 
-## 26. pnpm v11: verify-deps flapping con `ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY`
+## 27. pnpm v11: verify-deps flapping con `ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY`
 
 **Síntoma:** comandos recursivos (`pnpm --filter X ...`, `pnpm run`, `pnpm exec`) fallan
 intermitentemente con `[ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY]` y stack interno
@@ -442,7 +442,11 @@ paso prod purga devDeps de admin-panel y degrada el estado hasta que se relinkea
   hay problema: frozen install fresco + `CI=true`.
 - Nunca cachear `--production` en el estado local: Si `NODE_ENV` quedó exportado, pnpm fuerza
   `--production` en installs (usar env por comando, no exportar).
-- Para ejecutar scripts del proyecto con pnpm que no requieren verify (p. ej. el pack del sidecar),
-  invocarlos **directo con `node`** (`node apps/arcom-launcher/scripts/build-sidecar.mjs`), no vía
-  `pnpm run`. El `.mjs` calcula `repoRoot` desde `__dirname` y el `beforeBuildCommand` usa
-  `node "$(git rev-parse --show-toplevel)/..."` para ser agnóstico al CWD.
+- Para ejecutar scripts del proyecto que no requieren verify (p. ej. el pack del sidecar), invocarlos
+  **directo con `node`**, no vía `pnpm run`. El `.mjs` calcula `repoRoot` desde `__dirname`, así que
+  es inmune al CWD.
+- **beforeBuildCommand:** tauri ejecuta el comando con CWD = carpeta del paquete launcher (evidenciado
+  en Linux y Windows) y en Windows lo corre con **cmd.exe** (no bash). NO usar `$(git rev-parse ...)`:
+  el `$()`/comillas de bash no se expanden en cmd y `node` recibe un path literal
+  (`Cannot find module ...\"$(git`). Usar ruta **relativa al CWD del launcher**:
+  `node scripts/build-sidecar.mjs`.
