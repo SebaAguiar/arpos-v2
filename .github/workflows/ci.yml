@@ -111,7 +111,7 @@ jobs:
         run: |
           pnpm --filter api exec prisma generate
           echo 'DATABASE_URL="postgres://ci:ci@localhost:5432/ci"' > apps/admin-panel/.env
-          pnpm --filter admin-panel exec prisma generate
+          pnpm --filter admin-panel exec prisma generate --schema ../../packages/prisma-schema/prisma/schema.prisma
 
       - name: Create env file
         run: |
@@ -144,7 +144,7 @@ jobs:
         run: |
           pnpm --filter api exec prisma generate
           echo 'DATABASE_URL="postgres://ci:ci@localhost:5432/ci"' > apps/admin-panel/.env
-          pnpm --filter admin-panel exec prisma generate
+          pnpm --filter admin-panel exec prisma generate --schema ../../packages/prisma-schema/prisma/schema.prisma
 
       - name: Create env file
         run: |
