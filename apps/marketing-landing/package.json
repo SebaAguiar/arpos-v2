@@ -8,8 +8,7 @@
     "fetch:releases": "node scripts/fetch-releases.mjs",
     "build": "node scripts/fetch-releases.mjs && astro build",
     "preview": "astro preview",
-    "check": "astro check",
-    "postinstall": "prisma generate --schema ../../packages/prisma-schema/prisma/schema.prisma"
+    "check": "astro check"
   },
   "dependencies": {
     "@arcom/prisma-schema": "workspace:^",
