@@ -9,6 +9,9 @@ export default defineConfig({
   adapter: vercel(),
   integrations: [tailwind(), sitemap()],
   outDir: '../../dist/apps/marketing-landing',
+  server: {
+    host: true
+  },
   vite: {
     server: {
       fs: {
