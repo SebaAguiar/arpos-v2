@@ -86,7 +86,7 @@ async function main() {
     try {
       const existing = JSON.parse(await readFile(RAW_RELEASES_PATH, 'utf8'));
       if (!existing?.assets?.linux_deb) {
-        throw new Error('Existing releases.json has no usable assets');
+        throw new Error('Existing releases.json has no usable assets', { cause: error });
       }
     } catch {
       console.error('[fetch-releases] Existing releases.json is unusable.');
