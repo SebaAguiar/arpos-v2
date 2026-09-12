@@ -105,13 +105,15 @@ export function useBackend(): UseBackendReturn {
         if (cancelled) return;
 
         if (!s?.running) {
-          await startBackend();
-          if (cancelled) return;
-
           try {
+            await startBackend();
+            if (cancelled) return;
             await ProcessService.waitForReady();
           } catch (e) {
-            if (!cancelled) setError(String(e));
+            if (!cancelled) {
+              setError(String(e));
+              setIsLoading(false);
+            }
             return;
           }
         }

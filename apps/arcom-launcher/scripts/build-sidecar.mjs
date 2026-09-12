@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 import { execFileSync } from "node:child_process";
 import { createWriteStream } from "node:fs";
-import { chmodSync, mkdirSync, rmSync, renameSync, statSync } from "node:fs";
+import { chmodSync, cpSync, mkdirSync, rmSync, renameSync, statSync } from "node:fs";
 import { pipeline } from "node:stream/promises";
 import { Readable } from "node:stream";
 import path from "node:path";
+import os from "node:os";
 import { fileURLToPath } from "node:url";
 
 const NODE_VERSION = "v20.19.0";
@@ -93,23 +94,92 @@ function installNodeBinary(extracted) {
   console.log(`[build-sidecar] Node installed at ${dstNode}`);
 }
 
+// pnpm's legacy deploy layout is built from SYMLINKS into the .pnpm virtual
+// store. Tauri's resource bundler silently drops symlinks, so a symlink-based
+// runtime cannot resolve any dependency after packaging. Reinstall the deployed
+// api with node-linker=hoisted so the bundled node_modules contains only real
+// directories.
+function flattenNodeModules(target) {
+  // pnpm deploy copies the full workspace pnpm-lock.yaml into the target and
+  // leaves a symlink-based node_modules. Both must go before a standalone
+  // hoisted install, otherwise pnpm resolves against the workspace graph and
+  // fails (ERR_PNPM_LOCKFILE_MISSING_DEPENDENCY) or keeps the symlink layout.
+  rmSync(path.join(target, "pnpm-lock.yaml"), { force: true });
+  rmSync(path.join(target, "node_modules"), { recursive: true, force: true });
+  console.log("[build-sidecar] Reinstalling api deps with node-linker=hoisted (bundler-safe layout)");
+  try {
+    execFileSync(
+      "pnpm",
+      ["--dir", target, "install", "--prod", "--node-linker=hoisted", "--config.confirm-modules-purge=false"],
+      { cwd: repoRoot, stdio: "inherit", shell: true },
+    );
+  } catch {
+    // pnpm may exit non-zero when postinstall scripts are not approved
+    // (ERR_PNPM_IGNORED_BUILDS for @prisma/client/@prisma/engines). The layout
+    // is still materialized; the sanity checks below are the real gate.
+    console.log("[build-sidecar] [WARN] pnpm install exited with warnings; validating layout anyway");
+  }
+}
+
+// The deployed package has no prisma CLI (it is a devDependency) and `pnpm
+// exec` trips over the workspace deps-status check, so generate directly from
+// the workspace's prisma binary targeting the deployed schema. Prisma resolves
+// node_modules from the schema location and writes into the target.
+function regenPrismaClient(target) {
+  const schema = path.join(target, "prisma", "schema.prisma").replace(/\\/g, "/");
+  const prismaBin = path.join(repoRoot, "node_modules", ".bin", IS_WINDOWS ? "prisma.cmd" : "prisma");
+  console.log(`[build-sidecar] Regenerating Prisma client into hoisted layout (${schema})`);
+  execFileSync(prismaBin, ["generate", `--schema=${schema}`], {
+    cwd: repoRoot,
+    stdio: "inherit",
+    shell: true,
+  });
+}
+
+function assertBundlable(target) {
+  const nestCore = path.join(target, "node_modules", "@nestjs", "core");
+  const st = statSync(nestCore, { throwIfNoEntry: false });
+  if (!st) {
+    throw new Error(`Sanity check failed: ${nestCore} not found after deploy.`);
+  }
+  if (st.isSymbolicLink()) {
+    throw new Error(
+      `Sanity check failed: ${nestCore} is a symlink. node-linker=hoisted did not materialize the layout; the Tauri bundle would be broken.`,
+    );
+  }
+  const prismaClient = path.join(target, "node_modules", ".prisma", "client", "default.js");
+  if (!statSync(prismaClient, { throwIfNoEntry: false })) {
+    throw new Error(`Sanity check failed: Prisma client not generated at ${prismaClient}.`);
+  }
+}
+
 function packApi() {
+  // Deploy + flatten MUST happen OUTSIDE the repo: pnpm resolves standalone
+  // installs inside the workspace against the root pnpm-lock.yaml, whose graph
+  // hangs on workspace-only packages and fails or hangs. /tmp is validated
+  // (see runtime bundled from a /tmp staging) and clean of any workspace.
+  const staging = path.join(os.tmpdir(), "arcom-runtime-staging");
   const target = path.join(runtimeDir, "api");
+  rmSync(staging, { recursive: true, force: true });
   rmSync(target, { recursive: true, force: true });
+  mkdirSync(runtimeDir, { recursive: true });
   console.log("[build-sidecar] Deploying api production deps via pnpm deploy");
   execFileSync(
     "pnpm",
-    ["--filter", "api", "deploy", "--legacy", "--prod", "--config.confirm-modules-purge=false", target],
+    ["--filter", "api", "deploy", "--legacy", "--prod", "--config.confirm-modules-purge=false", staging],
     {
       cwd: repoRoot,
       stdio: "inherit",
       shell: true,
     },
   );
-  const main = path.join(target, "dist", "main.js");
+  const main = path.join(staging, "dist", "main.js");
   if (!statSync(main, { throwIfNoEntry: false })) {
     throw new Error(`Expected built backend at ${main}. Run 'pnpm --filter api build' first.`);
   }
+  flattenNodeModules(staging);
+  regenPrismaClient(staging);
+  assertBundlable(staging);
   for (const entry of [
     "src",
     "test",
@@ -123,7 +193,13 @@ function packApi() {
     "tsconfig.json",
     "tsconfig.spec.json",
   ]) {
-    rmSync(path.join(target, entry), { recursive: true, force: true });
+    rmSync(path.join(staging, entry), { recursive: true, force: true });
+  }
+  try {
+    renameSync(staging, target);
+  } catch {
+    cpSync(staging, target, { recursive: true });
+    rmSync(staging, { recursive: true, force: true });
   }
   console.log(`[build-sidecar] API deployed to ${target}`);
 }

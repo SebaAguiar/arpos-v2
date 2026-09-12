@@ -1,3 +1,4 @@
+use std::fs::{File, OpenOptions};
 use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
 use std::sync::Mutex;
@@ -104,7 +105,16 @@ impl ProcessManager {
         let runtime = self.resolve_runtime()?;
 
         let db_path = paths::get_db_path();
-        paths::ensure_data_dir()?;
+        let log_dir = paths::ensure_data_dir()?;
+        let log_path = log_dir.join("backend.log");
+        let log_file = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&log_path)
+            .map_err(|e| format!("Failed to open backend log {:?}: {}", log_path, e))?;
+        let log_stderr = log_file
+            .try_clone()
+            .map_err(|e| format!("Failed to clone backend log handle: {}", e))?;
 
         let child = Command::new(&runtime.node_bin)
             .arg(&runtime.main_script)
@@ -113,8 +123,8 @@ impl ProcessManager {
             .env("PORT", PORT.to_string())
             .env("DATABASE_URL", format!("file:{}", db_path.display()))
             .env("LOCAL_MODE", "true")
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
+            .stdout(file_to_stdio(log_file))
+            .stderr(file_to_stdio(log_stderr))
             .spawn()
             .map_err(|e| format!("Failed to spawn NestJS backend: {}", e))?;
 
@@ -128,7 +138,7 @@ impl ProcessManager {
             *guard = Some(Instant::now());
         }
 
-        Ok(format!("Backend started with PID {}", pid))
+        Ok(format!("Backend started with PID {} (log: {:?})", pid, log_path))
     }
 
     pub fn stop(&self) -> Result<String, String> {
@@ -220,6 +230,22 @@ impl Drop for ProcessManager {
             let _ = proc.kill();
             let _ = proc.wait();
         }
+    }
+}
+
+// Convert an open File into a child Stdio handle without a pipe (cross-platform).
+// Redirecting the backend's stdout/stderr to a log file avoids the pipe-deadlock
+// risk of an undrained Stdio::piped() and keeps backend logs for diagnosis.
+fn file_to_stdio(file: File) -> Stdio {
+    #[cfg(unix)]
+    {
+        use std::os::fd::OwnedFd;
+        Stdio::from(OwnedFd::from(file))
+    }
+    #[cfg(not(unix))]
+    {
+        use std::os::windows::io::OwnedHandle;
+        Stdio::from(OwnedHandle::from(file))
     }
 }
 
