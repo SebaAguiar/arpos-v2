@@ -58,7 +58,7 @@ dependencies = [
 
 [[package]]
 name = "arcom-v2"
-version = "1.0.0"
+version = "1.0.0-beta"
 dependencies = [
  "chrono",
  "dirs 5.0.1",

@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.0-beta] - 2026-09-12
+
+### Added
+- Self-contained installer: the NestJS backend sidecar and a portable Node 20 runtime
+  are bundled as installer resources, so the app runs on machines with no Node.js
+  installed and no cloned repository.
+
+### Changed
+- Installed app resolves the runtime from its own install dir instead of the repo.
+
 ## [1.0.0] - 2026-08-01
 
 ### Changed
