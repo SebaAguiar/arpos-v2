@@ -471,3 +471,21 @@ normal); en prod el exit code 0 deja pasar el verify en vez de abortarlo.
   (generate-latest-json sólo agrega la entrada si el asset existe).
 - **Prevención:** localmente, al buildear un prerelease en Windows usar `tauri build --bundles
   nsis`, o versiones numéricas tipo `1.0.0-1`.
+
+## 29. Marketing landing: cache de releases + endpoint `/releases/latest` durante la fase beta
+
+- **Síntoma:** los botones de descarga de `apps/marketing-landing` apuntan a
+  `releases/download/v1.0.0/...` y dan **404**, o a un `.msi` que no existe en el prerelease.
+- **Causa doble:**
+  1. `apps/marketing-landing/src/data/releases.json` es un snapshot **commiteado** que se generó
+     con la release anterior (el `v1.0.0` que luego se borró). Si no se regenera, la landing sigue
+     sirviendo links muertos.
+  2. `fetch-releases.mjs` consultaba `api.github.com/.../releases/latest`, que **no devuelve
+     prereleases** → durante la fase beta da 404 → el script cae al fallback y reusa el snapshot
+     stale en silencio.
+- **Solución (2026-09):** el script ahora consume `.../releases?per_page=5` y toma la release
+  publicada más nueva (incluye prereleases); `githubUrl` apunta a `releases/tag/<tag>` (la página
+  `/releases/latest` también 404 en el navegador mientras no haya stable). `DownloadSection.astro`
+  renderiza el botón `.msi` solo si el asset existe (la beta no publica MSI).
+- **Prevención:** tras cada release, regenerar con `pnpm --filter marketing-landing fetch:releases`
+  y commitear `releases.json`; no asumir que `/releases/latest` existe hasta publicar el stable.

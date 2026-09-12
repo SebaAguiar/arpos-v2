@@ -11,7 +11,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const REPO = 'SebaAguiar/arcom-releases';
-const API_URL = `https://api.github.com/repos/${REPO}/releases/latest`;
+const API_URL = `https://api.github.com/repos/${REPO}/releases?per_page=5`;
 const RAW_RELEASES_PATH = resolve(
   dirname(fileURLToPath(import.meta.url)),
   '../src/data/releases.json',
@@ -43,12 +43,29 @@ async function fetchLatestRelease() {
     throw new Error(`GitHub API returned ${res.status} for ${API_URL}`);
   }
 
-  const release = await res.json();
+  // Use the list endpoint (not /releases/latest): GitHub /releases/latest
+  // only resolves STABLE releases and 404s while the only release is a
+  // prerelease (beta phase). Take the newest published release, including
+  // prereleases, so the landing always links to a downloadable artifact.
+  const releases = await res.json();
+  const release = releases.find((r) => !r.draft);
+  if (!release) {
+    throw new Error('No published releases found');
+  }
   return release;
 }
 
 function buildAssets(release, tag) {
-  const assets = {};
+  // Always emit every key so the JSON shape (and the env.d.ts type) stays
+  // constant. Unpublished formats are "" — the UI hides those buttons.
+  const assets = {
+    windows_msi: '',
+    windows_exe: '',
+    macos_dmg: '',
+    linux_appimage: '',
+    linux_deb: '',
+    linux_rpm: '',
+  };
   const names = release.assets.map((a) => a.name);
 
   for (const rule of ASSET_RULES) {
@@ -69,7 +86,7 @@ async function main() {
 
     const data = {
       version: tag.replace(/^v/, ''),
-      githubUrl: `https://github.com/${REPO}/releases/latest`,
+      githubUrl: `https://github.com/${REPO}/releases/tag/${tag}`,
       assets: buildAssets(release, tag),
     };
 
