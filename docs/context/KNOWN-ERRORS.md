@@ -436,6 +436,10 @@ prisma (devDependency): en modo `--production` ese CLI no está, el postinstall 
 entrante aborta (o aborta el purge de modules con "no TTY"). El verify además es **auto-dañante**: su
 paso prod purga devDeps de admin-panel y degrada el estado hasta que se relinkea.
 
+**Solución estructural (2026-09):** el `postinstall` de admin-panel es ahora
+`prisma generate ... || true`. El generate solo es necesario en dev (donde prisma sí está y corre
+normal); en prod el exit code 0 deja pasar el verify en vez de abortarlo.
+
 **Mitigaciones (validadas):**
 - Antes del build local: `CI=true pnpm install --config.confirm-modules-purge=false`. Esto recarga el
   marker del workspace y deja el verify como no-op (los builds posteriores pasan). En CI de GitHub no
