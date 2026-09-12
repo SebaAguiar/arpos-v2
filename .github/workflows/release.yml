@@ -185,8 +185,10 @@ jobs:
           NOTES_FILE: CHANGELOG.md
           PRERELEASE: ${{ contains(github.ref_name, '-beta') || contains(github.ref_name, '-rc') || contains(github.ref_name, '-alpha') }}
         run: |
+          PRERELEASE_FLAG=""
+          if [ "$PRERELEASE" = "true" ]; then PRERELEASE_FLAG="--prerelease"; fi
           gh release create "$TAG" release-artifacts/* \
             --repo SebaAguiar/arcom-releases \
             --title "Arcom $TAG" \
             --notes-file "$NOTES_FILE" \
-            ${PRERELEASE:+--prerelease}
+            $PRERELEASE_FLAG
