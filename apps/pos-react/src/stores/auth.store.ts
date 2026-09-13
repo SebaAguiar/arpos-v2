@@ -136,13 +136,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   loginWithLicense: async (email) => {
     set({ loading: true, error: null });
     // Local-first login: the POS always operates, even fully offline. The
-    // license only gates cloud/paid features, never the core POS.
+    // license only gates cloud/paid features, never the core POS. A hard
+    // identity rejection from the license service (known:false) degrades to
+    // a local free-tier session instead of blocking entry.
     const { known, result } = await LicenseRepository.issueAndStore(email);
-
-    if (!known) {
-      set({ loading: false, error: result.ok ? undefined : result.error });
-      return false;
-    }
 
     const status: LicenseStatus =
       result.ok ? result.status : { status: "invalid", payload: null, daysLeft: 0 };
@@ -151,7 +148,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       ? buildLicenseData(payload, status)
       : null;
 
-    if (licenseData) cacheLicense(licenseData);
+    if (!known) {
+      // License revoked or account missing: persist nothing, keep paid gates
+      // closed (licenseStatus invalid), and let the core continue locally.
+      set({
+        license: null,
+        licenseStatus: status,
+        licensePayload: payload,
+        error: null,
+      });
+    } else if (licenseData) {
+      cacheLicense(licenseData);
+    }
 
     // Bridge the license into an API session so data endpoints stop returning
     // 401, falling back to a local free-tier identity when no license exists.
