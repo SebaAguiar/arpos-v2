@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.0-beta.2] - 2026-09-13
+
+### Fixed
+- Launcher no longer crashes with "resource path ... doesn't exist" (exit 101)
+  after an install: the bundled runtime's `.bin` dirs (absolute symlinks into
+  the pnpm staging dir, left dangling after the move) are now pruned before
+  bundling.
+- POS login no longer blocks entry when the license service rejects the email
+  (e.g. no cloud/admin reachable at :3001, or 4xx from the license endpoint):
+  a hard identity rejection now degrades to a local free-tier session while
+  keeping paid/cloud gates closed.
+
 ## [1.0.0-beta] - 2026-09-12
 
 ### Added
