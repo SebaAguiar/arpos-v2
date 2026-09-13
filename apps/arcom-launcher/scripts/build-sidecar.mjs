@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { execFileSync } from "node:child_process";
 import { createWriteStream } from "node:fs";
-import { chmodSync, cpSync, mkdirSync, rmSync, renameSync, statSync } from "node:fs";
+import { chmodSync, cpSync, mkdirSync, readdirSync, rmSync, renameSync, statSync } from "node:fs";
 import { pipeline } from "node:stream/promises";
 import { Readable } from "node:stream";
 import path from "node:path";
@@ -157,6 +157,20 @@ function regenPrismaClient(target) {
   });
 }
 
+// Recursively remove every `.bin` directory under `root`. pnpm creates
+// absolute symlinks pointing into its virtual store (or a /tmp staging dir);
+// once the runtime is moved those dangle and tauri-build fails on them.
+function pruneDotBins(root) {
+  const entries = readdirSync(root, { withFileTypes: true });
+  for (const entry of entries) {
+    if (entry.name === ".bin" && entry.isDirectory()) {
+      rmSync(path.join(root, entry.name), { recursive: true, force: true });
+    } else if (entry.isDirectory()) {
+      pruneDotBins(path.join(root, entry.name));
+    }
+  }
+}
+
 function assertBundlable(target) {
   const nestCore = path.join(target, "node_modules", "@nestjs", "core");
   const st = statSync(nestCore, { throwIfNoEntry: false });
@@ -222,6 +236,12 @@ function packApi() {
     cpSync(staging, target, { recursive: true });
     rmSync(staging, { recursive: true, force: true });
   }
+  // Deps were installed via pnpm with absolute paths pointing at the staging
+  // dir; after moving to `target` those .bin shims dangle and tauri-build
+  // fails with "resource path ... doesn't exist". The app boots via
+  // process.execPath directly, so .bin is never used at runtime. Some deps
+  // (e.g. prisma) ship nested node_modules/.bin too, so prune every .bin dir.
+  pruneDotBins(target);
   console.log(`[build-sidecar] API deployed to ${target}`);
 }
 
