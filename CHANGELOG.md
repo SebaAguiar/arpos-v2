@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.0.0-beta.4] - 2026-09-14
+
+### Fixed
+- Backend API is now reachable only through a secure local channel: the
+  sidecar binds an ephemeral port and shares it to the POS UI over IPC along
+  with a 32-byte random token, validated by a global NestJS guard. A foreign
+  process that occupies port 3000 before the sidecar can no longer impersonate
+  the backend (which previously caused silent login failures / data routing
+  against the wrong process).
+- The bundled app no longer fails database setup on clean machines: the
+  launcher previously resolved the Prisma CLI and schema against build-time
+  paths (`CARGO_MANIFEST_DIR`), and the CLI wasn't bundled at all (it was a
+  devDependency). `prisma` is now a runtime dependency, the build-sidecar
+  reinstalls it standalone (running its postinstall scripts so the native
+  engines ship) and strips dev databases/seed from the bundle, and
+  `DatabaseManager` runs `prisma migrate deploy` with the bundled Node binary
+  against the user data dir.
+
 ## [1.0.0-beta.3] - 2026-09-14
 
 ### Fixed
