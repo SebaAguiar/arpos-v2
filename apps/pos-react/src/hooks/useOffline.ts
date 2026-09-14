@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { apiBaseUrl } from "@/config";
+import { getApiBaseUrl, getSidecarHeaders } from "@/config";
 
 interface OfflineState {
   isOnline: boolean;
@@ -25,8 +25,9 @@ export function useOffline(): OfflineState {
 
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`${apiBaseUrl}/health`, {
+        const res = await fetch(`${getApiBaseUrl()}/health`, {
           method: "HEAD",
+          headers: getSidecarHeaders(),
           cache: "no-store",
         });
         if (res.ok && !navigator.onLine) {

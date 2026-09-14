@@ -1,7 +1,5 @@
-import { apiBaseUrl } from "@/config";
+import { getApiBaseUrl, getSidecarHeaders } from "@/config";
 import { readTokenLocal } from "@/lib/license";
-
-const API_BASE = apiBaseUrl;
 
 export class ApiError extends Error {
   constructor(
@@ -69,9 +67,12 @@ let mintInFlight: Promise<boolean> | null = null;
 async function tryMintLocalSession(): Promise<boolean> {
   const email = getLastLocalEmail();
   if (!email) return false;
-  const res = await fetch(`${API_BASE}/auth/local`, {
+  const res = await fetch(`${getApiBaseUrl()}/auth/local`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...getSidecarHeaders(),
+    },
     body: JSON.stringify({ email }),
     cache: "no-store",
   });
@@ -88,9 +89,12 @@ async function tryMintLicenseSession(): Promise<boolean> {
       try {
         const licenseToken = await readTokenLocal();
         if (!licenseToken) return false;
-        const res = await fetch(`${API_BASE}/auth/license`, {
+        const res = await fetch(`${getApiBaseUrl()}/auth/license`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...getSidecarHeaders(),
+          },
           body: JSON.stringify({ licenseToken }),
           cache: "no-store",
         });
@@ -115,9 +119,10 @@ async function request<T>(
   body?: unknown,
   retried = false,
 ): Promise<T> {
-  const url = `${API_BASE}${path}`;
+  const url = `${getApiBaseUrl()}${path}`;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
+    ...getSidecarHeaders(),
   };
 
   const token = getAuthToken();
@@ -168,8 +173,10 @@ async function request<T>(
 }
 
 async function requestText(path: string, retried = false): Promise<string> {
-  const url = `${API_BASE}${path}`;
-  const headers: Record<string, string> = {};
+  const url = `${getApiBaseUrl()}${path}`;
+  const headers: Record<string, string> = {
+    ...getSidecarHeaders(),
+  };
 
   const token = getAuthToken();
   if (token) {

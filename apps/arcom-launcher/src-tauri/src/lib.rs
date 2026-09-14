@@ -21,10 +21,10 @@ pub fn run() {
                 .path()
                 .resource_dir()
                 .map_err(|e| format!("Failed to resolve resource dir: {}", e))?;
-            app.manage(ProcessManager::new(resource_dir));
+            app.manage(ProcessManager::new(resource_dir.clone()));
+            app.manage(DatabaseManager::new(resource_dir));
             Ok(())
         })
-        .manage(DatabaseManager::new())
         .manage(SystemManager::new())
         .manage(BackupManager::new())
         .manage(ExportManager::new())
@@ -35,6 +35,7 @@ pub fn run() {
             commands::process::stop_backend,
             commands::process::restart_backend,
             commands::process::get_backend_status,
+            commands::process::get_backend_config,
             commands::process::wait_for_backend,
             // Database commands
             commands::database::init_database,

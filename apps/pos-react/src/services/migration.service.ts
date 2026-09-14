@@ -1,4 +1,4 @@
-import { apiBaseUrl } from "@/config";
+import { getApiBaseUrl } from "@/config";
 
 export interface MigrationProgressEvent {
   step: number;
@@ -29,7 +29,7 @@ export const MigrationService = {
     input: ImportV1Input,
     onProgress?: (progress: MigrationProgressEvent) => void,
   ): Promise<MigrationSummary> {
-    const res = await fetch(`${apiBaseUrl}/migration/import/stream`, {
+    const res = await fetch(`${getApiBaseUrl()}/migration/import/stream`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(input),

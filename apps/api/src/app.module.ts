@@ -21,6 +21,7 @@ import { ArcaModule } from './features/arca/arca.module';
 import { InvoiceModule } from './features/invoices/invoice.module';
 import { LocalTenantMiddleware } from './core/tenant/local-tenant.middleware';
 import { JwtAuthGuard } from './features/auth/guards/jwt-auth.guard';
+import { SidecarTokenGuard } from './features/auth/guards/sidecar-token.guard';
 
 @Module({
   imports: [
@@ -45,6 +46,9 @@ import { JwtAuthGuard } from './features/auth/guards/jwt-auth.guard';
     InvoiceModule,
   ],
   providers: [
+    // SidecarTokenGuard runs first: when a launcher-injected token exists it
+    // rejects foreign processes before any auth logic is reached.
+    { provide: APP_GUARD, useClass: SidecarTokenGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
   ],
 })

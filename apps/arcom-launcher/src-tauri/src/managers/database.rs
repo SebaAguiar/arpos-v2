@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use std::process::{Command, Stdio};
 
 use crate::utils::paths;
@@ -10,14 +11,97 @@ pub struct DatabaseInfo {
     pub migrations_applied: bool,
 }
 
-pub struct DatabaseManager;
+pub struct DatabaseManager {
+    resource_dir: PathBuf,
+}
+
+struct PrismaContext {
+    api_dir: PathBuf,
+    prisma_entry: PathBuf,
+    node_bin: PathBuf,
+}
 
 impl DatabaseManager {
-    pub fn new() -> Self {
-        Self
+    pub fn new(resource_dir: PathBuf) -> Self {
+        Self { resource_dir }
     }
 
-pub fn configure(&self) -> Result<String, String> {
+    // Locate the Prisma CLI + schema for the current environment:
+    // - Production: the bundled runtime (node + prisma CLI + schema.prisma +
+    //   migrations ship inside the installer's resource dir).
+    // - Development: the repository checkout with a system Node.js.
+    fn resolve_prisma_context(&self) -> Result<PrismaContext, String> {
+        // Production bundle layout:
+        //   resource_dir/runtime/node/bin/node
+        //   resource_dir/runtime/api/node_modules/prisma/build/index.js
+        //   resource_dir/runtime/api/prisma/schema.prisma
+        let runtime_node = if cfg!(windows) {
+            self.resource_dir.join("runtime").join("node").join("node.exe")
+        } else {
+            self.resource_dir
+                .join("runtime")
+                .join("node")
+                .join("bin")
+                .join("node")
+        };
+        let runtime_api = self.resource_dir.join("runtime").join("api");
+        let runtime_prisma = runtime_api
+            .join("node_modules")
+            .join("prisma")
+            .join("build")
+            .join("index.js");
+
+        if runtime_node.exists() && runtime_api.join("prisma").join("schema.prisma").exists() {
+            if runtime_prisma.exists() {
+                return Ok(PrismaContext {
+                    api_dir: runtime_api,
+                    prisma_entry: runtime_prisma,
+                    node_bin: runtime_node,
+                });
+            }
+            return Err(format!(
+                "Bundled backend has no Prisma CLI at {:?}: runtime was built before prisma \
+                 became a production dependency. Re-run build-sidecar.mjs.",
+                runtime_prisma
+            ));
+        }
+
+        // Development: repository checkout.
+        let project_root = paths::get_project_root();
+        let api_dir = project_root.join("apps").join("api");
+        let schema_path = api_dir.join("prisma").join("schema.prisma");
+        if !schema_path.exists() {
+            return Err(format!(
+                "Prisma schema not found at {:?}. Run 'pnpm install' and 'pnpm --filter api build' first.",
+                schema_path
+            ));
+        }
+
+        // The prisma CLI lives in different places depending on the pnpm layout:
+        // isolated linking (CI) or shamefully-hoist (local dev).
+        let candidates = [
+            api_dir.join("node_modules").join("prisma").join("build").join("index.js"),
+            project_root
+                .join("node_modules")
+                .join("prisma")
+                .join("build")
+                .join("index.js"),
+        ];
+        let prisma_entry = candidates
+            .iter()
+            .find(|p| p.exists())
+            .ok_or("Prisma CLI not found. Run 'pnpm install' first.")?;
+
+        let node_bin = which_node().ok_or("Node.js not found in PATH")?;
+
+        Ok(PrismaContext {
+            api_dir,
+            prisma_entry: prisma_entry.clone(),
+            node_bin: PathBuf::from(node_bin),
+        })
+    }
+
+    pub fn configure(&self) -> Result<String, String> {
         let db_path = paths::get_db_path();
         if !db_path.exists() {
             return Err("Database not found".to_string());
@@ -41,6 +125,15 @@ pub fn configure(&self) -> Result<String, String> {
         }
     }
 
+    // Best-effort: Prisma enables WAL + foreign_keys On per connection for
+    // SQLite, so the PRAGMAs below are an optimization on top. On a clean
+    // machine sqlite3 may be absent; never let that block DB initialization.
+    fn configure_best_effort(&self) {
+        if let Ok(msg) = self.configure() {
+            eprintln!("[database] {msg}");
+        }
+    }
+
     pub fn init(&self) -> Result<String, String> {
         paths::ensure_data_dir()?;
 
@@ -48,88 +141,53 @@ pub fn configure(&self) -> Result<String, String> {
         if !db_path.exists() {
             std::fs::write(&db_path, "")
                 .map_err(|e| format!("Failed to create database file: {}", e))?;
-            self.configure()?;
             return Ok(format!("Database created at {:?}", db_path));
         }
 
-        self.configure().ok();
         Ok(format!("Database already exists at {:?}", db_path))
     }
 
-    pub fn migrate(&self) -> Result<String, String> {
-        let project_root = paths::get_project_root();
-        let api_dir = project_root.join("apps").join("api");
-        let prisma_dir = api_dir.join("prisma");
+    fn run_prisma(&self, args: &[&str]) -> Result<String, String> {
+        let ctx = self.resolve_prisma_context()?;
         let db_path = paths::get_db_path();
+        let schema_path = ctx.api_dir.join("prisma").join("schema.prisma");
 
-        if !prisma_dir.join("schema.prisma").exists() {
-            return Err(format!(
-                "Prisma schema not found at {:?}",
-                prisma_dir.join("schema.prisma")
-            ));
-        }
-
-        let prisma_bin = api_dir
-            .join("node_modules")
-            .join(".bin")
-            .join("prisma");
-
-        if !prisma_bin.exists() {
-            return Err(format!(
-                "Prisma binary not found at {:?}. Run 'pnpm install' first.",
-                prisma_bin
-            ));
-        }
-
-        let output = Command::new(&prisma_bin)
-            .arg("migrate")
-            .arg("deploy")
-            .current_dir(&api_dir)
+        let output = Command::new(&ctx.node_bin)
+            .arg(&ctx.prisma_entry)
+            .args(args)
+            .arg("--schema")
+            .arg(&schema_path)
+            .current_dir(&ctx.api_dir)
             .env("DATABASE_URL", format!("file:{}", db_path.display()))
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .output()
-            .map_err(|e| format!("Failed to run prisma migrate: {}", e))?;
+            .map_err(|e| format!("Failed to run prisma: {}", e))?;
 
         if output.status.success() {
-            let stdout = String::from_utf8_lossy(&output.stdout);
-            Ok(format!("Migrations applied successfully: {}", stdout.trim()))
+            Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
         } else {
             let stderr = String::from_utf8_lossy(&output.stderr);
-            Err(format!("Migration failed: {}", stderr.trim()))
+            Err(format!("Prisma failed: {}", stderr.trim()))
         }
     }
 
+    pub fn migrate(&self) -> Result<String, String> {
+        let context = self.resolve_prisma_context()?;
+        if !context.api_dir.join("prisma").join("migrations").exists() {
+            return Err(format!(
+                "Prisma migrations folder not found at {:?}. Run 'pnpm --filter api prisma:migrate'.",
+                context.api_dir.join("prisma").join("migrations")
+            ));
+        }
+
+        let stdout = self.run_prisma(&["migrate", "deploy"])?;
+        Ok(format!("Migrations applied successfully: {}", stdout))
+    }
+
     pub fn push(&self) -> Result<String, String> {
-        let project_root = paths::get_project_root();
-        let api_dir = project_root.join("apps").join("api");
-        let db_path = paths::get_db_path();
-
-        let prisma_bin = api_dir
-            .join("node_modules")
-            .join(".bin")
-            .join("prisma");
-
-        if !prisma_bin.exists() {
-            return Err("Prisma binary not found. Run 'pnpm install' first.".to_string());
-        }
-
-        let output = Command::new(&prisma_bin)
-            .arg("db")
-            .arg("push")
-            .current_dir(&api_dir)
-            .env("DATABASE_URL", format!("file:{}", db_path.display()))
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .output()
-            .map_err(|e| format!("Failed to run prisma db push: {}", e))?;
-
-        if output.status.success() {
-            Ok("Schema pushed to database successfully".to_string())
-        } else {
-            let stderr = String::from_utf8_lossy(&output.stderr);
-            Err(format!("db push failed: {}", stderr.trim()))
-        }
+        let stdout = self.run_prisma(&["db", "push"])?;
+        Ok(format!("Schema pushed to database successfully: {}", stdout))
     }
 
     pub fn check_integrity(&self) -> Result<bool, String> {
@@ -139,15 +197,11 @@ pub fn configure(&self) -> Result<String, String> {
             return Ok(false);
         }
 
-        let project_root = paths::get_project_root();
-        let api_dir = project_root.join("apps").join("api");
-
         let sqlite3_bin = which_sqlite3().ok_or("sqlite3 not found in PATH")?;
 
         let output = Command::new(&sqlite3_bin)
             .arg(db_path.to_str().unwrap())
             .arg("PRAGMA integrity_check;")
-            .current_dir(&api_dir)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .output()
@@ -184,8 +238,8 @@ pub fn configure(&self) -> Result<String, String> {
 
     pub fn ensure_database(&self) -> Result<String, String> {
         self.init()?;
-        self.configure()?;
         self.migrate()?;
+        self.configure_best_effort();
         Ok("Database initialized and migrations applied".to_string())
     }
 }
@@ -215,4 +269,53 @@ pub(crate) fn which_sqlite3() -> Option<String> {
     }
 
     None
+}
+
+fn which_node() -> Option<String> {
+    let possible_paths = if cfg!(windows) {
+        vec![
+            "node.exe",
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Program Files (x86)\\nodejs\\node.exe",
+        ]
+    } else {
+        vec![
+            "node",
+            "/usr/local/bin/node",
+            "/usr/bin/node",
+            "/opt/homebrew/bin/node",
+        ]
+    };
+
+    for path in &possible_paths {
+        if Command::new(path)
+            .arg("--version")
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status()
+            .is_ok()
+        {
+            return Some(path.to_string());
+        }
+    }
+
+    which_native("node")
+}
+
+fn which_native(bin: &str) -> Option<String> {
+    let output = if cfg!(windows) {
+        Command::new("where").arg(bin).output().ok()
+    } else {
+        Command::new("which").arg(bin).output().ok()
+    };
+
+    output.and_then(|o| {
+        if o.status.success() {
+            String::from_utf8(o.stdout)
+                .ok()
+                .map(|s| s.trim().lines().next().unwrap_or("").to_string())
+        } else {
+            None
+        }
+    })
 }

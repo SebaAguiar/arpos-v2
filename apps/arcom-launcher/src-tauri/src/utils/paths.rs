@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 const APP_NAME: &str = "arcom";
 const DB_NAME: &str = "app.db";
+const BACKEND_TOKEN_FILE: &str = ".backend_token";
 
 pub fn get_home_dir() -> PathBuf {
     dirs::home_dir().unwrap_or_else(|| PathBuf::from("."))
@@ -17,6 +18,10 @@ pub fn get_backup_dir() -> PathBuf {
 
 pub fn get_db_path() -> PathBuf {
     get_data_dir().join(DB_NAME)
+}
+
+pub fn get_backend_token_file() -> PathBuf {
+    get_data_dir().join(BACKEND_TOKEN_FILE)
 }
 
 pub fn get_export_dir() -> PathBuf {

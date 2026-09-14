@@ -16,6 +16,7 @@ export class HealthController {
         timestamp: Date.now(),
         uptime: process.uptime(),
         db: 'connected',
+        backend: true,
       };
     } catch (error) {
       return {
@@ -23,6 +24,7 @@ export class HealthController {
         timestamp: Date.now(),
         uptime: process.uptime(),
         db: 'disconnected',
+        backend: true,
         error: error instanceof Error ? error.message : 'Unknown error',
       };
     }

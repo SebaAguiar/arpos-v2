@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { ProcessService } from "@/services/process.service";
 import { isTauri } from "@/lib/tauri";
-import { apiBaseUrl } from "@/config";
+import { getApiBaseUrl, getSidecarHeaders, refreshBackendConfig } from "@/config";
 import type { BackendStatus } from "@/lib/types";
 
-const HEALTH_URL = `${apiBaseUrl}/health`;
 const HEALTH_POLL_INTERVAL_MS = 500;
 const HEALTH_TIMEOUT_MS = 60_000;
 
@@ -70,8 +69,17 @@ export function useBackend(): UseBackendReturn {
 
   const checkHealth = useCallback(async (): Promise<boolean> => {
     try {
-      const res = await fetch(HEALTH_URL, { signal: AbortSignal.timeout(2_000) });
-      return res.ok;
+      const res = await fetch(`${getApiBaseUrl()}/health`, {
+        headers: getSidecarHeaders(),
+        signal: AbortSignal.timeout(2_000),
+      });
+      // A foreign process answering 2xx without our sidecar identity must not
+      // be treated as "backend up": only our backend reports backend:true.
+      if (!res.ok) return false;
+      const body = (await res.json().catch(() => null)) as {
+        backend?: boolean;
+      } | null;
+      return body?.backend === true;
     } catch {
       return false;
     }
@@ -109,6 +117,9 @@ export function useBackend(): UseBackendReturn {
             await startBackend();
             if (cancelled) return;
             await ProcessService.waitForReady();
+            // The sidecar binds a fresh ephemeral port per spawn; re-read the
+            // launcher config so subsequent requests hit the new port.
+            await refreshBackendConfig();
           } catch (e) {
             if (!cancelled) {
               setError(String(e));

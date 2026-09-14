@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { execFileSync } from "node:child_process";
 import { createWriteStream } from "node:fs";
-import { chmodSync, cpSync, mkdirSync, readdirSync, rmSync, renameSync, statSync } from "node:fs";
+import { chmodSync, cpSync, mkdirSync, readdirSync, rmSync, renameSync, statSync, writeFileSync } from "node:fs";
 import { pipeline } from "node:stream/promises";
 import { Readable } from "node:stream";
 import path from "node:path";
@@ -106,11 +106,35 @@ function flattenNodeModules(target) {
   // fails (ERR_PNPM_LOCKFILE_MISSING_DEPENDENCY) or keeps the symlink layout.
   rmSync(path.join(target, "pnpm-lock.yaml"), { force: true });
   rmSync(path.join(target, "node_modules"), { recursive: true, force: true });
+  // The standalone reinstall must run Prisma/esbuild/sharp postinstall scripts:
+  // they download the native engines/binaries the bundled app needs at runtime
+  // (migration engine, query engine) and are otherwise skipped because the
+  // staging dir is not a recognized workspace.
+  writeFileSync(
+    path.join(target, "pnpm-workspace.yaml"),
+    [
+      "allowBuilds:",
+      "  '@prisma/client': true",
+      "  '@prisma/engines': true",
+      "  prisma: true",
+      "  esbuild: true",
+      "  sharp: true",
+      "  core-js: true",
+      "",
+    ].join("\n"),
+  );
   console.log("[build-sidecar] Reinstalling api deps with node-linker=hoisted (bundler-safe layout)");
   try {
     execFileSync(
       "pnpm",
-      ["--dir", target, "install", "--prod", "--node-linker=hoisted", "--config.confirm-modules-purge=false"],
+      [
+        "--dir",
+        target,
+        "install",
+        "--prod",
+        "--node-linker=hoisted",
+        "--config.confirm-modules-purge=false",
+      ],
       { cwd: repoRoot, stdio: "inherit", shell: true },
     );
   } catch {
@@ -228,6 +252,11 @@ function packApi() {
     "tsconfig.json",
     "tsconfig.spec.json",
   ]) {
+    rmSync(path.join(staging, entry), { recursive: true, force: true });
+  }
+  // Prisma artifacts: keep schema.prisma + migrations (needed by the launcher's
+  // `prisma migrate deploy`), but strip the dev databases and the seed script.
+  for (const entry of ["prisma/dev.db", "prisma/migrate-v1-test.db", "prisma/seed.ts"]) {
     rmSync(path.join(staging, entry), { recursive: true, force: true });
   }
   try {

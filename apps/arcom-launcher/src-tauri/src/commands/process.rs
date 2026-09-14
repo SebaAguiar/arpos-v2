@@ -1,6 +1,6 @@
 use tauri::State;
 
-use crate::managers::process::{BackendStatus, ProcessManager};
+use crate::managers::process::{BackendConfig, BackendStatus, ProcessManager};
 
 #[tauri::command]
 pub fn start_backend(state: State<'_, ProcessManager>) -> Result<String, String> {
@@ -20,6 +20,11 @@ pub fn restart_backend(state: State<'_, ProcessManager>) -> Result<String, Strin
 #[tauri::command]
 pub fn get_backend_status(state: State<'_, ProcessManager>) -> BackendStatus {
     state.status()
+}
+
+#[tauri::command]
+pub fn get_backend_config(state: State<'_, ProcessManager>) -> Result<BackendConfig, String> {
+    state.config()
 }
 
 #[tauri::command]
