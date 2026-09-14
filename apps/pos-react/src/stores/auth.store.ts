@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { AuthRepository, type AuthUser } from "@/repositories/auth.repository";
 import { LicenseRepository, type LicenseData } from "@/repositories/license.repository";
 import { SetupRepository } from "@/repositories/setup.repository";
-import { setAuthToken, clearAuthToken } from "@/services/api-client";
+import { setAuthToken, clearAuthToken, setLastLocalEmail } from "@/services/api-client";
 import { ApiError } from "@/services/api-client";
 import { readTokenLocal, type LicensePayload, type LicenseStatus } from "@/lib/license";
 
@@ -79,6 +79,7 @@ async function resolveApiSession(email: string): Promise<AuthUser | null> {
   try {
     const { token, user } = await AuthRepository.loginLocal(email);
     setAuthToken(token);
+    setLastLocalEmail(email);
     return user;
   } catch {
     return null;
@@ -121,6 +122,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const { token, user } = await AuthRepository.login(email, password);
       setAuthToken(token);
+      setLastLocalEmail(email);
       set({ user, loading: false });
       return true;
     } catch (e) {
@@ -164,6 +166,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     // Bridge the license into an API session so data endpoints stop returning
     // 401, falling back to a local free-tier identity when no license exists.
     // Best-effort: if the sidecar is unreachable the POS still enters.
+    setLastLocalEmail(email);
     const apiUser = await resolveApiSession(email);
     const fallbackUser: AuthUser = {
       id: payload?.sub ?? email,

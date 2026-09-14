@@ -39,10 +39,48 @@ export function clearAuthToken(): void {
   }
 }
 
-// Single-flight exchange of the license token for a fresh auth_token on 401.
-// Self-heals expired sessions and the cold-boot race where data calls fire
-// before initialize() has minted the session.
+// Last email used for a local (free-plan) session. Persisted on login so the
+// 401 self-heal can re-mint a local auth_token without holding user input.
+const LAST_LOCAL_EMAIL_KEY = "last_local_email";
+
+function getLastLocalEmail(): string | null {
+  try {
+    return localStorage.getItem(LAST_LOCAL_EMAIL_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setLastLocalEmail(email: string): void {
+  try {
+    localStorage.setItem(LAST_LOCAL_EMAIL_KEY, email);
+  } catch {
+    // localStorage unavailable
+  }
+}
+
+// Single-flight session mint on 401: license-holder sessions exchange the
+// license token for a fresh auth_token; free/local sessions (no license token)
+// re-mint a local identity session from the persisted email. Self-heals
+// expired sessions and the cold-boot race where data calls fire before
+// initialize() has minted the session.
 let mintInFlight: Promise<boolean> | null = null;
+
+async function tryMintLocalSession(): Promise<boolean> {
+  const email = getLastLocalEmail();
+  if (!email) return false;
+  const res = await fetch(`${API_BASE}/auth/local`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+    cache: "no-store",
+  });
+  if (!res.ok) return false;
+  const json = (await res.json()) as { access_token?: string };
+  if (!json.access_token) return false;
+  setAuthToken(json.access_token);
+  return true;
+}
 
 async function tryMintLicenseSession(): Promise<boolean> {
   if (!mintInFlight) {
@@ -94,10 +132,12 @@ async function request<T>(
     cache: "no-store",
   });
 
-  // A license holder with a stale/missing session gets one transparent retry:
-  // mint a fresh auth_token and re-issue the request once.
-  if (res.status === 401 && !retried && path !== "/auth/license") {
-    const minted = await tryMintLicenseSession();
+  // A stale/missing session gets one transparent retry: mint a fresh
+  // auth_token (license bridge first, then local identity for free-plan
+  // sessions) and re-issue the request once.
+  if (res.status === 401 && !retried && path !== "/auth/license" && path !== "/auth/local") {
+    const minted =
+      (await tryMintLicenseSession()) || (await tryMintLocalSession());
     if (minted) {
       return request<T>(method, path, body, true);
     }
@@ -141,8 +181,9 @@ async function requestText(path: string, retried = false): Promise<string> {
     cache: "no-store",
   });
 
-  if (res.status === 401 && !retried && path !== "/auth/license") {
-    const minted = await tryMintLicenseSession();
+  if (res.status === 401 && !retried && path !== "/auth/license" && path !== "/auth/local") {
+    const minted =
+      (await tryMintLicenseSession()) || (await tryMintLocalSession());
     if (minted) {
       return requestText(path, true);
     }

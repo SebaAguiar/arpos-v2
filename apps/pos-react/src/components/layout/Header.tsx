@@ -1,5 +1,6 @@
 import { TextField, DropdownMenu, Avatar, IconButton, Tooltip } from "@radix-ui/themes";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   MagnifyingGlassIcon,
   BellIcon,
@@ -26,6 +27,7 @@ interface HeaderProps {
 }
 
 export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
+  const navigate = useNavigate();
   const theme = useThemeStore((s) => s.theme);
   const toggleTheme = useThemeStore((s) => s.toggleTheme);
   const { user, logout, licenseStatus } = useAuth();
@@ -171,8 +173,7 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
               <DropdownMenu.Separator />
             </>
           )}
-          <DropdownMenu.Item>Mi cuenta</DropdownMenu.Item>
-          <DropdownMenu.Item>Configuración</DropdownMenu.Item>
+          <DropdownMenu.Item onClick={() => navigate("/settings")}>Configuración</DropdownMenu.Item>
           <DropdownMenu.Separator />
           <DropdownMenu.Item color="red" onClick={logout}>
             Cerrar sesión
