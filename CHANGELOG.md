@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.0-beta.3] - 2026-09-14
+
+### Fixed
+- POS no longer locks out free-tier/local users with "Sesión expirada" once
+  their auth_token expires: the api-client now re-mints a local identity
+  session from the persisted login email (falling back after the license
+  bridge), transparently retrying the request once.
+- Profile menu "Configuración" now navigates to `/settings`. The dead
+  "Mi cuenta" item was removed since no profile route exists.
+
 ## [1.0.0-beta.2] - 2026-09-13
 
 ### Fixed

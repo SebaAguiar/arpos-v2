@@ -1,6 +1,6 @@
 [package]
 name = "arcom-v2"
-version = "1.0.0-beta.2"
+version = "1.0.0-beta.3"
 description = "Arcom - Point of Sale System"
 authors = ["SebaAguiar"]
 edition = "2021"
