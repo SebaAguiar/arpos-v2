@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.0-beta.5] - 2026-09-15
+
+### Fixed
+- The desktop app no longer talks to whatever process answers on port 3000.
+  The launcher previously reported 3000 (its old default) as the backend port
+  until the first start, so a production POS would adopt a foreign process
+  squatting on localhost:3000 (e.g. a leftover development backend) and never
+  spawn its own isolated sidecar. The process manager now reports port 0 until
+  the backend binds a real ephemeral port, the webview CSP allows any
+  127.0.0.1/localhost port, and the frontend stops falling back to the fixed
+  development port inside the desktop shell.
+
 ## [1.0.0-beta.4] - 2026-09-14
 
 ### Fixed
