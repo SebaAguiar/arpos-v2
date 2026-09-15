@@ -10,7 +10,7 @@ export interface Hotkey {
 function matchesCombo(event: KeyboardEvent, combo: string): boolean {
   const parts = combo.split("+");
   const key = (parts[parts.length - 1] ?? "").toLowerCase();
-  const mods = parts.slice(0, -1);
+  const mods = parts.slice(0, -1).map((m) => m.toLowerCase());
   if (event.key.toLowerCase() !== key) return false;
   if (mods.includes("alt") !== event.altKey) return false;
   if (mods.includes("ctrl") !== event.ctrlKey) return false;
