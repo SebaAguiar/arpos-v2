@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.0-beta.6] - 2026-09-15
+
+### Fixed
+- Fixed modifier key parsing in `useHotkeys` hook by normalizing modifier names to lowercase. Hotkey combinations like `Alt+P` no longer trigger on single un-modified keypresses (such as `p`).
+- Fixed Tauri build issues in dev mode by ensuring placeholder bundle resource directories are created in `build.rs`.
+
 ## [1.0.0-beta.5] - 2026-09-15
 
 ### Fixed
