@@ -7,7 +7,6 @@ use std::time::{Duration, Instant};
 
 use crate::utils::paths;
 
-pub const DEFAULT_PORT: u16 = 3000;
 pub const HEALTH_CHECK_TIMEOUT: u64 = 30;
 pub const HEALTH_CHECK_INTERVAL: u64 = 500;
 
@@ -50,7 +49,11 @@ impl ProcessManager {
         Self {
             child: Mutex::new(None),
             started_at: Mutex::new(None),
-            port: Mutex::new(DEFAULT_PORT),
+            // No fixed port is ever reported before the backend is spawned: 0
+            // means "not bound yet", so a frontend health probe fails fast
+            // instead of being answered by a foreign process squatting on a
+            // well-known port (e.g. the development server on 3000).
+            port: Mutex::new(0),
             resource_dir,
         }
     }

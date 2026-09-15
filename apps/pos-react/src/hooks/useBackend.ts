@@ -91,7 +91,7 @@ export function useBackend(): UseBackendReturn {
       const s = await ProcessService.status();
       setStatus(s);
     } catch {
-      setStatus({ running: false, port: 3000, pid: null, uptime_seconds: null });
+      setStatus({ running: false, port: 0, pid: null, uptime_seconds: null });
     }
   }, [tauri]);
 
