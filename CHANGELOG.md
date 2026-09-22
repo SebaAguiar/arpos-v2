@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.0-beta.7] - 2026-09-22
+
+### Added
+- Product variant stock support: product variants now own individual stock quantities, and inventory reports aggregate stock and cost across active variants.
+- Product container pricing: allowed optional zero top-level product price when variants exist.
+
+### Fixed
+- Improved 401 session mint single-flight deduplication to avoid SQLite WAL write contention on concurrent unauthenticated API calls.
+
 ## [1.0.0-beta.6] - 2026-09-15
 
 ### Fixed
