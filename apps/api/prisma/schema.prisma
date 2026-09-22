@@ -104,7 +104,7 @@ model Product {
   code           String
   name           String
   description    String?
-  price_cents    Int
+  price_cents    Int     @default(0)
   cost_cents     Int?
   stock_quantity Int     @default(0)
   sku            String?
@@ -134,11 +134,12 @@ model ProductVariant {
   color       String?
   barcode     String?
   sku         String?
-  price_cents Int     @default(0)
-  cost_cents  Int?
-  is_active   Boolean @default(true)
-  created_at  Int     @default(0)
-  updated_at  Int
+  price_cents    Int     @default(0)
+  cost_cents     Int?
+  stock_quantity Int     @default(0)
+  is_active      Boolean @default(true)
+  created_at     Int     @default(0)
+  updated_at     Int
 
   company              Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
   product              Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
