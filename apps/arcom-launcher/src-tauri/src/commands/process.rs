@@ -1,10 +1,21 @@
 use tauri::State;
 
+use crate::managers::database::DatabaseManager;
 use crate::managers::process::{BackendConfig, BackendStatus, ProcessManager};
 
 #[tauri::command]
-pub fn start_backend(state: State<'_, ProcessManager>) -> Result<String, String> {
-    state.start()
+pub fn start_backend(
+    process: State<'_, ProcessManager>,
+    database: State<'_, DatabaseManager>,
+) -> Result<String, String> {
+    // Before spawning the sidecar, ensure the SQLite schema is present and up
+    // to date. Failing closed here prevents booting against an empty DB, which
+    // would otherwise answer 401 "Local workspace not configured" on every
+    // request because no company row can exist without the tables.
+    if !process.is_running() {
+        database.ensure_database()?;
+    }
+    process.start()
 }
 
 #[tauri::command]
