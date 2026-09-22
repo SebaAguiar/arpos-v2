@@ -34,9 +34,9 @@ describe('CreateProductSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('should reject zero price', () => {
+  it('should accept zero price (product is a container)', () => {
     const result = CreateProductSchema.safeParse({ ...validInput, price_cents: 0 });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
   it('should reject non-integer price', () => {

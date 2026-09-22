@@ -7,6 +7,7 @@ export const UpdateVariantSchema = z.object({
   sku: z.string().optional(),
   price_cents: z.number().int().nonnegative().optional(),
   cost_cents: z.number().int().nonnegative().optional(),
+  stock_quantity: z.number().int().nonnegative().optional(),
   is_active: z.boolean().optional(),
 });
 

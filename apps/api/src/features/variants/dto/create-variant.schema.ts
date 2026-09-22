@@ -8,6 +8,7 @@ export const CreateVariantSchema = z.object({
   sku: z.string().optional(),
   price_cents: z.number().int().nonnegative().optional(),
   cost_cents: z.number().int().nonnegative().optional(),
+  stock_quantity: z.number().int().nonnegative().optional(),
 });
 
 export type CreateVariantInput = z.infer<typeof CreateVariantSchema>;
