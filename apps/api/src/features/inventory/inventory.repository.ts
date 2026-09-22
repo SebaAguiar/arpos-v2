@@ -78,6 +78,10 @@ export class InventoryRepository {
         stock_quantity: true,
         cost_cents: true,
         category_id: true,
+        variants: {
+          where: { is_active: true },
+          select: { stock_quantity: true, cost_cents: true },
+        },
         inventory: {
           where: { storeId },
           select: { min_stock: true },
@@ -100,16 +104,27 @@ export class InventoryRepository {
       lastMovements.map((m) => [m.productId, m._max.created_at ?? null]),
     );
 
-    return products.map((p) => ({
-      productId: p.id,
-      productCode: p.code,
-      productName: p.name,
-      stock_quantity: p.stock_quantity,
-      cost_cents: p.cost_cents,
-      min_stock: p.inventory[0]?.min_stock ?? null,
-      category_id: p.category_id,
-      last_movement_at: movementMap.get(p.id) ?? null,
-    }));
+    return products.map((p) => {
+      const hasVariants = p.variants.length > 0;
+      const stockQuantity = hasVariants
+        ? p.variants.reduce((acc, v) => acc + v.stock_quantity, 0)
+        : p.stock_quantity;
+      const primaryStock = p.variants.find((v) => v.stock_quantity > 0) ?? p.variants[0];
+      const costCents = hasVariants
+        ? (primaryStock?.cost_cents ?? p.cost_cents)
+        : p.cost_cents;
+
+      return {
+        productId: p.id,
+        productCode: p.code,
+        productName: p.name,
+        stock_quantity: stockQuantity,
+        cost_cents: costCents,
+        min_stock: p.inventory[0]?.min_stock ?? null,
+        category_id: p.category_id,
+        last_movement_at: movementMap.get(p.id) ?? null,
+      };
+    });
   }
 
   async getReport(companyId: string, storeId: string): Promise<InventoryReportData> {
@@ -123,6 +138,10 @@ export class InventoryRepository {
         cost_cents: true,
         price_cents: true,
         category_id: true,
+        variants: {
+          where: { is_active: true },
+          select: { stock_quantity: true, cost_cents: true, price_cents: true },
+        },
       },
       orderBy: { name: 'asc' },
     });
@@ -133,7 +152,19 @@ export class InventoryRepository {
     const outOfStockProducts: OutOfStockProduct[] = [];
 
     for (const p of products) {
-      const stockValue = (p.cost_cents ?? 0) * p.stock_quantity;
+      const hasVariants = p.variants.length > 0;
+      const stockQuantity = hasVariants
+        ? p.variants.reduce((acc, v) => acc + v.stock_quantity, 0)
+        : p.stock_quantity;
+      const primaryStock = p.variants.find((v) => v.stock_quantity > 0) ?? p.variants[0];
+      const costCents = hasVariants
+        ? (primaryStock?.cost_cents ?? p.cost_cents)
+        : p.cost_cents;
+      const priceCents = hasVariants
+        ? (primaryStock?.price_cents ?? p.price_cents)
+        : p.price_cents;
+
+      const stockValue = (costCents ?? 0) * stockQuantity;
       totalStockValueCents += stockValue;
 
       const cat = p.category_id ?? null;
@@ -142,22 +173,22 @@ export class InventoryRepository {
       existing.valueCents += stockValue;
       categoryMap.set(cat, existing);
 
-      if (p.stock_quantity <= 0) {
+      if (stockQuantity <= 0) {
         outOfStockProducts.push({
           productId: p.id,
           productName: p.name,
           productCode: p.code,
-          costCents: p.cost_cents,
-          priceCents: p.price_cents,
+          costCents,
+          priceCents,
         });
-      } else if (p.stock_quantity <= LOW_STOCK_THRESHOLD) {
+      } else if (stockQuantity <= LOW_STOCK_THRESHOLD) {
         lowStockProducts.push({
           productId: p.id,
           productName: p.name,
           productCode: p.code,
-          stockQuantity: p.stock_quantity,
-          costCents: p.cost_cents,
-          priceCents: p.price_cents,
+          stockQuantity,
+          costCents,
+          priceCents,
         });
       }
     }
@@ -261,12 +292,29 @@ export class InventoryRepository {
   }
 
   async adjustStock(productId: string, quantityDelta: number): Promise<void> {
-    await this.prisma.product.update({
+    const product = await this.prisma.product.update({
       where: { id: productId },
       data: {
         stock_quantity: { increment: quantityDelta },
         updated_at: Math.floor(Date.now() / 1000),
       },
+      include: {
+        variants: {
+          where: { is_active: true },
+          orderBy: { created_at: 'asc' },
+          select: { id: true },
+        },
+      },
     });
+
+    // The variant owns stock when it exists; keep the primary variant in sync
+    // so the report (which aggregates variant stock) reflects the movement.
+    const primaryVariant = product.variants[0];
+    if (primaryVariant) {
+      await this.prisma.productVariant.update({
+        where: { id: primaryVariant.id },
+        data: { stock_quantity: { increment: quantityDelta } },
+      });
+    }
   }
 }

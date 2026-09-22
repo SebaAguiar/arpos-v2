@@ -48,6 +48,7 @@ export class VariantsRepository {
         sku: data.sku,
         price_cents: data.price_cents ?? 0,
         cost_cents: data.cost_cents,
+        stock_quantity: data.stock_quantity ?? 0,
         created_at: now,
         updated_at: now,
       },
