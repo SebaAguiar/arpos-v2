@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.0-beta.8] - 2026-09-22
+
+### Fixed
+- The launcher now runs SQLite migrations before starting the bundled backend. Previously a clean install (or one whose database was never migrated) booted the sidecar against an empty database: with no `companies` table and therefore no tenant row, every authenticated flow failed with "Sesión expirada" (HTTP 401 "Local workspace not configured") shortly after login. The launcher now fails closed with a clear error instead of starting a backend that cannot serve requests.
+
 ## [1.0.0-beta.7] - 2026-09-22
 
 ### Added
