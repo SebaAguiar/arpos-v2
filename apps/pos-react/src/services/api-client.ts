@@ -57,54 +57,80 @@ export function setLastLocalEmail(email: string): void {
   }
 }
 
-// Single-flight session mint on 401: license-holder sessions exchange the
-// license token for a fresh auth_token; free/local sessions (no license token)
-// re-mint a local identity session from the persisted email. Self-heals
+// Single-flight session mint on 401: concurrent 401s share one attempt
+// instead of each hammering the sidecar (avoids duplicate local-user upserts
+// and SQLite WAL write contention). Tries the license bridge first, then the
+// free/local identity session minted from the persisted email. Self-heals
 // expired sessions and the cold-boot race where data calls fire before
 // initialize() has minted the session.
 let mintInFlight: Promise<boolean> | null = null;
 
 async function tryMintLocalSession(): Promise<boolean> {
-  const email = getLastLocalEmail();
-  if (!email) return false;
-  const res = await fetch(`${getApiBaseUrl()}/auth/local`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...getSidecarHeaders(),
-    },
-    body: JSON.stringify({ email }),
-    cache: "no-store",
-  });
-  if (!res.ok) return false;
-  const json = (await res.json()) as { access_token?: string };
-  if (!json.access_token) return false;
-  setAuthToken(json.access_token);
-  return true;
+  try {
+    const email = getLastLocalEmail();
+    if (!email) return false;
+    const res = await fetch(`${getApiBaseUrl()}/auth/local`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getSidecarHeaders(),
+      },
+      body: JSON.stringify({ email }),
+      cache: "no-store",
+    });
+    if (!res.ok) return false;
+    const json = (await res.json().catch(() => null)) as
+      | { access_token?: string }
+      | null;
+    if (!json?.access_token) return false;
+    setAuthToken(json.access_token);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function tryMintLicenseSession(): Promise<boolean> {
+  try {
+    const licenseToken = await readTokenLocal();
+    if (!licenseToken) return false;
+    const res = await fetch(`${getApiBaseUrl()}/auth/license`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getSidecarHeaders(),
+      },
+      body: JSON.stringify({ licenseToken }),
+      cache: "no-store",
+    });
+    if (!res.ok) return false;
+    const json = (await res.json().catch(() => null)) as
+      | { access_token?: string }
+      | null;
+    if (!json?.access_token) return false;
+    setAuthToken(json.access_token);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function mintSession(): Promise<boolean> {
   if (!mintInFlight) {
     mintInFlight = (async () => {
       try {
-        const licenseToken = await readTokenLocal();
-        if (!licenseToken) return false;
-        const res = await fetch(`${getApiBaseUrl()}/auth/license`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...getSidecarHeaders(),
-          },
-          body: JSON.stringify({ licenseToken }),
-          cache: "no-store",
-        });
-        if (!res.ok) return false;
-        const json = (await res.json()) as { access_token?: string };
-        if (!json.access_token) return false;
-        setAuthToken(json.access_token);
-        return true;
-      } catch {
-        return false;
+        const minted = await tryMintLicenseSession();
+        if (minted) return true;
+        const local = await tryMintLocalSession();
+        if (!local) {
+          const hasLicense = await readTokenLocal();
+          const hasEmail = getLastLocalEmail();
+          console.warn(
+            "[api-client] 401 self-heal failed",
+            { hasLicense: !!hasLicense, hasEmail: !!hasEmail },
+          );
+        }
+        return local;
       } finally {
         mintInFlight = null;
       }
@@ -141,8 +167,7 @@ async function request<T>(
   // auth_token (license bridge first, then local identity for free-plan
   // sessions) and re-issue the request once.
   if (res.status === 401 && !retried && path !== "/auth/license" && path !== "/auth/local") {
-    const minted =
-      (await tryMintLicenseSession()) || (await tryMintLocalSession());
+    const minted = await mintSession();
     if (minted) {
       return request<T>(method, path, body, true);
     }
@@ -189,8 +214,7 @@ async function requestText(path: string, retried = false): Promise<string> {
   });
 
   if (res.status === 401 && !retried && path !== "/auth/license" && path !== "/auth/local") {
-    const minted =
-      (await tryMintLicenseSession()) || (await tryMintLocalSession());
+    const minted = await mintSession();
     if (minted) {
       return requestText(path, true);
     }

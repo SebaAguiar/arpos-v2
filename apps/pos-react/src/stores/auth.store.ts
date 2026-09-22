@@ -82,6 +82,11 @@ async function resolveApiSession(email: string): Promise<AuthUser | null> {
     setLastLocalEmail(email);
     return user;
   } catch {
+    console.warn(
+      "[auth] API session mint failed for",
+      email,
+      "(license bridge and local identity both rejected)",
+    );
     return null;
   }
 }
@@ -247,9 +252,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
       // Revalidate online in the background; never blocks startup.
       void get().refreshLicenseOnline(p.email);
-      // Mint/refresh the API session from the license; the api-client retries
-      // on the first 401 if this ever races the initial data calls.
-      void mintApiAccessToken().then((apiUser) => {
+      // Persist the license email so the 401 self-heal can always fall back to
+      // a free/local identity session when the license bridge fails.
+      setLastLocalEmail(p.email);
+      // Mint/refresh the API session from the license, falling back to a local
+      // session on failure; the api-client retries on the first 401 if this
+      // ever races the initial data calls.
+      void resolveApiSession(p.email).then((apiUser) => {
         if (apiUser) set({ user: apiUser });
       });
       return;
