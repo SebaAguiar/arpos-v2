@@ -21,6 +21,7 @@ export interface ProductVariant {
   sku?: string;
   price?: number;
   costPrice?: number;
+  stockQuantity?: number;
   active: boolean;
   stockItems: StockItem[];
 }

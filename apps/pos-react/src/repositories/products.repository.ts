@@ -18,6 +18,7 @@ function mapProduct(api: ApiProductWithInventory): Product {
         sku: v.sku ?? undefined,
         price: v.price_cents > 0 ? v.price_cents / 100 : api.price_cents / 100,
         costPrice: v.cost_cents != null ? v.cost_cents / 100 : undefined,
+        stockQuantity: v.stock_quantity,
         active: v.is_active,
         stockItems: v.inventory.map((inv) => ({
           quantity: inv.quantity,
@@ -39,12 +40,17 @@ function mapProduct(api: ApiProductWithInventory): Product {
         sku: api.sku ?? undefined,
         price: api.price_cents / 100,
         costPrice: api.cost_cents != null ? api.cost_cents / 100 : undefined,
+        stockQuantity: api.stock_quantity,
         active: api.is_active,
         stockItems,
       },
     ];
   }
 
+  const stockQuantity = variants.reduce(
+    (acc, v) => acc + (v.stockQuantity ?? 0),
+    0,
+  );
   const defaultPrice = variants[0]?.price ?? api.price_cents / 100;
 
   return {
@@ -57,7 +63,7 @@ function mapProduct(api: ApiProductWithInventory): Product {
     category: api.category_id ?? undefined,
     internalCode: api.code,
     image: undefined,
-    stockQuantity: api.stock_quantity,
+    stockQuantity,
     variants,
   };
 }
@@ -77,7 +83,7 @@ export const ProductsRepository = {
     code: string;
     name: string;
     description?: string;
-    price_cents: number;
+    price_cents?: number;
     cost_cents?: number;
     stock_quantity?: number;
     sku?: string;

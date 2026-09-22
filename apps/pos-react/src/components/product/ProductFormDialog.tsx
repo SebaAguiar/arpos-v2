@@ -12,7 +12,6 @@ import {
 import { PlusCircledIcon, TrashIcon } from "@radix-ui/react-icons";
 import { ProductsRepository } from "@/repositories/products.repository";
 import { VariantsService } from "@/services/products.service";
-import { PricingFields, type PricingValues } from "@/components/product/PricingFields";
 import { CurrencyField } from "@/components/product/CurrencyField";
 import { parseNumericInput } from "@/lib/pricing";
 import type { Product } from "@/lib/types";
@@ -65,11 +64,6 @@ export function ProductFormDialog({
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [pricingValues, setPricingValues] = useState<PricingValues>({
-    cost: "",
-    margin: "",
-    price: "",
-  });
   const [category, setCategory] = useState("");
   const [categoryIsNew, setCategoryIsNew] = useState(false);
   const [variants, setVariants] = useState<VariantEntry[]>([]);
@@ -88,17 +82,6 @@ export function ProductFormDialog({
         setCode(productToEdit.internalCode || "");
         setName(productToEdit.name || "");
         setDescription(productToEdit.description || "");
-        const editCost = productToEdit.cost ? String(productToEdit.cost) : "";
-        const editPrice = productToEdit.price ? String(productToEdit.price) : "";
-        const editMargin =
-          editCost && editPrice && parseFloat(editCost) > 0
-            ? (
-                ((parseFloat(editPrice) - parseFloat(editCost)) /
-                  parseFloat(editPrice)) *
-                100
-              ).toFixed(1)
-            : "";
-        setPricingValues({ cost: editCost, margin: editMargin, price: editPrice });
         const productCategory = productToEdit.category || "";
         setCategory(productCategory);
         setCategoryIsNew(productCategory !== "" && !categories.includes(productCategory));
@@ -112,7 +95,9 @@ export function ProductFormDialog({
           sku: v.sku || "",
           price: v.price ? String(v.price) : "",
           cost: v.costPrice ? String(v.costPrice) : "",
-          stock: v.stockItems[0]?.quantity ? String(v.stockItems[0].quantity) : "0",
+          stock: v.stockQuantity != null
+            ? String(v.stockQuantity)
+            : String(v.stockItems[0]?.quantity ?? 0),
         }));
         setVariants(loaded);
         setLoadingVariants(false);
@@ -120,7 +105,6 @@ export function ProductFormDialog({
         setCode(nextDefaultCode());
         setName("");
         setDescription("");
-        setPricingValues({ cost: "", margin: "", price: "" });
         setCategory("");
         setCategoryIsNew(false);
         setVariants([]);
@@ -137,12 +121,12 @@ export function ProductFormDialog({
         color: "",
         barcode: "",
         sku: "",
-        price: pricingValues.price,
-        cost: pricingValues.cost,
+        price: "",
+        cost: "",
         stock: "0",
       },
     ]);
-  }, [pricingValues]);
+  }, []);
 
   const updateVariant = useCallback(
     (tempId: string, field: keyof VariantEntry, value: string) => {
@@ -179,11 +163,6 @@ export function ProductFormDialog({
     },
     [onOpenChange]
   );
-
-  const numericPrice = parseNumericInput(pricingValues.price);
-  const numericCost = parseNumericInput(pricingValues.cost);
-  const priceBelowCost =
-    numericPrice > 0 && numericCost > 0 && numericPrice < numericCost;
 
   const skuConflict = useCallback(
     (proposedSku: string, currentVariantId?: string) => {
@@ -222,17 +201,6 @@ export function ProductFormDialog({
         return;
       }
 
-      if (priceBelowCost) {
-        setError("El precio de venta no puede ser menor al costo.");
-        return;
-      }
-
-      const priceCents = Math.round(numericPrice * 100);
-      let costCents: number | undefined = undefined;
-      if (numericCost >= 0) {
-        costCents = Math.round(numericCost * 100);
-      }
-
       const activeVariants = variants.filter((v) => !v._deleted);
 
       for (const v of activeVariants) {
@@ -240,6 +208,15 @@ export function ProductFormDialog({
           setError(`El SKU "${v.sku}" ya existe en otro producto.`);
           return;
         }
+        if (!v.price || parseNumericInput(v.price) <= 0) {
+          setError("Cada variante necesita un precio de venta mayor a cero.");
+          return;
+        }
+      }
+
+      if (activeVariants.length === 0) {
+        setError("Agregá al menos una variante con precio y stock.");
+        return;
       }
 
       setSubmitting(true);
@@ -248,18 +225,15 @@ export function ProductFormDialog({
           await ProductsRepository.update(productToEdit.id, {
             name: name.trim(),
             description: description.trim() || undefined,
-            price_cents: priceCents,
-            cost_cents: costCents,
             category_id: category.trim() || undefined,
           });
 
           for (const v of activeVariants) {
-            const variantPriceCents = v.price
-              ? Math.round(parseFloat(v.price) * 100)
-              : priceCents;
+            const variantPriceCents = Math.round(parseNumericInput(v.price) * 100);
             const variantCostCents = v.cost
-              ? Math.round(parseFloat(v.cost) * 100)
-              : costCents;
+              ? Math.round(parseNumericInput(v.cost) * 100)
+              : undefined;
+            const variantStock = parseInt(v.stock, 10) || 0;
 
             if (v.existingId) {
               await VariantsService.update(v.existingId, {
@@ -269,6 +243,7 @@ export function ProductFormDialog({
                 sku: v.sku || undefined,
                 price_cents: variantPriceCents,
                 cost_cents: variantCostCents,
+                stock_quantity: variantStock,
               });
             } else {
               await VariantsService.create({
@@ -279,6 +254,7 @@ export function ProductFormDialog({
                 sku: v.sku || undefined,
                 price_cents: variantPriceCents,
                 cost_cents: variantCostCents,
+                stock_quantity: variantStock,
               });
             }
           }
@@ -290,27 +266,19 @@ export function ProductFormDialog({
             await VariantsService.remove(v.existingId!);
           }
         } else {
-          const initialStock = activeVariants.length > 0
-            ? parseInt(activeVariants[0]!.stock, 10) || 0
-            : 0;
-
           const created = await ProductsRepository.create({
             code: code.trim(),
             name: name.trim(),
             description: description.trim() || undefined,
-            price_cents: priceCents,
-            cost_cents: costCents,
-            stock_quantity: initialStock,
             category_id: category.trim() || undefined,
           });
 
           for (const v of activeVariants) {
-            const variantPriceCents = v.price
-              ? Math.round(parseFloat(v.price) * 100)
-              : priceCents;
+            const variantPriceCents = Math.round(parseNumericInput(v.price) * 100);
             const variantCostCents = v.cost
-              ? Math.round(parseFloat(v.cost) * 100)
-              : costCents;
+              ? Math.round(parseNumericInput(v.cost) * 100)
+              : undefined;
+            const variantStock = parseInt(v.stock, 10) || 0;
             await VariantsService.create({
               productId: created.id,
               size: v.size || undefined,
@@ -319,6 +287,7 @@ export function ProductFormDialog({
               sku: v.sku || undefined,
               price_cents: variantPriceCents,
               cost_cents: variantCostCents,
+              stock_quantity: variantStock,
             });
           }
         }
@@ -338,7 +307,7 @@ export function ProductFormDialog({
     [
       code, name, description, category, variants,
       isEditing, productToEdit, onSuccess, onOpenChange,
-      numericPrice, numericCost, priceBelowCost, skuConflict, products,
+      skuConflict, products,
     ]
   );
 
@@ -455,18 +424,6 @@ export function ProductFormDialog({
               />
             </div>
 
-            <div>
-              <PricingFields
-                values={pricingValues}
-                onChange={(vals) => markDirty(() => setPricingValues(vals))}
-              />
-              {priceBelowCost && (
-                <FieldError>
-                  El precio de venta es menor al costo (margen negativo).
-                </FieldError>
-              )}
-            </div>
-
             {/* Variants section */}
             <div>
               <Flex align="center" justify="between" style={{ marginBottom: "8px" }}>
@@ -560,7 +517,7 @@ export function ProductFormDialog({
                             <Text size="1" color="gray">Precio</Text>
                             <CurrencyField
                               size="1"
-                              placeholder={pricingValues.price || "0"}
+                              placeholder="0"
                               value={v.price}
                               onChange={(value) => markDirty(() => updateVariant(v.tempId, "price", value))}
                               ariaLabel="Precio de la variante"
@@ -570,24 +527,22 @@ export function ProductFormDialog({
                             <Text size="1" color="gray">Costo</Text>
                             <CurrencyField
                               size="1"
-                              placeholder={pricingValues.cost || "0"}
+                              placeholder="0"
                               value={v.cost}
                               onChange={(value) => markDirty(() => updateVariant(v.tempId, "cost", value))}
                               ariaLabel="Costo de la variante"
                             />
                           </div>
-                          {!isEditing && (
-                            <div>
-                              <Text size="1" color="gray">Stock</Text>
-                              <TextField.Root
-                                size="1"
-                                type="number"
-                                placeholder="0"
-                                value={v.stock}
-                                onChange={(e) => markDirty(() => updateVariant(v.tempId, "stock", e.target.value))}
-                              />
-                            </div>
-                          )}
+                          <div>
+                            <Text size="1" color="gray">Stock</Text>
+                            <TextField.Root
+                              size="1"
+                              type="number"
+                              placeholder="0"
+                              value={v.stock}
+                              onChange={(e) => markDirty(() => updateVariant(v.tempId, "stock", e.target.value))}
+                            />
+                          </div>
                         </Grid>
                         {variantLoss && (
                           <FieldError style={{ marginTop: 0, marginBottom: "4px" }}>

@@ -41,6 +41,7 @@ export interface ApiProductVariant {
   sku: string | null;
   price_cents: number;
   cost_cents: number | null;
+  stock_quantity: number;
   is_active: boolean;
   created_at: number;
   updated_at: number;
@@ -65,7 +66,7 @@ export const ProductsService = {
     code: string;
     name: string;
     description?: string;
-    price_cents: number;
+    price_cents?: number;
     cost_cents?: number;
     stock_quantity?: number;
     sku?: string;
@@ -107,6 +108,7 @@ export const VariantsService = {
     sku?: string;
     price_cents?: number;
     cost_cents?: number;
+    stock_quantity?: number;
   }): Promise<ApiProductVariant> {
     return apiClient.post<ApiProductVariant>("/variants", input);
   },
@@ -120,6 +122,7 @@ export const VariantsService = {
       sku: string;
       price_cents: number;
       cost_cents: number;
+      stock_quantity: number;
       is_active: boolean;
     }>,
   ): Promise<ApiProductVariant> {
