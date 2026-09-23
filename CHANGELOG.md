@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.0-beta.9] - 2026-09-23
+
+### Added
+- Linked account onboarding: first-run setup wizard now supports looking up and linking active subscription accounts, pre-filling admin email and plan info.
+- Dynamic store limits: store creation limits are now evaluated dynamically using `maxStores` from the DB-defined/issued license.
+- Desktop header update button: added `UpdateButton` directly to the top header bar and uncoupled app updates from license validation.
+
 ## [1.0.0-beta.8] - 2026-09-22
 
 ### Fixed
