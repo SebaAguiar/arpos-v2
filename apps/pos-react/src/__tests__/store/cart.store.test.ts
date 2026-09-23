@@ -63,6 +63,34 @@ describe("cart store", () => {
     expect(items[0]).toMatchObject({ custom: true, productId: "custom" });
   });
 
+  it("clamps a fresh item quantity to the available stock", () => {
+    useCartStore.getState().addItem({ ...productItem, stock: 2, quantity: 5 });
+    expect(useCartStore.getState().items[0].quantity).toBe(2);
+  });
+
+  it("clamps the merged quantity when adding beyond the available stock", () => {
+    useCartStore.getState().addItem({ ...productItem, stock: 2 });
+    useCartStore.getState().addItem({ ...productItem, stock: 2 });
+    useCartStore.getState().addItem({ ...productItem, stock: 2 });
+    const items = useCartStore.getState().items;
+    expect(items).toHaveLength(1);
+    expect(items[0].quantity).toBe(2);
+  });
+
+  it("does not add a zero-stock item", () => {
+    useCartStore.getState().addItem({ ...productItem, stock: 0 });
+    expect(useCartStore.getState().items).toHaveLength(0);
+  });
+
+  it("clamps updateQuantity to the available stock", () => {
+    useCartStore.getState().addItem({ ...productItem, stock: 2 });
+    const id = useCartStore.getState().items[0].id;
+    useCartStore.getState().updateQuantity(id, 10);
+    expect(useCartStore.getState().items[0].quantity).toBe(2);
+    useCartStore.getState().updateQuantity(id, 0);
+    expect(useCartStore.getState().items).toHaveLength(0);
+  });
+
   it("removes an item and tracks the last removed", () => {
     useCartStore.getState().addItem(productItem);
     const id = useCartStore.getState().items[0].id;

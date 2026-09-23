@@ -23,7 +23,7 @@ import { ProductCard } from "@/components/product/ProductCard";
 import { CategoryTabs } from "@/components/product/CategoryTabs";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useHotkeys } from "@/hooks/useHotkeys";
-import { getProductStock } from "@/lib/stock";
+import { getProductStock, getVariantStock } from "@/lib/stock";
 import { VariantSelectionDialog } from "@/components/product/VariantSelectionDialog";
 import { CartItem } from "@/components/cart/CartItem";
 import { CustomItemDialog } from "@/components/cart/CustomItemDialog";
@@ -200,6 +200,7 @@ export function POSPage() {
         price: variant?.price ?? product.price,
         quantity: 1,
         sku: variant?.sku,
+        stock: getProductStock(product),
       });
     },
     [addItem]
@@ -215,6 +216,7 @@ export function POSPage() {
         price: variant.price ?? product.price,
         quantity: 1,
         sku: variant.sku,
+        stock: getVariantStock(variant),
       });
       setVariantDialog(null);
     },

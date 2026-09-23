@@ -43,6 +43,7 @@ export interface CartItem {
   sku?: string;
   image?: string;
   custom?: boolean;
+  stock?: number; // available units at add time; absent for custom items (unbounded)
 }
 
 export interface Customer {

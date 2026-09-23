@@ -46,17 +46,30 @@ export const useCartStore = create<CartState>((set) => ({
           i.variantId === item.variantId &&
           !i.custom
       );
+      const max = item.stock ?? Infinity;
       if (existing) {
+        const merged = Math.min(existing.quantity + item.quantity, max);
         return {
           items: state.items.map((i) =>
             i.id === existing.id
-              ? { ...i, quantity: i.quantity + item.quantity }
+              ? { ...i, quantity: merged, stock: item.stock ?? i.stock }
               : i
           ),
         };
       }
+      const clampedQty = Math.min(item.quantity, max);
+      if (clampedQty <= 0) {
+        return state;
+      }
       return {
-        items: [...state.items, { ...item, id: `cart-${nextId++}` }],
+        items: [
+          ...state.items,
+          {
+            ...item,
+            id: `cart-${nextId++}`,
+            quantity: clampedQty,
+          },
+        ],
       };
     }),
 
@@ -90,12 +103,13 @@ export const useCartStore = create<CartState>((set) => ({
 
   updateQuantity: (itemId, quantity) =>
     set((state) => ({
-      items:
-        quantity <= 0
-          ? state.items.filter((i) => i.id !== itemId)
-          : state.items.map((i) =>
-              i.id === itemId ? { ...i, quantity } : i
-            ),
+      items: state.items
+        .map((i) => {
+          if (i.id !== itemId) return i;
+          const max = i.stock ?? Infinity;
+          return { ...i, quantity: Math.min(quantity, max) };
+        })
+        .filter((i) => i.quantity > 0),
     })),
 
   setDiscount: (value, type) => set({ discount: value, discountType: type }),

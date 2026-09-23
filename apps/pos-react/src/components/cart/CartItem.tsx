@@ -9,6 +9,7 @@ interface CartItemProps {
 }
 
 export function CartItem({ item, onUpdateQuantity, onRemove, onUpdateCustomItem }: CartItemProps) {
+  const atStockLimit = item.stock !== undefined && item.quantity >= item.stock;
   return (
     <div
       style={{
@@ -125,6 +126,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove, onUpdateCustomItem 
         <button
           onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
           aria-label={`Aumentar cantidad de ${item.name}`}
+          disabled={atStockLimit}
           style={{
             width: "32px",
             height: "32px",
@@ -135,7 +137,8 @@ export function CartItem({ item, onUpdateQuantity, onRemove, onUpdateCustomItem 
             borderRadius: "6px",
             backgroundColor: "transparent",
             color: "var(--text-secondary)",
-            cursor: "pointer",
+            cursor: atStockLimit ? "not-allowed" : "pointer",
+            opacity: atStockLimit ? 0.4 : 1,
           }}
         >
           <PlusIcon width={14} height={14} />
