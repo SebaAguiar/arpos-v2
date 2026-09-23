@@ -16,6 +16,18 @@ describe('SetupService (integration)', () => {
     adminPassword: 'secret123',
   };
 
+  const ACCOUNT = {
+    sub: 'client_123',
+    email: 'owner@acme.com',
+    name: 'Juan Perez',
+    planSlug: 'pro',
+    planName: 'Pro',
+    maxStores: 2,
+    features: { cloudSync: true, multiStore: true },
+    validFrom: '2026-01-01T00:00:00.000Z',
+    validUntil: '2027-01-01T00:00:00.000Z',
+  };
+
   beforeAll(async () => {
     prisma = await setupTestDb();
   });
@@ -66,6 +78,28 @@ describe('SetupService (integration)', () => {
 
       expect(config.get('LOCAL_COMPANY_ID')).toBe(result.companyId);
       expect(config.get('LOCAL_STORE_ID')).toBe(result.storeId);
+    });
+
+    it('persists linked account on the company when provided', async () => {
+      const result = await service.initCompany({ ...DTO, account: ACCOUNT });
+
+      const company = await prisma.company.findUnique({ where: { id: result.companyId } });
+
+      expect(company?.email).toBe(ACCOUNT.email);
+
+      const config = JSON.parse(company?.config ?? 'null') as
+        | { license?: unknown }
+        | null;
+      expect(config?.license).toEqual(ACCOUNT);
+    });
+
+    it('creates a company without account fields when not linked', async () => {
+      const result = await service.initCompany(DTO);
+
+      const company = await prisma.company.findUnique({ where: { id: result.companyId } });
+
+      expect(company?.email).toBeNull();
+      expect(company?.config).toBeNull();
     });
 
     it('rejects re-initialization with ConflictException', async () => {

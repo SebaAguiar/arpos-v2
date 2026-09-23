@@ -2,12 +2,14 @@ import { Injectable, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../data-access/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
+import type { InitAccount } from './dto/init-company.schema';
 
 export interface InitCompanyInput {
   companyName: string;
   taxId: string;
   adminEmail: string;
   adminPassword: string;
+  account?: InitAccount;
 }
 
 @Injectable()
@@ -36,6 +38,10 @@ export class SetupService {
         data: {
           name: dto.companyName,
           taxId: dto.taxId,
+          email: dto.account?.email ?? null,
+          config: dto.account
+            ? JSON.stringify({ license: dto.account })
+            : undefined,
           created_at: now,
           updated_at: now,
         },
