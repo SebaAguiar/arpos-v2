@@ -201,3 +201,25 @@ jobs:
             --title "Arcom $TAG" \
             --notes-file "$NOTES_FILE" \
             $PRERELEASE_FLAG
+
+      # ── Refresh the OTA manifest anchor ────────────────
+      # GitHub's /releases/latest only resolves to non-prerelease
+      # releases, so a beta-only distribution strategy makes the
+      # updater endpoint
+      #   .../releases/latest/download/latest.json
+      # 404 and in-app updates fail. Keep a stable anchor release
+      # (tag `updates`) whose sole asset is the freshly generated
+      # latest.json; /releases/latest then serves the current-beta
+      # manifest and the updater can self-update on every beta.
+      - name: Publish latest.json to stable OTA anchor
+        env:
+          GH_TOKEN: ${{ secrets.ARCOM_RELEASES_TOKEN }}
+        run: |
+          if ! gh release view updates --repo SebaAguiar/arcom-releases >/dev/null 2>&1; then
+            gh release create updates \
+              --repo SebaAguiar/arcom-releases \
+              --title "OTA manifest anchor" \
+              --notes "Stable anchor so /releases/latest serves latest.json while app releases are prereleases."
+          fi
+          gh release upload updates release-artifacts/latest.json \
+            --repo SebaAguiar/arcom-releases --clobber

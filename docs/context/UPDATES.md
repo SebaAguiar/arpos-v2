@@ -1359,6 +1359,15 @@ Gotchas documentados:
   upload (404 en `im-thai.so`). Solo hay que publicar los instaladores (`deb`, `rpm`, `AppImage`, `dmg`,
   `msi`, `exe`) + sus `.sig`. El workflow ahora filtra con `find ... -exec cp` y verifica que existan
   `.sig` antes de crear la release.
+- **Prerelease-only + `/releases/latest` = 404 (OTA muerto)**: GitHub resuelve `/releases/latest` solo
+  contra releases **no-prerelease**. Si TODAS las releases se publican con `--prerelease` (tags `-beta`),
+  el endpoint `https://github.com/<repo>/releases/latest/download/latest.json` da 404 y el updater del
+  POS no puede descargar el manifest → no hay auto-update (solo reinstalación manual). Fix implementado
+  (2026-09, beta.10): mantener un **release estable "ancla"** en `arcom-releases` con tag `updates` cuyo
+  único asset es el `latest.json` del beta vigente. Como es el único release estable del repo,
+  `/releases/latest` lo resuelve y sirve el manifest, cuyos `url` apuntan a los assets del tag beta
+  (los downloads directos por tag funcionan aunque la release sea prerelease). El workflow (`release.yml`)
+  lo auto-crea si falta y lo refresca con `gh release upload --clobber` en cada publicación.
 
 ---
 
