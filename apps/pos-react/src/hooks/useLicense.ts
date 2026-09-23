@@ -10,6 +10,8 @@ export interface LicenseGate {
   blockMessage: string;
   status: LicenseStatus | null;
   requiresPurchase: boolean;
+  planName: string | null; // DB-defined plan name (from the issued license token)
+  maxStores: number; // DB-driven store limit: subscription.maxStoresOverride ?? plan.maxStoresDefault
 }
 
 function featureOf(features: Record<string, boolean> | undefined, key: FeatureKey): boolean {
@@ -30,6 +32,8 @@ export function useLicense(): LicenseGate {
       covered,
       requiresPurchase: !covered,
       status: licenseStatus,
+      planName: active ? (licensePayload?.planName ?? null) : null,
+      maxStores: active ? (licensePayload?.maxStores ?? 1) : 1,
       blockMessage:
         "La sincronización en la nube requiere un plan de pago o una licencia vigente. " +
         "Podés usarla sin conexión; para activarla, renová tu licencia o suscribite a un plan.",

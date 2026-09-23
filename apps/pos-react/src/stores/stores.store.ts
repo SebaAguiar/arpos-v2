@@ -10,7 +10,6 @@ interface StoresState {
   loading: boolean;
   isStale: boolean;
   error: string | null;
-  canAddStore: boolean;
   fetchStores: () => Promise<void>;
   createStore: (input: { name: string; address?: string; phone?: string }) => Promise<Store>;
   updateStore: (
@@ -31,7 +30,6 @@ export const useStoresStore = create<StoresState>((set, get) => ({
   loading: false,
   isStale: false,
   error: null,
-  canAddStore: true,
 
   fetchStores: async () => {
     set({ loading: true, error: null });
@@ -41,14 +39,13 @@ export const useStoresStore = create<StoresState>((set, get) => ({
         StoresRepository.getCount(),
       ]);
       setCache(CACHE_KEY, { stores, storeCount } satisfies StoresCache);
-      set({ stores, storeCount, canAddStore: storeCount < 1, loading: false, isStale: false });
+      set({ stores, storeCount, loading: false, isStale: false });
     } catch {
       const cached = getCached<StoresCache>(CACHE_KEY);
       if (cached) {
         set({
           stores: cached.stores,
           storeCount: cached.storeCount,
-          canAddStore: cached.storeCount < 1,
           loading: false,
           isStale: true,
         });
@@ -64,7 +61,6 @@ export const useStoresStore = create<StoresState>((set, get) => ({
     set({
       stores: [store, ...get().stores],
       storeCount: newCount,
-      canAddStore: newCount < 1,
     });
     return store;
   },
@@ -85,7 +81,6 @@ export const useStoresStore = create<StoresState>((set, get) => ({
         s.id === id ? { ...s, is_active: false } : s,
       ),
       storeCount: newCount,
-      canAddStore: newCount < 1,
     });
   },
 }));

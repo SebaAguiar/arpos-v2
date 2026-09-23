@@ -4,11 +4,24 @@ export interface SetupStatusResponse {
   isInitialized: boolean;
 }
 
+export interface AccountLink {
+  sub: string;
+  email: string;
+  name: string;
+  planSlug: string;
+  planName: string;
+  maxStores: number;
+  features: Record<string, boolean>;
+  validFrom: string;
+  validUntil: string;
+}
+
 export interface InitCompanyInput {
   companyName: string;
   taxId: string;
   adminEmail: string;
   adminPassword: string;
+  account?: AccountLink;
 }
 
 export interface InitCompanyResponse {

@@ -9,13 +9,15 @@ import {
 } from "@radix-ui/react-icons";
 import { useAuthStore } from "@/stores/auth.store";
 import { SetupRepository } from "@/repositories/setup.repository";
+import { LicenseRepository } from "@/repositories/license.repository";
 import { MigrationWizard } from "@/components/auth/MigrationWizard";
+import type { AccountLink } from "@/services/setup.service";
 import { EMAIL_RE, validatePasswordMatch } from "@/lib/validators";
 import { FieldLabel } from "@/components/ui/FieldLabel";
 import { FieldError } from "@/components/ui/FieldError";
 import { InlineNotice } from "@/components/ui/InlineNotice";
 
-type WizardStep = "welcome" | "company" | "admin" | "success";
+type WizardStep = "welcome" | "account" | "company" | "admin" | "success";
 
 interface CompanyData {
   companyName: string;
@@ -52,7 +54,13 @@ export function FirstRunWizard() {
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [migrationOpen, setMigrationOpen] = useState(false);
 
+  const [accountEmail, setAccountEmail] = useState("");
+  const [account, setAccount] = useState<AccountLink | null>(null);
+  const [accountLoading, setAccountLoading] = useState(false);
+  const [accountError, setAccountError] = useState<string | null>(null);
+
   const login = useAuthStore((s) => s.login);
+  const loginWithLicense = useAuthStore((s) => s.loginWithLicense);
   const checkSetup = useAuthStore((s) => s.checkSetup);
 
   const validateCompany = useCallback((): boolean => {
@@ -84,6 +92,58 @@ export function FirstRunWizard() {
     return Object.keys(newErrors).length === 0;
   }, [admin]);
 
+  const handleVerifyAccount = useCallback(async () => {
+    const trimmed = accountEmail.trim().toLowerCase();
+    if (!trimmed || !EMAIL_RE.test(trimmed)) {
+      setAccountError("Ingresá un email válido");
+      return;
+    }
+    setAccountLoading(true);
+    setAccountError(null);
+    try {
+      const { known, result } = await LicenseRepository.issueAndStore(trimmed);
+      if (!known) {
+        setAccountError(
+          "No encontramos una cuenta activa con ese email. Verificá el email o creá tu negocio de cero.",
+        );
+        return;
+      }
+      if (result.ok && result.payload) {
+        const p = result.payload;
+        setAccount({
+          sub: p.sub,
+          email: p.email,
+          name: p.name,
+          planSlug: p.planSlug,
+          planName: p.planName,
+          maxStores: p.maxStores,
+          features: p.features,
+          validFrom: p.validFrom,
+          validUntil: p.validUntil,
+        });
+      } else {
+        setAccountError(
+          "No pudimos verificar tu licencia ahora. Podés seguir creando tu negocio sin vincular.",
+        );
+      }
+    } catch {
+      setAccountError(
+        "No pudimos verificar tu licencia ahora. Podés seguir creando tu negocio sin vincular.",
+      );
+    } finally {
+      setAccountLoading(false);
+    }
+  }, [accountEmail]);
+
+  const handleAccountContinue = useCallback(() => {
+    if (!account) return;
+    if (admin.email !== account.email) {
+      setAdmin((prev) => ({ ...prev, email: account.email }));
+    }
+    setGlobalError(null);
+    setStep("company");
+  }, [account, admin.email]);
+
   const handleCompanyNext = useCallback(() => {
     if (validateCompany()) {
       setErrors({});
@@ -103,9 +163,12 @@ export function FirstRunWizard() {
         taxId: company.taxId.trim(),
         adminEmail: admin.email.trim(),
         adminPassword: admin.password,
+        account: account ?? undefined,
       });
 
-      const loginSuccess = await login(admin.email.trim(), admin.password);
+      const loginSuccess = account
+        ? await loginWithLicense(admin.email.trim())
+        : await login(admin.email.trim(), admin.password);
       if (loginSuccess) {
         await checkSetup();
         setStep("success");
@@ -119,7 +182,7 @@ export function FirstRunWizard() {
     } finally {
       setLoading(false);
     }
-  }, [company, admin, validateAdmin, login, checkSetup]);
+  }, [company, admin, validateAdmin, login, loginWithLicense, checkSetup, account]);
 
   return (
     <div
@@ -198,6 +261,30 @@ export function FirstRunWizard() {
               <ArrowRightIcon width={16} height={16} />
             </button>
             <button
+              onClick={() => {
+                setAccountError(null);
+                setStep("account");
+              }}
+              style={{
+                width: "100%",
+                padding: "12px",
+                backgroundColor: "transparent",
+                color: "var(--text-primary)",
+                border: "1px solid var(--accent)",
+                borderRadius: "6px",
+                fontSize: "14px",
+                fontWeight: 600,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+              }}
+            >
+              <CheckCircledIcon width={16} height={16} />
+              Ya tengo una cuenta Arcom
+            </button>
+            <button
               onClick={() => setMigrationOpen(true)}
               style={{
                 width: "100%",
@@ -218,6 +305,140 @@ export function FirstRunWizard() {
               <DownloadIcon width={16} height={16} />
               Migrar mis datos desde Arcom v1
             </button>
+          </>
+        )}
+
+        {/* Step: Account */}
+        {step === "account" && (
+          <>
+            <div>
+              <Text size="5" weight="bold" style={{ display: "block" }}>
+                ¿Ya tenés una cuenta Arcom?
+              </Text>
+              <Text size="2" color="gray" style={{ display: "block", marginTop: "4px" }}>
+                Ingresá el email que usás para tu suscripción. Si verificamos tu
+                plan, vinculamos tu negocio local a tu cuenta automáticamente.
+              </Text>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div>
+                <FieldLabel>Email</FieldLabel>
+                <TextField.Root
+                  type="email"
+                  placeholder="admin@negocio.com"
+                  value={accountEmail}
+                  onChange={(e) => setAccountEmail(e.target.value)}
+                  autoFocus
+                />
+                {accountError && (
+                  <FieldError>{accountError}</FieldError>
+                )}
+                {account && (
+                  <Text size="2" color="green" style={{ display: "block", marginTop: "8px" }}>
+                    Cuenta verificada · Plan {account.planName} · {account.maxStores}{" "}
+                    {account.maxStores === 1 ? "sucursal" : "sucursales"}
+                  </Text>
+                )}
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: "12px" }}>
+              <button
+                onClick={() => {
+                  setAccountError(null);
+                  setStep("welcome");
+                }}
+                style={{
+                  flex: 1,
+                  padding: "10px",
+                  backgroundColor: "transparent",
+                  color: "var(--text-secondary)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "6px",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
+                }}
+              >
+                <ArrowLeftIcon width={14} height={14} />
+                Atrás
+              </button>
+              {!account ? (
+                <button
+                  onClick={handleVerifyAccount}
+                  disabled={accountLoading}
+                  style={{
+                    flex: 2,
+                    padding: "10px",
+                    backgroundColor: accountLoading ? "var(--bg-surface)" : "var(--accent)",
+                    color: accountLoading ? "var(--text-secondary)" : "#fff",
+                    border: "none",
+                    borderRadius: "6px",
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    cursor: accountLoading ? "not-allowed" : "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "6px",
+                  }}
+                >
+                  {accountLoading ? "Verificando..." : "Verificar"}
+                </button>
+              ) : (
+                <button
+                  onClick={handleAccountContinue}
+                  style={{
+                    flex: 2,
+                    padding: "10px",
+                    backgroundColor: "var(--accent)",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "6px",
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "6px",
+                  }}
+                >
+                  Continuar
+                  <ArrowRightIcon width={14} height={14} />
+                </button>
+              )}
+            </div>
+
+            {!account && accountError && (
+              <Text size="2" color="gray" style={{ textAlign: "center" }}>
+                ¿No es tu caso?{" "}
+                <button
+                  onClick={() => {
+                    setAccountError(null);
+                    setAccount(null);
+                    setStep("company");
+                  }}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    color: "var(--accent)",
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Crear mi negocio de cero
+                </button>
+              </Text>
+            )}
           </>
         )}
 
@@ -347,12 +568,21 @@ export function FirstRunWizard() {
                   onChange={(e) =>
                     setAdmin({ ...admin, email: e.target.value })
                   }
+                  readOnly={Boolean(account)}
                   autoFocus
                 />
                 {errors.email && (
                   <FieldError>
                     {errors.email}
                   </FieldError>
+                )}
+                {account && (
+                  <Text size="2" color="gray" style={{ display: "block", marginTop: "6px" }}>
+                    Email vinculado a tu cuenta Arcom ({account.email}). Se
+                    aplicará tu plan {account.planName} con{" "}
+                    {account.maxStores}{" "}
+                    {account.maxStores === 1 ? "sucursal" : "sucursales"}.
+                  </Text>
                 )}
               </div>
 

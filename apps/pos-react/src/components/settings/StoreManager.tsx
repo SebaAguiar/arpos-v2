@@ -3,6 +3,7 @@ import { Text, TextField, Badge, Button } from "@radix-ui/themes";
 import { HomeIcon, PlusIcon, Pencil2Icon, TrashIcon } from "@radix-ui/react-icons";
 import { useDialogStore } from "@/stores/dialog.store";
 import { useStoresStore } from "@/stores/stores.store";
+import { useLicense } from "@/hooks/useLicense";
 import { StaleIndicator } from "@/components/ui/StaleIndicator";
 import { InlineNotice } from "@/components/ui/InlineNotice";
 import { DialogHeader } from "@/components/ui/DialogHeader";
@@ -11,8 +12,9 @@ import { ListEmptyState } from "@/components/ui/ListEmptyState";
 import type { Store } from "@/lib/types";
 
 export function StoreManager() {
-  const { stores, storeCount, loading, error, isStale, canAddStore, fetchStores, createStore, updateStore, deleteStore } =
+  const { stores, storeCount, loading, error, isStale, fetchStores, createStore, updateStore, deleteStore } =
     useStoresStore();
+  const { planName, maxStores } = useLicense();
   const closeStores = useDialogStore((s) => s.closeStores);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Store | null>(null);
@@ -56,6 +58,8 @@ export function StoreManager() {
     setEditing(null);
     setForm({ name: "", address: "", phone: "" });
   };
+
+  const canAddStore = storeCount < maxStores;
 
   return (
     <div
@@ -114,7 +118,9 @@ export function StoreManager() {
         <div style={{ flex: 1, overflow: "auto", padding: "20px" }}>
           {!canAddStore && storeCount >= 1 && (
             <InlineNotice tone="warning" bordered={false} icon={false} style={{ marginBottom: "16px" }}>
-              Modo local: solo 1 sucursal permitida. Suscribite al plan multi-sucursal para agregar más.
+              {maxStores <= 1
+                ? "Tu plan actual permite 1 sucursal. Suscribite al plan multi-sucursal para agregar más."
+                : `Tu plan (${planName ?? "actual"}) permite hasta ${maxStores} sucursales. ¿Necesitás más? Consultá por un plan custom.`}
             </InlineNotice>
           )}
 
