@@ -5,15 +5,9 @@ import {
   DownloadIcon,
   CheckCircledIcon,
   CrossCircledIcon,
-  LockClosedIcon,
 } from "@radix-ui/react-icons";
 import { useUpdaterStore } from "@/stores/updater.store";
-import { useAuth } from "@/hooks/useAuth";
 import { getAppVersion } from "@/lib/tauri";
-
-function isLicenseValid(status: { status: string } | null | undefined): boolean {
-  return status?.status === "valid" || status?.status === "grace";
-}
 
 export function UpdateManager() {
   const {
@@ -26,9 +20,7 @@ export function UpdateManager() {
     clearError,
   } = useUpdaterStore();
 
-  const { licenseStatus } = useAuth();
   const [currentVersion, setCurrentVersion] = useState<string | null>(null);
-  const licenseValid = isLicenseValid(licenseStatus);
 
   useEffect(() => {
     getAppVersion()
@@ -70,32 +62,14 @@ export function UpdateManager() {
             size="1"
             variant="soft"
             disabled={checking || downloading || !currentVersion}
-            onClick={() => checkForUpdates(licenseValid)}
+            onClick={() => checkForUpdates()}
           >
             <ReloadIcon width={12} height={12} />
             {checking ? "Buscando..." : "Buscar actualizaciones"}
           </Button>
         </div>
 
-        {updateInfo?.requires_license && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "10px 12px",
-              backgroundColor: "var(--bg-surface-hover)",
-              borderRadius: "6px",
-            }}
-          >
-            <LockClosedIcon width={14} height={14} color="var(--amber-9)" />
-            <Text size="2" color="amber" style={{ flex: 1 }}>
-              Necesitás una licencia activa para recibir actualizaciones.
-            </Text>
-          </div>
-        )}
-
-        {updateInfo?.available && !updateInfo.requires_license && (
+        {updateInfo?.available && (
           <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "8px" }}>
             <Badge color="green" variant="soft" size="1">
               <DownloadIcon width={12} height={12} />
@@ -130,7 +104,7 @@ export function UpdateManager() {
           </div>
         )}
 
-        {updateInfo && !updateInfo.available && !updateInfo.requires_license && !checking && (
+        {updateInfo && !updateInfo.available && !checking && (
           <Text size="2" color="gray" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
             <CheckCircledIcon width={12} height={12} />
             Estás usando la versión más reciente

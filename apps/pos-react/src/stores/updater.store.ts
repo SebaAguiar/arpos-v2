@@ -8,7 +8,7 @@ interface UpdaterState {
   downloading: boolean;
   error: string | null;
 
-  checkForUpdates: (licenseValid: boolean) => Promise<void>;
+  checkForUpdates: () => Promise<void>;
   downloadAndInstall: () => Promise<void>;
   clearError: () => void;
 }
@@ -19,21 +19,8 @@ export const useUpdaterStore = create<UpdaterState>()((set, get) => ({
   downloading: false,
   error: null,
 
-  checkForUpdates: async (licenseValid: boolean) => {
+  checkForUpdates: async () => {
     set({ checking: true, error: null, updateInfo: null });
-    if (!licenseValid) {
-      set({
-        checking: false,
-        updateInfo: {
-          available: false,
-          version: "",
-          notes: null,
-          published_at: null,
-          requires_license: true,
-        },
-      });
-      return;
-    }
     try {
       const updateInfo = await UpdaterRepository.checkForUpdates();
       set({ updateInfo, checking: false });

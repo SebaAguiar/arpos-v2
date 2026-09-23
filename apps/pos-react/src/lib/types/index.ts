@@ -307,7 +307,6 @@ export interface UpdateInfo {
   version: string;
   notes: string | null;
   published_at: string | null;
-  requires_license: boolean;
 }
 
 export interface Company {

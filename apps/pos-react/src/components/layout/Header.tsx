@@ -20,6 +20,7 @@ import { useDialogStore } from "@/stores/dialog.store";
 import { useCashRegisterStore } from "@/stores/cash-register.store";
 import { NetworkIndicator } from "./NetworkIndicator";
 import { LicenseBadge } from "./LicenseBadge";
+import { UpdateButton } from "./UpdateButton";
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -139,6 +140,8 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
       />
 
       <LicenseBadge status={licenseStatus} />
+
+      <UpdateButton />
 
       <Tooltip content={theme === "dark" ? "Modo claro" : "Modo oscuro"}>
         <IconButton

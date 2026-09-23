@@ -6,14 +6,13 @@ export const UpdaterRepository = {
   async checkForUpdates(): Promise<UpdateInfo> {
     const update = await check();
     if (!update) {
-      return { available: false, version: "", notes: null, published_at: null, requires_license: false };
+      return { available: false, version: "", notes: null, published_at: null };
     }
     return {
       available: true,
       version: update.version,
       notes: update.body ?? null,
       published_at: update.date ?? null,
-      requires_license: false,
     };
   },
 
