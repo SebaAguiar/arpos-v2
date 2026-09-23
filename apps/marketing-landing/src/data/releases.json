@@ -1,12 +1,12 @@
 {
-  "version": "1.0.0-beta.9",
-  "githubUrl": "https://github.com/SebaAguiar/arcom-releases/releases/tag/v1.0.0-beta.9",
+  "version": "1.0.0-beta.10",
+  "githubUrl": "https://github.com/SebaAguiar/arcom-releases/releases/tag/v1.0.0-beta.10",
   "assets": {
     "windows_msi": "",
-    "windows_exe": "https://github.com/SebaAguiar/arcom-releases/releases/download/v1.0.0-beta.9/Arcom_1.0.0-beta.9_x64-setup.exe",
-    "macos_dmg": "https://github.com/SebaAguiar/arcom-releases/releases/download/v1.0.0-beta.9/Arcom_1.0.0-beta.9_aarch64.dmg",
-    "linux_appimage": "https://github.com/SebaAguiar/arcom-releases/releases/download/v1.0.0-beta.9/Arcom_1.0.0-beta.9_amd64.AppImage",
-    "linux_deb": "https://github.com/SebaAguiar/arcom-releases/releases/download/v1.0.0-beta.9/Arcom_1.0.0-beta.9_amd64.deb",
-    "linux_rpm": "https://github.com/SebaAguiar/arcom-releases/releases/download/v1.0.0-beta.9/Arcom-1.0.0-beta.9-1.x86_64.rpm"
+    "windows_exe": "https://github.com/SebaAguiar/arcom-releases/releases/download/v1.0.0-beta.10/Arcom_1.0.0-beta.10_x64-setup.exe",
+    "macos_dmg": "https://github.com/SebaAguiar/arcom-releases/releases/download/v1.0.0-beta.10/Arcom_1.0.0-beta.10_aarch64.dmg",
+    "linux_appimage": "https://github.com/SebaAguiar/arcom-releases/releases/download/v1.0.0-beta.10/Arcom_1.0.0-beta.10_amd64.AppImage",
+    "linux_deb": "https://github.com/SebaAguiar/arcom-releases/releases/download/v1.0.0-beta.10/Arcom_1.0.0-beta.10_amd64.deb",
+    "linux_rpm": "https://github.com/SebaAguiar/arcom-releases/releases/download/v1.0.0-beta.10/Arcom-1.0.0-beta.10-1.x86_64.rpm"
   }
 }

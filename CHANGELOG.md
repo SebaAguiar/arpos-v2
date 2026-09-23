@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.0-beta.10] - 2026-09-23
+
+### Fixed
+- POS cart no longer exceeds available stock: product and variant quantities are clamped to the stock known at add time (in add-to-cart, plus/increment buttons and explicit quantity updates), so a sale can no longer be assembled with more units than are in inventory. Custom items remain unbounded.
+
+### Changed
+- OTA updates: `latest.json` is now also published to a stable anchor release in `arcom-releases` so the updater endpoint `/releases/latest/download/latest.json` resolves even though app releases ship as prereleases. In-app updates now work for every beta.
+
 ## [1.0.0-beta.9] - 2026-09-23
 
 ### Added
