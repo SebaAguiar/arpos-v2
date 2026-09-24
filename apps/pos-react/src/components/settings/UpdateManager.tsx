@@ -1,13 +1,22 @@
 import { useEffect, useState } from "react";
-import { Text, Card, Button, Badge, Progress } from "@radix-ui/themes";
+import { Text, Card, Button, Badge, Progress, Flex } from "@radix-ui/themes";
 import {
   ReloadIcon,
   DownloadIcon,
   CheckCircledIcon,
   CrossCircledIcon,
+  ExternalLinkIcon,
+  InfoCircledIcon,
 } from "@radix-ui/react-icons";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { useUpdaterStore } from "@/stores/updater.store";
 import { getAppVersion } from "@/lib/tauri";
+import { formatLabel } from "@/repositories/updater.repository";
+import type { UpdatePlatformInfo } from "@/lib/types";
+
+async function downloadInstallerManually(platform: UpdatePlatformInfo): Promise<void> {
+  await openUrl(platform.url);
+}
 
 export function UpdateManager() {
   const {
@@ -27,6 +36,13 @@ export function UpdateManager() {
       .then(setCurrentVersion)
       .catch(() => setCurrentVersion(null));
   }, []);
+
+  // The auto-installer can only match a target when the running bundle format
+  // is published in the manifest. A manually extracted binary (e.g. an RPM
+  // unpacked to ~/.local/bin) has no supported OTA path, so we surface the
+  // available installers for the user to download instead.
+  const autoInstallUnavailable =
+    updateInfo?.available === true && !updateInfo.canAutoInstall;
 
   return (
     <Card>
@@ -75,6 +91,11 @@ export function UpdateManager() {
               <DownloadIcon width={12} height={12} />
               &nbsp;Nueva versión disponible: {updateInfo.version}
             </Badge>
+            {updateInfo.format && (
+              <Badge size="1" variant="soft" color="gray">
+                Formato de instalación detectado: {formatLabel(updateInfo.format)}
+              </Badge>
+            )}
             {updateInfo.published_at && (
               <Text size="2" color="gray">
                 Publicada el {new Date(updateInfo.published_at).toLocaleDateString("es-AR")}
@@ -82,7 +103,7 @@ export function UpdateManager() {
             )}
             {updateInfo.notes && <Text size="2" color="gray">{updateInfo.notes}</Text>}
 
-            {downloading ? (
+            {!autoInstallUnavailable && (downloading ? (
               <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                 <Progress size="1" />
                 <Text size="2" color="gray">
@@ -100,6 +121,45 @@ export function UpdateManager() {
                 <DownloadIcon width={12} height={12} />
                 Descargar e instalar
               </Button>
+            ))}
+
+            {autoInstallUnavailable && (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "6px",
+                  padding: "10px 12px",
+                  backgroundColor: "var(--bg-surface-hover)",
+                  borderRadius: "6px",
+                }}
+              >
+                <Flex align="center" gap="6px">
+                  <InfoCircledIcon width={14} height={14} color="var(--amber-9)" />
+                  <Text size="2" weight="medium">
+                    Actualización automática no disponible
+                  </Text>
+                </Flex>
+                <Text size="2" color="gray">
+                  Tu instalación ({formatLabel(updateInfo.format ?? "unknown")}) no coincide
+                  con los formatos publicados. Descargá el instalador y aplicá la
+                  actualización manualmente:
+                </Text>
+                <Flex wrap="wrap" gap="6px" mt="2">
+                  {updateInfo.installerOptions.map((platform) => (
+                    <Button
+                      key={platform.key}
+                      size="1"
+                      variant="soft"
+                      onClick={() => downloadInstallerManually(platform)}
+                      style={{ alignSelf: "flex-start" }}
+                    >
+                      <ExternalLinkIcon width={12} height={12} />
+                      {platform.label}
+                    </Button>
+                  ))}
+                </Flex>
+              </div>
             )}
           </div>
         )}

@@ -17,11 +17,15 @@
  *   NOTES_FILE     optional path to release notes (defaults to CHANGELOG.md)
  *
  * Platform keys follow Tauri's updater target lookup. get_urls prefers
- * "{os}-{arch}-{installer}" and falls back to "{os}-{arch}":
- *   linux-x86_64       -> AppImage
- *   darwin-aarch64     -> <app>.app.tar.gz (createUpdaterArtifacts)
- *   windows-x86_64-nsis -> NSIS setup.exe   (also emitted as windows-x86_64)
- *   windows-x86_64-msi -> MSI installer
+ * "{os}-{arch}-{installer}" and falls back to "{os}-{arch}".
+ * On Linux every bundle format is emitted under its own installer key so the
+ * updater picks the installer that matches the running bundle_type():
+ *   linux-x86_64-appimage -> AppImage (also emitted as the linux-x86_64 fallback)
+ *   linux-x86_64-deb      -> Debian package
+ *   linux-x86_64-rpm      -> RedHat package
+ *   darwin-aarch64        -> <app>.app.tar.gz (createUpdaterArtifacts)
+ *   windows-x86_64-nsis   -> NSIS setup.exe   (also emitted as windows-x86_64)
+ *   windows-x86_64-msi    -> MSI installer
  */
 import { readdirSync, readFileSync, existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -60,10 +64,31 @@ const downloadUrl = (asset) =>
 const platforms = {};
 
 const linuxAsset = pick('.AppImage');
+const debAsset = pick('.deb');
+const rpmAsset = pick('.rpm');
+
 if (linuxAsset) {
+  platforms['linux-x86_64-appimage'] = {
+    url: downloadUrl(linuxAsset),
+    signature: readSignature(linuxAsset),
+  };
   platforms['linux-x86_64'] = {
     url: downloadUrl(linuxAsset),
     signature: readSignature(linuxAsset),
+  };
+}
+
+if (debAsset) {
+  platforms['linux-x86_64-deb'] = {
+    url: downloadUrl(debAsset),
+    signature: readSignature(debAsset),
+  };
+}
+
+if (rpmAsset) {
+  platforms['linux-x86_64-rpm'] = {
+    url: downloadUrl(rpmAsset),
+    signature: readSignature(rpmAsset),
   };
 }
 
@@ -92,7 +117,7 @@ if (msiAsset) {
 
 if (Object.keys(platforms).length === 0) {
   console.error(
-    'No updater artifacts matched (AppImage, *.app.tar.gz, *-setup.exe, *.msi).',
+    'No updater artifacts matched (AppImage, *.deb, *.rpm, *.app.tar.gz, *-setup.exe, *.msi).',
   );
   process.exit(1);
 }

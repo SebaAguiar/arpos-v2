@@ -303,11 +303,26 @@ export interface ExportResult {
   size_bytes: number;
 }
 
+export interface UpdatePlatformInfo {
+  key: string;
+  os: string;
+  arch: string;
+  format: string;
+  isFallback: boolean;
+  label: string;
+  url: string;
+}
+
 export interface UpdateInfo {
   available: boolean;
   version: string;
   notes: string | null;
   published_at: string | null;
+  format: string | null;
+  platforms: UpdatePlatformInfo[];
+  installerOptions: UpdatePlatformInfo[];
+  targetPlatform: UpdatePlatformInfo | null;
+  canAutoInstall: boolean;
 }
 
 export interface Company {

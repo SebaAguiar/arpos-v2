@@ -103,15 +103,11 @@ export interface UpdateProgress {
 
 export interface VersionManifest {
   version: string;
-  name: string;
   notes: string;
   pub_date: string;
-  critical: boolean;
-  rollback_to: string | null;
   platforms: Record<string, {
     url: string;
     signature: string;
-    with_elevated_task: boolean;
   }>;
 }
 
@@ -246,30 +242,39 @@ v2.0.0  = Breaking change (migration requerida)
 ```json
 {
   "version": "1.0.1",
-  "name": "Arcom v1.0.1",
   "notes": "Hotfix: ARCA sync bug, POS cart performance",
   "pub_date": "2026-07-16T14:30:00Z",
   "platforms": {
-    "linux-x86_64": {
+    "linux-x86_64-appimage": {
       "url": "https://releases.arcom.app/Arcom_1.0.1_amd64.AppImage",
-      "signature": "...",
-      "with_elevated_task": false
+      "signature": "..."
     },
-    "darwin": {
-      "url": "https://releases.arcom.app/Arcom_1.0.1_universal.dmg",
-      "signature": "...",
-      "with_elevated_task": false
+    "linux-x86_64-deb": {
+      "url": "https://releases.arcom.app/arcom-v2_1.0.1_amd64.deb",
+      "signature": "..."
     },
-    "windows-x86_64": {
-      "url": "https://releases.arcom.app/Arcom_1.0.1_x64_en-US.msi",
-      "signature": "...",
-      "with_elevated_task": false
+    "linux-x86_64-rpm": {
+      "url": "https://releases.arcom.app/arcom-v2-1.0.1-1.x86_64.rpm",
+      "signature": "..."
+    },
+    "darwin-aarch64": {
+      "url": "https://releases.arcom.app/Arcom.app.tar.gz",
+      "signature": "..."
+    },
+    "windows-x86_64-nsis": {
+      "url": "https://releases.arcom.app/Arcom_1.0.1_x64-setup.exe",
+      "signature": "..."
     }
-  },
-  "critical": false,
-  "rollback_to": "1.0.0"
+  }
 }
 ```
+
+> **Nota Linux:** el plugin resuelve el target en `get_urls` buscando primero `{os}-{arch}-{instalador}`
+> (`linux-x86_64-rpm`, `linux-x86_64-deb`, `linux-x86_64-appimage`) y cayendo a `{os}-{arch}`.
+> Publicar los tres formatos garantiza que el updater descargue el instalador que coincide con el
+> `bundle_type` del binario que está corriendo. Si la instalación no coincide con ningún formato
+> publicado (p. ej. un RPM extraído a mano), el update automático falla silenciosamente con
+> `InvalidUpdaterFormat`; la UI detecta el mismatch y ofrece descarga manual.
 
 ---
 

@@ -62,6 +62,8 @@ pub fn run() {
             commands::license::get_license_token,
             commands::license::save_license_token,
             commands::license::clear_license_token,
+            // Updater commands
+            commands::updater::get_updater_environment,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");
