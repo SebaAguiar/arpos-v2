@@ -8,6 +8,11 @@ pub fn start_backend(
     process: State<'_, ProcessManager>,
     database: State<'_, DatabaseManager>,
 ) -> Result<String, String> {
+    // A sidecar orphaned by an unclean previous exit still holds the SQLite
+    // WAL lock. It MUST be killed before ensure_database() runs prisma migrate,
+    // otherwise migrate fails with "database is locked" before we even spawn.
+    process.kill_stale_sidecar();
+
     // Before spawning the sidecar, ensure the SQLite schema is present and up
     // to date. Failing closed here prevents booting against an empty DB, which
     // would otherwise answer 401 "Local workspace not configured" on every

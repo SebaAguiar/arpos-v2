@@ -120,6 +120,8 @@ impl ProcessManager {
             return Ok("Backend already running".to_string());
         }
 
+        self.kill_stale_sidecar();
+
         let runtime = self.resolve_runtime()?;
         let port = bind_ephemeral_port()?;
         let token = load_or_create_token()?;
@@ -154,6 +156,7 @@ impl ProcessManager {
             let mut guard = self.child.lock().unwrap();
             *guard = Some(child);
         }
+        write_pidfile(pid);
         {
             let mut guard = self.started_at.lock().unwrap();
             *guard = Some(Instant::now());
@@ -196,6 +199,7 @@ impl ProcessManager {
 
             *child = None;
             *started = None;
+            remove_pidfile();
             Ok(format!("Backend stopped (PID {})", pid))
         } else {
             Ok("Backend not running".to_string())
@@ -265,6 +269,138 @@ impl ProcessManager {
         std::thread::sleep(Duration::from_millis(500));
         self.start()
     }
+
+    // A previous run may have died without running its Drop/exit-path cleanup
+    // (window closed hard, crash, kill -9). The sidecar it spawned is then left
+    // behind holding the SQLite WAL lock, which makes the next start fail with
+    // "database is locked" during prisma migrate. Before spawning, look up the
+    // PID we persisted last run; if that process is still alive and is actually
+    // our sidecar, terminate it.
+    pub fn kill_stale_sidecar(&self) {
+        let pid_file = paths::get_backend_pid_file();
+        let Ok(pid_str) = std::fs::read_to_string(&pid_file) else {
+            return;
+        };
+        let Ok(pid) = pid_str.trim().parse::<u32>() else {
+            let _ = std::fs::remove_file(&pid_file);
+            return;
+        };
+
+        if !is_process_alive(pid) {
+            let _ = std::fs::remove_file(&pid_file);
+            return;
+        }
+
+        if is_our_sidecar(pid) {
+            eprintln!("[process] Killing stale sidecar PID {} from previous run", pid);
+            kill_process(pid);
+            // Give SQLite a moment to release the WAL lock before we spawn.
+            std::thread::sleep(Duration::from_millis(500));
+        } else {
+            // PID reused by an unrelated process: do not kill it, but drop the
+            // stale pidfile so we never reconsider the recycled PID later.
+            eprintln!(
+                "[process] PID {} from pidfile is not our sidecar; leaving it running",
+                pid
+            );
+        }
+        let _ = std::fs::remove_file(&pid_file);
+    }
+}
+
+// Persist the backend PID so the next process invocation can find an orphaned
+// sidecar and clean it up before starting (see kill_stale_sidecar).
+fn write_pidfile(pid: u32) {
+    let pid_file = paths::get_backend_pid_file();
+    let _ = std::fs::write(&pid_file, pid.to_string());
+}
+
+fn remove_pidfile() {
+    let _ = std::fs::remove_file(paths::get_backend_pid_file());
+}
+
+// A process is alive if kill(2) with SIG 0 succeeds. SIG 0 performs no signal
+// delivery; it only checks that the process exists and we may inspect it.
+fn is_process_alive(pid: u32) -> bool {
+    #[cfg(unix)]
+    {
+        use nix::sys::signal::kill;
+        use nix::unistd::Pid;
+        match kill(Pid::from_raw(pid as i32), None) {
+            Ok(()) => true,
+            Err(nix::errno::Errno::EPERM) => true,
+            Err(_) => false,
+        }
+    }
+    #[cfg(not(unix))]
+    {
+        false
+    }
+}
+
+// Confirm the PID recorded in our pidfile is the sidecar we spawned, not a
+// recycled OS PID belonging to something else. Under Linux we read /proc/<pid>
+// and match the command line; elsewhere we fall back to the process name.
+fn is_our_sidecar(pid: u32) -> bool {
+    let cmdline = read_process_cmdline(pid);
+    match cmdline {
+        Some(line) => line.contains("api/dist/main.js") || line.contains("/api/dist/main"),
+        None => false,
+    }
+}
+
+fn read_process_cmdline(pid: u32) -> Option<String> {
+    #[cfg(target_os = "linux")]
+    {
+        let path = format!("/proc/{}/cmdline", pid);
+        let buf = std::fs::read(&path).ok()?;
+        // /proc/<pid>/cmdline is NUL-separated: "node\0/path/main.js\0".
+        let line = buf
+            .split(|b| *b == 0)
+            .map(|s| String::from_utf8_lossy(s).into_owned())
+            .collect::<Vec<_>>()
+            .join(" ");
+        Some(line)
+    }
+    #[cfg(target_os = "macos")]
+    {
+        // macOS has no /proc; use `ps` with a narrow format, matching only the
+        // exact PID (no -A, so it works even with restricted args visibility).
+        let out = Command::new("ps")
+            .args(["-p", &pid.to_string(), "-o", "command="])
+            .output()
+            .ok()?;
+        if !out.status.success() {
+            return None;
+        }
+        Some(String::from_utf8_lossy(&out.stdout).trim().to_string())
+    }
+    #[cfg(not(any(target_os = "linux", target_os = "macos")))]
+    {
+        None
+    }
+}
+
+// Terminate a stale sidecar: SIGTERM for a graceful stop, then escalate to
+// SIGKILL if it does not exit within the grace window.
+fn kill_process(pid: u32) {
+    #[cfg(unix)]
+    {
+        use nix::sys::signal::{kill, Signal};
+        use nix::unistd::Pid;
+
+        let _ = kill(Pid::from_raw(pid as i32), Signal::SIGTERM);
+        std::thread::sleep(Duration::from_millis(1500));
+        if is_process_alive(pid) {
+            let _ = kill(Pid::from_raw(pid as i32), Signal::SIGKILL);
+        }
+    }
+    #[cfg(not(unix))]
+    {
+        let _ = Command::new("taskkill")
+            .args(["/PID", &pid.to_string(), "/F", "/T"])
+            .status();
+    }
 }
 
 enum HealthResult {
@@ -310,6 +446,7 @@ impl Drop for ProcessManager {
             let _ = proc.kill();
             let _ = proc.wait();
         }
+        remove_pidfile();
     }
 }
 

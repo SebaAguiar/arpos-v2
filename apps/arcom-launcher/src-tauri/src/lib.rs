@@ -12,7 +12,7 @@ use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let app = tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
@@ -63,6 +63,18 @@ pub fn run() {
             commands::license::save_license_token,
             commands::license::clear_license_token,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application");
+
+    app.run(|app_handle, event| {
+        // Stop the sidecar on every clean exit path (window close, exit
+        // request, updater relaunch). Without this, the NestJS child survives
+        // the launcher, is reparented to init/systemd, and keeps the SQLite
+        // WAL lock taken so the next launch fails with "database is locked".
+        if let tauri::RunEvent::ExitRequested { .. } = event {
+            if let Some(process) = app_handle.try_state::<ProcessManager>() {
+                let _ = process.stop();
+            }
+        }
+    });
 }

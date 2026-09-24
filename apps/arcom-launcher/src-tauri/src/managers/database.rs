@@ -1,7 +1,11 @@
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
+use std::time::Duration;
 
 use crate::utils::paths;
+
+const MIGRATE_MAX_RETRIES: u32 = 3;
+const MIGRATE_RETRY_DELAY_MS: u64 = 500;
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct DatabaseInfo {
@@ -181,8 +185,34 @@ impl DatabaseManager {
             ));
         }
 
-        let stdout = self.run_prisma(&["migrate", "deploy"])?;
-        Ok(format!("Migrations applied successfully: {}", stdout))
+        // A sidecar orphaned by a previous run may still be releasing the WAL
+        // lock for a few hundred ms after we killed it. prisma migrate deploy
+        // then fails with "database is locked"; retrying with a short backoff
+        // lets SQLite recover without forcing the user to start the app again.
+        let mut last_error = String::new();
+        for attempt in 0..MIGRATE_MAX_RETRIES {
+            match self.run_prisma(&["migrate", "deploy"]) {
+                Ok(stdout) => {
+                    return Ok(format!("Migrations applied successfully: {}", stdout));
+                }
+                Err(err) => {
+                    last_error = err;
+                    if !is_lock_error(&last_error) || attempt + 1 == MIGRATE_MAX_RETRIES {
+                        break;
+                    }
+                    eprintln!(
+                        "[database] migrate hit a lock conflict; retrying ({}/{}): {}",
+                        attempt + 1,
+                        MIGRATE_MAX_RETRIES,
+                        last_error
+                    );
+                    std::thread::sleep(Duration::from_millis(
+                        MIGRATE_RETRY_DELAY_MS * (attempt as u64 + 1),
+                    ));
+                }
+            }
+        }
+        Err(last_error)
     }
 
     pub fn push(&self) -> Result<String, String> {
@@ -242,6 +272,10 @@ impl DatabaseManager {
         self.configure_best_effort();
         Ok("Database initialized and migrations applied".to_string())
     }
+}
+
+fn is_lock_error(msg: &str) -> bool {
+    msg.contains("database is locked") || msg.contains("SQLITE_BUSY")
 }
 
 pub(crate) fn which_sqlite3() -> Option<String> {
