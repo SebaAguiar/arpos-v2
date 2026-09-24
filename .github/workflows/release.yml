@@ -183,10 +183,10 @@ jobs:
         run: find release-artifacts -type f | sort
 
       # ── Publish the release to arcom-releases ──────────
-      # This repo (arpos-v2) is private; the public distribution repo is
-      # SebaAguiar/arcom-releases. softprops/action-gh-release cannot target
-      # another repo, so we use the `gh` CLI with a PAT that has write access
-      # to arcom-releases (secret ARCOM_RELEASES_TOKEN, scope repo).
+      # The distribution repo (SebaAguiar/arcom-releases) is separate from
+      # this one. softprops/action-gh-release cannot target another repo,
+      # so we use the `gh` CLI with a PAT that has write access to
+      # arcom-releases (secret ARCOM_RELEASES_TOKEN, scope repo).
       - name: Publish release to arcom-releases
         env:
           GH_TOKEN: ${{ secrets.ARCOM_RELEASES_TOKEN }}
@@ -196,11 +196,22 @@ jobs:
         run: |
           PRERELEASE_FLAG=""
           if [ "$PRERELEASE" = "true" ]; then PRERELEASE_FLAG="--prerelease"; fi
-          gh release create "$TAG" release-artifacts/* \
-            --repo SebaAguiar/arcom-releases \
-            --title "Arcom $TAG" \
-            --notes-file "$NOTES_FILE" \
-            $PRERELEASE_FLAG
+          # Idempotent: re-running a workflow that already published the tag
+          # (e.g. after an infra/billing failure) must update the release
+          # instead of failing with "release already exists".
+          if gh release view "$TAG" --repo SebaAguiar/arcom-releases >/dev/null 2>&1; then
+            gh release edit "$TAG" --repo SebaAguiar/arcom-releases \
+              --title "Arcom $TAG" \
+              --notes-file "$NOTES_FILE"
+            gh release upload "$TAG" release-artifacts/* \
+              --repo SebaAguiar/arcom-releases --clobber
+          else
+            gh release create "$TAG" release-artifacts/* \
+              --repo SebaAguiar/arcom-releases \
+              --title "Arcom $TAG" \
+              --notes-file "$NOTES_FILE" \
+              $PRERELEASE_FLAG
+          fi
 
       # ── Refresh the OTA manifest anchor ────────────────
       # GitHub's /releases/latest only resolves to non-prerelease
