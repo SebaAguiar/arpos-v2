@@ -34,7 +34,7 @@ export default function LoginPage() {
     <Flex align="center" justify="center" style={{ minHeight: "100vh" }}>
       <Card style={{ width: 400 }}>
         <Flex direction="column" align="center" gap="1" mb="6">
-          <Heading size="6">Arcom Admin</Heading>
+          <Heading size="6" color="orange">Arcom Admin</Heading>
           <Text size="2" color="gray">Panel de administracion</Text>
         </Flex>
 

@@ -31,13 +31,13 @@ export default function DashboardLayout({
       <Box
         style={{
           width: 256,
-          borderRight: "1px solid var(--gray-6)",
-          background: "var(--color-surface)",
+          borderRight: "1px solid var(--gray-7)",
+          background: "var(--color-panel)",
           flexShrink: 0,
         }}
       >
-        <Box p="4" style={{ borderBottom: "1px solid var(--gray-6)" }}>
-          <Heading size="4">Arcom Admin</Heading>
+        <Box p="4" style={{ borderBottom: "1px solid var(--gray-7)" }}>
+          <Heading size="4" color="orange">Arcom Admin</Heading>
           <Text size="1" color="gray">Panel de administracion</Text>
         </Box>
         <Flex direction="column" gap="1" p="3">

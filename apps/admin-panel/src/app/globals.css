@@ -1,13 +1,167 @@
-@import "tailwindcss";
+/* Arcom Admin Panel — Ruta C brand system.
+ *
+ * El admin es Radix puro (sin Tailwind activo, sin hexes en componentes):
+ * todo el rebrand vive acá, en las escalas de color que Radix consume.
+ * Se sobreescribe `.radix-themes.light` (0,2,0) sobre la declaración nativa
+ * `.light` (0,1,0) — mismo mecanismo que el POS, sin gate de data-theme
+ * porque el admin es light fijo (no hay switcher y el bloque [data-theme=dark]
+ * era CSS muerto).
+ *
+ * Jerarquía Ruta C: página arena `--color-background: var(--gray-2)`,
+ * paneles papel `--color-panel: var(--gray-1)` — espeja al POS (desk arena,
+ * cards papel), con todo el contraste verificado (81/81, ver audit del POS).
+ */
 
 :root {
-  --accent: #6366F1;
-  --accent-hover: #4F46E5;
-  --accent-foreground: #FFFFFF;
+  /* Page tint para <body> y el wrapper de Radix coincidan */
+  --color-background: #f6f1ea; /* sand */
+  --color-panel: #fdfcfa;      /* paper */
 }
 
-[data-theme="dark"] {
-  --accent: #818CF8;
-  --accent-hover: #A5B4FC;
-  --accent-foreground: #111827;
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-background);
+}
+
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-synthesis-weight: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.radix-themes.light {
+  --default-font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --heading-font-family: "Inter Tight", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Radix colour scales for Ruta C — must beat `.radix-themes.light` nativo (0,2,0 > 0,1,0) */
+.radix-themes.light {
+  /* Gray — warm neutral, mapped from the landing's primary ramp */
+  --gray-1: #fdfcfa;
+  --gray-2: #f6f1ea;
+  --gray-3: #e8e2d9;
+  --gray-4: #d7ccc2;
+  --gray-5: #bfb0a3;
+  --gray-6: #a29486;
+  --gray-7: #85796d;
+  --gray-8: #73675f;
+  --gray-9: #6e635c;
+  --gray-10: #5f574f;
+  --gray-11: #4d4742;
+  --gray-12: #1f1a17;
+
+  /* Orange / Accent — terracotta ramp */
+  --orange-1: #f7e6dd;
+  --orange-2: #f2d8c2;
+  --orange-3: #efc0ab;
+  --orange-4: #e79f72;
+  --orange-5: #e08a6e;
+  --orange-6: #d4734f;
+  --orange-7: #c75b39;
+  --orange-8: #b75434;
+  --orange-9: #a94d30;
+  --orange-10: #94482c;
+  --orange-11: #7f3d26;
+  --orange-12: #6b311f;
+  --orange-contrast: #ffffff;
+  --orange-surface: #f7e6ddcc;
+  --orange-indicator: var(--orange-9);
+  --orange-track: var(--orange-9);
+
+  /* Red — alerta ramp (danger) */
+  --red-1: #fbe6e5;
+  --red-2: #f7d2cf;
+  --red-3: #f5c9c7;
+  --red-4: #f0a19d;
+  --red-5: #efaaa8;
+  --red-6: #e8807d;
+  --red-7: #e2504b;
+  --red-8: #b9423d;
+  --red-9: #a73b38;
+  --red-10: #963532;
+  --red-11: #7f2c2a;
+  --red-12: #712826;
+  --red-contrast: #ffffff;
+  --red-surface: #f7d2cfcc;
+  --red-indicator: var(--red-9);
+  --red-track: var(--red-9);
+
+  /* Green — success, warmed to 132° (olive, not cool cyan) */
+  --green-1: #e6efe8;
+  --green-2: #d1e3d3;
+  --green-3: #c6dccb;
+  --green-4: #a8cdb0;
+  --green-5: #97c4a0;
+  --green-6: #68b077;
+  --green-7: #4d9d5d;
+  --green-8: #448350;
+  --green-9: #396a43;
+  --green-10: #335f3e;
+  --green-11: #305537;
+  --green-12: #25412b;
+  --green-contrast: #ffffff;
+  --green-surface: #d1e3d3cc;
+  --green-indicator: var(--green-9);
+  --green-track: var(--green-9);
+
+  /* Amber — warning, ochre (distinct from terracotta) */
+  --amber-1: #f4eee1;
+  --amber-2: #ede2c3;
+  --amber-3: #ead9b8;
+  --amber-4: #e4ca8c;
+  --amber-5: #e1bf79;
+  --amber-6: #dfa839;
+  --amber-7: #d1941a;
+  --amber-8: #ac7c1a;
+  --amber-9: #8a6419;
+  --amber-10: #7d5b17;
+  --amber-11: #6d5117;
+  --amber-12: #523d14;
+  --amber-contrast: #ffffff;
+  --amber-surface: #ede2c3cc;
+  --amber-indicator: var(--amber-9);
+  --amber-track: var(--amber-9);
+
+  /* Yellow — shares the amber family */
+  --yellow-1: #f4eee1;
+  --yellow-2: #ede2c3;
+  --yellow-3: #ead9b8;
+  --yellow-4: #e4ca8c;
+  --yellow-5: #e1bf79;
+  --yellow-6: #dfa839;
+  --yellow-7: #d1941a;
+  --yellow-8: #ac7c1a;
+  --yellow-9: #8a6419;
+  --yellow-10: #7d5b17;
+  --yellow-11: #6d5117;
+  --yellow-12: #523d14;
+
+  /* Blue — info, desaturated steel */
+  --blue-1: #e5ebf0;
+  --blue-2: #d2deea;
+  --blue-3: #c3d1e0;
+  --blue-4: #9fbad2;
+  --blue-5: #8fadcb;
+  --blue-6: #6289b3;
+  --blue-7: #4a78a8;
+  --blue-8: #446b93;
+  --blue-9: #446b93;
+  --blue-10: #3f6288;
+  --blue-11: #355274;
+  --blue-12: #2f4965;
+  --blue-contrast: #ffffff;
+  --blue-surface: #d2deeacc;
+  --blue-indicator: var(--blue-9);
+  --blue-track: var(--blue-9);
+
+  /* Ruta C hierarchy: page sand, panels paper */
+  --color-background: var(--gray-2);
+  --color-panel: var(--gray-1);
 }
