@@ -7,7 +7,7 @@ interface Props {
 
 const { id, class: className, background = 'white' } = Astro.props;
 
-const bgClass = background === 'gray' ? 'bg-gray-50' : 'bg-white';
+const bgClass = background === 'gray' ? 'bg-sand/20' : 'bg-white';
 ---
 
 <section id={id} class:list={['py-16 sm:py-24', bgClass, className]}>

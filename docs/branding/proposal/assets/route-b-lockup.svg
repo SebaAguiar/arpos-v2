@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 220" role="img" aria-label="Arcom POS Ruta B — lockup horizontal">
+  <g transform="translate(16 42) scale(0.66)">
+    <rect x="24" y="24" width="208" height="208" rx="56" fill="#0E1116"/>
+    <path d="M197.5 102.7A74 74 0 1 1 153.3 58.5" fill="none" stroke="#22E08A" stroke-width="12" stroke-linecap="round" stroke-dasharray="4 26"/>
+    <circle cx="128" cy="128" r="32" fill="#22E08A"/>
+  </g>
+  <text x="190" y="122" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="92" font-weight="700" letter-spacing="-2" fill="#0E1116">Arcom POS<tspan fill="#22E08A">.</tspan></text>
+  <text x="194" y="172" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="26" font-weight="500" letter-spacing="1.5" fill="#7A8783">Tus datos viven acá.</text>
+</svg>

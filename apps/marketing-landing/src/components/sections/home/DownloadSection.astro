@@ -2,25 +2,25 @@
 import releases from '../../../data/releases.json';
 ---
 
-<section id="download" class="py-24 px-4 md:px-12 bg-[#0b2545] text-white border-t border-slate-800">
+<section id="download" class="py-24 px-4 md:px-12 bg-ink text-white border-t border-ink">
   <div class="max-w-[1280px] mx-auto text-center">
-    <div class="text-[#F59E0B] font-semibold text-sm mb-4 uppercase tracking-wider flex items-center justify-center gap-2">
+    <div class="text-terra-300 font-semibold text-sm mb-4 uppercase tracking-wider flex items-center justify-center gap-2">
       <span class="material-symbols-outlined text-base">download</span>
       GRATIS PARA UNA SUCURSAL
     </div>
     <h2 class="text-3xl md:text-5xl font-bold mb-4 tracking-tight leading-tight">
       Descarga Arcom POS
     </h2>
-    <p class="text-slate-300 text-lg mb-12 max-w-xl mx-auto leading-relaxed">
+    <p class="text-sand/70 text-lg mb-12 max-w-xl mx-auto leading-relaxed">
       Sin tarjeta de crédito. Instalación en 3 minutos. Elegí tu sistema operativo.
     </p>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
       {/* Windows */}
-      <div class="bg-white/5 border border-white/10 rounded-xl p-6 text-center flex flex-col items-center">
+      <div class="bg-white/5 border border-white/40 rounded-xl p-6 text-center flex flex-col items-center">
         <span class="material-symbols-outlined text-5xl text-white mb-4">laptop_windows</span>
         <h3 class="text-lg font-bold mb-1">Windows</h3>
-        <span class="text-xs text-slate-400 mb-4">v{releases.version}</span>
+        <span class="text-xs text-mist mb-4">v{releases.version}</span>
         <div class="mt-auto flex flex-col items-center gap-3 w-full">
           {releases.assets.windows_msi && (
             <a
@@ -28,7 +28,7 @@ import releases from '../../../data/releases.json';
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Descargar Arcom POS para Windows (.msi)"
-              class="bg-[#10B981] hover:bg-emerald-600 text-white font-bold text-sm px-6 py-3 rounded-lg transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2 w-full"
+              class="bg-terra-600 hover:bg-terra-700 text-white font-bold text-sm px-6 py-3 rounded-lg transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2 w-full"
             >
               <span class="material-symbols-outlined text-base">download</span>
               Descargar .msi
@@ -38,7 +38,7 @@ import releases from '../../../data/releases.json';
             href={releases.assets.windows_exe}
             target="_blank"
             rel="noopener noreferrer"
-            class="text-slate-400 hover:text-white text-xs underline transition-colors"
+            class="text-mist hover:text-white text-xs underline transition-colors"
           >
             También .exe (NSIS)
           </a>
@@ -46,17 +46,17 @@ import releases from '../../../data/releases.json';
       </div>
 
       {/* macOS */}
-      <div class="bg-white/5 border border-white/10 rounded-xl p-6 text-center flex flex-col items-center">
+      <div class="bg-white/5 border border-white/40 rounded-xl p-6 text-center flex flex-col items-center">
         <span class="material-symbols-outlined text-5xl text-white mb-4">laptop_mac</span>
         <h3 class="text-lg font-bold mb-1">macOS</h3>
-        <span class="text-xs text-slate-400 mb-4">v{releases.version}</span>
+        <span class="text-xs text-mist mb-4">v{releases.version}</span>
         <div class="mt-auto flex flex-col items-center gap-3 w-full">
           <a
             href={releases.assets.macos_dmg}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Descargar Arcom POS para macOS (.dmg)"
-            class="bg-[#10B981] hover:bg-emerald-600 text-white font-bold text-sm px-6 py-3 rounded-lg transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2 w-full"
+            class="bg-terra-600 hover:bg-terra-700 text-white font-bold text-sm px-6 py-3 rounded-lg transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2 w-full"
           >
             <span class="material-symbols-outlined text-base">download</span>
             Descargar .dmg
@@ -66,17 +66,17 @@ import releases from '../../../data/releases.json';
       </div>
 
       {/* Linux */}
-      <div class="bg-white/5 border border-white/10 rounded-xl p-6 text-center flex flex-col items-center">
+      <div class="bg-white/5 border border-white/40 rounded-xl p-6 text-center flex flex-col items-center">
         <span class="material-symbols-outlined text-5xl text-white mb-4">terminal</span>
         <h3 class="text-lg font-bold mb-1">Linux</h3>
-        <span class="text-xs text-slate-400 mb-4">v{releases.version}</span>
+        <span class="text-xs text-mist mb-4">v{releases.version}</span>
         <div class="mt-auto flex flex-col items-center gap-3 w-full">
           <a
             href={releases.assets.linux_appimage}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Descargar Arcom POS para Linux (.AppImage)"
-            class="bg-[#10B981] hover:bg-emerald-600 text-white font-bold text-sm px-6 py-3 rounded-lg transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2 w-full"
+            class="bg-terra-600 hover:bg-terra-700 text-white font-bold text-sm px-6 py-3 rounded-lg transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2 w-full"
           >
             <span class="material-symbols-outlined text-base">download</span>
             Descargar .AppImage
@@ -86,7 +86,7 @@ import releases from '../../../data/releases.json';
               href={releases.assets.linux_deb}
               target="_blank"
               rel="noopener noreferrer"
-              class="text-slate-400 hover:text-white text-xs underline transition-colors"
+              class="text-mist hover:text-white text-xs underline transition-colors"
             >
               .deb
             </a>
@@ -94,7 +94,7 @@ import releases from '../../../data/releases.json';
               href={releases.assets.linux_rpm}
               target="_blank"
               rel="noopener noreferrer"
-              class="text-slate-400 hover:text-white text-xs underline transition-colors"
+              class="text-mist hover:text-white text-xs underline transition-colors"
             >
               .rpm
             </a>
@@ -103,13 +103,13 @@ import releases from '../../../data/releases.json';
       </div>
     </div>
 
-    <p class="text-slate-400 text-sm mt-8">
+    <p class="text-mist text-sm mt-8">
       O descarga todos los formatos desde
       <a
         href={releases.githubUrl}
         target="_blank"
         rel="noopener noreferrer"
-        class="text-[#10B981] hover:text-emerald-400 underline transition-colors"
+        class="text-terra-300 hover:text-terra-200 underline transition-colors"
       >
         GitHub Releases
       </a>

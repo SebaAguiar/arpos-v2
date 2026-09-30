@@ -1,0 +1,95 @@
+---
+/**
+ * Arcom POS — lockup horizontal (isotipo + wordmark + claim).
+ *
+ * Por qué el SVG va INLINE y no en un <img src="....svg">:
+ * un SVG referenciado por <img> se renderiza como documento aislado — no hereda
+ * los <style> de la página ni puede ir a buscar la fuente web que la página ya
+ * cargó. El wordmark del lockup es <text font-family="Inter"> (no paths), así
+ * que servido por <img> cae al fallback del sistema y el nombre de marca se ve
+ * con otra tipografía. Inline, el `font-family` resuelve contra las fuentes del
+ * documento y sale Inter real.
+ *
+ * ── Por qué un único viewBox ────────────────────────────────────────────────
+ * El wordmark y el claim son texto vivo: su caja depende de la fuente que
+ * termine resolviendo el navegador, y eso se midió sobre 9 familias. El
+ * artwork real (asset original, viewBox 780x220) ocupa:
+ *
+ *   x  49.5 .. 711.5     <- la "S" llega a 711.5 con DejaVu Sans
+ *   y  53.5 .. 179.0     <- el borde inferior es el TRAZO del isotipo (y 179),
+ *                            no el claim: el claim baja sólo hasta y≈177.5 y
+ *                            su texto termina en x≈625, antes de la "S".
+ *
+ * O sea: la variante con claim y la compacta comparten la MISMA caja. Por eso
+ * hay un solo viewBox y no dos — antes había dos y el compacto recortaba 21 u
+ * del isotipo por abajo y 11.5 u de la "S" por derecha.
+ *
+ * Clear space = 40 u. El board pide 30 u ("Resguardo = x, x = radio del núcleo"),
+ * pero la dispersión medida entre fuentes es de 30 u: 30 u exactos quedan al
+ * límite. Con 40 u el margen es 1.33x la peor variación observada.
+ */
+interface Props {
+  /** `primary` = para superficies claras (sand/paper). `negative` = para superficies oscuras (ink). */
+  variant?: 'primary' | 'negative';
+  /** Muestra el claim "Vendé sin depender de nadie." */
+  claim?: boolean;
+  class?: string;
+}
+
+const { variant = 'negative', claim = true, class: className } = Astro.props;
+
+const VIEWBOX = '9.5 13.5 742 205.5';
+const ASPECT = 742 / 205.5;
+
+const isNegative = variant === 'negative';
+const wordmarkFill = isNegative ? 'fill-sand' : 'fill-ink';
+const claimFill = isNegative ? 'fill-mist' : 'fill-stone';
+---
+
+<svg
+  viewBox={VIEWBOX}
+  xmlns="http://www.w3.org/2000/svg"
+  role="img"
+  aria-label="Arcom POS"
+  focusable="false"
+  style={`aspect-ratio: ${ASPECT};`}
+  class={className}
+>
+  <g transform="translate(16 25) scale(0.66)">
+    <path
+      d="M64 220V132a64 64 0 0 1 128 0v88"
+      fill="none"
+      class="stroke-terra-500"
+      stroke-width="26"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <circle cx="128" cy="140" r="30" class={isNegative ? 'fill-sand' : 'fill-ink'} />
+  </g>
+  <text
+    x="212"
+    y="122"
+    font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-size="92"
+    font-weight="800"
+    letter-spacing="-2"
+    class={wordmarkFill}
+  >
+    Arcom<tspan font-weight="500" class="fill-terra-500"> POS</tspan>
+  </text>
+  {
+    claim && (
+      <text
+        x="216"
+        y="172"
+        font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif"
+        font-size="26"
+        font-weight="500"
+        letter-spacing="1.5"
+        class={claimFill}
+      >
+        Vendé sin depender de nadie.
+      </text>
+    )
+  }
+</svg>

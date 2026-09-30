@@ -11,22 +11,27 @@ import FinalCTASection from '../components/sections/home/FinalCTASection.astro';
   title="Funcionalidades - Arcom"
   description="Descubrí todo lo que Arcom puede hacer por tu negocio. Gestión de stock, ventas, facturación y más."
 >
-  <div class="pt-24 bg-gray-900">
+  <!--
+    Only the intro is dark. Wrapping every section in `bg-ink` leaked the dark
+    surface into the light sections below it, so each section owns its
+    background and this div closes right after the intro.
+  -->
+  <div class="pt-24 bg-ink">
     <div class="px-6 py-24 sm:py-32 lg:px-8">
       <div class="mx-auto max-w-2xl text-center">
         <h2 class="text-4xl font-bold tracking-tight text-white sm:text-6xl">
           Todo lo que necesitás para crecer
         </h2>
-        <p class="mt-6 text-lg leading-8 text-gray-300">
+        <p class="mt-6 text-lg leading-8 text-sand/70">
           Arcom es una plataforma completa diseñada para modernizar la gestión
           de tu comercio.
         </p>
       </div>
     </div>
-    <FeaturesSection />
-    <MultiStoreSection />
-    <EcommerceSection />
-    <ArcaSection />
-    <FinalCTASection />
   </div>
+  <FeaturesSection />
+  <MultiStoreSection />
+  <EcommerceSection />
+  <ArcaSection />
+  <FinalCTASection />
 </BaseLayout>

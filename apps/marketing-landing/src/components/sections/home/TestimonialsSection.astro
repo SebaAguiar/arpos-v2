@@ -13,17 +13,17 @@ function initials(name: string): string {
 }
 ---
 
-<section id="testimonios" class="py-24 px-4 md:px-12 bg-[#0d1b2a] text-white border-t border-slate-800">
+<section id="testimonios" class="py-24 px-4 md:px-12 bg-ink text-white border-t border-ink">
   <div class="max-w-[1280px] mx-auto">
     <div class="text-center mb-16">
-      <div class="text-[#F59E0B] font-semibold text-sm mb-4 uppercase tracking-wider flex items-center justify-center gap-2">
+      <div class="text-terra-300 font-semibold text-sm mb-4 uppercase tracking-wider flex items-center justify-center gap-2">
         <span class="material-symbols-outlined text-base">star</span>
         TESTIMONIOS
       </div>
       <h2 class="text-3xl md:text-5xl font-bold mb-4 tracking-tight leading-tight">
         Comercios que crecen con Arcom
       </h2>
-      <p class="text-slate-300 text-lg max-w-2xl mx-auto leading-relaxed">
+      <p class="text-sand/70 text-lg max-w-2xl mx-auto leading-relaxed">
         Conocé cómo otros negocios ya operan sin caídas, sin perder ventas y con
         la tranquilidad de un sistema que no depende de internet.
       </p>
@@ -31,20 +31,20 @@ function initials(name: string): string {
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       {testimonials.map((testimonial) => (
-        <div class="bg-white/5 border border-white/10 rounded-xl p-6 flex flex-col">
-          <div class="flex gap-1 text-[#F59E0B] mb-4" aria-label="5 de 5 estrellas">
+        <div class="bg-white/5 border border-white/40 rounded-xl p-6 flex flex-col">
+          <div class="flex gap-1 text-terra-300 mb-4" aria-label="5 de 5 estrellas">
             <span class="material-symbols-outlined text-base">star</span>
             <span class="material-symbols-outlined text-base">star</span>
             <span class="material-symbols-outlined text-base">star</span>
             <span class="material-symbols-outlined text-base">star</span>
             <span class="material-symbols-outlined text-base">star</span>
           </div>
-          <blockquote class="text-slate-200 text-sm leading-relaxed flex-1">
+          <blockquote class="text-sand/50 text-sm leading-relaxed flex-1">
             "{testimonial.data.body}"
           </blockquote>
           <div class="mt-6 flex items-center gap-3">
             <div
-              class="w-10 h-10 rounded-full bg-[#10B981] text-white flex items-center justify-center font-bold text-sm shrink-0"
+              class="w-10 h-10 rounded-full bg-terra-600 text-white flex items-center justify-center font-bold text-sm shrink-0"
               aria-hidden="true"
             >
               {initials(testimonial.data.author.name)}
@@ -53,7 +53,7 @@ function initials(name: string): string {
               <div class="font-semibold text-white text-sm">
                 {testimonial.data.author.name}
               </div>
-              <div class="text-slate-400 text-xs">
+              <div class="text-mist text-xs">
                 {testimonial.data.author.role}
               </div>
             </div>

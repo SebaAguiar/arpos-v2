@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Arcom POS Ruta A — Sello">
+  <path d="M128 20 220 54v74c0 56-38 94-92 110-54-16-92-54-92-110V54Z" fill="#0B2545"/>
+  <path d="M128 44 200 71v57c0 44-30 74-72 87-42-13-72-43-72-87V71Z" fill="none" stroke="#10B981" stroke-width="8"/>
+  <circle cx="128" cy="124" r="30" fill="#10B981"/>
+</svg>

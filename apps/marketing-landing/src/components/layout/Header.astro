@@ -1,4 +1,6 @@
 ---
+import Logo from '../brand/Logo.astro';
+
 const links = [
   { text: 'Funciones', href: '#features' },
   { text: 'Planes', href: '#pricing' },
@@ -7,19 +9,18 @@ const links = [
 ];
 ---
 
-<header class="bg-[#0b2545] sticky top-0 z-50 shadow-md">
-  <div class="max-w-[1280px] mx-auto flex justify-between items-center px-4 md:px-12 h-20">
-    <a href="/" class="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-      <span class="w-8 h-8 rounded-lg bg-[#10B981] text-white flex items-center justify-center text-lg font-extrabold shadow-xs">A</span>
-      ARCOM POS
+<header class="bg-ink sticky top-0 z-50 shadow-md">
+  <div class="max-w-[1280px] mx-auto flex justify-between items-center px-3 sm:px-4 md:px-12 h-24 md:h-28">
+    <a href="/" class="flex items-center shrink-0" aria-label="Arcom POS — inicio">
+      <Logo variant="negative" claim class="h-14 sm:h-16 md:h-20 w-auto" />
     </a>
 
-    <nav class="hidden md:flex gap-8">
+    <nav class="hidden lg:flex gap-6 xl:gap-8">
       {
         links.map((link) => (
           <a
             href={link.href}
-            class="text-slate-200 hover:text-white font-semibold text-sm transition-colors"
+            class="text-sand/50 hover:text-white font-semibold text-sm transition-colors"
           >
             {link.text}
           </a>
@@ -27,10 +28,10 @@ const links = [
       }
     </nav>
 
-    <div class="flex items-center gap-4">
+    <div class="flex items-center gap-2 sm:gap-3 lg:gap-4 shrink-0">
       <a
         href="#download"
-        class="bg-[#10B981] hover:bg-emerald-600 text-white font-bold text-sm px-6 py-3 rounded-lg shadow-sm transition-all duration-200 hover:scale-105"
+        class="bg-terra-600 hover:bg-terra-700 text-white font-bold text-sm px-4 sm:px-6 py-3 rounded-lg shadow-sm transition-all duration-200 hover:scale-105"
       >
         Probar gratis
       </a>

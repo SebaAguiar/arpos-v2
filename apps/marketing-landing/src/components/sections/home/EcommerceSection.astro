@@ -2,7 +2,7 @@
 
 ---
 
-<section class="overflow-hidden bg-slate-900 py-24 sm:py-32 text-white">
+<section class="overflow-hidden bg-ink py-24 sm:py-32 text-white">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div
       class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-2 items-center"
@@ -17,7 +17,7 @@
           >
             Tu local y tu e-commerce, sincronizados
           </p>
-          <p class="mt-6 text-lg leading-8 text-gray-300">
+          <p class="mt-6 text-lg leading-8 text-sand/70">
             No pierdas ventas por falta de stock ni sobrevendas. Arcom conecta
             tu inventario físico con tu tienda online automáticamente.
           </p>
@@ -27,11 +27,16 @@
         </div>
       </div>
       <div class="flex items-start justify-start lg:order-first">
-        <div class="p-2 bg-slate-800/80 rounded-2xl ring-1 ring-slate-700/80 shadow-2xl">
+        <!--
+          The frame is `bg-ink` inside a `bg-ink` section, so the ring and the
+          image border were ink-on-ink (1.00:1) — invisible. `ring-white/10`
+          is the same value the other dark sections already use.
+        -->
+        <div class="p-2 bg-ink/80 rounded-2xl ring-1 ring-white/10 shadow-2xl">
           <img
             src="/screenshots/inventory-light.png"
             alt="Catálogo e Inventario Omnicanal Arcom POS"
-            class="w-[48rem] max-w-none rounded-xl border border-slate-700"
+            class="w-[48rem] max-w-none rounded-xl border border-white/10"
             width="1280"
             height="800"
           />

@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Arcom POS — Propuesta de Branding</title>
+<style>
+  :root {
+    --ink: #0e1116;
+    --paper: #faf9fc;
+    --line: #e4e2ea;
+    --muted: #64748b;
+    --navy: #0b2545;
+    --emerald: #10b981;
+    --amber: #f59e0b;
+    --volt: #22e08a;
+    --terra: #c75b39;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Inter, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.55;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 32px; }
+  header.hero {
+    background: var(--ink);
+    color: #fff;
+    padding: 72px 0 64px;
+  }
+  .eyebrow {
+    font-size: 13px; font-weight: 700; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--volt); margin: 0 0 16px;
+  }
+  h1 { font-size: clamp(34px, 5vw, 54px); margin: 0 0 18px; letter-spacing: -.02em; line-height: 1.1; }
+  .hero p { max-width: 680px; font-size: 18px; color: #b9c2cc; margin: 0 0 8px; }
+  .hero .claim { color: #fff; font-weight: 600; }
+  section { padding: 64px 0; border-bottom: 1px solid var(--line); }
+  h2 { font-size: 28px; letter-spacing: -.01em; margin: 0 0 8px; }
+  .lead { color: var(--muted); max-width: 760px; margin: 0 0 40px; font-size: 17px; }
+  .insights { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+  .insight {
+    background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 24px;
+  }
+  .insight .n { font-size: 13px; font-weight: 800; color: var(--muted); letter-spacing: .1em; }
+  .insight h3 { font-size: 17px; margin: 10px 0 8px; }
+  .insight p { font-size: 15px; color: var(--muted); margin: 0; }
+  .route {
+    background: #fff; border: 1px solid var(--line); border-radius: 18px;
+    overflow: hidden; margin-bottom: 36px;
+  }
+  .route-top { display: grid; grid-template-columns: 1.25fr 1fr; }
+  @media (max-width: 860px) { .route-top { grid-template-columns: 1fr; } }
+  .route-logo {
+    padding: 48px; display: flex; align-items: center; justify-content: center;
+    min-height: 260px;
+  }
+  .route-logo img { width: 100%; max-width: 480px; height: auto; }
+  .route-mark { padding: 48px; display: flex; align-items: center; justify-content: center; }
+  .route-mark img { width: 190px; height: 190px; }
+  .bg-light { background: #f4f5f7; }
+  .bg-navy { background: var(--navy); }
+  .bg-carbon { background: #0e1116; }
+  .bg-sand { background: #f6f1ea; }
+  .route-body { padding: 32px 40px 40px; border-top: 1px solid var(--line); }
+  .route-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .badge {
+    font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase;
+    background: var(--ink); color: #fff; border-radius: 999px; padding: 5px 12px;
+  }
+  .badge.rec { background: var(--emerald); }
+  .badge.base { background: var(--muted); }
+  .route-head h3 { font-size: 24px; margin: 0; }
+  .tagline { font-size: 19px; font-weight: 600; margin: 14px 0 6px; }
+  .route-body p { color: var(--muted); font-size: 15.5px; margin: 0 0 14px; }
+  .swatches { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+  .sw { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  .sw i { width: 22px; height: 22px; border-radius: 6px; border: 1px solid rgba(0,0,0,.12); display: inline-block; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; font-size: 15px; }
+  th, td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--line); }
+  th { background: var(--ink); color: #fff; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; }
+  td:first-child { font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+  .rec-box {
+    background: var(--ink); color: #fff; border-radius: 18px; padding: 40px 44px;
+  }
+  .rec-box h2 { color: #fff; }
+  .rec-box p, .rec-box li { color: #c8d0d9; font-size: 16px; }
+  .rec-box strong { color: var(--volt); }
+  .rec-box ul { padding-left: 20px; margin: 12px 0; }
+  .links { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 26px; }
+  .btn {
+    display: inline-block; background: var(--volt); color: var(--ink); font-weight: 700;
+    text-decoration: none; padding: 13px 22px; border-radius: 10px; font-size: 15px;
+  }
+  .btn.ghost { background: transparent; color: #fff; border: 1px solid #3a444f; }
+  footer { padding: 40px 0 64px; color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Propuesta de identidad visual · Arcom POS</p>
+    <h1>La marca que dice, sin palabras, que tus datos son tuyos.</h1>
+    <p class="claim">Mensaje central: confianza soberana de datos.</p>
+    <p>Arcom POS es local-first: la base de datos vive en la máquina del comerciante, no en una nube ajena. Ese es el diferencial de venta, y el branding tiene que comunicarlo antes de que alguien lea una sola línea de copy.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>El territorio de marca</h2>
+    <p class="lead">Tres ideas fuerza derivadas del posicionamiento local-first. Toda pieza de la identidad debe poder justificarse contra una de ellas.</p>
+    <div class="insights">
+      <div class="insight">
+        <span class="n">01 — SOBERANÍA</span>
+        <h3>Tus datos son tuyos</h3>
+        <p>SQLite embebido, backup diario local, exportación a SQL estándar. Sin lock-in, sin mensualidad por leer tu propia información.</p>
+      </div>
+      <div class="insight">
+        <span class="n">02 — DISPONIBILIDAD</span>
+        <h3>Vende aunque se caiga internet</h3>
+        <p>El POS no depende de la nube para cobrar. La sync opcional es un lujo, no un requisito. Marca = continuidad.</p>
+      </div>
+      <div class="insight">
+        <span class="n">03 — CONFIANZA</span>
+        <h3>Control verificable</h3>
+        <p>El dueño del negocio ve, toca y respalda sus datos. La marca debe sentirse sólida, no etérea: signos cerrados, no humo de nube.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Base de partida</h2>
+    <p class="lead">La identidad actual (landing v2) se mantiene como referencia obligada: azul institucional + esmeralda de CTA + ámbar de énfasis. Cualquier ruta nueva debe poder reemplazarla sin romper la continuidad con los usuarios existentes.</p>
+    <div class="route">
+      <div class="route-top">
+        <div class="route-logo bg-navy">
+          <div style="text-align:center;color:#fff;font-family:Inter,sans-serif;">
+            <div style="font-size:64px;font-weight:800;letter-spacing:-2px;">Arcom<span style="color:#10b981;font-weight:500;"> POS</span></div>
+            <div style="font-size:18px;color:#93a7bd;letter-spacing:.08em;margin-top:6px;">tu-software.com.ar · identidad vigente</div>
+          </div>
+        </div>
+        <div class="route-mark bg-light" style="display:flex;gap:24px;align-items:center;justify-content:center;">
+          <div style="width:76px;height:76px;border-radius:16px;background:#0b2545;color:#10b981;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:800;">A</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <span style="width:44px;height:44px;border-radius:10px;background:#0b2545;"></span>
+            <span style="width:44px;height:44px;border-radius:10px;background:#10b981;"></span>
+            <span style="width:44px;height:44px;border-radius:10px;background:#f59e0b;"></span>
+          </div>
+        </div>
+      </div>
+      <div class="route-body">
+        <div class="route-head">
+          <span class="badge base">Referencia</span>
+          <h3>Identidad actual — “Institucional”</h3>
+        </div>
+        <p class="tagline">—</p>
+        <p>Sólida y convencional, pero genérica: el cuadrado con la “A” no dice local-first ni soberanía. Sirve como baseline y como opción de mínima continuidad.</p>
+        <div class="swatches">
+          <span class="sw"><i style="background:#0b2545"></i>#0B2545</span>
+          <span class="sw"><i style="background:#10b981"></i>#10B981</span>
+          <span class="sw"><i style="background:#f59e0b"></i>#F59E0B</span>
+          <span class="sw"><i style="background:#faf9fc"></i>#FAF9FC</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Tres rutas propuestas</h2>
+    <p class="lead">Cada ruta parte de un signo distinto para el mismo territorio: el dato que permanece en la máquina del comerciante.</p>
+
+    <!-- RUTA A -->
+    <div class="route">
+      <div class="route-top">
+        <div class="route-logo bg-navy">
+          <img src="assets/route-a-lockup.svg" alt="Lockup Ruta A — Sello" />
+        </div>
+        <div class="route-mark bg-light">
+          <img src="assets/route-a-mark.svg" alt="Isotipo Ruta A — Sello" />
+        </div>
+      </div>
+      <div class="route-body">
+        <div class="route-head">
+          <span class="badge">Ruta A</span>
+          <h3>“Sello” — confianza institucional</h3>
+        </div>
+        <p class="tagline">Tus datos, bajo tu resguardo.</p>
+        <p>El isotipo es un escudo con anillo y núcleo: el sello de garantía del comercio argentino. Evoluciona la paleta vigente en vez de romperla — el azul profundo aporta la seriedad fiscal (ARCA/AFIP, caja, arqueos) y el esmeralda conserva la memoria de CTA de la landing actual.</p>
+        <p><strong>Ideal si:</strong> querés máxima continuidad con la marca existente y un tono serio/profesional para el público PyME que factura.</p>
+        <div class="swatches">
+          <span class="sw"><i style="background:#0b2545"></i>#0B2545</span>
+          <span class="sw"><i style="background:#10b981"></i>#10B981</span>
+          <span class="sw"><i style="background:#64748b"></i>#64748B</span>
+          <span class="sw"><i style="background:#faf9fc"></i>#FAF9FC</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RUTA B -->
+    <div class="route">
+      <div class="route-top">
+        <div class="route-logo bg-carbon">
+          <img src="assets/route-b-lockup.svg" alt="Lockup Ruta B — Núcleo" />
+        </div>
+        <div class="route-mark bg-carbon">
+          <img src="assets/route-b-mark.svg" alt="Isotipo Ruta B — Núcleo" />
+        </div>
+      </div>
+      <div class="route-body">
+        <div class="route-head">
+          <span class="badge rec">Recomendada</span>
+          <span class="badge">Ruta B</span>
+          <h3>“Núcleo” — soberanía por diseño</h3>
+        </div>
+        <p class="tagline">Tus datos viven acá.</p>
+        <p>Un núcleo sólido e inamovible (tu base de datos local) dentro del equipo, y un arco punteado abierto y tenue alrededor: la nube opcional, explicitada como algo que roda alrededor pero <em>no</em> sostiene al sistema. Es el concepto local-first hecho signo — se entiende sin explicación y funciona como sistema: el cuadrado redondeado escala a app icon, favicon y placeholders.</p>
+        <p><strong>Ideal si:</strong> la marca tiene que vender el diferencial local-first en una sola mirada, con lenguaje tech actual y máximo contraste en el POS (muchas UIs en dark mode).</p>
+        <div class="swatches">
+          <span class="sw"><i style="background:#0e1116"></i>#0E1116</span>
+          <span class="sw"><i style="background:#22e08a"></i>#22E08A</span>
+          <span class="sw"><i style="background:#7a8783"></i>#7A8783</span>
+          <span class="sw"><i style="background:#f4f7f5"></i>#F4F7F5</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RUTA C -->
+    <div class="route">
+      <div class="route-top">
+        <div class="route-logo bg-sand">
+          <img src="assets/route-c-lockup.svg" alt="Lockup Ruta C — Portal" />
+        </div>
+        <div class="route-mark bg-sand">
+          <img src="assets/route-c-mark.svg" alt="Isotipo Ruta C — Portal" />
+        </div>
+      </div>
+      <div class="route-body">
+        <div class="route-head">
+          <span class="badge rec">Elegida</span>
+          <span class="badge">Ruta C</span>
+          <h3>“Portal” — el negocio, anclado</h3>
+        </div>
+        <p class="tagline">Vendé sin depender de nadie.</p>
+        <p>El arco de la puerta del comercio con el núcleo oscuro adentro: la marca como umbral físico, no como servicio etéreo. Paleta cálida (terracota/tinta) que humaniza y diferencia de todo el POS market saturado de azules; apela a la cercanía con el comercio de barrio.</p>
+        <p><strong>Ideal si:</strong> el tono de marca querés que sea cercano y artesanal antes que corporativo o tech.</p>
+        <div class="swatches">
+          <span class="sw"><i style="background:#c75b39"></i>#C75B39</span>
+          <span class="sw"><i style="background:#1f1a17"></i>#1F1A17</span>
+          <span class="sw"><i style="background:#8c8078"></i>#8C8078</span>
+          <span class="sw"><i style="background:#f6f1ea"></i>#F6F1EA</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Comparativa</h2>
+    <p class="lead">Evaluación contra los criterios del posicionamiento, no contra el gusto personal.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Criterio</th>
+          <th><span class="dot" style="background:#94a3b8"></span>Actual</th>
+          <th><span class="dot" style="background:#0b2545"></span>A · Sello</th>
+          <th><span class="dot" style="background:#22e08a"></span>B · Núcleo</th>
+          <th><span class="dot" style="background:#c75b39"></span>C · Portal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Comunica local-first sin copy</td><td>Bajo</td><td>Medio</td><td><strong>Alto</strong></td><td>Medio</td></tr>
+        <tr><td>Continuidad con marca vigente</td><td><strong>Alto</strong></td><td><strong>Alto</strong></td><td>Medio</td><td>Bajo</td></tr>
+        <tr><td>Diferenciación en el mercado POS</td><td>Bajo</td><td>Medio</td><td><strong>Alto</strong></td><td><strong>Alto</strong></td></tr>
+        <tr><td>Escalabilidad (app icon, favicon, mono)</td><td>Medio</td><td><strong>Alto</strong></td><td><strong>Alto</strong></td><td>Alto</td></tr>
+        <tr><td>Contraste en UI dark (POS)</td><td>Medio</td><td>Medio</td><td><strong>Alto</strong></td><td>Bajo</td></tr>
+        <tr><td>Tono fiscal / ARCA credibility</td><td><strong>Alto</strong></td><td><strong>Alto</strong></td><td>Medio</td><td>Medio</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section style="border-bottom:none;">
+  <div class="wrap">
+    <div class="rec-box">
+      <h2>Decisión: Ruta C — “Portal”</h2>
+      <p><strong>Ruta C — “Portal”</strong> es la identidad elegida. El umbral del comercio con el núcleo de datos adentro ancla la promesa local-first en algo físico y cercano: el negocio existe acá, y sus datos también. La paleta cálida (terracota/tinta/arena) diferencia de todo el POS market saturado de azules, y el tono en voseo del claim —<em> “Vendé sin depender de nadie.”</em>— convierte el diferencial técnico en una promesa de autonomía del dueño del negocio.</p>
+      <ul>
+        <li><strong>Por qué:</strong> máxima diferenciación visual + territorio de confianza soberana de datos, sin registro corporativo frío.</li>
+        <li><strong>Sistema completo:</strong> lockups claro/oscuro/vertical/mono, app icon, favicon simplificado, OG image y grilla de construcción.</li>
+        <li><strong>Continuidad:</strong> el wordmark conserva la estructura de la marca vigente — la transición es reemplazar el isotipo, no rehacer la marca.</li>
+      </ul>
+      <div class="links">
+        <a class="btn" href="brand-board-c.html">Ver Brand Board (Ruta C)</a>
+        <a class="btn ghost" href="assets/route-c/lockup-horizontal.svg">Descargar lockup SVG</a>
+        <a class="btn ghost" href="assets/route-c/app-icon.svg">Descargar app icon</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">Arcom POS · Propuesta de branding — documentos fuente en <code>docs/branding/proposal/assets/</code></div>
+</footer>
+
+</body>
+</html>

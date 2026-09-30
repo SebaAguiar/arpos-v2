@@ -2,47 +2,52 @@
 
 ---
 
-<section class="bg-slate-50 py-20 border-y border-slate-200/60">
+<!--
+  Opaque background on purpose. features.astro wraps every section in a
+  `bg-ink` column, so a translucent `bg-sand/20` here resolved to near-ink
+  while the copy stayed `text-ink`/`text-stone` — unreadable on that page.
+-->
+<section class="bg-paper py-20 border-y border-line">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-3xl text-center">
-      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold ring-1 ring-blue-200/60 mb-4">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-terra-100 text-terra-800 text-xs font-semibold ring-1 ring-terra-600/20 mb-4">
         Homologación Fiscal Oficial ARCA / AFIP
       </div>
-      <h2 class="text-3xl font-extrabold text-slate-900 sm:text-4xl tracking-tight">
+      <h2 class="text-3xl font-extrabold text-ink sm:text-4xl tracking-tight">
         Facturación Electrónica sin complicaciones
       </h2>
-      <p class="mt-4 text-lg text-slate-600">
+      <p class="mt-4 text-lg text-stone">
         Emití Comprobantes Electrónicos A, B, C, y Notas de Crédito de forma automática y transparente en cada venta.
       </p>
     </div>
 
     <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-      <div class="p-6 bg-white rounded-2xl shadow-xs border border-slate-200/80">
-        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg mb-4">
+      <div class="p-6 bg-white rounded-2xl shadow-xs border border-sand/50/80">
+        <div class="w-10 h-10 rounded-xl bg-sand text-ink flex items-center justify-center font-bold text-lg mb-4">
           CAE
         </div>
-        <h3 class="font-bold text-slate-900 text-base">CAE en Tiempo Real</h3>
-        <p class="mt-2 text-xs text-slate-600 leading-relaxed">
+        <h3 class="font-bold text-ink text-base">CAE en Tiempo Real</h3>
+        <p class="mt-2 text-xs text-stone leading-relaxed">
           Obtención de Código de Autorización Electrónico al instante con firma de certificado fiscal local.
         </p>
       </div>
 
-      <div class="p-6 bg-white rounded-2xl shadow-xs border border-slate-200/80">
-        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg mb-4">
+      <div class="p-6 bg-white rounded-2xl shadow-xs border border-sand/50/80">
+        <div class="w-10 h-10 rounded-xl bg-sand text-terra-700 flex items-center justify-center font-bold text-lg mb-4">
           ⇄
         </div>
-        <h3 class="font-bold text-slate-900 text-base">Cola de Reintento Offline</h3>
-        <p class="mt-2 text-xs text-slate-600 leading-relaxed">
+        <h3 class="font-bold text-ink text-base">Cola de Reintento Offline</h3>
+        <p class="mt-2 text-xs text-stone leading-relaxed">
           Si los webservices de ARCA/AFIP sufren interrupciones, Arcom encola los comprobantes y los autoriza automáticamente apenas se restablece el servicio.
         </p>
       </div>
 
-      <div class="p-6 bg-white rounded-2xl shadow-xs border border-slate-200/80">
-        <div class="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center font-bold text-lg mb-4">
+      <div class="p-6 bg-white rounded-2xl shadow-xs border border-sand/50/80">
+        <div class="w-10 h-10 rounded-xl bg-sand text-terra-700 flex items-center justify-center font-bold text-lg mb-4">
           PDF
         </div>
-        <h3 class="font-bold text-slate-900 text-base">Impresión y Ticketera Fiscal</h3>
-        <p class="mt-2 text-xs text-slate-600 leading-relaxed">
+        <h3 class="font-bold text-ink text-base">Impresión y Ticketera Fiscal</h3>
+        <p class="mt-2 text-xs text-stone leading-relaxed">
           Generación automática de formato PDF, envío por correo electrónico e impresión directa en ticketeras térmicas (ESC/POS).
         </p>
       </div>

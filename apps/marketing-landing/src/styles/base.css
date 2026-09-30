@@ -1,4 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
+/**
+ * Typography: Inter only.
+ *
+ * Manrope used to be imported here and applied to `html`, which silently
+ * overrode the Inter <link> in BaseLayout.astro (an <link> cannot beat an
+ * @import plus an explicit html rule), so the site was rendering Manrope
+ * while the brand board and tailwind.config both specified Inter. The
+ * duplicated Manrope import is removed; BaseLayout keeps the single request.
+ */
 
 @tailwind base;
 @tailwind components;
@@ -6,7 +14,7 @@
 
 @layer base {
   html {
-    font-family: 'Manrope', sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
     scroll-behavior: smooth;
   }
 }
