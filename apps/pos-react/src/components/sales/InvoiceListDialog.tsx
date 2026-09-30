@@ -31,9 +31,9 @@ const STATUS_CONFIG: Record<
 > = {
   issued: {
     label: "Emitida",
-    color: "#2db464",
-    bg: "rgba(45, 180, 100, 0.08)",
-    border: "rgba(45, 180, 100, 0.2)",
+    color: "var(--color-success)",
+    bg: "color-mix(in srgb, var(--color-success) 8%, transparent)",
+    border: "color-mix(in srgb, var(--color-success) 20%, transparent)",
   },
   pending: {
     label: "Pendiente",

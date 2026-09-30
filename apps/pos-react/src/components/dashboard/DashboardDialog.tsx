@@ -6,6 +6,7 @@ import { SalesRepository } from "@/repositories/sales.repository";
 import type { ApiSaleStats, ApiPaymentMethodBreakdown } from "@/services/sales.service";
 import { DialogHeader } from "@/components/ui/DialogHeader";
 import { StatTile } from "@/components/ui/StatTile";
+import { methodColor } from "@/lib/payment-methods";
 
 type Period = "today" | "7d" | "30d" | "90d";
 
@@ -32,16 +33,6 @@ function getPeriodTimestamps(period: Period): { from?: number; to?: number } {
       return { from: now - 90 * 86400, to: now };
   }
 }
-
-const METHOD_COLORS: Record<string, string> = {
-  CASH: "#30a46c",
-  DEBIT: "#3b82f6",
-  CREDIT: "#8b5cf6",
-  QR: "#f59e0b",
-  WALLET: "#ec4899",
-  TRANSFER: "#06b6d4",
-  POINTS: "#64748b",
-};
 
 const BAR_CHART_HEIGHT = 140;
 const BAR_LABEL_HEIGHT = 28;
@@ -162,7 +153,7 @@ export function DashboardDialog() {
   const paymentDistribution = paymentBreakdown.map((p) => ({
     method: p.payment_method,
     percentage: totalPaymentCents > 0 ? Math.round((p.total_cents / totalPaymentCents) * 100) : 0,
-    color: METHOD_COLORS[p.payment_method] ?? "#64748b",
+    color: methodColor(p.payment_method),
   }));
 
   return (

@@ -129,8 +129,8 @@ export function CashControlDialog() {
                   <div
                     style={{
                       padding: "16px",
-                      backgroundColor: "#e54d2e10",
-                      border: "1px solid #e54d2e30",
+                      backgroundColor: "color-mix(in srgb, var(--color-danger) 12%, transparent)",
+                      border: "1px solid color-mix(in srgb, var(--color-danger) 12%, transparent)",
                       borderRadius: "8px",
                       marginBottom: "16px",
                     }}
@@ -151,8 +151,8 @@ export function CashControlDialog() {
                     <div
                       style={{
                         padding: "8px 12px",
-                        backgroundColor: "#e54d2e15",
-                        border: "1px solid #e54d2e30",
+                        backgroundColor: "color-mix(in srgb, var(--color-danger) 12%, transparent)",
+                        border: "1px solid color-mix(in srgb, var(--color-danger) 12%, transparent)",
                         borderRadius: "6px",
                         marginBottom: "8px",
                         cursor: "pointer",
@@ -176,7 +176,7 @@ export function CashControlDialog() {
                       disabled={loading || !initialAmount}
                       style={{
                         padding: "8px 24px",
-                        backgroundColor: "#30a46c",
+                        backgroundColor: "var(--color-success)",
                         color: "#fff",
                         border: "none",
                         borderRadius: "6px",
@@ -200,8 +200,8 @@ export function CashControlDialog() {
                     <div
                       style={{
                         padding: "8px 12px",
-                        backgroundColor: "#e54d2e15",
-                        border: "1px solid #e54d2e30",
+                        backgroundColor: "color-mix(in srgb, var(--color-danger) 12%, transparent)",
+                        border: "1px solid color-mix(in srgb, var(--color-danger) 12%, transparent)",
                         borderRadius: "6px",
                         marginBottom: "12px",
                         cursor: "pointer",
@@ -235,13 +235,13 @@ export function CashControlDialog() {
 
                   {/* Income / Expense summary */}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "16px" }}>
-                    <div style={{ padding: "10px", backgroundColor: "#30a46c10", border: "1px solid #30a46c30", borderRadius: "8px" }}>
+                    <div style={{ padding: "10px", backgroundColor: "color-mix(in srgb, var(--color-success) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--color-success) 12%, transparent)", borderRadius: "8px" }}>
                       <Text size="1" color="green">Ingresos</Text>
                       <Text size="3" weight="bold" color="green">
                         +${summary?.totalIncome.toLocaleString("es-AR")}
                       </Text>
                     </div>
-                    <div style={{ padding: "10px", backgroundColor: "#e54d2e10", border: "1px solid #e54d2e30", borderRadius: "8px" }}>
+                    <div style={{ padding: "10px", backgroundColor: "color-mix(in srgb, var(--color-danger) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--color-danger) 12%, transparent)", borderRadius: "8px" }}>
                       <Text size="1" color="red">Egresos</Text>
                       <Text size="3" weight="bold" color="red">
                         -${summary?.totalExpenses.toLocaleString("es-AR")}
@@ -465,7 +465,7 @@ export function CashControlDialog() {
                       </div>
                       <div style={{ display: "flex", gap: "12px", marginTop: "6px", fontSize: "12px" }}>
                         <span>Inicio: ${shift.initialAmount.toLocaleString("es-AR")}</span>
-                        <span style={{ color: "#30a46c" }}>Ventas: ${shift.totalSales.toLocaleString("es-AR")}</span>
+                        <span style={{ color: "var(--color-success)" }}>Ventas: ${shift.totalSales.toLocaleString("es-AR")}</span>
                         <span>Movimientos: {shift.movementCount}</span>
                       </div>
                     </div>

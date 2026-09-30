@@ -207,7 +207,7 @@ export function InvoicePdfDialog({ open, invoice, onClose }: InvoicePdfDialogPro
 
           {/* CAE + QR */}
           {invoice.cae && (
-            <div style={{ marginBottom: "16px", padding: "12px", backgroundColor: "rgba(45, 180, 100, 0.06)", border: "1px solid rgba(45, 180, 100, 0.15)", borderRadius: "8px" }}>
+            <div style={{ marginBottom: "16px", padding: "12px", backgroundColor: "color-mix(in srgb, var(--color-success) 6%, transparent)", border: "1px solid color-mix(in srgb, var(--color-success) 15%, transparent)", borderRadius: "8px" }}>
               <SectionHeader style={{ marginBottom: "4px" }}>Comprobante Autorizado</SectionHeader>
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "16px" }}>
                 <div style={{ display: "grid", gap: "4px" }}>

@@ -271,10 +271,10 @@ export function PaymentDialog({ creditSurcharge, onSaleComplete }: PaymentDialog
                   }}
                   style={{
                     padding: "6px 12px",
-                    border: "1px solid #30a46c",
+                    border: "1px solid var(--color-success)",
                     borderRadius: "4px",
-                    backgroundColor: "#30a46c20",
-                    color: "#30a46c",
+                    backgroundColor: "color-mix(in srgb, var(--color-success) 12%, transparent)",
+                    color: "var(--color-success)",
                     cursor: "pointer",
                     fontSize: "12px",
                     fontWeight: 600,
@@ -421,7 +421,7 @@ export function PaymentDialog({ creditSurcharge, onSaleComplete }: PaymentDialog
             style={{
               width: "100%",
               padding: "12px",
-              backgroundColor: totalPaid >= total && !processing ? "#30a46c" : "var(--bg-surface)",
+              backgroundColor: totalPaid >= total && !processing ? "var(--color-success)" : "var(--bg-surface)",
               color: totalPaid >= total && !processing ? "#fff" : "var(--text-secondary)",
               border: "none",
               borderRadius: "6px",

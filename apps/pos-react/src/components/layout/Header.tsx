@@ -8,11 +8,12 @@ import {
   Cross1Icon,
   SunIcon,
   MoonIcon,
+  CheckIcon,
   LockOpen1Icon,
   LockClosedIcon,
   BarChartIcon,
 } from "@radix-ui/react-icons";
-import { useThemeStore } from "@/stores/theme.store";
+import { useThemeStore, THEMES, type Theme } from "@/stores/theme.store";
 import { useAuth } from "@/hooks/useAuth";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { useSyncStore } from "@/stores/sync.store";
@@ -27,10 +28,20 @@ interface HeaderProps {
   sidebarOpen: boolean;
 }
 
+/**
+ * Labels and swatches for the theme picker. `arcom` is the brand theme and the
+ * application default; `dark` and `light` are the neutral themes.
+ */
+const THEME_OPTIONS: Record<Theme, { label: string; swatch: string; icon: typeof SunIcon }> = {
+  arcom: { label: "Arcom", swatch: "#c75b39", icon: SunIcon },
+  dark: { label: "Oscuro", swatch: "#999999", icon: MoonIcon },
+  light: { label: "Claro", swatch: "#e0e0e0", icon: SunIcon },
+};
+
 export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
   const navigate = useNavigate();
   const theme = useThemeStore((s) => s.theme);
-  const toggleTheme = useThemeStore((s) => s.toggleTheme);
+  const setTheme = useThemeStore((s) => s.setTheme);
   const { user, logout, licenseStatus } = useAuth();
   const isOnline = useNetworkStatus();
   const pendingCount = useSyncStore((s) => s.pendingCount);
@@ -40,6 +51,7 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
   const openCashControl = useDialogStore((s) => s.openCashControl);
   const openDashboard = useDialogStore((s) => s.openDashboard);
   const currentShift = useCashRegisterStore((s) => s.currentShift);
+  const ThemeIcon = THEME_OPTIONS[theme].icon;
 
   useEffect(() => {
     if (isOnline) {
@@ -98,8 +110,8 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
             padding: "4px 10px",
             border: "none",
             borderRadius: "6px",
-            backgroundColor: currentShift ? "#e54d2e15" : "#30a46c15",
-            color: currentShift ? "#e54d2e" : "#30a46c",
+            backgroundColor: currentShift ? "color-mix(in srgb, var(--color-danger) 12%, transparent)" : "color-mix(in srgb, var(--color-success) 12%, transparent)",
+            color: currentShift ? "var(--color-danger)" : "var(--color-success)",
             cursor: "pointer",
             fontSize: "12px",
             fontWeight: 600,
@@ -143,16 +155,38 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
 
       <UpdateButton />
 
-      <Tooltip content={theme === "dark" ? "Modo claro" : "Modo oscuro"}>
-        <IconButton
-          variant="ghost"
-          size="1"
-          onClick={toggleTheme}
-          style={{ cursor: "pointer", color: "var(--text-secondary)" }}
-        >
-          {theme === "dark" ? <SunIcon width={16} height={16} /> : <MoonIcon width={16} height={16} />}
-        </IconButton>
-      </Tooltip>
+      <DropdownMenu.Root>
+        <Tooltip content="Tema">
+          <DropdownMenu.Trigger>
+            <IconButton
+              variant="ghost"
+              size="1"
+              style={{ cursor: "pointer", color: "var(--text-secondary)" }}
+            >
+              <ThemeIcon width={16} height={16} />
+            </IconButton>
+          </DropdownMenu.Trigger>
+        </Tooltip>
+        <DropdownMenu.Content align="end">
+          {THEMES.map((option) => (
+            <DropdownMenu.Item key={option} onSelect={() => setTheme(option)}>
+              <span
+                aria-hidden
+                style={{
+                  display: "inline-block",
+                  width: "12px",
+                  height: "12px",
+                  borderRadius: "3px",
+                  background: THEME_OPTIONS[option].swatch,
+                  border: "1px solid var(--border)",
+                }}
+              />
+              <span style={{ flex: 1 }}>{THEME_OPTIONS[option].label}</span>
+              {theme === option ? <CheckIcon width={14} height={14} /> : null}
+            </DropdownMenu.Item>
+          ))}
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
 
       <IconButton variant="ghost" size="1">
         <BellIcon width={16} height={16} />

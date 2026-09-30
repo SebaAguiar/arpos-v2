@@ -76,8 +76,8 @@ export function StockAdjustmentDialog({ preselectedProductId, onClose }: StockAd
           <div
             style={{
               padding: "8px 12px",
-              backgroundColor: "#e54d2e15",
-              border: "1px solid #e54d2e30",
+              backgroundColor: "color-mix(in srgb, var(--color-danger) 12%, transparent)",
+              border: "1px solid color-mix(in srgb, var(--color-danger) 12%, transparent)",
               borderRadius: "6px",
               marginBottom: "12px",
               cursor: "pointer",

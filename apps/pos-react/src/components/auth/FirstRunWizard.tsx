@@ -692,14 +692,14 @@ export function FirstRunWizard() {
                   width: "56px",
                   height: "56px",
                   borderRadius: "14px",
-                  backgroundColor: "#30a46c15",
+                  backgroundColor: "color-mix(in srgb, var(--color-success) 12%, transparent)",
                   marginBottom: "16px",
                 }}
               >
                 <CheckCircledIcon
                   width={28}
                   height={28}
-                  style={{ color: "#30a46c" }}
+                  style={{ color: "var(--color-success)" }}
                 />
               </div>
               <Text size="5" weight="bold" style={{ display: "block" }}>

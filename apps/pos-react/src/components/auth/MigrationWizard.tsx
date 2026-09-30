@@ -253,7 +253,7 @@ export function MigrationWizard({ open, onClose, onComplete }: MigrationWizardPr
                       }}
                     >
                       {done ? (
-                        <CheckCircledIcon width={14} height={14} color="#30a46c" />
+                        <CheckCircledIcon width={14} height={14} color="var(--color-success)" />
                       ) : active ? (
                         <ReloadIcon width={14} height={14} className="spin" color="var(--accent)" />
                       ) : (
@@ -280,11 +280,11 @@ export function MigrationWizard({ open, onClose, onComplete }: MigrationWizardPr
                     width: "56px",
                     height: "56px",
                     borderRadius: "14px",
-                    backgroundColor: "#30a46c15",
+                    backgroundColor: "color-mix(in srgb, var(--color-success) 12%, transparent)",
                     marginBottom: "12px",
                   }}
                 >
-                  <CheckCircledIcon width={28} height={28} color="#30a46c" />
+                  <CheckCircledIcon width={28} height={28} color="var(--color-success)" />
                 </div>
                 <Text size="4" weight="bold" style={{ display: "block" }}>
                   Migración completada

@@ -165,8 +165,8 @@ export function InventoryPage() {
           <div
             style={{
               padding: "10px 14px",
-              backgroundColor: "rgba(229, 77, 46, 0.1)",
-              border: "1px solid rgba(229, 77, 46, 0.25)",
+              backgroundColor: "color-mix(in srgb, var(--color-danger) 10%, transparent)",
+              border: "1px solid color-mix(in srgb, var(--color-danger) 25%, transparent)",
               borderRadius: "8px",
               cursor: "pointer",
             }}
@@ -305,7 +305,7 @@ export function InventoryPage() {
           <Card
             style={{
               cursor: "pointer",
-              border: statusFilter === "normal" ? "1px solid var(--green-8, #30a46c)" : undefined,
+              border: statusFilter === "normal" ? "1px solid var(--green-8, var(--color-success))" : undefined,
               transition: "all 0.15s ease",
             }}
             onClick={() => setStatusFilter("normal")}
@@ -358,8 +358,8 @@ export function InventoryPage() {
           <Card
             style={{
               cursor: "pointer",
-              border: statusFilter === "out_of_stock" ? "1px solid var(--red-8, #e54d2e)" : undefined,
-              backgroundColor: outOfStockCount > 0 ? "rgba(229, 77, 46, 0.05)" : undefined,
+              border: statusFilter === "out_of_stock" ? "1px solid var(--red-8, var(--color-danger))" : undefined,
+              backgroundColor: outOfStockCount > 0 ? "color-mix(in srgb, var(--color-danger) 5%, transparent)" : undefined,
               transition: "all 0.15s ease",
             }}
             onClick={() => setStatusFilter((prev) => (prev === "out_of_stock" ? "all" : "out_of_stock"))}

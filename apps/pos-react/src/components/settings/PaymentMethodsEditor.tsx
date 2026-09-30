@@ -13,6 +13,7 @@ import {
 import { useSettingsStore } from "@/stores/settings.store";
 import { AutosaveBadge } from "./AutosaveBadge";
 import type { PaymentMethod } from "@/lib/types";
+import { METHOD_COLORS } from "@/lib/payment-methods";
 
 const METHOD_ICONS: Record<PaymentMethod, typeof DragHandleDots2Icon> = {
   CASH: PersonIcon,
@@ -22,16 +23,6 @@ const METHOD_ICONS: Record<PaymentMethod, typeof DragHandleDots2Icon> = {
   WALLET: FileTextIcon,
   TRANSFER: ReaderIcon,
   POINTS: TokensIcon,
-};
-
-const METHOD_COLORS: Record<PaymentMethod, string> = {
-  CASH: "#30a46c",
-  DEBIT: "#3b82f6",
-  CREDIT: "#8b5cf6",
-  QR: "#f59e0b",
-  WALLET: "#ec4899",
-  TRANSFER: "#06b6d4",
-  POINTS: "#84cc16",
 };
 
 const METHOD_HELP: Record<PaymentMethod, string> = {
@@ -125,7 +116,10 @@ export function PaymentMethodsEditor() {
                     width: "28px",
                     height: "28px",
                     borderRadius: "6px",
-                    backgroundColor: `${color}20`,
+                    // color-mix instead of `${color}20`: the value may be a hex
+                    // OR a `var(--color-*)` token, and hex-alpha concatenation
+                    // is invalid CSS when a custom property is used.
+                    backgroundColor: `color-mix(in srgb, ${color} 12%, transparent)`,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",

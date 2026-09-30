@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { PaymentMethod } from "@/lib/types";
+import { METHOD_COLORS } from "@/lib/payment-methods";
 
 export type PaperSize = "default" | "80mm" | "58mm" | "a4" | "a5";
 
@@ -33,13 +34,13 @@ interface SettingsState {
 }
 
 const DEFAULT_METHODS: PaymentMethodConfig[] = [
-  { id: "CASH", label: "Efectivo", enabled: true, color: "#30a46c" },
-  { id: "DEBIT", label: "Débito", enabled: true, color: "#3b82f6" },
-  { id: "CREDIT", label: "Crédito", enabled: true, color: "#8b5cf6", requiresSurcharge: true },
-  { id: "QR", label: "QR", enabled: true, color: "#f59e0b" },
-  { id: "WALLET", label: "Billetera", enabled: false, color: "#ec4899" },
-  { id: "TRANSFER", label: "Transferencia", enabled: false, color: "#06b6d4" },
-  { id: "POINTS", label: "Puntos", enabled: false, color: "#84cc16" },
+  { id: "CASH", label: "Efectivo", enabled: true, color: METHOD_COLORS.CASH },
+  { id: "DEBIT", label: "Débito", enabled: true, color: METHOD_COLORS.DEBIT },
+  { id: "CREDIT", label: "Crédito", enabled: true, color: METHOD_COLORS.CREDIT, requiresSurcharge: true },
+  { id: "QR", label: "QR", enabled: true, color: METHOD_COLORS.QR },
+  { id: "WALLET", label: "Billetera", enabled: false, color: METHOD_COLORS.WALLET },
+  { id: "TRANSFER", label: "Transferencia", enabled: false, color: METHOD_COLORS.TRANSFER },
+  { id: "POINTS", label: "Puntos", enabled: false, color: METHOD_COLORS.POINTS },
 ];
 
 export const useSettingsStore = create<SettingsState>()(

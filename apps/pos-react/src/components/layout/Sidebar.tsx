@@ -13,6 +13,8 @@ import {
   ArchiveIcon,
   FileTextIcon,
 } from "@radix-ui/react-icons";
+import { BrandLockup } from "@/components/brand/BrandLockup";
+import { useThemeStore } from "@/stores/theme.store";
 
 const ITEM_BASE: React.CSSProperties = {
   position: "relative",
@@ -103,6 +105,7 @@ function SidebarNavLink({
 }
 
 export function Sidebar() {
+  const theme = useThemeStore((s) => s.theme);
   return (
     <aside
       style={{
@@ -115,12 +118,16 @@ export function Sidebar() {
         flexDirection: "column",
       }}
     >
-      {/* Logo */}
-      <div style={{ padding: "16px 16px 12px" }}>
-        <h1 style={{ fontSize: "20px", fontWeight: 700, color: "var(--accent)", margin: 0 }}>
-          Arcom
-        </h1>
-        <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: 0 }}>v2.0</p>
+      {/* Logo — lockup compacto sobre la superficie del rail; negativo sobre ink */}
+      <div style={{ padding: "16px 16px 8px" }}>
+        <BrandLockup
+          variant={theme === "dark" ? "negative" : "primary"}
+          claim={false}
+          width={188}
+        />
+        <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "6px 0 0", textAlign: "right" }}>
+          v2.0
+        </p>
       </div>
 
       {/* Scrollable nav */}

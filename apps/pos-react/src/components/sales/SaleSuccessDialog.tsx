@@ -81,13 +81,13 @@ export function SaleSuccessDialog({
                 width: "40px",
                 height: "40px",
                 borderRadius: "12px",
-                backgroundColor: "rgba(45, 180, 100, 0.12)",
+                backgroundColor: "color-mix(in srgb, var(--color-success) 12%, transparent)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <CheckCircledIcon width={22} height={22} style={{ color: "#2db464" }} />
+              <CheckCircledIcon width={22} height={22} style={{ color: "var(--color-success)" }} />
             </div>
             <div>
               <Text
@@ -137,7 +137,7 @@ export function SaleSuccessDialog({
               >
                 Vuelto a entregar
               </Text>
-              <Text size="8" weight="bold" style={{ color: "#2db464", fontFamily: "monospace" }}>
+              <Text size="8" weight="bold" style={{ color: "var(--color-success)", fontFamily: "monospace" }}>
                 ${change.toLocaleString("es-AR", { minimumFractionDigits: 2 })}
               </Text>
               <Text size="1" color="gray" style={{ marginTop: "8px", fontFamily: "monospace" }}>
@@ -166,7 +166,7 @@ export function SaleSuccessDialog({
                   justifyContent: "center",
                 }}
               >
-                <CheckCircledIcon width={32} height={32} style={{ color: "rgba(45, 180, 100, 0.5)" }} />
+                <CheckCircledIcon width={32} height={32} style={{ color: "color-mix(in srgb, var(--color-success) 50%, transparent)" }} />
               </div>
               <Text size="2" color="gray" style={{ textAlign: "center", maxWidth: "260px", lineHeight: 1.5 }}>
                 El cobro se ha registrado correctamente y el inventario ha sido actualizado.
@@ -217,10 +217,10 @@ export function SaleSuccessDialog({
             style={{
               width: "100%",
               height: "44px",
-              backgroundColor: "rgba(45, 180, 100, 0.1)",
-              border: "1px solid rgba(45, 180, 100, 0.25)",
+              backgroundColor: "color-mix(in srgb, var(--color-success) 10%, transparent)",
+              border: "1px solid color-mix(in srgb, var(--color-success) 25%, transparent)",
               borderRadius: "12px",
-              color: "#2db464",
+              color: "var(--color-success)",
               fontWeight: 700,
               fontSize: "13px",
               textTransform: "uppercase",

@@ -88,7 +88,7 @@ export function InventoryTable({
                 className={item.stockQuantity <= 0 ? "inventory-row--critical" : undefined}
                 style={{
                   backgroundColor: isOutOfStock
-                    ? "rgba(229, 77, 46, 0.06)"
+                    ? "color-mix(in srgb, var(--color-danger) 6%, transparent)"
                     : isLowStock
                     ? "rgba(245, 158, 11, 0.03)"
                     : undefined,

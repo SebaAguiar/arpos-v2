@@ -173,7 +173,7 @@ export function TasksPage() {
                 background: "none",
                 border: "none",
                 cursor: "pointer",
-                color: task.status === "DONE" ? "#30a46c" : "var(--text-secondary)",
+                color: task.status === "DONE" ? "var(--color-success)" : "var(--text-secondary)",
                 marginTop: "2px",
               }}
             >
@@ -234,10 +234,10 @@ export function TasksPage() {
                   onClick={() => completeTask(task.id)}
                   style={{
                     padding: "2px 8px",
-                    border: "1px solid #30a46c",
+                    border: "1px solid var(--color-success)",
                     borderRadius: "4px",
                     backgroundColor: "transparent",
-                    color: "#30a46c",
+                    color: "var(--color-success)",
                     cursor: "pointer",
                     fontSize: "11px",
                   }}

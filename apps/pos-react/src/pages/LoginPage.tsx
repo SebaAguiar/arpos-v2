@@ -1,11 +1,13 @@
 import { useState, useCallback } from "react";
 import { Text, TextField } from "@radix-ui/themes";
-import { LightningBoltIcon } from "@radix-ui/react-icons";
 import { useAuth } from "@/hooks/useAuth";
 import { InlineNotice } from "@/components/ui/InlineNotice";
+import { BrandLockup } from "@/components/brand/BrandLockup";
+import { useThemeStore } from "@/stores/theme.store";
 
 export function LoginPage() {
   const { loginWithLicense, loading, error, clearError } = useAuth();
+  const theme = useThemeStore((s) => s.theme);
   const [email, setEmail] = useState("");
 
   const handleSubmit = useCallback(
@@ -39,26 +41,15 @@ export function LoginPage() {
           gap: "24px",
         }}
       >
-        {/* Logo */}
+        {/* Logo — lockup completo sobre la superficie de la tarjeta */}
         <div style={{ textAlign: "center" }}>
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "48px",
-              height: "48px",
-              borderRadius: "12px",
-              backgroundColor: "var(--accent-subtle)",
-              marginBottom: "12px",
-            }}
-          >
-            <LightningBoltIcon width={24} height={24} style={{ color: "var(--accent)" }} />
-          </div>
-          <Text size="5" weight="bold" style={{ display: "block" }}>
-            Arcom
-          </Text>
-          <Text size="2" color="gray">
+          <BrandLockup
+            variant={theme === "dark" ? "negative" : "primary"}
+            claim
+            width={285}
+            style={{ margin: "0 auto" }}
+          />
+          <Text size="2" color="gray" style={{ display: "block", marginTop: "4px" }}>
             Ingresa tu email para continuar
           </Text>
         </div>

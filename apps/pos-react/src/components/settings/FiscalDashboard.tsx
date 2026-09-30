@@ -27,8 +27,11 @@ function StatCard({
     <div
       style={{
         padding: "14px",
-        backgroundColor: `${color}08`,
-        border: `1px solid ${color}22`,
+        // color-mix instead of `${color}08`: the value may be a hex OR a
+        // `var(--color-*)` token, and hex-alpha concatenation is invalid CSS
+        // when a custom property is used.
+        backgroundColor: `color-mix(in srgb, ${color} 3%, transparent)`,
+        border: `1px solid color-mix(in srgb, ${color} 13%, transparent)`,
         borderRadius: "10px",
         display: "flex",
         alignItems: "center",
@@ -40,7 +43,7 @@ function StatCard({
           width: "36px",
           height: "36px",
           borderRadius: "10px",
-          backgroundColor: `${color}15`,
+          backgroundColor: `color-mix(in srgb, ${color} 8%, transparent)`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -135,8 +138,8 @@ export function FiscalDashboard() {
                 {formatCents(stats.issuedAmountCents)}
               </Badge>
             }
-            icon={<CheckCircledIcon width={16} height={16} color="#2db464" />}
-            color="#2db464"
+            icon={<CheckCircledIcon width={16} height={16} color="var(--color-success)" />}
+            color="var(--color-success)"
           />
           <StatCard
             label="Pendientes"

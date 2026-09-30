@@ -68,7 +68,7 @@ export function CashRegisterPage() {
               </div>
               <div style={{ display: "flex", gap: "12px", marginTop: "6px", fontSize: "12px" }}>
                 <span>Inicio: ${shift.initialAmount.toLocaleString("es-AR")}</span>
-                <span style={{ color: "#30a46c" }}>Ventas: ${shift.totalSales.toLocaleString("es-AR")}</span>
+                <span style={{ color: "var(--color-success)" }}>Ventas: ${shift.totalSales.toLocaleString("es-AR")}</span>
                 <span>Movimientos: {shift.movementCount}</span>
               </div>
             </div>

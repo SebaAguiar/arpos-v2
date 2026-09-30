@@ -115,14 +115,14 @@ function HelpPanel({ tab, onTabChange }: { tab: HelpTab; onTabChange: (t: HelpTa
       style={{
         marginTop: "10px",
         borderRadius: "8px",
-        border: "1px solid rgba(229, 77, 46, 0.25)",
+        border: "1px solid color-mix(in srgb, var(--color-danger) 25%, transparent)",
         overflow: "hidden",
       }}
     >
       <div
         style={{
           display: "flex",
-          backgroundColor: "rgba(229, 77, 46, 0.05)",
+          backgroundColor: "color-mix(in srgb, var(--color-danger) 5%, transparent)",
         }}
       >
         <button

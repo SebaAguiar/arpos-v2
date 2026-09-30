@@ -1,6 +1,15 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
+// Inter / Inter Tight are bundled from node_modules rather than fetched from a
+// CDN: the POS is local-first and must render identically with no network.
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/600.css";
+import "@fontsource/inter/700.css";
+import "@fontsource/inter/800.css";
+import "@fontsource/inter-tight/700.css";
+import "@fontsource/inter-tight/800.css";
 import { AppThemeProvider } from "@/lib/theme";
 import { TauriShell } from "@/components/layout/TauriShell";
 import { App } from "@/App";

@@ -47,7 +47,7 @@ export function OpenRegisterModal() {
         }}
       >
         <DialogHeader
-          icon={<LockOpen1Icon width={18} height={18} color="#30a46c" />}
+          icon={<LockOpen1Icon width={18} height={18} color="var(--color-success)" />}
           title="Abrir caja"
           onClose={close}
         />
@@ -57,8 +57,8 @@ export function OpenRegisterModal() {
             <div
               style={{
                 padding: "8px 12px",
-                backgroundColor: "#e54d2e15",
-                border: "1px solid #e54d2e30",
+                backgroundColor: "color-mix(in srgb, var(--color-danger) 12%, transparent)",
+                border: "1px solid color-mix(in srgb, var(--color-danger) 12%, transparent)",
                 borderRadius: "6px",
                 marginBottom: "12px",
                 cursor: "pointer",
@@ -92,7 +92,7 @@ export function OpenRegisterModal() {
               disabled={loading || !amount}
               style={{
                 padding: "10px 20px",
-                backgroundColor: "#30a46c",
+                backgroundColor: "var(--color-success)",
                 color: "#fff",
                 border: "none",
                 borderRadius: "6px",

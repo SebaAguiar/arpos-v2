@@ -13,6 +13,8 @@
     "lint:fix": "eslint . --report-unused-disable-directives --max-warnings 0 --fix"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.3.0",
+    "@fontsource/inter-tight": "^5.3.0",
     "@radix-ui/colors": "^3.0.0",
     "@radix-ui/react-alert-dialog": "^1.1.20",
     "@radix-ui/react-avatar": "^1.2.3",
