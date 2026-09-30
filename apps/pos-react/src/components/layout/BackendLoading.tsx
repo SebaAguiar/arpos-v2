@@ -41,8 +41,8 @@ export function BackendLoading({ error, onRetry }: BackendLoadingProps) {
           <div>
             <div
               style={{
-                backgroundColor: "rgba(239, 68, 68, 0.1)",
-                border: "1px solid rgba(239, 68, 68, 0.3)",
+                backgroundColor: "color-mix(in srgb, var(--color-danger) 10%, transparent)",
+                border: "1px solid color-mix(in srgb, var(--color-danger) 30%, transparent)",
                 borderRadius: "8px",
                 padding: "16px",
                 marginBottom: "16px",
@@ -51,7 +51,7 @@ export function BackendLoading({ error, onRetry }: BackendLoadingProps) {
               <div
                 style={{
                   fontSize: "14px",
-                  color: "#ef4444",
+                  color: "var(--color-danger)",
                   marginBottom: "4px",
                   fontWeight: 500,
                 }}

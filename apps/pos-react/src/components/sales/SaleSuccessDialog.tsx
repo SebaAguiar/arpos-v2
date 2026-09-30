@@ -245,7 +245,7 @@ export function SaleSuccessDialog({
                 backgroundColor: "var(--color-panel-solid)",
                 border: "1px solid var(--gray-a5)",
                 borderRadius: "12px",
-                color: "#8b5cf6",
+                color: "var(--accent)",
                 fontWeight: 600,
                 fontSize: "12px",
                 cursor: "pointer",

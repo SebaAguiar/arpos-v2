@@ -93,7 +93,7 @@ export function FiscalDashboard() {
               padding: "5px 12px",
               borderRadius: "8px",
               border: "1px solid var(--gray-a4)",
-              backgroundColor: isRetrying || !stats || stats.error === 0 ? "var(--gray-a2)" : "rgba(139, 92, 246, 0.06)",
+              backgroundColor: isRetrying || !stats || stats.error === 0 ? "var(--gray-a2)" : "color-mix(in srgb, var(--accent) 6%, transparent)",
               color: isRetrying || !stats || stats.error === 0 ? "var(--gray-9)" : "var(--accent)",
               fontSize: "12px",
               fontWeight: 500,
@@ -127,8 +127,8 @@ export function FiscalDashboard() {
           <StatCard
             label="Total"
             value={stats.total}
-            icon={<FileTextIcon width={16} height={16} color="#8b5cf6" />}
-            color="#8b5cf6"
+            icon={<FileTextIcon width={16} height={16} color="var(--accent)" />}
+            color="var(--accent)"
           />
           <StatCard
             label="Emitidos"
@@ -144,14 +144,14 @@ export function FiscalDashboard() {
           <StatCard
             label="Pendientes"
             value={stats.pending}
-            icon={<FileTextIcon width={16} height={16} color="#e6a817" />}
-            color="#e6a817"
+            icon={<FileTextIcon width={16} height={16} color="var(--color-warning)" />}
+            color="var(--color-warning)"
           />
           <StatCard
             label="Con error"
             value={stats.error}
-            icon={<CrossCircledIcon width={16} height={16} color="#ef4444" />}
-            color="#ef4444"
+            icon={<CrossCircledIcon width={16} height={16} color="var(--color-danger)" />}
+            color="var(--color-danger)"
           />
         </div>
       )}

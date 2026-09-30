@@ -13,8 +13,8 @@ export function OfflineIndicator() {
         gap: "6px",
         padding: "4px 10px",
         borderRadius: "6px",
-        backgroundColor: "rgba(239, 68, 68, 0.12)",
-        color: "#ef4444",
+        backgroundColor: "color-mix(in srgb, var(--color-danger) 12%, transparent)",
+        color: "var(--color-danger)",
         fontSize: "12px",
         fontWeight: 500,
         whiteSpace: "nowrap",
@@ -25,7 +25,7 @@ export function OfflineIndicator() {
           width: "8px",
           height: "8px",
           borderRadius: "50%",
-          backgroundColor: "#ef4444",
+          backgroundColor: "var(--color-danger)",
           display: "inline-block",
         }}
       />

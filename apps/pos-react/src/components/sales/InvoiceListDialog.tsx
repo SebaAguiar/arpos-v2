@@ -37,21 +37,21 @@ const STATUS_CONFIG: Record<
   },
   pending: {
     label: "Pendiente",
-    color: "#e6a817",
-    bg: "rgba(230, 168, 23, 0.08)",
-    border: "rgba(230, 168, 23, 0.2)",
+    color: "var(--color-warning)",
+    bg: "color-mix(in srgb, var(--color-warning) 8%, transparent)",
+    border: "color-mix(in srgb, var(--color-warning) 20%, transparent)",
   },
   error: {
     label: "Error",
-    color: "#ef4444",
-    bg: "rgba(239, 68, 68, 0.08)",
-    border: "rgba(239, 68, 68, 0.2)",
+    color: "var(--color-danger)",
+    bg: "color-mix(in srgb, var(--color-danger) 8%, transparent)",
+    border: "color-mix(in srgb, var(--color-danger) 20%, transparent)",
   },
   cancelled: {
     label: "Anulada",
-    color: "#6b7280",
-    bg: "rgba(107, 114, 128, 0.08)",
-    border: "rgba(107, 114, 128, 0.2)",
+    color: "var(--gray-9)",
+    bg: "color-mix(in srgb, var(--gray-9) 8%, transparent)",
+    border: "color-mix(in srgb, var(--gray-9) 20%, transparent)",
   },
 };
 
@@ -307,13 +307,13 @@ export function InvoiceListDialog({ open, onClose }: InvoiceListDialogProps) {
                 width: "36px",
                 height: "36px",
                 borderRadius: "10px",
-                backgroundColor: "rgba(139, 92, 246, 0.12)",
+                backgroundColor: "color-mix(in srgb, var(--accent) 12%, transparent)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <FileTextIcon width={18} height={18} style={{ color: "#8b5cf6" }} />
+              <FileTextIcon width={18} height={18} style={{ color: "var(--accent)" }} />
             </div>
             <div>
               <Text size="3" weight="bold" style={{ display: "block" }}>
@@ -393,14 +393,14 @@ export function InvoiceListDialog({ open, onClose }: InvoiceListDialogProps) {
           <div
             style={{
               padding: "10px 20px",
-              backgroundColor: "rgba(239, 68, 68, 0.08)",
-              borderBottom: "1px solid rgba(239, 68, 68, 0.15)",
+              backgroundColor: "color-mix(in srgb, var(--color-danger) 8%, transparent)",
+              borderBottom: "1px solid color-mix(in srgb, var(--color-danger) 15%, transparent)",
               display: "flex",
               alignItems: "center",
               gap: "8px",
             }}
           >
-            <CrossCircledIcon width={14} height={14} style={{ color: "#ef4444", flexShrink: 0 }} />
+            <CrossCircledIcon width={14} height={14} style={{ color: "var(--color-danger)", flexShrink: 0 }} />
             <Text size="2" color="red" style={{ flex: 1 }}>
               {error}
             </Text>
@@ -410,7 +410,7 @@ export function InvoiceListDialog({ open, onClose }: InvoiceListDialogProps) {
                 background: "none",
                 border: "none",
                 cursor: "pointer",
-                color: "#ef4444",
+                color: "var(--color-danger)",
               }}
             >
               <Cross2Icon width={12} height={12} />
@@ -422,14 +422,14 @@ export function InvoiceListDialog({ open, onClose }: InvoiceListDialogProps) {
           <div
             style={{
               padding: "16px 20px",
-              backgroundColor: "rgba(230, 168, 23, 0.06)",
-              borderBottom: "1px solid rgba(230, 168, 23, 0.15)",
+              backgroundColor: "color-mix(in srgb, var(--color-warning) 6%, transparent)",
+              borderBottom: "1px solid color-mix(in srgb, var(--color-warning) 15%, transparent)",
               display: "flex",
               alignItems: "center",
               gap: "10px",
             }}
           >
-            <Text size="2" style={{ color: "#e6a817" }}>
+            <Text size="2" style={{ color: "var(--color-warning)" }}>
               No hay configuración de ARCA. Configurala en{" "}
               <strong>Configuración → Facturación</strong> antes de emitir comprobantes.
             </Text>

@@ -619,7 +619,7 @@ export function ArcaConfigForm() {
               style={{
                 background: "none",
                 border: "none",
-                color: "#ef4444",
+                color: "var(--color-danger)",
                 fontSize: "12px",
                 cursor: "pointer",
                 fontWeight: 600,
