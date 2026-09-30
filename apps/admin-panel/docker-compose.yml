@@ -3,12 +3,24 @@ services:
     image: postgres:16-alpine
     container_name: arcom-admin-db
     restart: unless-stopped
+    # Host 5436, NOT 5432: another project's Postgres (tuskfish-postgres)
+    # already owns 5432 on this machine. Changing this will make the admin
+    # panel fail to connect with an ECONNREFUSED that looks like a bad URL.
     ports:
       - "5436:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: admin_panel
+    # Lets `pnpm db:up` wait for a genuinely writable database instead of
+    # racing the init phase. `-d` runs the full initdb, which takes longer
+    # than a bare TCP accept.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d admin_panel"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+      start_period: 10s
     volumes:
       - admin-db-data:/var/lib/postgresql/data
 

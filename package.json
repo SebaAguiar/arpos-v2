@@ -29,6 +29,8 @@
     "admin:prisma:push": "nx run admin-panel:prisma:push",
     "admin:prisma:studio": "nx run admin-panel:prisma:studio",
     "admin:seed": "nx run admin-panel:prisma:seed",
+    "admin:db:up": "nx run admin-panel:db:up",
+    "admin:db:reset": "nx run admin-panel:db:reset",
     "seed": "nx run api:prisma:seed",
     "e2e": "cd apps/pos-e2e && npx playwright test",
     "e2e:ui": "cd apps/pos-e2e && npx playwright test --ui",

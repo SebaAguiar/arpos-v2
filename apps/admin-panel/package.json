@@ -12,7 +12,9 @@
     "db:push": "prisma db push --schema ../../packages/prisma-schema/prisma/schema.prisma && node scripts/apply-db-invariants.mjs",
     "db:migrate": "prisma migrate dev --schema ../../packages/prisma-schema/prisma/schema.prisma",
     "db:studio": "prisma studio --schema ../../packages/prisma-schema/prisma/schema.prisma",
-    "db:seed": "tsx ../../packages/prisma-schema/prisma/seed.ts"
+    "db:seed": "tsx ../../packages/prisma-schema/prisma/seed.ts",
+    "db:up": "node scripts/dev-db.mjs",
+    "db:reset": "node scripts/dev-db.mjs --reset"
   },
   "dependencies": {
     "@arcom/prisma-schema": "workspace:^",
