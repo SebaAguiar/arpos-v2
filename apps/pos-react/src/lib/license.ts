@@ -75,12 +75,21 @@ const ISSUER = "arcom-admin";
 const AUDIENCE = "arcom-pos";
 
 // Public key (Ed25519) used to verify offline license tokens.
-// This is the DEV key pair from the admin .env. For production this is
-// embedded at build time via VITE_LICENSE_PUBLIC_KEY and must match the
-// admin's LICENSE_PRIVATE_KEY.
-const EMBEDDED_PUBLIC_KEY =
-  import.meta.env.VITE_LICENSE_PUBLIC_KEY ??
-  "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAUkhabgK5W7rjvxuR3e1sa67XSieFUKXfFTPSgYzTBqQ=\n-----END PUBLIC KEY-----\n";
+// The public key is injected at build time via VITE_LICENSE_PUBLIC_KEY
+// (set in .env or build environment). The fallback below is intentionally
+// disabled: if the build does not inject the key, license verification
+// will fail fast (a hard failure is preferable to accepting an invalid
+// or obsolete key). This mirrors the requirement that POS NEVER trusts a
+// baked-in dev key in production builds.
+const RAW_PUBLIC_KEY: string | undefined = import.meta.env.VITE_LICENSE_PUBLIC_KEY;
+
+if (!RAW_PUBLIC_KEY) {
+  throw new Error(
+    "VITE_LICENSE_PUBLIC_KEY is missing. The POS must be built with the Ed25519 public key from the admin-panel.",
+  );
+}
+
+const EMBEDDED_PUBLIC_KEY: string = RAW_PUBLIC_KEY;
 
 // Grace period after validUntil before the paid features are blocked.
 export const LICENSE_GRACE_DAYS = 15;
