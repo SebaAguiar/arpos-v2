@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Arcom POS — app icon">
+  <rect width="512" height="512" fill="#1F1A17"/>
+  <g transform="translate(128 74) scale(1)">
+    <path d="M64 220V132a64 64 0 0 1 128 0v88" fill="none" stroke="#C75B39" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="128" cy="140" r="34" fill="#F6F1EA"/>
+  </g>
+</svg>

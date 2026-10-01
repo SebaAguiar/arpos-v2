@@ -1,0 +1,194 @@
+<template>
+  <style>
+    @font-face{font-family:"Inter";font-weight:400;font-style:normal;font-display:block;src:url("assets/fonts/Inter-400.woff2") format("woff2");}
+    @font-face{font-family:"Inter";font-weight:700;font-style:normal;font-display:block;src:url("assets/fonts/Inter-700.woff2") format("woff2");}
+    @font-face{font-family:"JetBrains Mono";font-weight:400;font-style:normal;font-display:block;src:url("assets/fonts/JetBrainsMono-400.woff2") format("woff2");}
+    @font-face{font-family:"JetBrains Mono";font-weight:700;font-style:normal;font-display:block;src:url("assets/fonts/JetBrainsMono-700.woff2") format("woff2");}
+
+    #root{
+      position:relative;width:1920px;height:1080px;overflow:hidden;
+      container-type:size;font-family:"Inter";color:#1F1A17;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .clip.f07-track{position:absolute;inset:0;}
+
+    /* Track 0: arena ground */
+    .f07-ground{position:absolute;inset:0;background:#F6F1EA;}
+
+    /* Track 1: kicker */
+    .f07-kicker{
+      position:absolute;left:4.2cqw;top:9.4cqh;
+      font-family:"JetBrains Mono";font-weight:700;font-size:1.46cqw;
+      letter-spacing:0.16em;text-transform:uppercase;color:#6E635C;
+      display:flex;align-items:baseline;gap:0.9cqw;
+      transform-origin:0 50%;opacity:0;
+    }
+    .f07-spike{color:#C75B39;}
+
+    /* Track 2: surface Dashboard */
+    .f07-screen{
+      position:absolute;left:4.2cqw;top:16cqh;width:72cqw;height:72cqh;
+      box-sizing:border-box;border:1px solid rgba(31,26,23,0.12);
+      border-radius:12px;overflow:hidden;background:#F4DFD9;
+      opacity:0;
+    }
+    .f07-shot{display:block;width:100%;height:100%;object-fit:cover;}
+
+    /* live counter metric chip */
+    .f07-metric-chip{
+      position:absolute;right:2.4cqw;top:2.4cqh;
+      padding:1.4cqh 1.8cqw;border-radius:10px;background:#FDFCFA;
+      border:1px solid rgba(31,26,23,0.14);
+      box-shadow:0 4px 16px rgba(31,26,23,0.08);
+      opacity:0;transform-origin:100% 0%;
+    }
+    .f07-metric-label{
+      font-family:"JetBrains Mono";font-weight:700;font-size:1.05cqw;
+      letter-spacing:0.1em;text-transform:uppercase;color:#6E635C;
+    }
+    .f07-metric-num{
+      font-family:"Inter";font-weight:700;font-size:2.4cqw;
+      line-height:1.2;color:#1F1A17;margin:0.4cqh 0;
+      font-variant-numeric:tabular-nums;
+    }
+    .f07-metric-sub{
+      font-family:"JetBrains Mono";font-weight:500;font-size:1.0cqw;
+      color:#428250;
+    }
+
+    /* Track 3: editorial chrome column */
+    .f07-chrome{position:absolute;left:80cqw;top:16cqh;width:16cqw;}
+    .f07-rule{width:100%;height:1px;background:rgba(31,26,23,0.12);transform-origin:0% 50%;opacity:0;}
+    .f07-claim{
+      display:block;font-family:"Inter";font-weight:400;font-style:italic;
+      font-size:2.3cqw;line-height:1.25;letter-spacing:-0.005em;color:#1F1A17;
+      min-height:9cqh;margin-top:1.7cqw;
+    }
+    .f07-list{
+      display:flex;flex-direction:column;gap:1.4cqh;margin-top:2.2cqh;
+    }
+    .f07-item{
+      display:flex;align-items:center;gap:0.7cqw;
+      font-family:"JetBrains Mono";font-weight:500;font-size:1.22cqw;
+      color:#6E635C;opacity:0;
+    }
+    .f07-dot{color:#C75B39;font-size:1.2em;}
+  </style>
+
+  <div id="root" data-composition-id="07-dashboard" data-width="1920" data-height="1080">
+    <!-- track 0: arena ground -->
+    <div class="clip f07-track f07-ground-track" id="f07-ground-track" data-start="0" data-duration="4.5" data-track-index="0">
+      <div class="f07-ground" id="f07-ground"></div>
+    </div>
+
+    <!-- track 1: surface Dashboard -->
+    <div class="clip f07-track f07-surface-track" id="f07-surface-track" data-start="0" data-duration="4.5" data-track-index="1">
+      <div class="f07-screen" id="f07-plate">
+        <img class="f07-shot" id="f07-shot" src="assets/screens/dashboard-light.png" alt="Arcom Dashboard" />
+
+        <div class="f07-metric-chip" id="f07-metric-chip">
+          <div class="f07-metric-label">COMPROBANTES EMITIDOS</div>
+          <div class="f07-metric-num"><span id="f07-count">0</span> / 42</div>
+          <div class="f07-metric-sub">✓ 100% validados con CAE</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- track 2: editorial chrome -->
+    <div class="clip f07-track f07-editorial-track" id="f07-editorial-track" data-start="0" data-duration="4.5" data-track-index="2">
+      <div class="f07-kicker" id="f07-kicker">
+        <span class="f07-spike">✱</span>&nbsp;<span>Cierre del día</span>
+      </div>
+
+      <div class="f07-chrome" id="f07-chrome">
+        <div class="f07-rule" id="f07-rule"></div>
+        <span class="f07-claim" id="f07-claim"></span>
+
+        <div class="f07-list" id="f07-list">
+          <div class="f07-item" id="f07-item-1"><span class="f07-dot">·</span><span>caja arqueada</span></div>
+          <div class="f07-item" id="f07-item-2"><span class="f07-dot">·</span><span>reportes al instante</span></div>
+          <div class="f07-item" id="f07-item-3"><span class="f07-dot">·</span><span>inventario al día</span></div>
+          <div class="f07-item" id="f07-item-4"><span class="f07-dot">·</span><span>facturas completas</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = window.__timelines["07-dashboard"] = gsap.timeline({ paused: true });
+
+      var plate = document.getElementById("f07-plate");
+      var kicker = document.getElementById("f07-kicker");
+      var rule = document.getElementById("f07-rule");
+      var claimEl = document.getElementById("f07-claim");
+      var metricChip = document.getElementById("f07-metric-chip");
+      var countEl = document.getElementById("f07-count");
+      var item1 = document.getElementById("f07-item-1");
+      var item2 = document.getElementById("f07-item-2");
+      var item3 = document.getElementById("f07-item-3");
+      var item4 = document.getElementById("f07-item-4");
+
+      /* Scene 1 (0.0 - 1.2s): Surface coasts into position and settles */
+      tl.fromTo(plate, { opacity: 0, scale: 0.98 },
+        { opacity: 1, scale: 1, duration: 0.48, ease: "power3.out", immediateRender: false }, 0.05);
+
+      tl.fromTo(kicker, { scale: 0.85, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.38, ease: "back.out(1.8)", immediateRender: false }, 0.08);
+
+      tl.fromTo(rule, { scaleX: 0, opacity: 1 },
+        { scaleX: 1, opacity: 1, duration: 0.4, ease: "power2.out", immediateRender: false }, 0.44);
+
+      /* Chrome claim reveal */
+      var CLAIM = [
+        { text: "Cierra",                   hold: 0.10 },
+        { text: "Cierra el día",            hold: 0.14 },
+        { text: "Cierra el día igual.",     hold: 0.45 }
+      ];
+      var BASE = 0.22, SEC_PER_CHAR = 0.026, cum = 0;
+      var CLAIM_TL = CLAIM.map(function (e) {
+        var d = BASE + e.text.length * SEC_PER_CHAR + e.hold;
+        var s = cum; cum += d;
+        return { text: e.text, start: s, end: cum };
+      });
+      function claimAt(time) {
+        for (var i = CLAIM_TL.length - 1; i >= 0; i--) {
+          if (time >= CLAIM_TL[i].start) return CLAIM_TL[i].text;
+        }
+        return CLAIM_TL[0].text;
+      }
+      var claimState = { t: 0 }, lastClaim = null;
+      tl.to(claimState, {
+        t: cum, duration: cum, ease: "none",
+        onUpdate: function () {
+          var s = claimAt(claimState.t);
+          if (s !== lastClaim) { claimEl.textContent = s; lastClaim = s; }
+        }
+      }, 0.75);
+
+      /* Scene 2 (1.2 - 3.0s): Metric chip pop-in and counter count-up */
+      tl.fromTo(metricChip, { scale: 0.82, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.44, ease: "back.out(1.9)", immediateRender: false }, 1.25);
+
+      var counter = { val: 0 };
+      tl.to(counter, {
+        val: 42,
+        duration: 1.0,
+        ease: "power2.out",
+        onUpdate: function () {
+          if (countEl) countEl.textContent = String(Math.round(counter.val));
+        }
+      }, 1.45);
+
+      /* Staggered list items in right column */
+      tl.fromTo(item1, { opacity: 0, x: 10 }, { opacity: 1, x: 0, duration: 0.28, ease: "power2.out", immediateRender: false }, 1.6);
+      tl.fromTo(item2, { opacity: 0, x: 10 }, { opacity: 1, x: 0, duration: 0.28, ease: "power2.out", immediateRender: false }, 1.9);
+      tl.fromTo(item3, { opacity: 0, x: 10 }, { opacity: 1, x: 0, duration: 0.28, ease: "power2.out", immediateRender: false }, 2.2);
+      tl.fromTo(item4, { opacity: 0, x: 10 }, { opacity: 1, x: 0, duration: 0.28, ease: "power2.out", immediateRender: false }, 2.5);
+
+      /* Scene 3 (3.0 - 4.5s): Hold still until crossfade */
+    })();
+  </script>
+</template>

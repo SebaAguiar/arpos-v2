@@ -1,0 +1,260 @@
+<template>
+  <style>
+    @font-face{font-family:"Inter";font-weight:400;font-style:normal;font-display:block;src:url("assets/fonts/Inter-400.woff2") format("woff2");}
+    @font-face{font-family:"Inter";font-weight:700;font-style:normal;font-display:block;src:url("assets/fonts/JetBrainsMono-400.woff2") format("woff2");}
+    @font-face{font-family:"JetBrains Mono";font-weight:400;font-style:normal;font-display:block;src:url("assets/fonts/JetBrainsMono-400.woff2") format("woff2");}
+    @font-face{font-family:"JetBrains Mono";font-weight:700;font-style:normal;font-display:block;src:url("assets/fonts/JetBrainsMono-700.woff2") format("woff2");}
+
+    /* ── root: styled by #root, never by a class on the composition element ── */
+    #root{position:relative;width:1920px;height:1080px;overflow:hidden;container-type:size;font-family:"Inter";color:#1F1A17;}
+
+    /* ── full-frame clip tracks: two classes, so this beats the shared .clip ── */
+    .clip.f05-track{position:absolute;inset:0;}
+
+    /* ── track 0 · ground: arena paper, full bleed, full duration ── */
+    .clip.f05-ground{background:#F6F1EA;}
+
+    /* ── kicker-spike eyebrow ── */
+    .f05-kicker{position:absolute;left:4.2cqw;top:9cqh;font-family:"JetBrains Mono";font-weight:700;font-size:1.46cqw;letter-spacing:0.16em;text-transform:uppercase;color:#6E635C;white-space:nowrap;transform-origin:0% 50%;opacity:0;}
+    .f05-spike{color:#C75B39;}
+
+    /* ── POS surface · handoff rect, byte-exact, never transformed ── */
+    .f05-screen{position:absolute;left:4.2cqw;top:16cqh;width:72cqw;height:72cqh;box-sizing:border-box;border:1px solid rgba(31,26,23,0.12);border-radius:12px;overflow:hidden;background:#F4DFD9;}
+    .f05-shot{display:block;width:100%;height:100%;object-fit:cover;}
+
+    /* ── editorial chrome column ── */
+    .f05-chrome{position:absolute;left:78.5cqw;top:16cqh;width:17.5cqw;}
+    .f05-rule{width:100%;height:1px;background:rgba(31,26,23,0.12);transform-origin:0% 50%;opacity:0;}
+    .f05-claim{display:block;font-family:"Inter";font-weight:400;font-style:italic;font-size:2.3cqw;line-height:1.25;letter-spacing:-0.005em;color:#1F1A17;min-height:9cqh;margin-top:1.7cqw;}
+
+    /* ── badge: brand terracotta/warning pill in editorial column ── */
+    .f05-badge-wrap{position:relative;margin-top:2cqh;height:5.8cqh;}
+    .f05-badge{position:absolute;left:0;top:0;width:100%;height:100%;}
+    .f05-pill{position:absolute;inset:0;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:0.9cqw;border-radius:9999px;background:#8F4229;border:1px solid rgba(31,26,23,0.14);box-shadow:0 4px 16px rgba(143,66,41,0.25);}
+    .f05-pill img{display:block;width:1.6cqw;height:1.6cqw;}
+    .f05-slice{opacity:0;}
+    .f05-badge-label{font-family:"JetBrains Mono";font-weight:700;font-size:1.05cqw;letter-spacing:0.08em;color:#FDFCFA;white-space:nowrap;}
+    .f05-pill-final{opacity:0;}
+
+    /* ── comprobante micro-state chip in editorial column ── */
+    .f05-receipt-wrap{position:relative;margin-top:1.4cqh;height:5.2cqh;}
+    .f05-receipt{position:absolute;left:0;top:0;width:100%;height:100%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:0.8cqw;padding:0 1cqw;border-radius:8px;background:#FDFCFA;border:1px solid rgba(31,26,23,0.14);box-shadow:0 2px 8px rgba(31,26,23,0.06);font-family:"JetBrains Mono";font-weight:700;font-size:0.98cqw;letter-spacing:0.06em;color:#1F1A17;white-space:nowrap;transform-origin:50% 50%;opacity:0;}
+    .f05-rlabel{color:#6E635C;}
+    .f05-arrow{color:#8F4229;}
+    .f05-token{display:inline-block;min-width:7.5ch;color:#8F4229;}
+    .f05-cursor{display:inline-block;opacity:0;}
+
+    .f05-note{display:block;font-family:"JetBrains Mono";font-weight:400;font-size:1.25cqw;line-height:1.6;letter-spacing:0.02em;color:#6E635C;margin-top:2cqh;opacity:0;}
+    .f05-note-tight{margin-top:0.8cqh;}
+  </style>
+
+  <div id="root" data-composition-id="05-offline" data-width="1920" data-height="1080">
+
+    <!-- track 0 · arena ground -->
+    <div class="clip f05-track f05-ground" data-start="0" data-duration="6" data-track-index="0"></div>
+
+    <!-- track 1 · the POS surface (clean, zero overlays) -->
+    <div class="clip f05-track f05-surface" data-start="0" data-duration="6" data-track-index="1">
+      <div class="f05-screen" id="f05-plate">
+        <img class="f05-shot" src="assets/screens/pos-offline-light.png" alt="" />
+      </div>
+    </div>
+
+    <!-- track 2 · editorial chrome -->
+    <div class="clip f05-track f05-editorial" data-start="0" data-duration="6" data-track-index="2">
+      <div class="f05-kicker" id="f05-kicker"><span class="f05-spike">✱</span>&nbsp;Se cae la señal</div>
+
+      <div class="f05-chrome" id="f05-chrome">
+        <div class="f05-rule" id="f05-rule"></div>
+        <span class="f05-claim" id="f05-claim"></span>
+
+        <div class="f05-badge-wrap" id="f05-badge-wrap">
+          <div class="f05-badge" id="f05-badge">
+            <div class="f05-pill f05-slice" aria-hidden="true"><img src="assets/brand/mark-mono-ink.svg" alt="" /><span class="f05-badge-label"></span></div>
+            <div class="f05-pill f05-slice" aria-hidden="true"><img src="assets/brand/mark-mono-ink.svg" alt="" /><span class="f05-badge-label"></span></div>
+            <div class="f05-pill f05-slice" aria-hidden="true"><img src="assets/brand/mark-mono-ink.svg" alt="" /><span class="f05-badge-label"></span></div>
+            <div class="f05-pill f05-slice" aria-hidden="true"><img src="assets/brand/mark-mono-ink.svg" alt="" /><span class="f05-badge-label"></span></div>
+            <div class="f05-pill f05-pill-final" id="f05-pill-final"><img src="assets/brand/mark-mono-ink.svg" alt="" /><span class="f05-badge-label"></span></div>
+          </div>
+        </div>
+
+        <div class="f05-receipt-wrap" id="f05-receipt-wrap">
+          <div class="f05-receipt" id="f05-receipt">
+            <span class="f05-rlabel">COMPROBANTE</span>
+            <span class="f05-arrow">→</span>
+            <span class="f05-token" id="f05-token">ENVIADO</span>
+            <span class="f05-cursor" id="f05-cursor">_</span>
+          </div>
+        </div>
+
+        <span class="f05-note" id="f05-note-a">el comprobante queda en cola</span>
+        <span class="f05-note f05-note-tight" id="f05-note-b">ARCA reintenta solo</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = window.__timelines["05-offline"] = gsap.timeline({ paused: true });
+
+      /* Pure function of its index — the stutter is deterministic, never Math.random. */
+      var glitchHash = function (n) {
+        var x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+        return x - Math.floor(x);
+      };
+
+      var plate    = document.getElementById("f05-plate");
+      var badge    = document.getElementById("f05-badge");
+      var pillFin  = document.getElementById("f05-pill-final");
+      var receipt  = document.getElementById("f05-receipt");
+      var claimEl  = document.getElementById("f05-claim");
+      var tokenEl  = document.getElementById("f05-token");
+      var cursorEl = document.getElementById("f05-cursor");
+      var slices   = gsap.utils.toArray(".f05-slice");
+      var bLabels  = gsap.utils.toArray(".f05-badge-label");
+
+      /* ══ Scene 1 (0.0–1.0s) · the surface settles into the F3 rect ════════════
+         The plate arrives with the crossfade on opacity only — its transform is
+         never touched, so the handoff contract (scale 1 / static) holds exactly. */
+      tl.fromTo(plate, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out", immediateRender: true }, 0);
+      tl.fromTo("#f05-kicker", { scale: 0, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.45, ease: "power3.out", immediateRender: false }, 0.06);
+      tl.fromTo("#f05-rule", { scaleX: 0, opacity: 1 },
+        { scaleX: 1, opacity: 1, duration: 0.4, ease: "power2.out", immediateRender: false }, 0.52);
+
+      /* ══ Scene 2 (1.0–2.4s) · the offline chip breaks in and snaps sharp ═══════
+         chromatic-glitch Form B (monochrome slice displacement — the restrained
+         register for this enterprise surface): 4 bands arrive offset and converge
+         under a stepped ease. discrete-text-sequence drives the label decode. */
+
+      var BADGE_SEQ = [
+        { t: 0.00, text: "" },
+        { t: 1.00, text: "MO" },
+        { t: 1.09, text: "MODO" },
+        { t: 1.15, text: "MODO OFF" },
+        { t: 1.21, text: "MODO OFFLINE" }
+      ];
+      function badgeAt(time) {
+        for (var i = BADGE_SEQ.length - 1; i >= 0; i--) {
+          if (time >= BADGE_SEQ[i].t) return BADGE_SEQ[i].text;
+        }
+        return "";
+      }
+      var badgeState = { t: 0 }, lastBadge = null;
+      tl.to(badgeState, {
+        t: 1.21, duration: 0.21, ease: "none",
+        onUpdate: function () {
+          var s = badgeAt(badgeState.t);
+          if (s !== lastBadge) {
+            for (var i = 0; i < bLabels.length; i++) bLabels[i].textContent = s;
+            lastBadge = s;
+          }
+        }
+      }, 1.00);
+
+      slices.forEach(function (el, i) {
+        gsap.set(el, { clipPath: "inset(" + (i * 25) + "% 0 " + (100 - (i + 1) * 25) + "% 0)" });
+        var dir = glitchHash(i * 3 + 1) > 0.5 ? 1 : -1;
+        tl.fromTo(el, {
+            x: dir * (10 + glitchHash(i * 5 + 2) * 12),
+            scaleX: 1 + glitchHash(i * 7 + 3) * 0.3,
+            opacity: 1
+          }, {
+            x: 0, scaleX: 1,
+            duration: 0.3, ease: "steps(5)", immediateRender: false
+          }, 1.00 + glitchHash(i * 11 + 4) * 0.06);
+      });
+      /* Clean resolve: the readable pill rises under the last band, then the
+         ghosts are clamped to exact rest — a ghost left 1px off reads as a bug. */
+      tl.fromTo(pillFin, { opacity: 0 },
+        { opacity: 1, duration: 0.16, ease: "power2.in", immediateRender: false }, 1.20);
+      tl.to(slices, { opacity: 0, duration: 0.001, ease: "none", immediateRender: false }, 1.36);
+
+      /* ══ Scene 3 (2.4–4.6s) · the receipt waits in the retry queue ═════════════ */
+
+      /* dynamic-content-sequencing: window per entry computed from content
+         length, reduced ONCE into a flat timeline; the driver reverse-searches
+         and swaps the DOM only on a transition. */
+      var CLAIM = [
+        { text: "La",            hold: 0.08 },
+        { text: "La caja",       hold: 0.10 },
+        { text: "La caja sigue.", hold: 0.32 }
+      ];
+      var BASE = 0.26, SEC_PER_CHAR = 0.030, cum = 0;
+      var CLAIM_TL = CLAIM.map(function (e) {
+        var d = BASE + e.text.length * SEC_PER_CHAR + e.hold;
+        var s = cum; cum += d;
+        return { text: e.text, start: s, end: cum };
+      });
+      function claimAt(time) {
+        for (var i = CLAIM_TL.length - 1; i >= 0; i--) {
+          if (time >= CLAIM_TL[i].start) return CLAIM_TL[i].text;
+        }
+        return CLAIM_TL[0].text;
+      }
+      var claimState = { t: 0 }, lastClaim = null;
+      tl.to(claimState, {
+        t: cum, duration: cum, ease: "none",
+        onUpdate: function () {
+          var s = claimAt(claimState.t);
+          if (s !== lastClaim) { claimEl.textContent = s; lastClaim = s; }
+        }
+      }, 2.46);
+
+      tl.fromTo(receipt, { scale: 0.86, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.44, ease: "power3.out", immediateRender: false }, 2.42);
+
+      /* discrete-text-sequence: the receipt token hard-cuts "enviado" → "en cola",
+         with a thinking pause between the two states — the wait IS the beat. */
+      var TOKEN_SEQ = [
+        { t: 0.00, text: "ENVIADO" },
+        { t: 3.38, text: "EN COLA" }
+      ];
+      function tokenAt(time) {
+        for (var i = TOKEN_SEQ.length - 1; i >= 0; i--) {
+          if (time >= TOKEN_SEQ[i].t) return TOKEN_SEQ[i].text;
+        }
+        return TOKEN_SEQ[0].text;
+      }
+      var tokenState = { t: 0 }, lastToken = null;
+      tl.to(tokenState, {
+        t: 3.38, duration: 0.88, ease: "none",
+        onUpdate: function () {
+          var s = tokenAt(tokenState.t);
+          if (s !== lastToken) { tokenEl.textContent = s; lastToken = s; }
+        }
+      }, 2.50);
+
+      /* Deterministic sin square wave on the same timeline — never a CSS keyframe. */
+      var blink = { p: 0 }, BLINK_DUR = 6.00 - 3.44;
+      tl.to(blink, {
+        p: Math.PI * 2 * 4, duration: BLINK_DUR, ease: "none",
+        onUpdate: function () {
+          cursorEl.style.opacity = Math.sin(blink.p) > 0 ? "1" : "0";
+        }
+      }, 3.44);
+
+      tl.fromTo("#f05-note-a", { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.26, ease: "power2.out", immediateRender: false }, 4.52);
+      tl.fromTo("#f05-note-b", { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.26, ease: "power2.out", immediateRender: false }, 4.86);
+
+      /* ══ Scene 4 (4.6–6.0s) · control hold · subtle jitter, settled ════════════
+         sine-wave-loop at the low end: the badge alone breathes once, amplitude
+         ramping to zero over the last 20% so the shot rests before the crossfade. */
+      var phase = { p: 0 }, IDLE_START = 4.62, IDLE_DUR = 6.00 - IDLE_START;
+      tl.to(phase, {
+        p: Math.PI * 2, duration: IDLE_DUR, ease: "none",
+        onUpdate: function () {
+          var t = phase.p / (Math.PI * 2);
+          var env = t < 0.8 ? 1 : (1 - t) / 0.2;
+          var s = Math.sin(phase.p);
+          badge.style.transform =
+            "translateY(" + (s * 2 * env).toFixed(3) + "px) scale(" + (1 + s * 0.008 * env).toFixed(5) + ")";
+        }
+      }, IDLE_START);
+    })();
+  </script>
+</template>

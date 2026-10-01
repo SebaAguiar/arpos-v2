@@ -1,0 +1,136 @@
+<template>
+  <style>
+    @font-face{font-family:"Inter";font-weight:400;font-style:normal;font-display:block;src:url("assets/fonts/Inter-400.woff2") format("woff2");}
+    @font-face{font-family:"Inter";font-weight:700;font-style:normal;font-display:block;src:url("assets/fonts/Inter-700.woff2") format("woff2");}
+    @font-face{font-family:"JetBrains Mono";font-weight:400;font-style:normal;font-display:block;src:url("assets/fonts/JetBrainsMono-400.woff2") format("woff2");}
+    @font-face{font-family:"JetBrains Mono";font-weight:700;font-style:normal;font-display:block;src:url("assets/fonts/JetBrainsMono-700.woff2") format("woff2");}
+
+    #root{
+      position:relative;width:1920px;height:1080px;overflow:hidden;
+      container-type:size;font-family:"Inter";color:#F6F1EA;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .clip.f09-track{position:absolute;inset:0;}
+
+    /* Track 0: dark navy ground + ambient terracotta glow and grain */
+    .f09-ground{position:absolute;inset:0;background:#181515;}
+    .f09-warm{
+      position:absolute;inset:0;
+      background:radial-gradient(120% 90% at 50% 35%,rgba(199,91,57,0.12) 0%,rgba(24,21,21,0) 70%);
+    }
+    .f09-tex{
+      position:absolute;inset:-5%;
+      background-image:radial-gradient(rgba(246,241,234,0.09) 1px,rgba(24,21,21,0) 1px);
+      background-size:48px 48px;
+      transform-origin:50% 50%;
+    }
+
+    /* Track 1: kicker */
+    .f09-kicker{
+      position:absolute;left:4.2cqw;top:9.4cqh;
+      font-family:"JetBrains Mono";font-weight:700;font-size:1.46cqw;
+      letter-spacing:0.16em;text-transform:uppercase;color:#9E928A;
+      display:flex;align-items:baseline;gap:0.9cqw;
+      transform-origin:0 50%;opacity:0;
+    }
+    .f09-spike{color:#C75B39;}
+
+    /* Track 2: centered brand assembly stack */
+    .f09-stack{
+      position:absolute;left:0;right:0;top:22cqh;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:4.5cqh;
+    }
+
+    .f09-lockup-wrap{
+      width:680px;max-width:44cqw;
+      box-sizing:border-box;border-radius:14px;overflow:hidden;
+      border:1px solid rgba(246,241,234,0.12);
+      box-shadow:0 8px 32px rgba(0,0,0,0.45);
+      transform-origin:50% 50%;opacity:0;
+    }
+    .f09-lockup{width:100%;height:auto;display:block;}
+
+    .f09-cta-wrap{
+      display:flex;flex-direction:column;align-items:center;gap:1.6cqh;
+      opacity:0;transform-origin:50% 50%;
+    }
+    .f09-btn{
+      background:#C75B39;color:#F6F1EA;
+      font-family:"Inter";font-weight:600;font-size:1.55cqw;
+      padding:1.4cqh 3.4cqw;border-radius:9999px;letter-spacing:-0.01em;
+      box-shadow:0 4px 20px rgba(199,91,57,0.35);
+    }
+    .f09-sub{
+      font-family:"JetBrains Mono";font-weight:500;font-size:1.25cqw;
+      color:#A99C92;letter-spacing:0.04em;
+    }
+
+    .f09-url{
+      font-family:"JetBrains Mono";font-weight:700;font-size:1.6cqw;
+      color:#F6F1EA;letter-spacing:0.12em;text-transform:uppercase;
+      opacity:0;transform-origin:50% 50%;
+    }
+  </style>
+
+  <div id="root" data-composition-id="09-endcard" data-width="1920" data-height="1080">
+    <!-- track 0: navy ground -->
+    <div class="clip f09-track f09-ground-track" id="f09-ground-track" data-start="0" data-duration="5.5" data-track-index="0">
+      <div class="f09-ground" id="f09-ground"></div>
+      <div class="f09-warm"></div>
+      <div class="f09-tex" id="f09-tex"></div>
+    </div>
+
+    <!-- track 1: kicker -->
+    <div class="clip f09-track f09-kicker-track" id="f09-kicker-track" data-start="0" data-duration="5.5" data-track-index="1">
+      <div class="f09-kicker" id="f09-kicker">
+        <span class="f09-spike">✱</span>&nbsp;<span>Arcom</span>
+      </div>
+    </div>
+
+    <!-- track 2: brand assembly stack -->
+    <div class="clip f09-track f09-stack-track" id="f09-stack-track" data-start="0" data-duration="5.5" data-track-index="2">
+      <div class="f09-stack" id="f09-stack">
+        <div class="f09-lockup-wrap" id="f09-lockup-wrap">
+          <img class="f09-lockup" id="f09-lockup" src="assets/brand/lockup-horizontal-negative.svg" alt="Arcom POS" />
+        </div>
+
+        <div class="f09-cta-wrap" id="f09-cta-wrap">
+          <div class="f09-btn" id="f09-btn">Empezar ahora</div>
+          <div class="f09-sub" id="f09-sub">Instalación en 3 minutos</div>
+        </div>
+
+        <div class="f09-url" id="f09-url">arcom.arsian.dev</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = window.__timelines["09-endcard"] = gsap.timeline({ paused: true });
+
+      var kicker = document.getElementById("f09-kicker");
+      var lockupWrap = document.getElementById("f09-lockup-wrap");
+      var ctaWrap = document.getElementById("f09-cta-wrap");
+      var urlEl = document.getElementById("f09-url");
+
+      /* Scene 1 (0.0 - 1.0s): Navy ground settles, kicker pops in */
+      tl.fromTo(kicker, { scale: 0.85, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.38, ease: "back.out(1.8)", immediateRender: false }, 0.08);
+
+      /* Scene 2 (1.0 - 2.4s): Negative lockup spring-pops and settles */
+      tl.fromTo(lockupWrap, { scale: 0.88, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.55, ease: "back.out(1.7)", immediateRender: false }, 0.95);
+
+      /* Scene 3 (2.4 - 3.8s): CTA button & sub reveal */
+      tl.fromTo(ctaWrap, { scale: 0.9, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.44, ease: "back.out(1.8)", immediateRender: false }, 2.35);
+
+      /* Scene 4 (3.8 - 5.5s): URL reveals with steady brand hold */
+      tl.fromTo(urlEl, { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.4, ease: "power2.out", immediateRender: false }, 3.65);
+    })();
+  </script>
+</template>

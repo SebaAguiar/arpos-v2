@@ -1,0 +1,249 @@
+<template>
+  <style>
+    @font-face{font-family:"Inter";font-weight:400;font-style:normal;font-display:block;src:url("assets/fonts/Inter-400.woff2") format("woff2");}
+    @font-face{font-family:"Inter";font-weight:700;font-style:normal;font-display:block;src:url("assets/fonts/Inter-700.woff2") format("woff2");}
+    @font-face{font-family:"JetBrains Mono";font-weight:400;font-style:normal;font-display:block;src:url("assets/fonts/JetBrainsMono-400.woff2") format("woff2");}
+    @font-face{font-family:"JetBrains Mono";font-weight:700;font-style:normal;font-display:block;src:url("assets/fonts/JetBrainsMono-700.woff2") format("woff2");}
+
+    #root{
+      position:relative;width:1920px;height:1080px;overflow:hidden;
+      container-type:size;font-family:"Inter";color:#1F1A17;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .clip.f06-track{position:absolute;inset:0;}
+
+    /* Track 0: arena ground */
+    .f06-ground{position:absolute;inset:0;background:#F6F1EA;}
+
+    /* Track 1: kicker */
+    .f06-kicker{
+      position:absolute;left:4.2cqw;top:9.4cqh;
+      font-family:"JetBrains Mono";font-weight:700;font-size:1.46cqw;
+      letter-spacing:0.16em;text-transform:uppercase;color:#6E635C;
+      display:flex;align-items:baseline;gap:0.9cqw;
+      transform-origin:0 50%;opacity:0;
+    }
+    .f06-spike{color:#C75B39;}
+
+    /* Track 2: surface POS */
+    .f06-screen{
+      position:absolute;left:4.2cqw;top:16cqh;width:72cqw;height:72cqh;
+      box-sizing:border-box;border:1px solid rgba(31,26,23,0.12);
+      border-radius:12px;overflow:hidden;background:#F4DFD9;
+      opacity:0;
+    }
+    .f06-shot{display:block;width:100%;height:100%;object-fit:cover;}
+
+    /* Track 3: editorial chrome column */
+    .f06-chrome{position:absolute;left:78.5cqw;top:16cqh;width:17.5cqw;}
+    .f06-rule{width:100%;height:1px;background:rgba(31,26,23,0.12);transform-origin:0% 50%;opacity:0;}
+    .f06-claim{
+      display:block;font-family:"Inter";font-weight:400;font-style:italic;
+      font-size:2.3cqw;line-height:1.25;letter-spacing:-0.005em;color:#1F1A17;
+      min-height:9cqh;margin-top:1.7cqw;
+    }
+
+    /* sync status badge in editorial column */
+    .f06-badge-wrap{position:relative;margin-top:2cqh;height:5.8cqh;}
+    .f06-sync-badge{position:absolute;left:0;top:0;width:100%;height:100%;}
+    .f06-pill-syncing{
+      position:absolute;inset:0;box-sizing:border-box;
+      display:flex;align-items:center;justify-content:center;gap:0.9cqw;
+      border-radius:9999px;background:#FDFCFA;
+      border:1px solid rgba(31,26,23,0.14);
+      box-shadow:0 2px 8px rgba(31,26,23,0.06);
+    }
+    .f06-spinner{
+      width:1.6cqw;height:1.6cqw;transform-origin:50% 50%;
+    }
+    .f06-sync-label{
+      font-family:"JetBrains Mono";font-weight:700;font-size:1.05cqw;
+      letter-spacing:0.08em;color:#1F1A17;
+    }
+
+    .f06-pill-done{
+      position:absolute;inset:0;box-sizing:border-box;
+      display:flex;align-items:center;justify-content:center;gap:0.9cqw;
+      border-radius:9999px;background:#396A43;
+      border:1px solid rgba(31,26,23,0.14);
+      box-shadow:0 4px 16px rgba(57,106,67,0.25);
+      opacity:0;transform-origin:50% 50%;
+    }
+    .f06-check{
+      color:#F6F1EA;font-size:1.2cqw;font-weight:700;
+    }
+    .f06-done-label{
+      font-family:"JetBrains Mono";font-weight:700;font-size:1.05cqw;
+      letter-spacing:0.08em;color:#F6F1EA;
+    }
+
+    /* receipt queue resolution chip in editorial column */
+    .f06-receipt-wrap{position:relative;margin-top:1.4cqh;height:5.2cqh;}
+    .f06-receipt{
+      position:absolute;left:0;top:0;width:100%;height:100%;
+      box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:0.8cqw;
+      padding:0 1cqw;border-radius:8px;background:#FDFCFA;
+      border:1px solid rgba(31,26,23,0.14);
+      font-family:"JetBrains Mono";font-weight:700;font-size:0.98cqw;
+      color:#1F1A17;white-space:nowrap;
+      box-shadow:0 2px 8px rgba(31,26,23,0.06);
+      transform-origin:50% 50%;opacity:0;
+    }
+    .f06-rlabel{color:#6E635C;}
+    .f06-arrow{color:#6E635C;}
+    .f06-status-ok{color:#396A43;}
+
+    .f06-note{
+      display:block;font-family:"JetBrains Mono";font-weight:400;
+      font-size:1.25cqw;line-height:1.6;letter-spacing:0.02em;color:#6E635C;
+      margin-top:2cqh;opacity:0;
+    }
+    .f06-note-tight{margin-top:0.8cqh;}
+  </style>
+
+  <div id="root" data-composition-id="06-sync" data-width="1920" data-height="1080">
+    <!-- track 0: arena ground -->
+    <div class="clip f06-track f06-ground-track" id="f06-ground-track" data-start="0" data-duration="5.5" data-track-index="0">
+      <div class="f06-ground" id="f06-ground"></div>
+    </div>
+
+    <!-- track 1: surface POS (clean, zero overlays) -->
+    <div class="clip f06-track f06-surface-track" id="f06-surface-track" data-start="0" data-duration="5.5" data-track-index="1">
+      <div class="f06-screen" id="f06-plate">
+        <img class="f06-shot" id="f06-shot" src="assets/screens/pos-sync-light.png" alt="Arcom POS Sync" />
+      </div>
+    </div>
+
+    <!-- track 2: editorial chrome -->
+    <div class="clip f06-track f06-editorial-track" id="f06-editorial-track" data-start="0" data-duration="5.5" data-track-index="2">
+      <div class="f06-kicker" id="f06-kicker">
+        <span class="f06-spike">✱</span>&nbsp;<span>Vuelve internet</span>
+      </div>
+
+      <div class="f06-chrome" id="f06-chrome">
+        <div class="f06-rule" id="f06-rule"></div>
+        <span class="f06-claim" id="f06-claim"></span>
+
+        <div class="f06-badge-wrap" id="f06-badge-wrap">
+          <div class="f06-sync-badge" id="f06-sync-badge" data-layout-allow-overlap>
+            <div class="f06-pill-syncing" id="f06-pill-syncing">
+              <svg class="f06-spinner" id="f06-spinner" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9" fill="none" stroke="#6E635C" stroke-width="2.5" stroke-dasharray="32 18" />
+              </svg>
+              <span class="f06-sync-label">SINCRONIZANDO</span>
+            </div>
+            <div class="f06-pill-done" id="f06-pill-done">
+              <span class="f06-check">✓</span>
+              <span class="f06-done-label">AL DÍA</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="f06-receipt-wrap" id="f06-receipt-wrap">
+          <div class="f06-receipt" id="f06-receipt">
+            <span class="f06-rlabel">COLA FISCAL</span>
+            <span class="f06-arrow">→</span>
+            <span class="f06-status-ok" id="f06-status-ok">CAE 73654879 ✓</span>
+          </div>
+        </div>
+
+        <span class="f06-note" id="f06-note-a">ventas y facturas sincronizan solas</span>
+        <span class="f06-note f06-note-tight" id="f06-note-b">sin intervención</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = window.__timelines["06-sync"] = gsap.timeline({ paused: true });
+
+      var plate = document.getElementById("f06-plate");
+      var kicker = document.getElementById("f06-kicker");
+      var rule = document.getElementById("f06-rule");
+      var claimEl = document.getElementById("f06-claim");
+      var spinner = document.getElementById("f06-spinner");
+      var pillSync = document.getElementById("f06-pill-syncing");
+      var pillDone = document.getElementById("f06-pill-done");
+      var receipt = document.getElementById("f06-receipt");
+      var noteA = document.getElementById("f06-note-a");
+      var noteB = document.getElementById("f06-note-b");
+
+      /* Scene 1 (0.0 - 1.2s): Surface settles in the continuous handoff rect */
+      tl.fromTo(plate, { opacity: 0 },
+        { opacity: 1, duration: 0.3, ease: "power2.out", immediateRender: true }, 0);
+
+      tl.fromTo(kicker, { scale: 0.85, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.38, ease: "back.out(1.8)", immediateRender: false }, 0.08);
+
+      tl.fromTo(rule, { scaleX: 0, opacity: 1 },
+        { scaleX: 1, opacity: 1, duration: 0.4, ease: "power2.out", immediateRender: false }, 0.48);
+
+      /* Right chrome sequencing */
+      var CLAIM = [
+        { text: "Todo",                   hold: 0.10 },
+        { text: "Todo sincroniza",        hold: 0.14 },
+        { text: "Todo sincroniza solo.",  hold: 0.45 }
+      ];
+      var BASE = 0.24, SEC_PER_CHAR = 0.028, cum = 0;
+      var CLAIM_TL = CLAIM.map(function (e) {
+        var d = BASE + e.text.length * SEC_PER_CHAR + e.hold;
+        var s = cum; cum += d;
+        return { text: e.text, start: s, end: cum };
+      });
+      function claimAt(time) {
+        for (var i = CLAIM_TL.length - 1; i >= 0; i--) {
+          if (time >= CLAIM_TL[i].start) return CLAIM_TL[i].text;
+        }
+        return CLAIM_TL[0].text;
+      }
+      var claimState = { t: 0 }, lastClaim = null;
+      tl.to(claimState, {
+        t: cum, duration: cum, ease: "none",
+        onUpdate: function () {
+          var s = claimAt(claimState.t);
+          if (s !== lastClaim) { claimEl.textContent = s; lastClaim = s; }
+        }
+      }, 0.85);
+
+      /* Scene 2 (1.2 - 3.0s): Syncing spinner rotates smoothly */
+      var rot = { deg: 0 };
+      tl.to(rot, {
+        deg: 720,
+        duration: 2.5,
+        ease: "none",
+        onUpdate: function () {
+          if (spinner) spinner.style.transform = "rotate(" + rot.deg + "deg)";
+        }
+      }, 0.8);
+
+      /* Scene 3 (3.0 - 4.6s): Queue chip resolves to CAE, and badge flips to AL DÍA */
+      tl.fromTo(receipt, { scale: 0.9, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.38, ease: "power3.out", immediateRender: false }, 2.85);
+
+      tl.to(pillSync, { opacity: 0, scale: 0.92, duration: 0.22, ease: "power2.in" }, 3.35);
+
+      tl.fromTo(pillDone, { scale: 0.84, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.42, ease: "back.out(2)", immediateRender: false }, 3.42);
+
+      tl.fromTo(noteA, { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.3, ease: "power2.out", immediateRender: false }, 3.75);
+
+      tl.fromTo(noteB, { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.3, ease: "power2.out", immediateRender: false }, 4.10);
+
+      /* Scene 4 (4.6 - 5.5s): Subtle settled breathing on AL DÍA badge */
+      var phase = { p: 0 }, IDLE_START = 4.4, IDLE_DUR = 5.5 - IDLE_START;
+      tl.to(phase, {
+        p: Math.PI * 2, duration: IDLE_DUR, ease: "none",
+        onUpdate: function () {
+          var s = Math.sin(phase.p);
+          if (pillDone) {
+            pillDone.style.transform = "scale(" + (1 + s * 0.012).toFixed(4) + ")";
+          }
+        }
+      }, IDLE_START);
+    })();
+  </script>
+</template>

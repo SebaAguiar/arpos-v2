@@ -1,0 +1,211 @@
+<template>
+  <style>
+    @font-face{font-family:"Inter";font-weight:400;font-style:normal;font-display:block;src:url("assets/fonts/Inter-400.woff2") format("woff2");}
+    @font-face{font-family:"Inter";font-weight:700;font-style:normal;font-display:block;src:url("assets/fonts/Inter-700.woff2") format("woff2");}
+    @font-face{font-family:"JetBrains Mono";font-weight:400;font-style:normal;font-display:block;src:url("assets/fonts/JetBrainsMono-400.woff2") format("woff2");}
+    @font-face{font-family:"JetBrains Mono";font-weight:700;font-style:normal;font-display:block;src:url("assets/fonts/JetBrainsMono-700.woff2") format("woff2");}
+
+    #root{
+      position:relative;width:1920px;height:1080px;overflow:hidden;
+      container-type:size;font-family:"Inter";color:#1F1A17;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .clip.f03-track{position:absolute;inset:0;}
+
+    /* Track 0: arena ground */
+    .f03-ground{position:absolute;inset:0;background:#F6F1EA;}
+
+    /* Track 1: kicker */
+    .f03-kicker{
+      position:absolute;left:4.2cqw;top:9.4cqh;
+      font-family:"JetBrains Mono";font-weight:700;font-size:1.46cqw;
+      letter-spacing:0.16em;text-transform:uppercase;color:#6E635C;
+      display:flex;align-items:baseline;gap:0.9cqw;
+      transform-origin:0 50%;opacity:0;
+    }
+    .f03-spike{color:#C75B39;}
+
+    /* Track 2: surface hero */
+    .f03-screen{
+      position:absolute;left:4.2cqw;top:16cqh;width:72cqw;height:72cqh;
+      box-sizing:border-box;border:1px solid rgba(31,26,23,0.12);
+      border-radius:12px;overflow:hidden;background:#F4DFD9;
+      opacity:0;
+    }
+    .f03-shot{display:block;width:100%;height:100%;object-fit:cover;}
+
+    /* product add highlight pill on the catalog */
+    .f03-prod-callout{
+      position:absolute;left:14cqw;top:32cqh;
+      padding:0.9cqh 1.5cqw;border-radius:9999px;
+      background:#1F1A17;color:#F6F1EA;
+      font-family:"JetBrains Mono";font-size:1.15cqw;font-weight:700;
+      letter-spacing:0.04em;box-shadow:0 4px 16px rgba(31,26,23,0.14);
+      opacity:0;transform-origin:50% 50%;
+    }
+
+    /* live cart total chip on the cart area */
+    .f03-cart-chip{
+      position:absolute;right:2.4cqw;bottom:8.4cqh;
+      height:6.4cqh;box-sizing:border-box;display:flex;align-items:center;gap:1.2cqw;
+      padding:0 1.8cqw;border-radius:8px;background:#F6F1EA;
+      border:1px solid rgba(31,26,23,0.14);
+      box-shadow:0 2px 8px rgba(31,26,23,0.06);
+      font-family:"JetBrains Mono";font-weight:700;font-size:1.3cqw;
+      color:#1F1A17;opacity:0;
+    }
+    .f03-cart-label{color:#6E635C;font-size:1.05cqw;letter-spacing:0.08em;}
+    .f03-cart-val{font-variant-numeric:tabular-nums;color:#1F1A17;}
+
+    /* payment confirmation chip */
+    .f03-pay-chip{
+      position:absolute;right:2.4cqw;top:2.4cqh;
+      padding:0.9cqh 1.6cqw;border-radius:9999px;
+      background:#FDFCFA;border:1px solid rgba(31,26,23,0.14);
+      display:flex;align-items:center;gap:0.8cqw;
+      font-family:"JetBrains Mono";font-weight:700;font-size:1.18cqw;
+      color:#1F1A17;box-shadow:0 4px 16px rgba(31,26,23,0.08);
+      opacity:0;transform-origin:100% 0%;
+    }
+    .f03-pay-check{color:#52A365;font-size:1.3em;}
+
+    /* Track 3: editorial chrome column */
+    .f03-chrome{position:absolute;left:80cqw;top:16cqh;width:16cqw;}
+    .f03-rule{width:100%;height:1px;background:rgba(31,26,23,0.12);transform-origin:0% 50%;opacity:0;}
+    .f03-claim{
+      display:block;font-family:"Inter";font-weight:400;font-style:italic;
+      font-size:2.3cqw;line-height:1.25;letter-spacing:-0.005em;color:#1F1A17;
+      min-height:9cqh;margin-top:1.7cqw;
+    }
+    .f03-note{
+      display:block;font-family:"JetBrains Mono";font-weight:400;
+      font-size:1.35cqw;line-height:1.6;letter-spacing:0.02em;color:#6E635C;
+      margin-top:1.7cqw;opacity:0;
+    }
+    .f03-note-tight{margin-top:0.9cqw;}
+  </style>
+
+  <div id="root" data-composition-id="03-sale" data-width="1920" data-height="1080">
+    <!-- track 0: arena ground -->
+    <div class="clip f03-track f03-ground-track" id="f03-ground-track" data-start="0" data-duration="6.5" data-track-index="0">
+      <div class="f03-ground" id="f03-ground"></div>
+    </div>
+
+    <!-- track 1: surface POS -->
+    <div class="clip f03-track f03-surface-track" id="f03-surface-track" data-start="0" data-duration="6.5" data-track-index="1">
+      <div class="f03-screen" id="f03-plate">
+        <img class="f03-shot" id="f03-shot" src="assets/screens/pos-light.png" alt="Arcom POS" />
+        <div class="f03-prod-callout" id="f03-prod-callout">+ Remera Algodón · $ 12.480</div>
+        <div class="f03-cart-chip" id="f03-cart-chip">
+          <span class="f03-cart-label">SUBTOTAL</span>
+          <span class="f03-cart-val" id="f03-cart-val">$ 0</span>
+        </div>
+        <div class="f03-pay-chip" id="f03-pay-chip">
+          <span class="f03-pay-check">✓</span>
+          <span>Cobro listo · Efectivo</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- track 2: editorial chrome -->
+    <div class="clip f03-track f03-editorial-track" id="f03-editorial-track" data-start="0" data-duration="6.5" data-track-index="2">
+      <div class="f03-kicker" id="f03-kicker">
+        <span class="f03-spike">✱</span>&nbsp;<span>Cobro en vivo</span>
+      </div>
+
+      <div class="f03-chrome" id="f03-chrome">
+        <div class="f03-rule" id="f03-rule"></div>
+        <span class="f03-claim" id="f03-claim"></span>
+        <span class="f03-note" id="f03-note-a">catálogo ▸ carrito ▸ pago</span>
+        <span class="f03-note f03-note-tight" id="f03-note-b">sin esperar a la nube</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = window.__timelines["03-sale"] = gsap.timeline({ paused: true });
+
+      var plate = document.getElementById("f03-plate");
+      var kicker = document.getElementById("f03-kicker");
+      var rule = document.getElementById("f03-rule");
+      var claimEl = document.getElementById("f03-claim");
+      var prodCallout = document.getElementById("f03-prod-callout");
+      var cartChip = document.getElementById("f03-cart-chip");
+      var cartVal = document.getElementById("f03-cart-val");
+      var payChip = document.getElementById("f03-pay-chip");
+      var noteA = document.getElementById("f03-note-a");
+      var noteB = document.getElementById("f03-note-b");
+
+      /* Scene 1 (0.0 - 1.2s): Surface coasts into position and settles */
+      tl.fromTo(plate, { opacity: 0, scale: 0.98 },
+        { opacity: 1, scale: 1, duration: 0.55, ease: "power3.out", immediateRender: false }, 0.05);
+
+      tl.fromTo(kicker, { scale: 0.85, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.38, ease: "back.out(1.8)", immediateRender: false }, 0.12);
+
+      tl.fromTo(rule, { scaleX: 0, opacity: 1 },
+        { scaleX: 1, opacity: 1, duration: 0.4, ease: "power2.out", immediateRender: false }, 0.48);
+
+      /* Chrome headline sequencing */
+      var CLAIM = [
+        { text: "Un",                   hold: 0.10 },
+        { text: "Un cobro",             hold: 0.14 },
+        { text: "Un cobro en segundos.", hold: 0.45 }
+      ];
+      var BASE = 0.24, SEC_PER_CHAR = 0.028, cum = 0;
+      var CLAIM_TL = CLAIM.map(function (e) {
+        var d = BASE + e.text.length * SEC_PER_CHAR + e.hold;
+        var s = cum; cum += d;
+        return { text: e.text, start: s, end: cum };
+      });
+      function claimAt(time) {
+        for (var i = CLAIM_TL.length - 1; i >= 0; i--) {
+          if (time >= CLAIM_TL[i].start) return CLAIM_TL[i].text;
+        }
+        return CLAIM_TL[0].text;
+      }
+      var claimState = { t: 0 }, lastClaim = null;
+      tl.to(claimState, {
+        t: cum, duration: cum, ease: "none",
+        onUpdate: function () {
+          var s = claimAt(claimState.t);
+          if (s !== lastClaim) { claimEl.textContent = s; lastClaim = s; }
+        }
+      }, 0.85);
+
+      /* Scene 2 (1.2 - 3.2s): Product added, cart count-up */
+      tl.fromTo(prodCallout, { scale: 0.7, opacity: 0, y: 10 },
+        { scale: 1, opacity: 1, y: 0, duration: 0.36, ease: "back.out(2)", immediateRender: false }, 1.25);
+
+      tl.to(prodCallout, { opacity: 0, scale: 0.9, duration: 0.28, ease: "power2.in" }, 2.4);
+
+      tl.fromTo(cartChip, { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 0.35, ease: "power3.out", immediateRender: false }, 1.35);
+
+      var counter = { val: 0 };
+      tl.to(counter, {
+        val: 12480,
+        duration: 1.1,
+        ease: "power2.out",
+        onUpdate: function () {
+          cartVal.textContent = "$ " + Math.round(counter.val).toLocaleString("es-AR");
+        }
+      }, 1.45);
+
+      /* Scene 3 (3.2 - 5.2s): Payment confirmation chip + right notes */
+      tl.fromTo(payChip, { scale: 0.8, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.44, ease: "back.out(1.8)", immediateRender: false }, 3.35);
+
+      tl.fromTo(noteA, { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.3, ease: "power2.out", immediateRender: false }, 3.25);
+
+      tl.fromTo(noteB, { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.3, ease: "power2.out", immediateRender: false }, 3.65);
+
+      /* Scene 4 (5.2 - 6.5s): Hold still until crossfade */
+    })();
+  </script>
+</template>

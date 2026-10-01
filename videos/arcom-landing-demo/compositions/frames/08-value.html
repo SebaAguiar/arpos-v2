@@ -1,0 +1,255 @@
+<template>
+  <style>
+    /* Local brand faces (frame.md) — no network import. */
+    @font-face{font-family:"Inter";font-weight:400;font-style:normal;font-display:block;src:url("assets/fonts/Inter-400.woff2") format("woff2");}
+    @font-face{font-family:"Inter";font-weight:700;font-style:normal;font-display:block;src:url("assets/fonts/JetBrainsMono-400.woff2") format("woff2");}
+    @font-face{font-family:"JetBrains Mono";font-weight:400;font-style:normal;font-display:block;src:url("assets/fonts/JetBrainsMono-400.woff2") format("woff2");}
+    @font-face{font-family:"JetBrains Mono";font-weight:700;font-style:normal;font-display:block;src:url("assets/fonts/JetBrainsMono-700.woff2") format("woff2");}
+
+    /* Root is styled by ID (never by a class on the data-composition-id element). */
+    #root{
+      position:relative;width:1920px;height:1080px;overflow:hidden;
+      container-type:size;font-family:"Inter";color:#1F1A17;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    /* ---- ground: full-bleed clip layer (never painted on #root) ---- */
+    #root .v08-ground{position:absolute;inset:0;background:#F6F1EA;transform-origin:50% 50%;will-change:transform;}
+    .v08-warm{position:absolute;inset:0;
+      background:radial-gradient(128% 92% at 46% 26%,rgba(31,26,23,0) 34%,rgba(31,26,23,0.05) 100%);}
+    .v08-grain{position:absolute;inset:-4%;
+      background-image:radial-gradient(rgba(31,26,23,0.09) 1px,rgba(31,26,23,0) 1px);
+      background-size:48px 48px;transform-origin:50% 50%;will-change:transform;}
+
+    /* ---- empty list region: three hairline slots (section-rule, ink only) ---- */
+    #root .v08-slots{position:absolute;inset:0;}
+    .v08-slot{position:absolute;left:4.2cqw;width:91.6cqw;height:1px;
+      background:rgba(31,26,23,0.14);transform-origin:0 50%;will-change:transform;}
+
+    /* ---- chrome: the ✱ spike kicker, one line, top-left ---- */
+    #root .v08-kicker{position:absolute;left:4.2cqw;top:9.4cqh;display:flex;align-items:baseline;gap:0.9cqw;
+      font-family:"JetBrains Mono";font-size:1.46cqw;font-weight:500;letter-spacing:0.16em;
+      text-transform:uppercase;color:#6E635C;transform-origin:0 50%;will-change:transform,opacity;}
+    .v08-spike{color:#C75B39;font-size:1.18em;line-height:1;}
+
+    /* ---- the stack: force-left editorial lockups, one shared column grid ---- */
+    #root .v08-stack{position:absolute;left:4.2cqw;top:27.8cqh;width:91.6cqw;height:46.7cqh;will-change:transform;}
+    .v08-row{position:absolute;left:0;width:100%;height:15.6cqh;display:grid;
+      grid-template-columns:14cqw 5cqw 1fr auto;column-gap:1.15cqw;align-items:baseline;}
+    .v08-row-1{top:0;}
+    .v08-row-2{top:15.6cqh;}
+    .v08-row-3{top:31.1cqh;}
+
+    /* the single coral moment: three margin markers, one per value line */
+    .v08-mark{position:absolute;left:-2.4cqw;top:42px;width:4px;height:52px;
+      background:#C75B39;transform-origin:0 100%;will-change:transform,opacity;}
+
+    /* number-hero figure — left-pinned origin so the count grows rightward, never drifts */
+    .v08-fig{grid-column:1;font-family:"Inter";font-weight:400;font-size:7.4cqw;line-height:0.95;
+      letter-spacing:-0.025em;color:#1F1A17;font-variant-numeric:tabular-nums;
+      white-space:nowrap;transform-origin:0 70%;will-change:transform,opacity;}
+    .v08-num{display:inline-block;}
+    .v08-lt{display:inline-block;padding-right:0.1em;}
+
+    /* mono number-unit, seated on the figure baseline */
+    .v08-unit{grid-column:2;font-family:"JetBrains Mono";font-size:2.08cqw;font-weight:500;line-height:1;
+      letter-spacing:0.01em;color:#6E635C;white-space:nowrap;will-change:transform,opacity;}
+
+    /* claim word, one step down from the figure */
+    .v08-qual{grid-column:3;font-family:"Inter";font-weight:400;font-size:3.2cqw;line-height:1;
+      letter-spacing:-0.01em;color:#1F1A17;white-space:nowrap;will-change:transform,opacity;}
+
+    /* mono offset — the right-hand margin rail, flush right on every line */
+    .v08-off{grid-column:4;justify-self:end;font-family:"JetBrains Mono";font-size:1.35cqw;font-weight:500;
+      line-height:1.4;letter-spacing:0.02em;color:#6E635C;white-space:nowrap;will-change:transform,opacity;}
+
+    /* closing beat: one coral ping ring off the third marker */
+    .v08-ping{position:absolute;left:-66px;top:45px;width:46px;height:46px;border-radius:50%;
+      border:1px solid #C75B39;box-sizing:border-box;transform-origin:50% 50%;will-change:transform,opacity;}
+  </style>
+
+  <div id="root" data-composition-id="08-value" data-width="1920" data-height="1080">
+    <!-- Scene 1: the arena settles; the empty three-slot list region is established -->
+    <div class="clip v08-ground" id="v08-ground" data-start="0" data-duration="4" data-track-index="0">
+      <div class="v08-warm"></div>
+      <div class="v08-grain" id="v08-grain"></div>
+    </div>
+
+    <div class="clip v08-slots" data-start="0" data-duration="4" data-track-index="1">
+      <div class="v08-slot" id="v08-slot-1" style="top:43.4cqh"></div>
+      <div class="v08-slot" id="v08-slot-2" style="top:59cqh"></div>
+      <div class="v08-slot" id="v08-slot-3" style="top:74.4cqh"></div>
+    </div>
+
+    <div class="clip v08-stack" id="v08-stack" data-start="0" data-duration="4" data-track-index="2">
+      <div class="v08-row v08-row-1" id="v08-row-1">
+        <span class="v08-mark"></span>
+        <div class="v08-fig"><span class="v08-lt">&lt;</span><span class="v08-num">0</span></div>
+        <div class="v08-unit">ms</div>
+        <div class="v08-off">de cobro local</div>
+      </div>
+
+      <div class="v08-row v08-row-2" id="v08-row-2">
+        <span class="v08-mark"></span>
+        <div class="v08-fig"><span class="v08-num">0</span></div>
+        <div class="v08-unit">%</div>
+        <div class="v08-qual">autónomo</div>
+        <div class="v08-off">en tu PC</div>
+      </div>
+
+      <div class="v08-row v08-row-3" id="v08-row-3">
+        <span class="v08-mark"></span>
+        <div class="v08-fig"><span class="v08-num">0</span></div>
+        <div class="v08-unit">min</div>
+        <div class="v08-qual">Listo</div>
+        <div class="v08-off">de instalación</div>
+        <span class="v08-ping" id="v08-ping"></span>
+      </div>
+    </div>
+
+    <div class="clip v08-kicker" id="v08-kicker" data-start="0" data-duration="4" data-track-index="3">
+      <span class="v08-spike">✱</span><span>En números</span>
+    </div>
+  </div>
+
+  <script>
+    window.__timelines = window.__timelines || {};
+    const tl = (window.__timelines["08-value"] = gsap.timeline({ paused: true }));
+
+    /* Count timing is compressed against the 4s board (three value lines, ~1s each).
+       The mechanic is kept intact: value + transform scale share position, duration and ease. */
+    const COUNT_DUR = 0.4;
+    const COUNT_EASE = "power2.out";
+    const START_SCALE = 0.62; // START_SIZE / END_SIZE — sizes are static CSS, only scale tweens
+    const MARK_DUR = 0.32;    // spring-pop-entrance, smooth power3.out settle (no overshoot)
+    const UNIT_DUR = 0.3;     // suffix lands after the count, never during it
+    const QUAL_DUR = 0.32;
+    const SEC_PER_CHAR = 0.012;
+    const LABEL_MIN = 0.11;
+    const LABEL_MAX = 0.2;
+    const LABEL_PAD = 0.24;
+
+    /* Scene cues: line 1 @0.8s, line 2 @1.9s, line 3 @2.9s (voiceover reaches each number there). */
+    const PLAN = [
+      { id: "v08-row-1", enter: 0.82, target: 5 },
+      { id: "v08-row-2", enter: 1.9, target: 100 },
+      { id: "v08-row-3", enter: 2.88, target: 3 },
+    ].map(function (row) {
+      const el = document.getElementById(row.id);
+      const offEl = el.querySelector(".v08-off");
+      const offText = offEl ? offEl.textContent : "";
+      /* dynamic-content-sequencing: the offset's screen time is derived from its own length */
+      const lead = Math.min(LABEL_MAX, Math.max(LABEL_MIN, offText.length * SEC_PER_CHAR));
+      const start = row.enter + 0.06;
+      return {
+        el: el,
+        start: start,
+        target: row.target,
+        num: el.querySelector(".v08-num"),
+        fig: el.querySelector(".v08-fig"),
+        unit: el.querySelector(".v08-unit"),
+        qual: el.querySelector(".v08-qual"),
+        mark: el.querySelector(".v08-mark"),
+        off: offEl,
+        countEnd: start + COUNT_DUR,
+        labelAt: start + lead,
+        labelDur: Math.min(0.5, LABEL_PAD + offText.length * 0.015),
+      };
+    });
+
+    /* --- Scene 1 (0.0–0.8): arena settles, grain drifts, empty slots draw, kicker pops --- */
+    tl.fromTo("#v08-ground", { scale: 1.014 }, { scale: 1, duration: 0.85, ease: "power2.out" }, 0);
+    tl.fromTo("#v08-grain", { scale: 1 }, { scale: 1.08, duration: 3.7, ease: "none" }, 0.2);
+    tl.fromTo("#v08-slot-1", { scaleX: 0 }, { scaleX: 1, duration: 0.55, ease: "power2.out" }, 0.22);
+    tl.fromTo("#v08-slot-2", { scaleX: 0 }, { scaleX: 1, duration: 0.55, ease: "power2.out" }, 0.34);
+    tl.fromTo("#v08-slot-3", { scaleX: 0 }, { scaleX: 1, duration: 0.55, ease: "power2.out" }, 0.46);
+    tl.fromTo(
+      "#v08-kicker",
+      { scale: 0.72, opacity: 0 },
+      { scale: 1, opacity: 1, duration: 0.42, ease: "power3.out" },
+      0.05,
+    );
+
+    /* --- Scenes 2–4 (0.8–3.7): three value lines assemble left-to-right, in cascade --- */
+    PLAN.forEach(function (row) {
+      // marker pop — origin-anchored grow out of the row's baseline
+      tl.fromTo(
+        row.mark,
+        { scaleY: 0, opacity: 0 },
+        { scaleY: 1, opacity: 1, duration: MARK_DUR, ease: "power3.out" },
+        row.enter - 0.08,
+      );
+
+      // counting-dynamic-scale: proxy value -> text (O(1)) + transform scale, one shared beat
+      const state = { v: 0 };
+      tl.to(
+        state,
+        {
+          v: row.target,
+          duration: COUNT_DUR,
+          ease: COUNT_EASE,
+          onUpdate: function () {
+            row.num.textContent = String(Math.round(state.v));
+          },
+        },
+        row.start,
+      );
+      tl.fromTo(
+        row.fig,
+        { scale: START_SCALE, opacity: 0 },
+        { scale: 1, opacity: 1, duration: COUNT_DUR, ease: COUNT_EASE },
+        row.start,
+      );
+
+      // suffix slides in only after the count lands
+      tl.fromTo(
+        row.unit,
+        { y: 16, opacity: 0 },
+        { y: 0, opacity: 1, duration: UNIT_DUR, ease: "power3.out" },
+        row.countEnd,
+      );
+
+      // claim word joins the line right after its number
+      if (row.qual) {
+        tl.fromTo(
+          row.qual,
+          { x: -18, opacity: 0 },
+          { x: 0, opacity: 1, duration: QUAL_DUR, ease: "power3.out" },
+          row.countEnd + 0.02,
+        );
+      }
+
+      // mono offset reveals beside, ahead of the count peak, paced by its own length
+      tl.fromTo(
+        row.off,
+        { y: 10, opacity: 0 },
+        { y: 0, opacity: 1, duration: row.labelDur, ease: "power2.out" },
+        row.labelAt,
+      );
+    });
+
+    /* --- Scene 4 close (3.0s): one coral ping off the last marker, then the list is whole --- */
+    tl.fromTo(
+      "#v08-ping",
+      { scale: 0.3, opacity: 0.55 },
+      { scale: 2.3, opacity: 0, duration: 0.55, ease: "power2.out" },
+      3.06,
+    );
+
+    /* --- Scene 5 (3.7–4.0): HOLD. Minimal sine jitter, sin(0)=0 so the settled stack never jumps. --- */
+    const cam = document.getElementById("v08-stack");
+    const drift = { p: 0 };
+    tl.to(
+      drift,
+      {
+        p: Math.PI * 2 * 0.21,
+        duration: 0.32,
+        ease: "none",
+        onUpdate: function () {
+          cam.style.transform = "translateY(" + (Math.sin(drift.p) * 1.6).toFixed(3) + "px)";
+        },
+      },
+      3.68,
+    );
+  </script>
+</template>

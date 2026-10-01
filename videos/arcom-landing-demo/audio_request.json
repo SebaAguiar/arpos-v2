@@ -1,0 +1,66 @@
+{
+  "lines": [
+    {
+      "id": "01",
+      "sfx": [
+        "impact-bass-2"
+      ]
+    },
+    {
+      "id": "02",
+      "sfx": [
+        "chime"
+      ]
+    },
+    {
+      "id": "03",
+      "sfx": [
+        "click-soft",
+        "chime"
+      ]
+    },
+    {
+      "id": "04",
+      "sfx": [
+        "riser",
+        "chime"
+      ]
+    },
+    {
+      "id": "05",
+      "sfx": [
+        "glitch-3",
+        "error"
+      ]
+    },
+    {
+      "id": "06",
+      "sfx": [
+        "chime"
+      ]
+    },
+    {
+      "id": "07",
+      "sfx": [
+        "ping",
+        "chime"
+      ]
+    },
+    {
+      "id": "08",
+      "sfx": [
+        "ping"
+      ]
+    },
+    {
+      "id": "09",
+      "sfx": [
+        "impact-bass-1",
+        "chime"
+      ]
+    }
+  ],
+  "bgm": {
+    "mode": "none"
+  }
+}

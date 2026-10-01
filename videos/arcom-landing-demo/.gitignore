@@ -1,0 +1,6 @@
+renders/
+.hyperframes/
+.thumbnails/
+.media/
+.texture-probe.html
+node_modules/

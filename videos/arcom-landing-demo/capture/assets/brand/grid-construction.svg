@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Arcom POS — grilla de construcción">
+  <defs>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0v32" fill="none" stroke="#E4DED6" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="256" height="256" fill="#F6F1EA"/>
+  <rect width="256" height="256" fill="url(#grid)"/>
+  <circle cx="128" cy="140" r="112" fill="none" stroke="#C75B39" stroke-opacity=".35" stroke-width="1.5" stroke-dasharray="6 6"/>
+  <line x1="128" y1="0" x2="128" y2="256" stroke="#C75B39" stroke-opacity=".35" stroke-width="1.5" stroke-dasharray="6 6"/>
+  <line x1="0" y1="140" x2="256" y2="140" stroke="#C75B39" stroke-opacity=".35" stroke-width="1.5" stroke-dasharray="6 6"/>
+  <path d="M64 220V132a64 64 0 0 1 128 0v88" fill="none" stroke="#C75B39" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="128" cy="140" r="30" fill="#1F1A17"/>
+  <path d="M64 236v12M192 236v12M46 220h12M198 220h12" stroke="#1F1A17" stroke-width="2"/>
+  <text x="128" y="252" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#1F1A17">4x</text>
+</svg>

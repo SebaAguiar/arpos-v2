@@ -1,0 +1,104 @@
+<template>
+  <style>
+    @font-face{font-family:"Inter";font-weight:400;font-style:normal;font-display:block;src:url("assets/fonts/Inter-400.woff2") format("woff2");}
+    @font-face{font-family:"Inter";font-weight:700;font-style:normal;font-display:block;src:url("assets/fonts/Inter-700.woff2") format("woff2");}
+    @font-face{font-family:"JetBrains Mono";font-weight:400;font-style:normal;font-display:block;src:url("assets/fonts/JetBrainsMono-400.woff2") format("woff2");}
+    @font-face{font-family:"JetBrains Mono";font-weight:700;font-style:normal;font-display:block;src:url("assets/fonts/JetBrainsMono-700.woff2") format("woff2");}
+
+    #root{
+      position:relative;width:1920px;height:1080px;overflow:hidden;
+      container-type:size;font-family:"Inter";color:#1F1A17;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .clip.f01-track{position:absolute;inset:0;}
+
+    /* Track 0: ground + warm texture with subtle grain */
+    .f01-ground{position:absolute;inset:0;background:#F6F1EA;}
+    .f01-warm{
+      position:absolute;inset:0;
+      background:radial-gradient(128% 92% at 46% 26%,rgba(31,26,23,0) 34%,rgba(31,26,23,0.06) 100%);
+    }
+    .f01-tex{
+      position:absolute;inset:-5%;
+      background-image:radial-gradient(rgba(31,26,23,0.11) 1px,rgba(31,26,23,0) 1px);
+      background-size:48px 48px;
+      transform-origin:50% 50%;
+    }
+
+    /* Track 1: kicker */
+    .f01-kicker{
+      position:absolute;left:4.2cqw;top:9.4cqh;
+      font-family:"JetBrains Mono";font-weight:700;font-size:1.46cqw;
+      letter-spacing:0.16em;text-transform:uppercase;color:#6E635C;
+      display:flex;align-items:baseline;gap:0.9cqw;
+      transform-origin:0 50%;opacity:0;
+    }
+    .f01-spike{color:#B45234;}
+
+    /* Track 2: hero title centered */
+    .f01-hero-wrap{
+      position:absolute;left:0;right:0;top:42cqh;
+      display:flex;justify-content:center;align-items:center;
+    }
+    .f01-hero{
+      font-family:"Inter";font-weight:700;font-size:7.6cqw;
+      line-height:1.02;letter-spacing:-0.024em;color:#1F1A17;
+      text-align:center;white-space:nowrap;
+      transform-origin:50% 50%;opacity:0;
+    }
+  </style>
+
+  <div id="root" data-composition-id="01-hook" data-width="1920" data-height="1080">
+    <div class="clip f01-track f01-bg-track" id="f01-bg-track" data-start="0" data-duration="3" data-track-index="0">
+      <div class="f01-ground" id="f01-ground"></div>
+      <div class="f01-warm"></div>
+      <div class="f01-tex" id="f01-tex"></div>
+    </div>
+
+    <div class="clip f01-track f01-kicker-track" id="f01-kicker-track" data-start="0" data-duration="3" data-track-index="1">
+      <div class="f01-kicker" id="f01-kicker">
+        <span class="f01-spike">✱</span>&nbsp;<span>Arcom</span>
+      </div>
+    </div>
+
+    <div class="clip f01-track f01-hero-track" id="f01-hero-track" data-start="0" data-duration="3" data-track-index="2">
+      <div class="f01-hero-wrap" id="f01-hero-wrap">
+        <h1 class="f01-hero" id="f01-hero">Se corta internet.</h1>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = window.__timelines["01-hook"] = gsap.timeline({ paused: true });
+
+      var tex = document.getElementById("f01-tex");
+      var kicker = document.getElementById("f01-kicker");
+      var hero = document.getElementById("f01-hero");
+
+      /* Scene 1 (0.0 - 0.4s): Arena ground settles, kicker pops in */
+      tl.fromTo(kicker, { scale: 0.85, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.38, ease: "back.out(1.8)", immediateRender: false }, 0.08);
+
+      /* Scene 2 (0.4 - 1.4s): "Se corta internet." kinetic slam dead center */
+      tl.fromTo(hero, { scale: 1.28, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.22, ease: "power4.out", immediateRender: false }, 0.42);
+
+      /* Scene 3 (1.4 - 3.0s): Subtle tension hold / micro-jitter on texture */
+      var jitter = { p: 0 };
+      tl.to(jitter, {
+        p: Math.PI * 4,
+        duration: 1.6,
+        ease: "none",
+        onUpdate: function () {
+          var s = Math.sin(jitter.p);
+          if (tex) {
+            tex.style.transform = "translate(" + (s * 0.8).toFixed(2) + "px, " + (s * 0.5).toFixed(2) + "px)";
+          }
+        }
+      }, 1.4);
+    })();
+  </script>
+</template>

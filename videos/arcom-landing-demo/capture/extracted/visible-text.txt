@@ -1,0 +1,26 @@
+// Copy real de la landing de Arcom (apps/marketing-landing/src/components/sections/home).
+// Fuente del storyboard — no inventar claims fuera de esto.
+
+SISTEMA POS OFFLINE-FIRST
+Tu negocio no se detiene. Tu sistema tampoco.
+Arcom es el único POS que funciona 100% sin internet. Sigue facturando, controlando inventario y atendiendo clientes aunque se caiga la red. La tranquilidad de un sistema robusto, con la agilidad de la nube.
+
+Empezar ahora — instalación en 3 minutos.
+Ver cómo funciona.
+
+45 segundos para entender por qué Arcom no se detiene.
+
+CAE en Tiempo Real
+Cola de Reintento Offline
+Impresión y Ticketera Fiscal
+
+Funciona sin internet — 100% Autónomo en PC
+Facturación ARCA / AFIP — Reintento Offline automático
+Sync Multi-Sucursal — Automático en 2º plano
+Velocidad de cobro — <5ms (SQLite local)
+Instalación y Setup — Zero-Config (<3 min)
+
+Velocidad Instantánea
+Seguridad & Autonomía
+Sincronización en Segundo Plano
+Stock unificado.

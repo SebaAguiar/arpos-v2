@@ -1,0 +1,633 @@
+<template>
+  <style>
+    @font-face{font-family:"Inter";font-weight:400;font-style:normal;font-display:block;src:url("assets/fonts/Inter-400.woff2") format("woff2");}
+    @font-face{font-family:"Inter";font-weight:700;font-style:normal;font-display:block;src:url("assets/fonts/JetBrainsMono-400.woff2") format("woff2");}
+    @font-face{font-family:"JetBrains Mono";font-weight:400;font-style:normal;font-display:block;src:url("assets/fonts/JetBrainsMono-400.woff2") format("woff2");}
+    @font-face{font-family:"JetBrains Mono";font-weight:700;font-style:normal;font-display:block;src:url("assets/fonts/JetBrainsMono-700.woff2") format("woff2");}
+
+    /* ---- frame tokens (frame.md: cream ground, ink voice, coral rationed, navy = machine surface) ---- */
+    #root{
+      position:relative;width:1920px;height:1080px;overflow:hidden;
+      container-type:size;
+      font-family:"Inter";color:#1F1A17;
+    }
+    #root *{box-sizing:border-box;}
+
+    /* ---------- ground (full-bleed clip, lowest track) ---------- */
+    .a04-ground{position:absolute;inset:0;background:#FDFCFA;}
+
+    /* ---------- kicker ---------- */
+    .a04-kicker{
+      position:absolute;left:4.2cqw;top:8cqh;
+      font-family:"JetBrains Mono";font-size:1.46cqw;font-weight:500;
+      letter-spacing:0.16em;text-transform:uppercase;color:#6E635C;
+    }
+    .a04-spike{color:#C75B39;letter-spacing:0;display:inline-block;transform-origin:50% 50%;}
+    .a04-kicker-rule{
+      position:absolute;left:4.2cqw;top:calc(8cqh + 5.2cqh);width:26cqw;height:1px;
+      background:rgba(31,26,23,0.12);transform-origin:0 50%;
+    }
+
+    /* ---------- Scene 1 · the trigger (centered modal-click) ---------- */
+    .a04-trigger{position:absolute;left:30cqw;top:33.4cqh;width:40cqw;height:32cqh;}
+    .a04-trigger-plate{
+      position:absolute;left:-0.5cqw;top:0.7cqw;right:-0.5cqw;bottom:-0.5cqw;
+      background:#F4DFD9;border:1px solid rgba(31,26,23,0.1);border-radius:12px;z-index:1;
+    }
+    .a04-trigger-card{
+      position:absolute;inset:0;
+      background:#FDFCFA;border:1px solid rgba(31,26,23,0.12);border-radius:12px;
+      box-shadow:0 1px 3px rgba(31,26,23,0.08), 0 4px 16px rgba(31,26,23,0.04);
+      z-index:2;opacity:0;
+    }
+    .a04-trigger-eyebrow{
+      position:absolute;left:3.2cqw;top:3cqh;
+      font-family:"JetBrains Mono";font-size:1.4cqw;font-weight:400;
+      letter-spacing:0.14em;text-transform:uppercase;color:#6E635C;
+    }
+    .a04-trigger-amount{
+      position:absolute;left:3.2cqw;top:6.4cqh;
+      font-family:"Inter";font-size:4.2cqw;font-weight:400;line-height:1.02;
+      letter-spacing:-0.022em;color:#1F1A17;
+    }
+    .a04-trigger-caption{
+      position:absolute;left:3.2cqw;top:14.4cqh;
+      font-family:"JetBrains Mono";font-size:1.4cqw;letter-spacing:0.02em;color:#6E635C;
+    }
+    .a04-trigger-rule{
+      position:absolute;left:3.2cqw;right:3.2cqw;top:18.4cqh;height:1px;
+      background:rgba(31,26,23,0.12);transform-origin:0 50%;
+    }
+    .a04-burst{
+      position:absolute;left:1.8cqw;top:19.4cqh;width:19.6cqw;height:9.6cqh;
+      border:1px solid rgba(31,26,23,0.22);border-radius:9999px;
+      transform-origin:50% 50%;z-index:2;
+    }
+    .a04-pill{
+      position:absolute;left:3.2cqw;top:20.4cqh;width:16cqw;height:7.4cqh;
+      border-radius:9999px;background:#1F1A17;color:#FDFCFA;
+      display:flex;align-items:center;justify-content:center;
+      font-family:"Inter";font-size:1.46cqw;font-weight:500;line-height:1;
+      box-shadow:0 1px 3px rgba(31,26,23,0.08), 0 4px 16px rgba(31,26,23,0.04);
+      transform-origin:50% 50%;will-change:transform;z-index:3;
+    }
+    .a04-ghost{
+      position:absolute;right:3.2cqw;top:20.4cqh;height:7.4cqh;padding:0 3cqw;
+      border:1px solid rgba(31,26,23,0.2);border-radius:9999px;
+      display:flex;align-items:center;
+      font-family:"Inter";font-size:1.4cqw;font-weight:400;color:#6E635C;
+    }
+    .a04-cursor{position:absolute;left:46.4cqw;top:24.6cqh;width:2.1cqh;z-index:4;transform-origin:0 0;}
+    .a04-cursor path{fill:#1F1A17;stroke:#FDFCFA;stroke-width:1.1;stroke-linejoin:round;}
+
+    /* ---------- Scene 2 · working state (centered loader lockup, then docks) ---------- */
+    .a04-lockup{position:absolute;left:0;top:0;width:100%;height:100%;will-change:transform;}
+    .a04-lockup-inner{position:absolute;left:50%;top:50%;width:44cqw;height:40cqh;margin-left:-22cqw;margin-top:-20cqh;text-align:center;}
+    .a04-ring-outer{
+      position:absolute;left:50%;top:5.4cqh;width:46cqh;height:46cqh;margin-left:-23cqh;
+      border:1px solid rgba(31,26,23,0.08);border-radius:50%;
+    }
+    .a04-ring-dash{
+      position:absolute;left:50%;top:5.4cqh;width:46cqh;height:46cqh;margin-left:-23cqh;
+    }
+    .a04-ring-dash circle{fill:none;stroke:rgba(31,26,23,0.16);stroke-width:1.5;stroke-dasharray:3 20;stroke-linecap:round;}
+    .a04-spinner{position:absolute;left:50%;top:8.4cqh;width:14cqh;height:14cqh;margin-left:-7cqh;}
+    .a04-spinner path{fill:none;stroke:#C75B39;stroke-linecap:round;}
+    .a04-spinner .a04-arc-a{stroke-width:5;}
+    .a04-spinner .a04-arc-b{stroke-width:2.5;stroke:#1F1A17;opacity:0.28;}
+    .a04-lockup-status{
+      position:absolute;left:0;right:0;top:23.4cqh;
+      font-family:"Inter";font-size:3.2cqw;font-weight:400;line-height:1.1;
+      letter-spacing:-0.014em;color:#1F1A17;
+    }
+    .a04-dots{position:absolute;left:0;right:0;top:28.4cqh;display:flex;justify-content:center;gap:0.9cqw;}
+    .a04-dot{width:0.62cqh;height:0.62cqh;border-radius:50%;background:rgba(31,26,23,0.42);}
+    .a04-lockup-note{
+      position:absolute;left:0;right:0;top:31.6cqh;
+      font-family:"JetBrains Mono";font-size:1.3cqw;font-weight:400;
+      letter-spacing:0.16em;text-transform:uppercase;color:#6E635C;
+    }
+    .a04-dock-spike{position:absolute;left:69.8cqw;top:26.2cqh;color:#C75B39;letter-spacing:0;display:inline-block;transform-origin:50% 50%;}
+
+    /* ---------- docked machine status header (right column) ---------- */
+    .a04-dock{position:absolute;left:69.8cqw;top:24.4cqh;width:26cqw;height:6cqh;}
+    .a04-dock-spinner{position:absolute;left:0;top:0.2cqh;width:3.4cqh;height:3.4cqh;}
+    .a04-dock-spinner path{fill:none;stroke:#C75B39;stroke-linecap:round;}
+    .a04-dock-word{
+      position:absolute;left:4.6cqw;top:1cqh;
+      font-family:"JetBrains Mono";font-size:1.4cqw;font-weight:500;
+      letter-spacing:0.16em;text-transform:uppercase;color:#1F1A17;
+    }
+    .a04-dock-rule{position:absolute;left:0;right:0;top:5.4cqh;height:1px;background:rgba(31,26,23,0.12);transform-origin:0 50%;}
+
+    /* ---------- ticket (the fiscal document — approved sketch hierarchy) ---------- */
+    .a04-ticket{position:absolute;left:24cqw;top:12.5cqh;width:40cqw;height:65.4cqh;will-change:transform;}
+    .a04-ticket-plate{
+      position:absolute;left:-0.5cqw;top:0.7cqw;right:-0.5cqw;bottom:-0.7cqh;
+      background:#F4DFD9;border:1px solid rgba(31,26,23,0.1);border-radius:12px;
+    }
+    .a04-ticket-face{
+      position:absolute;inset:0;padding:3.4cqh 3.4cqw 3.2cqh;
+      background:#FDFCFA;border:1px solid rgba(31,26,23,0.12);border-radius:12px;
+      box-shadow:0 1px 3px rgba(31,26,23,0.08), 0 4px 16px rgba(31,26,23,0.04);
+    }
+    .a04-ticket-title{
+      font-family:"JetBrains Mono";font-size:2.2cqw;font-weight:700;
+      letter-spacing:0.08em;color:#1F1A17;line-height:1;
+    }
+    .a04-ticket-sub{
+      display:flex;justify-content:space-between;margin-top:1.4cqh;
+      font-family:"JetBrains Mono";font-size:1.3cqw;letter-spacing:0.1em;color:#6E635C;
+    }
+    .a04-rule{height:1px;background:rgba(31,26,23,0.12);transform-origin:0 50%;}
+    .a04-ticket-subrule{margin-top:1.8cqh;}
+    .a04-row{
+      display:flex;justify-content:space-between;align-items:baseline;
+      margin-top:1.3cqh;padding-bottom:0.8cqh;border-bottom:1px solid rgba(31,26,23,0.08);
+    }
+    .a04-row span{font-family:"JetBrains Mono";font-size:1.4cqw;letter-spacing:0.02em;color:#6E635C;}
+    .a04-row b{font-family:"JetBrains Mono";font-size:1.4cqw;font-weight:500;letter-spacing:0.02em;color:#1F1A17;}
+    .a04-ticket-footrule{margin-top:2cqh;}
+    .a04-ticket-foot{display:flex;align-items:flex-end;gap:2.6cqw;margin-top:1.8cqh;}
+    .a04-qr{position:relative;width:13.2cqh;height:13.2cqh;flex:0 0 auto;transform-origin:50% 50%;}
+    .a04-qr svg{position:absolute;inset:0;width:100%;height:100%;display:block;}
+    .a04-qr-frame{fill:none;stroke:rgba(31,26,23,0.14);stroke-width:1.5;}
+    .a04-qr-finder{fill:none;stroke:#1F1A17;stroke-width:3.2;}
+    .a04-qr-eye{fill:#1F1A17;fill-opacity:0;}
+    .a04-qr-mod{fill:#1F1A17;fill-opacity:0;}
+    .a04-qr-sweep{position:absolute;left:0.4cqh;right:0.4cqh;top:0.6cqh;height:1px;background:rgba(31,26,23,0.3);}
+    .a04-qr-cap{
+      position:absolute;left:0;right:0;top:14cqh;text-align:center;
+      font-family:"JetBrains Mono";font-size:1.2cqw;letter-spacing:0.1em;color:#6E635C;
+    }
+    .a04-totalwrap{flex:1 1 auto;padding-bottom:0.6cqh;}
+    .a04-total-label{font-family:"JetBrains Mono";font-size:1.4cqw;letter-spacing:0.06em;color:#6E635C;}
+    .a04-total-value{
+      margin-top:0.5cqh;font-family:"Inter";font-size:3.2cqw;font-weight:400;
+      line-height:1;letter-spacing:-0.02em;color:#1F1A17;
+    }
+    .a04-total-iva{
+      margin-top:1cqh;font-family:"JetBrains Mono";font-size:1.4cqw;
+      letter-spacing:0.02em;color:#6E635C;
+    }
+
+    /* ---------- status badge · scale-swap (emitiendo -> CAE emitido) ---------- */
+    .a04-chip{position:absolute;left:27.4cqw;top:79.2cqh;width:33.2cqw;height:6.4cqh;}
+    .a04-chip-state{
+      position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:0.9cqw;
+      border-radius:9999px;transform-origin:50% 50%;
+    }
+    .a04-chip-pending{border:1px solid rgba(31,26,23,0.2);background:#FDFCFA;z-index:1;opacity:0;}
+    .a04-chip-done{background:#C75B39;border:1px solid #C75B39;z-index:2;}
+    .a04-chip-label{
+      font-family:"JetBrains Mono";font-size:1.4cqw;font-weight:500;
+      letter-spacing:0.12em;text-transform:uppercase;
+    }
+    .a04-chip-pending .a04-chip-label{color:#1F1A17;}
+    .a04-chip-done .a04-chip-label{color:#FDFCFA;}
+    .a04-chip-ring{width:1.1cqh;height:1.1cqh;border:1px solid rgba(31,26,23,0.35);border-radius:50%;}
+    .a04-chip-check{width:1.5cqh;height:1.5cqh;}
+    .a04-chip-check svg{width:100%;height:100%;display:block;}
+    .a04-chip-check path{fill:none;stroke:#FDFCFA;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;}
+
+    /* ---------- machine response · warm-navy terminal surface ---------- */
+    .a04-log{position:absolute;left:69.8cqw;top:32.6cqh;width:26cqw;height:35.4cqh;}
+    .a04-log-bar{
+      position:absolute;left:0;right:0;top:0;height:4.4cqh;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 1.6cqw;background:#252120;border:1px solid rgba(253,252,250,0.14);border-bottom:none;
+      border-radius:8px 8px 0 0;
+    }
+    .a04-log-title{
+      font-family:"JetBrains Mono";font-size:1.3cqw;font-weight:500;
+      letter-spacing:0.16em;text-transform:uppercase;color:rgba(253,252,250,0.72);
+    }
+    .a04-log-strip{
+      font-family:"JetBrains Mono";font-size:1.3cqw;font-weight:500;letter-spacing:0.08em;color:#5DB872;
+    }
+    .a04-log-body{
+      position:absolute;left:0;right:0;top:4.4cqh;bottom:0;
+      background:#181515;border:1px solid rgba(253,252,250,0.14);border-radius:0 0 8px 8px;
+      padding:1.4cqh 1.6cqw;overflow:hidden;
+    }
+    .a04-log-req{
+      font-family:"JetBrains Mono";font-size:1.4cqw;letter-spacing:0.02em;color:#5DB8A6;
+    }
+    .a04-log-line{
+      display:flex;justify-content:space-between;align-items:baseline;margin-top:1.9cqh;
+      font-family:"JetBrains Mono";font-size:1.4cqw;letter-spacing:0.02em;
+    }
+    .a04-log-line span{color:rgba(253,252,250,0.55);}
+    .a04-log-line b{font-weight:400;color:#E8A55A;}
+    .a04-log-line .a04-log-num{color:#FDFCFA;}
+  </style>
+
+  <div id="root" data-composition-id="04-arca" data-width="1920" data-height="1080">
+
+    <!-- ground -->
+    <div class="clip a04-ground" data-start="0" data-duration="6" data-track-index="0"></div>
+
+    <!-- kicker -->
+    <div class="clip a04-kicker-clip" data-start="0" data-duration="6" data-track-index="1" style="position:absolute;inset:0;">
+      <div class="a04-kicker"><span class="a04-spike">✱</span>&nbsp;Facturación ARCA</div>
+      <div class="a04-kicker-rule"></div>
+    </div>
+
+    <!-- Scene 1 · trigger: modal click, 3 depth layers (plate / card / raised pill) -->
+    <div class="clip a04-trigger-clip" data-start="0" data-duration="1.4" data-track-index="2" style="position:absolute;inset:0;">
+      <div class="a04-trigger">
+        <div class="a04-trigger-plate"></div>
+        <div class="a04-trigger-card"></div>
+        <div class="a04-trigger-eyebrow">Cobro N.º 00000123</div>
+        <div class="a04-trigger-amount">$ 12.480,00</div>
+        <div class="a04-trigger-caption">Turno 1 · Caja 1</div>
+        <div class="a04-trigger-rule"></div>
+        <div class="a04-burst"></div>
+        <div class="a04-pill">Emitir comprobante</div>
+        <div class="a04-ghost">Cancelar</div>
+        <svg class="a04-cursor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 4 2 L 4 20.5 L 9 15.8 L 12.3 22.5 L 15.6 20.9 L 12.2 14.4 L 19 14.4 Z"></path>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Scene 2 · working state: loader lockup (frame center) that docks to the right column -->
+    <div class="clip a04-lockup-clip" data-start="0.95" data-duration="5.05" data-track-index="3" style="position:absolute;inset:0;">
+      <div class="a04-lockup">
+        <div class="a04-lockup-inner">
+          <div class="a04-ring-outer"></div>
+          <svg class="a04-ring-dash" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="100" cy="100" r="96"></circle>
+          </svg>
+          <svg class="a04-spinner" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+            <g class="a04-spin-a">
+              <path class="a04-arc-a" d="M 64 16 A 48 48 0 1 1 16.7 55.7"></path>
+            </g>
+            <g class="a04-spin-b">
+              <path class="a04-arc-b" d="M 64 28 A 36 36 0 1 1 28.5 60.3"></path>
+            </g>
+          </svg>
+          <div class="a04-lockup-status">Conectando…</div>
+          <div class="a04-dots">
+            <div class="a04-dot"></div>
+            <div class="a04-dot"></div>
+            <div class="a04-dot"></div>
+          </div>
+          <div class="a04-lockup-note">Servicio de autorización · ARCA</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- docked machine status header -->
+    <div class="clip a04-dock-clip" data-start="2.8" data-duration="3.2" data-track-index="4" style="position:absolute;inset:0;">
+      <div class="a04-dock">
+        <span class="a04-dock-spike">✱</span>
+        <svg class="a04-dock-spinner" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+          <g class="a04-dock-spin">
+            <path d="M 16 4 A 12 12 0 1 1 4.2 18.5" fill="none" stroke="#C75B39" stroke-width="2.6" stroke-linecap="round"></path>
+          </g>
+        </svg>
+        <div class="a04-dock-word">Timbrando</div>
+        <div class="a04-dock-rule"></div>
+      </div>
+    </div>
+
+    <!-- Scene 3-4 · the fiscal document -->
+    <div class="clip a04-ticket-clip" data-start="2.95" data-duration="3.05" data-track-index="5" style="position:absolute;inset:0;">
+      <div class="a04-ticket">
+        <div class="a04-ticket-plate"></div>
+        <div class="a04-ticket-face">
+          <div class="a04-ticket-title">FACTURA B</div>
+          <div class="a04-ticket-sub"><span>Código 001</span><span>30/09/2026</span></div>
+          <div class="a04-rule a04-ticket-subrule"></div>
+          <div class="a04-row"><span>Punto de venta</span><b>00001</b></div>
+          <div class="a04-row"><span>Comprobante</span><b>00000123</b></div>
+          <div class="a04-row"><span>CUIT</span><b>20-27123456-3</b></div>
+          <div class="a04-row"><span>CAE</span><b class="a04-cae-ticket">········</b></div>
+          <div class="a04-row"><span>Vto. CAE</span><b>10/10/2026</b></div>
+          <div class="a04-rule a04-ticket-footrule"></div>
+          <div class="a04-ticket-foot">
+            <div class="a04-qr">
+              <svg viewBox="0 0 116 116" xmlns="http://www.w3.org/2000/svg">
+                <path class="a04-qr-frame" d="M 2 2 H 114 V 114 H 2 Z"></path>
+                <path class="a04-qr-finder a04-qr-f1" d="M 2 2 H 30 V 30 H 2 Z"></path>
+                <path class="a04-qr-eye a04-qr-e1" d="M 11 11 H 21 V 21 H 11 Z"></path>
+                <path class="a04-qr-finder a04-qr-f2" d="M 86 2 H 114 V 30 H 86 Z"></path>
+                <path class="a04-qr-eye a04-qr-e2" d="M 95 11 H 105 V 21 H 95 Z"></path>
+                <path class="a04-qr-finder a04-qr-f3" d="M 2 86 H 30 V 114 H 2 Z"></path>
+                <path class="a04-qr-eye a04-qr-e3" d="M 11 95 H 21 V 105 H 11 Z"></path>
+              </svg>
+              <div class="a04-qr-sweep"></div>
+            </div>
+            <div class="a04-totalwrap">
+              <div class="a04-total-label">Total</div>
+              <div class="a04-total-value">$ 12.480,00</div>
+              <div class="a04-total-iva">IVA 21% · $ 2.165,95</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scene 4 · status badge (scale-swap: emitiendo -> CAE emitido) -->
+    <div class="clip a04-chip-clip" data-start="3.1" data-duration="2.9" data-track-index="6" style="position:absolute;inset:0;">
+      <div class="a04-chip">
+        <div class="a04-chip-state a04-chip-pending">
+          <span class="a04-chip-ring"></span>
+          <span class="a04-chip-label">emitiendo</span>
+        </div>
+        <div class="a04-chip-state a04-chip-done">
+          <span class="a04-chip-check">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M 4 12.4 L 9.4 18 L 20 6.4"></path>
+            </svg>
+          </span>
+          <span class="a04-chip-label">CAE emitido</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- machine response log (the wire answer behind the document) -->
+    <div class="clip a04-log-clip" data-start="3" data-duration="3" data-track-index="7" style="position:absolute;inset:0;">
+      <div class="a04-log">
+        <div class="a04-log-bar">
+          <span class="a04-log-title">Respuesta · ARCA</span>
+          <span class="a04-log-strip">200 OK</span>
+        </div>
+        <div class="a04-log-body">
+          <div class="a04-log-req">&gt; solicitarCAE</div>
+          <div class="a04-log-line"><span>Estado</span><b class="a04-log-num">autorizado</b></div>
+          <div class="a04-log-line"><span>F. emisión</span><b>30/09/2026 14:22</b></div>
+          <div class="a04-log-line"><span>CAE</span><b class="a04-cae-log">········</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var T = 6; /* render length — fixed upstream */
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+      window.__timelines["04-arca"] = tl;
+
+      var q = function (sel) { return document.querySelectorAll(sel); };
+      var one = function (sel) { return document.querySelector(sel); };
+
+      /* ============================================================
+         SCENE 1 — THE TRIGGER (0.00 – 1.00s)
+         Centred modal-click card, three depth layers, ONE igniting
+         click on the "Emitir comprobante" pill, then the cursor goes.
+         ============================================================ */
+
+      /* kicker + its hairline, then the ✱ spike emphasis beat (frame.md spike-mark) */
+      tl.fromTo(".a04-kicker", { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.42, ease: "power3.out" }, 0.12);
+      tl.fromTo(".a04-kicker-rule", { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power3.out" }, 0.2);
+      tl.fromTo(".a04-spike", { scale: 0.92 }, { scale: 1, duration: 0.3, ease: "power3.out" }, 0.34);
+
+      /* trigger card arrives and settles (hero on screen by t = 0.48) */
+      tl.fromTo(".a04-trigger-plate", { scale: 0.94, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.42, ease: "power3.out" }, 0.1);
+      tl.fromTo(".a04-trigger-card", { scale: 0.94, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.38, ease: "power3.out" }, 0.1);
+      tl.fromTo(".a04-trigger-eyebrow", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.34, ease: "power3.out" }, 0.18);
+      tl.fromTo(".a04-trigger-amount", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 0.24);
+      tl.fromTo(".a04-trigger-caption", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.32, ease: "power3.out" }, 0.32);
+      tl.fromTo(".a04-trigger-rule", { scaleX: 0 }, { scaleX: 1, duration: 0.44, ease: "power3.out" }, 0.36);
+      tl.fromTo(".a04-pill", { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.24, ease: "power3.out" }, 0.38);
+      tl.fromTo(".a04-ghost", { scale: 0.94, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.32, ease: "power3.out" }, 0.44);
+
+      /* the one igniting click: cursor in -> press -> release, then the cursor leaves */
+      tl.fromTo(".a04-cursor", { x: 96, y: 128, opacity: 0 }, { x: 0, y: 0, opacity: 1, duration: 0.32, ease: "power3.out" }, 0.3);
+
+      /* press-release-spring: linear compression, spring recovery, hairline burst behind the pill */
+      var REST_SHADOW = "0 1px 3px rgba(31,26,23,0.08), 0 4px 16px rgba(31,26,23,0.04)";
+      var DOWN_SHADOW = "0 1px 2px rgba(31,26,23,0.05)";
+      tl.to(".a04-pill", { scale: 0.93, boxShadow: DOWN_SHADOW, duration: 0.14, ease: "power1.in" }, 0.62);
+      tl.to(".a04-cursor", { scale: 0.82, duration: 0.09, ease: "power1.in" }, 0.62);
+      tl.to(".a04-pill", { scale: 1, boxShadow: REST_SHADOW, duration: 0.5, ease: "back.out(1.7)" }, 0.76);
+      tl.to(".a04-cursor", { scale: 1, duration: 0.24, ease: "back.out(1.8)" }, 0.71);
+      tl.fromTo(".a04-burst", { scale: 1, opacity: 0 }, { scale: 2.2, opacity: 0.55, duration: 0.24, ease: "power2.out" }, 0.76);
+      tl.to(".a04-burst", { opacity: 0, duration: 0.34, ease: "power2.in" }, 1.0);
+
+      /* cursor exits — the UI performs itself from here */
+      tl.to(".a04-cursor", { x: -54, y: -86, opacity: 0, duration: 0.3, ease: "power2.in" }, 0.84);
+
+      /* the trigger hands the frame to the machine (within-shot dismissal, not a frame exit) */
+      tl.to(".a04-trigger-plate", { scale: 0.86, opacity: 0, duration: 0.28, ease: "power2.in" }, 0.9);
+      tl.to(".a04-trigger-card", { scale: 0.86, opacity: 0, y: -58, duration: 0.28, ease: "power2.in" }, 0.9);
+      tl.to(".a04-trigger-eyebrow", { opacity: 0, duration: 0.18, ease: "power1.in" }, 0.9);
+      tl.to(".a04-trigger-amount", { opacity: 0, duration: 0.18, ease: "power1.in" }, 0.9);
+      tl.to(".a04-trigger-caption", { opacity: 0, duration: 0.18, ease: "power1.in" }, 0.9);
+      tl.to(".a04-trigger-rule", { opacity: 0, duration: 0.18, ease: "power1.in" }, 0.9);
+      tl.to(".a04-pill", { opacity: 0, duration: 0.18, ease: "power1.in" }, 0.9);
+      tl.to(".a04-ghost", { opacity: 0, duration: 0.18, ease: "power1.in" }, 0.9);
+
+      /* ============================================================
+         SCENE 2 — WORKING STATE (1.00 – 2.80s)
+         Loader lockup: coral arc spinner + status couplet cycling in
+         place + pulsing dots. One shared rotation proxy so the small
+         docked spinner keeps the large one's phase.
+         ============================================================ */
+      tl.fromTo(".a04-ring-outer", { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: "power3.out" }, 1.02);
+      tl.fromTo(".a04-ring-dash", { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: "power3.out" }, 1.02);
+      tl.fromTo(".a04-spinner", { scale: 0.86, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.44, ease: "power3.out" }, 1.05);
+      tl.fromTo(".a04-lockup-status", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.38, ease: "power3.out" }, 1.06);
+      tl.fromTo(".a04-dots", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.34, ease: "power3.out" }, 1.12);
+      tl.fromTo(".a04-lockup-note", { opacity: 0 }, { opacity: 1, duration: 0.44, ease: "power1.out" }, 1.16);
+
+      /* svg-icon-enrichment · rotation through explicit centres via the SVG transform attribute */
+      var spinA = one(".a04-spin-a");
+      var spinB = one(".a04-spin-b");
+      var spinDash = one(".a04-ring-dash circle");
+      var dockSpin = one(".a04-dock-spin");
+      var rot = { deg: 0 };
+      if (spinA) spinA.setAttribute("transform", "rotate(0 64 64)");
+      if (spinB) spinB.setAttribute("transform", "rotate(0 64 64)");
+      if (spinDash) spinDash.setAttribute("transform", "rotate(0 100 100)");
+      if (dockSpin) dockSpin.setAttribute("transform", "rotate(0 16 16)");
+      tl.to(rot, {
+        deg: 360 * 3.4,
+        duration: 3.65,
+        ease: "none",
+        onUpdate: function () {
+          var a = rot.deg;
+          if (spinA) spinA.setAttribute("transform", "rotate(" + a + " 64 64)");
+          if (spinB) spinB.setAttribute("transform", "rotate(" + (a * 1.45) + " 64 64)");
+          if (spinDash) spinDash.setAttribute("transform", "rotate(" + (-a * 0.28) + " 100 100)");
+          if (dockSpin) dockSpin.setAttribute("transform", "rotate(" + a + " 16 16)");
+        }
+      }, 1.05);
+
+      /* discrete-text-sequence · in-place status couplet (instant swaps, no smear) */
+      var STATUS_SEQ = [
+        { t: 1.08, text: "Conectando…" },
+        { t: 1.7, text: "Solicitando CAE…" },
+        { t: 2.26, text: "Emitiendo…" }
+      ];
+      var CAE_TICKET_SEQ = [
+        { t: 3.58, text: "········" },
+        { t: 4.6, text: "73654879" }
+      ];
+      var CAE_LOG_SEQ = [
+        { t: 3.6, text: "········" },
+        { t: 4.6, text: "73654879" }
+      ];
+      var DOCK_SEQ = [
+        { t: 2.86, text: "Timbrando" },
+        { t: 4.68, text: "Timbrado" }
+      ];
+
+      function textAt(seq, time) {
+        for (var i = seq.length - 1; i >= 0; i--) {
+          if (time >= seq[i].t) return seq[i].text;
+        }
+        return "";
+      }
+      function seqDriver(sel, seq) {
+        var el = one(sel);
+        if (!el) return;
+        el.textContent = seq[0].text;
+        var last = seq[0].text;
+        var driver = { t: 0 };
+        tl.to(driver, {
+          t: T,
+          duration: T,
+          ease: "none",
+          onUpdate: function () {
+            var next = textAt(seq, driver.t);
+            if (next !== last) { /* swap only on a transition — per-frame writes flicker */
+              el.textContent = next;
+              last = next;
+            }
+          }
+        }, 0);
+      }
+      seqDriver(".a04-lockup-status", STATUS_SEQ);
+      seqDriver(".a04-cae-ticket", CAE_TICKET_SEQ);
+      seqDriver(".a04-cae-log", CAE_LOG_SEQ);
+      seqDriver(".a04-dock-word", DOCK_SEQ);
+
+      /* sine-wave-loop · phase-offset loading dots, finite, dead before the payload lands */
+      var dotEls = q(".a04-dot");
+      var pulse = { p: 0 };
+      tl.to(pulse, {
+        p: Math.PI * 2 * 1.6,
+        duration: 1.62,
+        ease: "none",
+        onUpdate: function () {
+          for (var i = 0; i < dotEls.length; i++) {
+            var s = 1 + Math.sin(pulse.p + i * 0.9) * 0.2;
+            dotEls[i].style.transform = "scale(" + s.toFixed(4) + ")";
+          }
+        }
+      }, 1.1);
+      tl.to(".a04-dots", { opacity: 0, duration: 0.24, ease: "power1.in" }, 2.62);
+
+      /* the scan label shrinks and docks to the right column; the canvas now belongs to
+         what it produces. The small docked header carries readable type at its own size. */
+      tl.fromTo(".a04-dock-rule", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power3.out" }, 2.86);
+      tl.fromTo(".a04-dock", { scale: 0.82, opacity: 0, y: -10 }, { scale: 1, opacity: 1, y: 0, duration: 0.42, ease: "power3.out" }, 2.86);
+      tl.fromTo(".a04-dock-spike", { scale: 0.92 }, { scale: 1, duration: 0.3, ease: "power3.out" }, 2.94);
+      tl.fromTo(".a04-dock-spinner", { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.34, ease: "power3.out" }, 2.9);
+      tl.to(".a04-lockup", { scale: 0.5, opacity: 0, duration: 0.3, ease: "power2.in" }, 2.62);
+
+      /* ============================================================
+         SCENE 3 — THE RECEIPT CASCADES IN (2.80 – 4.60s)
+         spring-pop-entrance for the card, dynamic-content-sequencing
+         stagger for its rows, svg-path-draw for the QR.
+         ============================================================ */
+      tl.fromTo(".a04-ticket-plate", { scale: 0.965, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.46, ease: "power3.out" }, 3.0);
+      tl.fromTo(".a04-ticket-face", { scale: 0.965, opacity: 0, y: 26 }, { scale: 1, opacity: 1, y: 0, duration: 0.46, ease: "power3.out" }, 3.0);
+      tl.fromTo(".a04-ticket-title", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.34, ease: "power3.out" }, 3.04);
+      tl.fromTo(".a04-ticket-sub", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, 3.1);
+      tl.fromTo(".a04-ticket-subrule", { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: "power2.out" }, 3.14);
+
+      var rows = q(".a04-row");
+      for (var r = 0; r < rows.length; r++) {
+        tl.fromTo(rows[r], { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.36, ease: "power3.out" }, 3.16 + r * 0.14);
+      }
+      tl.fromTo(".a04-ticket-footrule", { scaleX: 0 }, { scaleX: 1, duration: 0.36, ease: "power2.out" }, 3.9);
+
+      /* QR builds itself: frame traces, finder patterns trace, module rows cascade in */
+      var QR_PATTERN = ["1101101", "1010110", "0111011", "1100101", "0011110", "1011011", "0101100"];
+      var qrSvg = one(".a04-qr svg");
+      var MOD = 6;
+      var PITCH = 7;
+      var ORIGIN = 34;
+      for (var row = 0; row < QR_PATTERN.length; row++) {
+        var d = "";
+        for (var col = 0; col < QR_PATTERN[row].length; col++) {
+          if (QR_PATTERN[row].charAt(col) === "1") {
+            var x = ORIGIN + col * PITCH;
+            var y = ORIGIN + row * PITCH;
+            d += "M " + x + " " + y + " h " + MOD + " v " + MOD + " h " + -MOD + " Z ";
+          }
+        }
+        if (!d) continue;
+        var p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        p.setAttribute("d", d);
+        p.setAttribute("class", "a04-qr-mod");
+        qrSvg.appendChild(p);
+        tl.fromTo(p, { fillOpacity: 0 }, { fillOpacity: 1, duration: 0.16, ease: "none" }, 4.0 + row * 0.045);
+      }
+
+      tl.fromTo(".a04-qr", { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.34, ease: "power3.out" }, 3.84);
+      var qFrame = one(".a04-qr-frame");
+      var finders = q(".a04-qr-finder");
+      var eyes = q(".a04-qr-eye");
+      var dashed = (qFrame ? [qFrame] : []).concat(Array.prototype.slice.call(finders));
+      for (var fp = 0; fp < dashed.length; fp++) {
+        var pathEl = dashed[fp];
+        if (!pathEl) continue;
+        var len = pathEl.getTotalLength ? pathEl.getTotalLength() : 100;
+        pathEl.style.strokeDasharray = String(len);
+        pathEl.style.strokeDashoffset = String(len);
+        tl.to(pathEl, { strokeDashoffset: 0, duration: 0.2, ease: "power2.out" }, 3.92 + fp * 0.06);
+      }
+      for (var ep = 0; ep < eyes.length; ep++) {
+        if (!eyes[ep]) continue;
+        tl.fromTo(eyes[ep], { fillOpacity: 0 }, { fillOpacity: 1, duration: 0.16, ease: "power1.out" }, 4.02 + ep * 0.06);
+      }
+      tl.fromTo(".a04-qr-sweep", { y: 0, opacity: 0.9 }, { y: 128, duration: 0.5, ease: "none" }, 3.92);
+      tl.to(".a04-qr-sweep", { opacity: 0, duration: 0.14, ease: "power1.in" }, 4.4);
+
+      tl.fromTo(".a04-total-label", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, 4.28);
+      tl.fromTo(".a04-total-value", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.38, ease: "power3.out" }, 4.32);
+      tl.fromTo(".a04-total-iva", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.32, ease: "power3.out" }, 4.44);
+
+      /* the machine's own answer arrives alongside the document */
+      tl.fromTo(".a04-log-bar", { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.36, ease: "power3.out" }, 3.04);
+      tl.fromTo(".a04-log-body", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 3.06);
+      tl.fromTo(".a04-log-req", { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.3, ease: "power3.out" }, 3.08);
+      var logLines = q(".a04-log-line");
+      for (var lp = 0; lp < logLines.length; lp++) {
+        if (!logLines[lp]) continue;
+        tl.fromTo(logLines[lp], { opacity: 0, x: -12 }, { opacity: 1, x: 0, duration: 0.32, ease: "power3.out" }, 3.24 + lp * 0.18);
+      }
+      tl.fromTo(".a04-log-strip", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.3, ease: "power3.out" }, 4.5);
+
+      /* ============================================================
+         SCENE 4 — STATE MUTATION (4.60 – 6.00s)
+         scale-swap-transition on the badge (outline -> solid coral),
+         svg-path-draw check, then a held read with bounded jitter.
+         ============================================================ */
+      tl.fromTo(".a04-chip-pending", { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.34, ease: "power3.out" }, 3.16);
+      tl.to(".a04-chip-pending", { scale: 0.7, opacity: 0, duration: 0.3, ease: "power2.in" }, 4.6);
+      tl.fromTo(".a04-chip-done", { scale: 0.7, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.44, ease: "power3.out" }, 4.74);
+
+      var checkPath = one(".a04-chip-check path");
+      if (checkPath) {
+        var checkLen = checkPath.getTotalLength ? checkPath.getTotalLength() : 40;
+        checkPath.style.strokeDasharray = String(checkLen);
+        checkPath.style.strokeDashoffset = String(checkLen);
+        tl.to(checkPath, { strokeDashoffset: 0, duration: 0.34, ease: "power2.out" }, 4.86);
+      }
+
+      /* the working pulse dies the instant the state resolves */
+      tl.to(".a04-dock-spinner", { scale: 0, opacity: 0, duration: 0.22, ease: "power2.in" }, 4.66);
+
+      /* hold: the certificate is legible, one bounded breath, settled before the crossfade */
+      tl.to(".a04-ticket", { y: -2, duration: 0.42, ease: "sine.inOut", yoyo: true, repeat: 1 }, 5.1);
+      tl.to(".a04-chip", { y: -1.6, duration: 0.5, ease: "sine.inOut", yoyo: true, repeat: 1 }, 5.2);
+    })();
+  </script>
+</template>

@@ -1,0 +1,130 @@
+<template>
+  <style>
+    @font-face{font-family:"Inter";font-weight:400;font-style:normal;font-display:block;src:url("assets/fonts/Inter-400.woff2") format("woff2");}
+    @font-face{font-family:"Inter";font-weight:700;font-style:normal;font-display:block;src:url("assets/fonts/Inter-700.woff2") format("woff2");}
+    @font-face{font-family:"JetBrains Mono";font-weight:400;font-style:normal;font-display:block;src:url("assets/fonts/JetBrainsMono-400.woff2") format("woff2");}
+    @font-face{font-family:"JetBrains Mono";font-weight:700;font-style:normal;font-display:block;src:url("assets/fonts/JetBrainsMono-700.woff2") format("woff2");}
+
+    #root{
+      position:relative;width:1920px;height:1080px;overflow:hidden;
+      container-type:size;font-family:"Inter";color:#1F1A17;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .clip.f02-track{position:absolute;inset:0;}
+
+    /* Track 0: arena ground */
+    .f02-ground{position:absolute;inset:0;background:#F6F1EA;}
+
+    /* Track 1: kicker */
+    .f02-kicker{
+      position:absolute;left:4.2cqw;top:9.4cqh;
+      font-family:"JetBrains Mono";font-weight:700;font-size:1.46cqw;
+      letter-spacing:0.16em;text-transform:uppercase;color:#6E635C;
+      display:flex;align-items:baseline;gap:0.9cqw;
+      transform-origin:0 50%;opacity:0;
+    }
+    .f02-spike{color:#C75B39;}
+
+    /* Track 2: statement build */
+    .f02-stack{
+      position:absolute;left:0;right:0;top:34cqh;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:4cqh;
+    }
+
+    .f02-line-1{
+      font-family:"Inter";font-weight:700;font-size:5.8cqw;
+      line-height:1.1;letter-spacing:-0.022em;color:#1F1A17;
+      display:flex;gap:0.28em;justify-content:center;
+    }
+    .f02-w{
+      display:inline-block;opacity:0;transform-origin:50% 100%;
+    }
+
+    .f02-line-2-wrap{
+      display:flex;align-items:center;justify-content:center;gap:1.6cqw;
+      opacity:0;transform-origin:50% 50%;
+    }
+    .f02-line-2{
+      font-family:"Inter";font-weight:400;font-style:italic;
+      font-size:4.8cqw;line-height:1.1;letter-spacing:-0.015em;
+      color:#6E635C;white-space:nowrap;
+    }
+
+    .f02-mark-wrap{
+      display:flex;align-items:center;justify-content:center;
+      width:4.2cqw;height:4.2cqw;transform-origin:50% 50%;
+    }
+    .f02-mark{
+      width:100%;height:100%;display:block;
+    }
+  </style>
+
+  <div id="root" data-composition-id="02-promise" data-width="1920" data-height="1080">
+    <div class="clip f02-track f02-bg-track" id="f02-bg-track" data-start="0" data-duration="4" data-track-index="0">
+      <div class="f02-ground" id="f02-ground"></div>
+    </div>
+
+    <div class="clip f02-track f02-kicker-track" id="f02-kicker-track" data-start="0" data-duration="4" data-track-index="1">
+      <div class="f02-kicker" id="f02-kicker">
+        <span class="f02-spike">✱</span>&nbsp;<span>Tu sistema</span>
+      </div>
+    </div>
+
+    <div class="clip f02-track f02-stack-track" id="f02-stack-track" data-start="0" data-duration="4" data-track-index="2">
+      <div class="f02-stack" id="f02-stack">
+        <div class="f02-line-1" id="f02-line-1">
+          <span class="f02-w" id="f02-w1">Tu</span>
+          <span class="f02-w" id="f02-w2">negocio</span>
+          <span class="f02-w" id="f02-w3">no</span>
+          <span class="f02-w" id="f02-w4">se</span>
+          <span class="f02-w" id="f02-w5">detiene.</span>
+        </div>
+
+        <div class="f02-line-2-wrap" id="f02-line-2-wrap">
+          <div class="f02-line-2" id="f02-line-2">Tu sistema tampoco.</div>
+          <div class="f02-mark-wrap" id="f02-mark-wrap">
+            <img class="f02-mark" id="f02-mark" src="assets/brand/mark.svg" alt="Arcom" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = window.__timelines["02-promise"] = gsap.timeline({ paused: true });
+
+      var kicker = document.getElementById("f02-kicker");
+      var w1 = document.getElementById("f02-w1");
+      var w2 = document.getElementById("f02-w2");
+      var w3 = document.getElementById("f02-w3");
+      var w4 = document.getElementById("f02-w4");
+      var w5 = document.getElementById("f02-w5");
+      var line2Wrap = document.getElementById("f02-line-2-wrap");
+      var markWrap = document.getElementById("f02-mark-wrap");
+
+      /* Scene 1 (0.0 - 0.5s): Kicker pops in */
+      tl.fromTo(kicker, { scale: 0.85, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.38, ease: "back.out(1.8)", immediateRender: false }, 0.08);
+
+      /* Scene 2 (0.5 - 2.2s): Word-by-word reveal for "Tu negocio no se detiene." */
+      tl.fromTo(w1, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out", immediateRender: false }, 0.50);
+      tl.fromTo(w2, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out", immediateRender: false }, 0.74);
+      tl.fromTo(w3, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out", immediateRender: false }, 1.02);
+      tl.fromTo(w4, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out", immediateRender: false }, 1.24);
+      tl.fromTo(w5, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.26, ease: "power2.out", immediateRender: false }, 1.48);
+
+      /* Scene 3 (2.2 - 3.4s): "Tu sistema tampoco." arrives, followed by mark pop */
+      tl.fromTo(line2Wrap, { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.44, ease: "power3.out", immediateRender: false }, 2.22);
+
+      tl.fromTo(markWrap, { scale: 0, rotation: -16 },
+        { scale: 1, rotation: 0, duration: 0.48, ease: "back.out(2)", immediateRender: false }, 2.58);
+
+      /* Scene 4 (3.4 - 4.0s): Hold still until transition */
+    })();
+  </script>
+</template>
