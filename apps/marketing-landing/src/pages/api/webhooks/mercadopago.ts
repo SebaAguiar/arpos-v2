@@ -4,9 +4,9 @@ import type { APIRoute } from 'astro';
 import {
   MercadoPagoConfig,
   PreApproval,
-  WebhookSignatureValidator,
   InvalidWebhookSignatureError,
 } from 'mercadopago';
+import { validateWebhookSignature } from '../../../lib/webhook-security';
 import { db } from '../../../lib/db';
 
 const mpClient = new MercadoPagoConfig({
@@ -42,25 +42,37 @@ function parseExternalReference(
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    if (WEBHOOK_SECRET) {
-      const url = new URL(request.url);
-      try {
-        WebhookSignatureValidator.validate({
-          xSignature: request.headers.get('x-signature') ?? undefined,
-          xRequestId: request.headers.get('x-request-id') ?? undefined,
-          dataId: url.searchParams.get('data.id') ?? undefined,
-          secret: WEBHOOK_SECRET,
+    // Fail-closed: never process a webhook without a configured secret.
+    // The endpoint is public and an unauthenticated POST could mutate the
+    // subscription DB, so a missing MP_WEBHOOK_SECRET is a hard error, not
+    // a skipped check.
+    if (!WEBHOOK_SECRET) {
+      console.error(
+        '[webhook] MP_WEBHOOK_SECRET is not configured — refusing to process (fail-closed).',
+      );
+      return new Response(JSON.stringify({ error: 'Webhook is not configured' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const url = new URL(request.url);
+    try {
+      validateWebhookSignature({
+        secret: WEBHOOK_SECRET,
+        xSignature: request.headers.get('x-signature') ?? undefined,
+        xRequestId: request.headers.get('x-request-id') ?? undefined,
+        dataId: url.searchParams.get('data.id') ?? undefined,
+      });
+    } catch (err) {
+      if (err instanceof InvalidWebhookSignatureError) {
+        console.error(`[webhook] Invalid signature: ${err.reason}`);
+        return new Response(JSON.stringify({ error: 'Invalid signature' }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' },
         });
-      } catch (err) {
-        if (err instanceof InvalidWebhookSignatureError) {
-          console.error(`[webhook] Invalid signature: ${err.reason}`);
-          return new Response(JSON.stringify({ error: 'Invalid signature' }), {
-            status: 401,
-            headers: { 'Content-Type': 'application/json' },
-          });
-        }
-        throw err;
       }
+      throw err;
     }
 
     const body = await request.json();

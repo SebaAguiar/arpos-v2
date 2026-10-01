@@ -6,9 +6,10 @@
   "scripts": {
     "dev": "astro dev",
     "fetch:releases": "node scripts/fetch-releases.mjs",
-    "build": "node scripts/fetch-releases.mjs && astro build",
+    "build": "node scripts/check-env.mjs && node scripts/fetch-releases.mjs && astro build",
     "preview": "astro preview",
-    "check": "astro check"
+    "check": "astro check",
+    "test": "node --test src/lib/webhook-security.test.mjs"
   },
   "dependencies": {
     "@arcom/prisma-schema": "workspace:^",
