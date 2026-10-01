@@ -4,7 +4,7 @@ import sitemap from "@astrojs/sitemap";
 import vercel from "@astrojs/vercel";
 
 export default defineConfig({
-  site: 'https://arcom.com.ar',
+  site: 'https://arcom.arsian.dev',
   output: 'static',
   adapter: vercel(),
   integrations: [tailwind(), sitemap()],
