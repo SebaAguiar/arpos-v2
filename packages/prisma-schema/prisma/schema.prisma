@@ -119,20 +119,51 @@ model Subscription {
   @@map("subscriptions")
 }
 
-// ─── INSTANCES (multi-local POS) ───
+// ─── INSTANCES (device-bound POS installations) ───
 
+// A POS installation enrolled against a Subscription. One Instance is one
+// machine.
+//
+// This doubles as the device-binding record. It was originally a cloud-sync
+// bookkeeping row, so `localIdentifier` predates its current role: it is now
+// the client-minted uuid that names the device on the wire (see
+// `device-identity.ts` in pos-react). Reusing it makes registration idempotent
+// on a unique index that already exists.
 model Instance {
   id                 String   @id @default(cuid())
   subscriptionId     String   @map("subscription_id")
   localIdentifier    String   @unique @map("local_identifier")
   lastSyncAt         DateTime? @map("last_sync_at")
   connectionStatus   String   @default("offline") @map("connection_status")
+
+  // ── Device binding ──────────────────────────────────────────
+  // Every field below is nullable except the attempt counter, so this change is
+  // purely additive: existing rows keep working and are simply treated as
+  // unregistered. That matters because this project runs `db push` rather than
+  // migrations, and only drops/renames are destructive.
+  //
+  // devicePublicKey: SPKI public key (PEM) of the device keypair. An Instance
+  // without one can never authorize a license.
+  devicePublicKey      String?   @map("device_public_key")
+  // Hashed confirmation code for paid plans. The plaintext is never stored.
+  confirmationCodeHash String?   @map("confirmation_code_hash")
+  confirmationExpiresAt DateTime? @map("confirmation_expires_at")
+  // Failed attempts against the current code, to cap brute force.
+  confirmationAttempts Int       @default(0) @map("confirmation_attempts")
+  // Set once the device is entitled. A null confirmedAt IS the unconfirmed
+  // state; there is deliberately no separate `state` column that could drift
+  // out of sync with it.
+  confirmedAt          DateTime? @map("confirmed_at")
+  // Soft-revoke a device without deleting the audit row.
+  revokedAt            DateTime? @map("revoked_at")
+
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @default(now()) @map("updated_at")
 
   subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
   @@index([subscriptionId])
+  @@index([subscriptionId, confirmedAt])
   @@map("instances")
 }
 
