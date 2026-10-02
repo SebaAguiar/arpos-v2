@@ -63,6 +63,16 @@ jobs:
 
       - name: Build POS
         run: pnpm --filter pos-react build
+        env:
+          VITE_LICENSE_PUBLIC_KEY: ${{ secrets.VITE_LICENSE_PUBLIC_KEY }}
+          VITE_CLOUD_API_BASE: ${{ secrets.VITE_CLOUD_API_BASE }}
+
+      # Guards against shipping a POS that throws on boot. Pull requests from
+      # forks do not get repository secrets, so the build genuinely lacks the
+      # key there; skip the check rather than fail every external PR.
+      - name: Verify POS bundle configuration
+        if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
+        run: node .github/scripts/verify-pos-bundle.mjs
 
       - name: Run POS tests
         run: pnpm --filter pos-react test
@@ -94,6 +104,14 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
 
+      - uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            apps/arcom-launcher/src-tauri/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('apps/arcom-launcher/src-tauri/Cargo.lock') }}
+
       - name: Install Linux dependencies
         run: |
           sudo apt-get update
@@ -117,10 +135,17 @@ jobs:
         run: |
           echo 'DATABASE_URL="file:./dev.db"' > apps/api/.env
           echo 'PORT=3000' >> apps/api/.env
-          echo 'JWT_SECRET="ci-secret"' >> apps/api/.env
+          echo "JWT_SECRET=\"$(openssl rand -hex 32)\"" >> apps/api/.env
 
-      - name: Run API tests
-        run: pnpm --filter api test
+      # Compile-check the Tauri Rust sources. This job used to re-run the API
+      # tests (already covered by the test-api job) and never compiled Rust,
+      # so a broken launcher was only discovered inside release.yml, after the
+      # three-OS matrix and the signing step. `cargo check` validates every
+      # Rust source and the tauri build script without paying for full
+      # release-profile codegen; release.yml still does the real build.
+      - name: Compile-check Tauri Rust sources
+        working-directory: apps/arcom-launcher/src-tauri
+        run: cargo check --locked --all-targets
 
   lint:
     runs-on: ubuntu-latest

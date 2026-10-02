@@ -74,11 +74,15 @@ jobs:
         run: pnpm --filter api exec prisma generate
 
       # ── Create env file for API build ───────────────
+      # JWT_SECRET is generated per build, never a hardcoded literal: this
+      # .env is bundled into the installer by scripts/build-sidecar.mjs, so a
+      # fixed value would ship a publicly known secret inside every release
+      # and let anyone forge a JWT against the local sidecar API.
       - name: Create env file
         run: |
           echo 'DATABASE_URL="file:./dev.db"' > apps/api/.env
           echo 'PORT=3000' >> apps/api/.env
-          echo 'JWT_SECRET="ci-secret"' >> apps/api/.env
+          echo "JWT_SECRET=\"$(openssl rand -hex 32)\"" >> apps/api/.env
 
       # ── Build signed Tauri bundles (deb/rpm/appimage
       #    on Linux, dmg on macOS, msi/nsis on Windows).
@@ -98,6 +102,18 @@ jobs:
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          # Vite inlines import.meta.env.VITE_* at build time. pos-react is
+          # built by beforeBuildCommand (tauri.conf.json), so these MUST be on
+          # the tauri build step itself. A missing key does not fail the build —
+          # it silently emits a bundle that throws at module load.
+          VITE_LICENSE_PUBLIC_KEY: ${{ secrets.VITE_LICENSE_PUBLIC_KEY }}
+          VITE_CLOUD_API_BASE: ${{ secrets.VITE_CLOUD_API_BASE }}
+
+      # ── Verify POS bundle configuration ──────────────
+      # Fail here rather than on a customer machine. Runs on every matrix
+      # job (linux/macos/windows) so a per-OS regression cannot ship.
+      - name: Verify POS bundle configuration
+        run: node .github/scripts/verify-pos-bundle.mjs
 
       # ── Stage release artifacts ──────────────────────
       # Upload only the final installers + their .sig files.
