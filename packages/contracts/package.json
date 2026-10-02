@@ -1,0 +1,24 @@
+{
+  "name": "@arcom/contracts",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared Zod validation schemas and DTOs for the Arcom cloud API contract (admin-panel <-> pos-react <-> marketing-landing). Single source of truth for request/response shapes.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "typescript": "~5.8.3"
+  }
+}
