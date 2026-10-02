@@ -62,6 +62,10 @@ pub fn run() {
             commands::license::get_license_token,
             commands::license::save_license_token,
             commands::license::clear_license_token,
+            // Device identity commands (license issuance proof-of-possession)
+            commands::license::get_device_identity,
+            commands::license::save_device_identity,
+            commands::license::clear_device_identity,
             // Updater commands
             commands::updater::get_updater_environment,
         ])
